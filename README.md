@@ -22,7 +22,7 @@ Starting with **Defqon.1**, designed to grow across the wider hardstyle scene.
 ## Features (MVP)
 
 - 🌍 **Multilingual memory wall** — real-time, captions auto-translated & cached
-- 📤 **No-login upload** — photos / short clips, with a moderation queue
+- 📤 **No-login upload, instantly live** — with community reports and fast takedown
 - 🔗 **Moment Cards** — every memory gets its own shareable page with an OG image
 - 🎫 **Festival Passport** — log the editions you attended, earn "my Nth Defqon" badges
 
