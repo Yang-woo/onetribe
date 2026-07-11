@@ -20,7 +20,29 @@ alter table upload_events enable row level security;
 grant all on table upload_events to service_role;
 
 alter table memories add column author_link text;
+grant select (author_link) on memories to anon, authenticated;
 
 -- reports: remove the direct anon write path
 drop policy reports_insert on reports;
 revoke insert on table reports from anon, authenticated;
+
+-- Realtime must not leak takedown_token either: column grants only guard
+-- the REST API, so the publication itself carries an explicit column list
+-- (PG15 publication column lists).
+alter publication supabase_realtime drop table memories;
+alter publication supabase_realtime add table memories (
+  id, event_id, media_url, thumb_url, media_kind, embed_url, clip_start,
+  clip_length, caption, source_lang, author_name, author_link,
+  origin_country, status, created_at
+);
+
+-- Live wall counters ("N moments · M countries", D9 P9). The view runs with
+-- owner rights but only ever exposes two aggregates over live rows.
+create view wall_counters as
+  select
+    count(*)::int as moments,
+    count(distinct origin_country)::int as countries
+  from memories
+  where status = 'live';
+
+grant select on wall_counters to anon, authenticated, service_role;
