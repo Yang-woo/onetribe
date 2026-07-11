@@ -44,6 +44,21 @@ jobs:
           cache: yarn
 
       - run: yarn install --frozen-lockfile
+
+      - name: Start local Supabase
+        run: yarn supabase start -x studio,imgproxy,logflare,vector
+
+      - name: Write .env.local from local Supabase
+        run: |
+          eval "$(yarn --silent supabase status -o env | grep -E '^(API_URL|ANON_KEY|SERVICE_ROLE_KEY)=')"
+          cat > .env.local <<EOF
+          NEXT_PUBLIC_SUPABASE_URL=$API_URL
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY
+          SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY
+          NEXT_PUBLIC_SITE_URL=http://localhost:3000
+          STORAGE_DRIVER=local
+          EOF
+
       - run: yarn build
       - run: npx playwright install --with-deps chromium
       - run: yarn test:e2e

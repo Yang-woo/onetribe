@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { copy } from '@/lib/copy'
-import { fetchMoments, PUBLIC_MEMORY_COLUMNS, WALL_PAGE_SIZE, type Moment } from '@/lib/moments'
+import { fetchMoments, WALL_PAGE_SIZE, type Moment } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
+import { Lightbox } from './lightbox'
 import { MomentThumb } from './moment-thumb'
 
 type LoadMore = (before: string) => Promise<Moment[]>
@@ -43,6 +44,7 @@ export function MemoryWall({
   const [moments, setMoments] = useState(initialMoments)
   const [exhausted, setExhausted] = useState(initialMoments.length < WALL_PAGE_SIZE)
   const [loading, setLoading] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   const loadMore = useCallback(async () => {
@@ -95,10 +97,26 @@ export function MemoryWall({
   return (
     <section className="px-4">
       <div className="columns-2 gap-3 md:columns-3 lg:columns-4">
-        {moments.map((moment) => (
-          <MomentThumb key={moment.id} moment={moment} />
+        {moments.map((moment, index) => (
+          <button
+            key={moment.id}
+            type="button"
+            onClick={() => setLightboxIndex(index)}
+            className="block w-full text-left"
+            aria-label={moment.caption ?? 'open moment'}
+          >
+            <MomentThumb moment={moment} />
+          </button>
         ))}
       </div>
+      {lightboxIndex !== null && (
+        <Lightbox
+          moments={moments}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
       {!exhausted && (
         <div ref={sentinelRef} className="flex justify-center py-8">
           <button
