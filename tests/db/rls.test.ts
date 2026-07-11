@@ -117,17 +117,20 @@ describe('memories — write is server-only (D9 P1)', () => {
   })
 })
 
-describe('reports — insert-only for anon', () => {
-  test('anon can file a report', async () => {
+describe('reports — no direct client access (server route only)', () => {
+  // A client-supplied reporter_hint could forge 3 "distinct reporters" and
+  // auto-hide any memory, so reports also write through the server route
+  // (migration 20260712000500).
+  test('anon cannot insert reports directly', async () => {
     const { error } = await anon.from('reports').insert({
       memory_id: liveId,
       reason: 'spam',
-      reporter_hint: 'rls-test-hint',
+      reporter_hint: 'forged-hint',
     })
-    expect(error).toBeNull()
+    expect(error).not.toBeNull()
   })
 
-  test('anon cannot read reports back', async () => {
+  test('anon cannot read reports', async () => {
     const { error } = await anon.from('reports').select('id, memory_id, reason')
     expect(error).not.toBeNull()
   })

@@ -31,8 +31,13 @@ async function createLiveMemory(label: string): Promise<string> {
   return data.id
 }
 
+// Reports insert via the service role here (fixtures) — clients go through
+// the server route, which computes the hint (see upload-api.test.ts). The
+// trigger fires on insert regardless of role.
 async function report(memoryId: string, hint: string | null) {
-  return anon.from('reports').insert({ memory_id: memoryId, reason: 'spam', reporter_hint: hint })
+  return service
+    .from('reports')
+    .insert({ memory_id: memoryId, reason: 'spam', reporter_hint: hint })
 }
 
 async function statusOf(memoryId: string): Promise<string> {
