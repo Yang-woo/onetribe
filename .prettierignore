@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+build
+coverage
+yarn.lock
+playwright-report
+test-results
+supabase/.temp
+next-env.d.ts

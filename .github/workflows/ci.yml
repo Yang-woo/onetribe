@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+      - run: yarn typecheck
+      - run: yarn format
+      - run: yarn test
+
+      # DB/RLS integration tests against a real local Supabase (docs/00 D8).
+      - name: Start local Supabase
+        run: yarn supabase start -x studio,imgproxy,logflare,vector
+
+      - run: yarn test:db
+
+      - run: yarn build
+
+  e2e:
+    # E2E on main merges + manual runs (docs/17 B).
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      - run: npx playwright install --with-deps chromium
+      - run: yarn test:e2e
+        env:
+          CI: 'true'

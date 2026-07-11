@@ -12,7 +12,6 @@
 /.next/
 /out/
 /build
-next-env.d.ts
 *.tsbuildinfo
 
 # production
@@ -22,6 +21,7 @@ next-env.d.ts
 .env
 .env.*
 !.env.example
+*.pem
 
 # testing / coverage
 /coverage

@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+/*
+ * fire palette — single source: docs/12-brand.md B (matches Figma Paint Styles 1:1).
+ * Role separation: orange = identity (CTA, counters, focus), red = emotion (hearts, loss).
+ * The default Tailwind palette is stripped on purpose — tokens only.
+ */
+@theme {
+  --color-*: initial;
+  --color-black: #0b0908; /* True Warm Black — base background */
+  --color-surface: #151110;
+  --color-surface-raised: #1f1712;
+  --color-orange: #ff6a00; /* Q Orange — identity */
+  --color-flame: #ff9a4d; /* Light Flame — links, translation marker */
+  --color-red: #e3241d; /* Defqon Red — emotion */
+  --color-paper: #f2ede6; /* body text */
+  --color-muted: #a39a90; /* secondary text */
+  --color-line: rgba(163, 154, 144, 0.15); /* borders */
+  --color-success: #34d399; /* UI state only */
+  --color-warning: #fbbf24; /* UI state only */
+
+  --font-display: var(--font-space-grotesk), var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Fire gradient — used in exactly one hero accent, nowhere else. */
+@utility bg-fire {
+  background-image: linear-gradient(92deg, var(--color-orange), var(--color-red));
+}
+
+/* Single dark theme by design (night culture) — no light mode. */
+body {
+  background: var(--color-black);
+  color: var(--color-paper);
+}
