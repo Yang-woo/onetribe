@@ -58,6 +58,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL=http://localhost:3000
           STORAGE_DRIVER=local
           UPLOAD_SESSION_SECRET=ci-e2e-only-secret
+          TURNSTILE_BYPASS=1
           EOF
 
       - run: yarn build

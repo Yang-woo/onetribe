@@ -9,6 +9,8 @@ export type TurnstileVerifier = (
  * local dev without keys so the wall works before Phase 2 accounts exist.
  */
 export const verifyTurnstile: TurnstileVerifier = async (token, ip) => {
+  // CI/E2E only — production must never set this (fail-closed stays intact).
+  if (process.env.TURNSTILE_BYPASS === '1') return true
   const secret = process.env.TURNSTILE_SECRET_KEY
   if (!secret) return process.env.NODE_ENV !== 'production'
   if (!token) return false
