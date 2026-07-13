@@ -1,3 +1,4 @@
+import { siteUrl } from '@/lib/site-url'
 import { createLocalStorage, isLocalStorageDriver } from './local'
 import { createR2Storage } from './r2'
 import type { StorageAdapter } from './types'
@@ -7,7 +8,7 @@ export type { PresignedUpload, StorageAdapter } from './types'
 /** Server-side driver selection: R2 when configured, local otherwise. */
 export function createStorage(): StorageAdapter {
   if (isLocalStorageDriver()) {
-    return createLocalStorage(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000')
+    return createLocalStorage(siteUrl())
   }
   const required = [
     'R2_ACCOUNT_ID',

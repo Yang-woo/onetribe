@@ -6,6 +6,7 @@ import { ReportButton } from '@/components/report-button'
 import { Link } from '@/i18n/navigation'
 import { PUBLIC_MEMORY_COLUMNS, youtubeThumbnail, type Moment } from '@/lib/moments'
 import { localeAlternates } from '@/lib/seo'
+import { siteUrl } from '@/lib/site-url'
 import { createServiceRoleClient } from '@/lib/server/supabase'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 import { createDefaultProvider, translateWithCache } from '@/lib/translate'
@@ -46,7 +47,7 @@ export async function generateMetadata({
   const { id } = await params
   const moment = await fetchMoment(id)
   if (!moment) return {}
-  const base = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+  const base = siteUrl()
   const title = eventLine(moment.events) ?? 'a moment'
   return {
     title: `${title} — one tribe`,
