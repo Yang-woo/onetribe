@@ -14,9 +14,11 @@ function contentSecurityPolicy(): string {
   const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
   const supabaseWs = supabase.replace(/^http/, 'ws')
   // R2 presigned PUTs go to the account host (or the public media base).
-  const r2 = process.env.R2_ACCOUNT_ID
-    ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
-    : ''
+  // Jurisdiction-scoped buckets live on a different host (docs/00 D9 P1 + EU bucket).
+  const r2Host = process.env.R2_JURISDICTION
+    ? `${process.env.R2_ACCOUNT_ID}.${process.env.R2_JURISDICTION}.r2.cloudflarestorage.com`
+    : `${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+  const r2 = process.env.R2_ACCOUNT_ID ? `https://${r2Host}` : ''
   const r2Public = process.env.R2_PUBLIC_BASE_URL ?? ''
   const connect = ['self', supabase, supabaseWs, r2, r2Public, TURNSTILE_ORIGIN]
     .filter(Boolean)

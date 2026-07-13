@@ -7,6 +7,9 @@ export interface R2Config {
   secretAccessKey: string
   bucket: string
   publicBaseUrl: string // e.g. https://media.onetribe.dance
+  /** R2 jurisdiction (e.g. "eu"). Jurisdiction-scoped buckets are only reachable
+   *  via their jurisdiction endpoint — the default endpoint 404s for them. */
+  jurisdiction?: string
 }
 
 /**
@@ -21,7 +24,10 @@ export function createR2Storage(config: R2Config): StorageAdapter {
     region: 'auto',
     service: 's3',
   })
-  const endpoint = `https://${config.accountId}.r2.cloudflarestorage.com/${config.bucket}`
+  const host = config.jurisdiction
+    ? `${config.accountId}.${config.jurisdiction}.r2.cloudflarestorage.com`
+    : `${config.accountId}.r2.cloudflarestorage.com`
+  const endpoint = `https://${host}/${config.bucket}`
 
   return {
     async presignUpload({ key, contentType, contentLength }): Promise<PresignedUpload> {
