@@ -67,7 +67,8 @@
       "badEmbed": "that doesn’t look like a YouTube link",
       "needEvent": "pick an edition",
       "failed": "something went wrong — nothing was posted. try again."
-    }
+    },
+    "toPassport": "save it to your passport"
   },
   "takedown": {
     "confirmTitle": "take this moment down?",
@@ -85,5 +86,22 @@
       "guidelines": "guidelines",
       "about": "about"
     }
+  },
+  "passport": {
+    "title": "festival passport",
+    "startTitle": "start anonymously — just pick a name",
+    "namePlaceholder": "your name on the wall",
+    "start": "create my passport",
+    "journey": "my journey",
+    "badge": "my {n, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} defqon",
+    "noneChecked": "tap the editions you were there for.",
+    "myMoments": "my moments ({count})",
+    "noMoments": "no moments yet — your uploads will gather here.",
+    "share": "share",
+    "shared": "copied",
+    "signOut": "leave this passport on this device"
+  },
+  "policies": {
+    "enNotice": "The English text is the binding version."
   }
 }

@@ -67,7 +67,8 @@
       "badEmbed": "YouTubeのリンクではないようです",
       "needEvent": "エディションを選んでください",
       "failed": "問題が発生しました — 何も投稿されていません。もう一度お試しください。"
-    }
+    },
+    "toPassport": "パスポートに保存"
   },
   "takedown": {
     "confirmTitle": "この瞬間を取り下げますか？",
@@ -85,5 +86,22 @@
       "guidelines": "ガイドライン",
       "about": "このサイトについて"
     }
+  },
+  "passport": {
+    "title": "フェスティバル・パスポート",
+    "startTitle": "匿名ではじめる — 名前を決めるだけ",
+    "namePlaceholder": "壁に残す名前",
+    "start": "パスポートを作る",
+    "journey": "私の旅",
+    "badge": "{n}回目のDefqon",
+    "noneChecked": "行ったエディションをタップしてチェック。",
+    "myMoments": "私の瞬間 ({count})",
+    "noMoments": "まだありません — アップロードがここに集まります。",
+    "share": "シェア",
+    "shared": "コピーしました",
+    "signOut": "この端末にパスポートを残す"
+  },
+  "policies": {
+    "enNotice": "英語の原文が優先されます。"
   }
 }

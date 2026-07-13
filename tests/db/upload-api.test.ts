@@ -327,6 +327,56 @@ describe('write-time language detection (T3.3)', () => {
   })
 })
 
+describe('passport attribution (T4.1)', () => {
+  test('a valid anonymous-auth token links the moment to its author', async () => {
+    const userClient = anon
+    const { data: auth } = await createAnonClient().auth.signInAnonymously()
+    void userClient
+    const uid = auth.user!.id
+    const token = auth.session!.access_token
+
+    const caption = `${MARKER}-author`
+    const res = await createMemoriesHandler(deps())(
+      post({
+        turnstileToken: 't',
+        authToken: token,
+        eventId,
+        caption,
+        rightsConfirmed: true,
+        embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
+      }),
+    )
+    expect(res.status).toBe(201)
+
+    const { data: row } = await db
+      .from('memories')
+      .select('author_id')
+      .eq('caption', caption)
+      .single()
+    expect(row!.author_id).toBe(uid)
+
+    // the profile row is auto-created so the FK holds
+    const { data: profile } = await db.from('profiles').select('id').eq('id', uid).single()
+    expect(profile!.id).toBe(uid)
+
+    await db.auth.admin.deleteUser(uid)
+  })
+
+  test('an invalid auth token is rejected, not silently dropped', async () => {
+    const res = await createMemoriesHandler(deps())(
+      post({
+        turnstileToken: 't',
+        authToken: 'not-a-real-token',
+        eventId,
+        caption: `${MARKER}-badauthor`,
+        rightsConfirmed: true,
+        embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
+      }),
+    )
+    expect(res.status).toBe(401)
+  })
+})
+
 describe('rate limiting (D9 P4)', () => {
   test('11th upload within an hour → 429 on both endpoints', async () => {
     const rateHash = hashIp(RATE_IP, 'upload')

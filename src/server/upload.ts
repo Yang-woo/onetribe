@@ -162,6 +162,7 @@ const memoriesSchema = z
   .object({
     session: z.string().optional(),
     turnstileToken: z.string().optional(),
+    authToken: z.string().optional(), // passport session — links the upload to its author
     eventId: z.uuid(),
     caption: z.string().max(MAX_CAPTION_LENGTH).optional(),
     authorName: z.string().max(MAX_AUTHOR_NAME_LENGTH).optional(),
@@ -212,6 +213,19 @@ export function createMemoriesHandler(deps: UploadDeps) {
       return json(429, { error: 'too many uploads — try again later' })
     }
 
+    // Passport attribution: a valid anonymous-auth token links the moment
+    // to its uploader (docs/15 §4). Invalid tokens are rejected, not
+    // silently dropped — losing attribution quietly would be worse.
+    let authorId: string | null = null
+    if (input.authToken) {
+      const { data: userData, error: authError } = await deps.db.auth.getUser(input.authToken)
+      if (authError || !userData.user) return json(401, { error: 'invalid auth token' })
+      authorId = userData.user.id
+      await deps.db
+        .from('profiles')
+        .upsert({ id: authorId }, { onConflict: 'id', ignoreDuplicates: true })
+    }
+
     const { data: event } = await deps.db
       .from('events')
       .select('id')
@@ -229,6 +243,7 @@ export function createMemoriesHandler(deps: UploadDeps) {
       source_lang: detectCaptionLocale(caption),
       author_name: input.authorName?.trim() || null,
       author_link: authorLink,
+      author_id: authorId,
       origin_country: originCountry(req),
       rights_confirmed: true,
       status: 'live' as const,

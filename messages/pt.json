@@ -67,7 +67,8 @@
       "badEmbed": "isso não parece um link do YouTube",
       "needEvent": "escolhe uma edição",
       "failed": "algo correu mal — nada foi publicado. tenta outra vez."
-    }
+    },
+    "toPassport": "guarda-o no teu passaporte"
   },
   "takedown": {
     "confirmTitle": "remover este momento?",
@@ -85,5 +86,22 @@
       "guidelines": "diretrizes",
       "about": "sobre"
     }
+  },
+  "passport": {
+    "title": "passaporte de festival",
+    "startTitle": "começa anónimo — escolhe só um nome",
+    "namePlaceholder": "o teu nome no mural",
+    "start": "criar o meu passaporte",
+    "journey": "a minha jornada",
+    "badge": "o meu {n, selectordinal, other {#º}} defqon",
+    "noneChecked": "marca as edições em que estiveste.",
+    "myMoments": "os meus momentos ({count})",
+    "noMoments": "ainda nada — os teus uploads juntam-se aqui.",
+    "share": "partilhar",
+    "shared": "copiado",
+    "signOut": "deixar o passaporte neste dispositivo"
+  },
+  "policies": {
+    "enNotice": "O texto em inglês prevalece."
   }
 }

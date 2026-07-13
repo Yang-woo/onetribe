@@ -67,7 +67,8 @@
       "badEmbed": "YouTube 링크가 아닌 것 같아요",
       "needEvent": "에디션을 골라주세요",
       "failed": "문제가 생겼어요 — 아무것도 게시되지 않았어요. 다시 시도해주세요."
-    }
+    },
+    "toPassport": "여권에 저장하기"
   },
   "takedown": {
     "confirmTitle": "이 순간을 내릴까요?",
@@ -85,5 +86,22 @@
       "guidelines": "가이드라인",
       "about": "소개"
     }
+  },
+  "passport": {
+    "title": "페스티벌 여권",
+    "startTitle": "익명으로 시작 — 이름만 지어주세요",
+    "namePlaceholder": "벽에 남길 이름",
+    "start": "여권 만들기",
+    "journey": "나의 여정",
+    "badge": "나의 {n}번째 데프콘",
+    "noneChecked": "다녀온 에디션을 눌러 체크해주세요.",
+    "myMoments": "내 순간들 ({count})",
+    "noMoments": "아직 없어요 — 업로드한 순간들이 여기에 모여요.",
+    "share": "공유",
+    "shared": "복사됨",
+    "signOut": "이 기기에 여권 남겨두기"
+  },
+  "policies": {
+    "enNotice": "영문 원문이 우선 적용됩니다."
   }
 }

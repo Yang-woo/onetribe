@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { useMemo, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
+import { supabaseBrowser } from '@/lib/supabase/browser'
 import { prepareForUpload, validateFiles } from '@/lib/upload/client-image'
 import { MAX_CAPTION_LENGTH, MAX_FILES_PER_MOMENT } from '@/lib/upload/constants'
 
@@ -72,7 +73,17 @@ export function UploadWizard({
     setSubmitting(true)
     setError(null)
     try {
+      // Passport attribution is best-effort: no session (or no Supabase env
+      // in tests) simply means an unattributed upload.
+      let authToken: string | undefined
+      try {
+        const { data: sessionData } = await supabaseBrowser().auth.getSession()
+        authToken = sessionData.session?.access_token
+      } catch {
+        authToken = undefined
+      }
       const shared = {
+        authToken,
         eventId,
         caption: caption.trim() || undefined,
         authorName: authorName.trim() || undefined,
@@ -331,12 +342,17 @@ function DoneScreen({ moments }: { moments: DoneMoment[] }) {
       >
         {copied ? t('copied') : t('copyLink')}
       </button>
-      <Link
-        href="/"
-        className="rounded-full bg-orange px-6 py-3 font-medium text-black transition-opacity hover:opacity-90"
-      >
-        {t('toWall')}
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/"
+          className="rounded-full bg-orange px-6 py-3 font-medium text-black transition-opacity hover:opacity-90"
+        >
+          {t('toWall')}
+        </Link>
+        <Link href="/passport" className="text-sm text-flame hover:underline">
+          {t('toPassport')}
+        </Link>
+      </div>
     </section>
   )
 }
