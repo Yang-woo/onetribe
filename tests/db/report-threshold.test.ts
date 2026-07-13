@@ -1,5 +1,11 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { createAnonClient, createServiceClient } from './helpers'
+import {
+  createAnonClient,
+  createServiceClient,
+  eventIdByYear,
+  memoryStatus,
+  seedMemory,
+} from './helpers'
 
 /**
  * Report threshold trigger — docs/17 T1.3, docs/00 D9 P2.
@@ -14,21 +20,9 @@ let eventId: string
 const fixtureIds: string[] = []
 
 async function createLiveMemory(label: string): Promise<string> {
-  const { data, error } = await service
-    .from('memories')
-    .insert({
-      event_id: eventId,
-      media_kind: 'image',
-      media_url: `https://example.com/${label}.jpg`,
-      caption: label,
-      rights_confirmed: true,
-      status: 'live',
-    })
-    .select('id')
-    .single()
-  if (error || !data) throw new Error(`fixture failed: ${error?.message}`)
-  fixtureIds.push(data.id)
-  return data.id
+  const id = await seedMemory(service, { event_id: eventId, caption: label })
+  fixtureIds.push(id)
+  return id
 }
 
 // Reports insert via the service role here (fixtures) — clients go through
@@ -41,18 +35,11 @@ async function report(memoryId: string, hint: string | null) {
 }
 
 async function statusOf(memoryId: string): Promise<string> {
-  const { data } = await service.from('memories').select('status').eq('id', memoryId).single()
-  return data!.status
+  return memoryStatus(service, memoryId)
 }
 
 beforeAll(async () => {
-  const { data } = await service
-    .from('events')
-    .select('id')
-    .eq('festival', 'Defqon.1')
-    .eq('year', 2019)
-    .single()
-  eventId = data!.id
+  eventId = await eventIdByYear(service, 2019)
 })
 
 afterAll(async () => {

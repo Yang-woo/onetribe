@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { createAnonClient, createServiceClient } from './helpers'
+import { createAnonClient, createServiceClient, eventIdByYear, memoryStatus } from './helpers'
 
 /**
  * Takedown RPC — docs/17 T1.5. One-click uploader self-removal via the
@@ -15,17 +15,11 @@ let memoryId: string
 let token: string
 
 beforeAll(async () => {
-  const { data: event } = await service
-    .from('events')
-    .select('id')
-    .eq('festival', 'Defqon.1')
-    .eq('year', 2019)
-    .single()
-
+  const eventId = await eventIdByYear(service, 2019)
   const { data, error } = await service
     .from('memories')
     .insert({
-      event_id: event!.id,
+      event_id: eventId,
       media_kind: 'image',
       media_url: 'https://example.com/takedown.jpg',
       caption: 'takedown-test',
@@ -44,8 +38,7 @@ afterAll(async () => {
 })
 
 async function statusOf(id: string): Promise<string> {
-  const { data } = await service.from('memories').select('status').eq('id', id).single()
-  return data!.status
+  return memoryStatus(service, id)
 }
 
 test('an invalid token changes nothing and reports failure', async () => {

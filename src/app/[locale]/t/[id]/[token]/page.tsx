@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { redirect } from 'next/navigation'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 /**
@@ -25,7 +26,6 @@ export default async function TakedownPage({
 
   async function takedown() {
     'use server'
-    const { redirect } = await import('next/navigation')
     const db = supabaseServerAnon()
     const { data } = await db.rpc('takedown_memory', { p_memory_id: id, p_token: token })
     redirect(`/${locale}/t/${id}/${token}?done=${data === true ? '1' : '0'}`)

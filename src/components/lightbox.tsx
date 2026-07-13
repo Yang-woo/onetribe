@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { useCallback, useEffect, useRef } from 'react'
-import { youtubeThumbnail, type Moment } from '@/lib/moments'
+import { momentImageSrc, type Moment } from '@/lib/moments'
 
 /**
  * Wall lightbox — docs/15 §1: tap a card → overlay, swipe/arrows to move,
@@ -44,10 +44,7 @@ export function Lightbox({
 
   if (!moment) return null
 
-  const src =
-    moment.media_kind === 'clip'
-      ? (youtubeThumbnail(moment.embed_url ?? '') ?? undefined)
-      : (moment.media_url ?? undefined)
+  const src = momentImageSrc(moment) ?? undefined
 
   return (
     <div

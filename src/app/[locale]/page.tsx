@@ -21,15 +21,24 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   const { e } = await searchParams
   const selectedYear = e && /^\d{4}$/.test(e) ? Number(e) : null
 
-  const editions = await fetchEditions(db)
+  // All first-paint reads start together; moments only chain behind
+  // editions when a year filter needs their ids.
+  const editionsPromise = fetchEditions(db)
+  const momentsPromise = selectedYear
+    ? editionsPromise.then((editions) =>
+        fetchMoments(db, {
+          eventIds: editions.filter((ed) => ed.year === selectedYear).map((ed) => ed.id),
+        }),
+      )
+    : fetchMoments(db)
+  const [editions, moments, counters] = await Promise.all([
+    editionsPromise,
+    momentsPromise,
+    fetchCounters(db),
+  ])
   const selectedEventIds = selectedYear
     ? editions.filter((ed) => ed.year === selectedYear).map((ed) => ed.id)
     : undefined
-
-  const [moments, counters] = await Promise.all([
-    fetchMoments(db, { eventIds: selectedEventIds }),
-    fetchCounters(db),
-  ])
 
   return (
     <main className="flex-1">

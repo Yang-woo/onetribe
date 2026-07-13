@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/browser'
+import { inputClass } from './ui'
 
 /**
  * Operator console — docs/15 §5. Post-moderation only: everything here is
@@ -99,7 +100,7 @@ export function AdminPanel() {
           placeholder="operator email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-line bg-surface px-3 py-2 text-paper placeholder:text-muted"
+          className={inputClass}
         />
         <input
           type="password"
@@ -107,7 +108,7 @@ export function AdminPanel() {
           placeholder="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-line bg-surface px-3 py-2 text-paper placeholder:text-muted"
+          className={inputClass}
         />
         <button
           type="submit"
@@ -168,57 +169,60 @@ export function AdminPanel() {
       </p>
 
       <ul className="flex flex-col gap-2">
-        {ordered.map((memory) => (
-          <li
-            key={memory.id}
-            tabIndex={0}
-            aria-label={memory.caption ?? memory.id}
-            onKeyDown={(e) => {
-              if (e.key === 'h') void act(memory.id, memory.status === 'hidden' ? 'unhide' : 'hide')
-              if (e.key === 'd') void act(memory.id, 'delete')
-              if (e.key === 'o') void act(memory.id, 'dismiss')
-            }}
-            className="flex items-center gap-3 rounded-lg border border-line p-2 focus:border-orange"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={memory.thumb_url ?? memory.media_url ?? ''}
-              alt=""
-              className="h-14 w-14 rounded object-cover"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm">{memory.caption ?? '—'}</p>
-              <p className="text-xs text-muted">
-                {memory.status}
-                {memory.author_name ? ` · @${memory.author_name}` : ''}
-                {memory.origin_country ? ` · ${memory.origin_country}` : ''}
-              </p>
-            </div>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => void act(memory.id, memory.status === 'hidden' ? 'unhide' : 'hide')}
-                className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
-              >
-                {memory.status === 'hidden' ? 'unhide' : 'hide'}
-              </button>
-              <button
-                type="button"
-                onClick={() => void act(memory.id, 'delete')}
-                className="rounded-full border border-red/40 px-3 py-1 text-sm text-red"
-              >
-                delete
-              </button>
-              <button
-                type="button"
-                onClick={() => void act(memory.id, 'dismiss')}
-                className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
-              >
-                OK
-              </button>
-            </div>
-          </li>
-        ))}
+        {ordered.map((memory) => {
+          const hideAction = memory.status === 'hidden' ? 'unhide' : 'hide'
+          return (
+            <li
+              key={memory.id}
+              tabIndex={0}
+              aria-label={memory.caption ?? memory.id}
+              onKeyDown={(e) => {
+                if (e.key === 'h') void act(memory.id, hideAction)
+                if (e.key === 'd') void act(memory.id, 'delete')
+                if (e.key === 'o') void act(memory.id, 'dismiss')
+              }}
+              className="flex items-center gap-3 rounded-lg border border-line p-2 focus:border-orange"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={memory.thumb_url ?? memory.media_url ?? ''}
+                alt=""
+                className="h-14 w-14 rounded object-cover"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm">{memory.caption ?? '—'}</p>
+                <p className="text-xs text-muted">
+                  {memory.status}
+                  {memory.author_name ? ` · @${memory.author_name}` : ''}
+                  {memory.origin_country ? ` · ${memory.origin_country}` : ''}
+                </p>
+              </div>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => void act(memory.id, hideAction)}
+                  className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
+                >
+                  {hideAction}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void act(memory.id, 'delete')}
+                  className="rounded-full border border-red/40 px-3 py-1 text-sm text-red"
+                >
+                  delete
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void act(memory.id, 'dismiss')}
+                  className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
+                >
+                  OK
+                </button>
+              </div>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

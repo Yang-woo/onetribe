@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { createAdminActionHandler, createAdminQueueHandler } from '@/server/admin'
-import { createAnonClient, createServiceClient } from './helpers'
+import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
 /**
  * Admin routes — docs/17 T4.2, access model D9 P10. The allowlist gate is
@@ -42,31 +42,13 @@ function withAuth(token?: string, body?: unknown): Request {
 }
 
 async function createMemory(caption: string, status: 'live' | 'hidden' = 'live') {
-  const { data, error } = await service
-    .from('memories')
-    .insert({
-      event_id: eventId,
-      media_kind: 'image',
-      media_url: `https://media.test/${caption}.jpg`,
-      caption,
-      rights_confirmed: true,
-      status,
-    })
-    .select('id')
-    .single()
-  if (error || !data) throw new Error(`fixture: ${error?.message}`)
-  fixtureIds.push(data.id)
-  return data.id
+  const id = await seedMemory(service, { event_id: eventId, caption, status })
+  fixtureIds.push(id)
+  return id
 }
 
 beforeAll(async () => {
-  const { data: event } = await service
-    .from('events')
-    .select('id')
-    .eq('festival', 'Defqon.1')
-    .eq('year', 2018)
-    .single()
-  eventId = event!.id
+  eventId = await eventIdByYear(service, 2018)
 
   for (const account of [OPERATOR, STRANGER]) {
     const { data, error } = await service.auth.admin.createUser({

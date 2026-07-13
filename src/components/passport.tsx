@@ -10,6 +10,7 @@ import {
 } from '@/lib/passport/backend'
 import { siteUrl } from '@/lib/site-url'
 import { MomentThumb } from './moment-thumb'
+import { inputClass } from './ui'
 
 /**
  * Festival Passport — docs/15 §4, the retention seed (D3). Anonymous
@@ -24,20 +25,17 @@ export function Passport({
 }) {
   const t = useTranslations('passport')
   const api = useMemo(() => backend ?? createSupabasePassportBackend(), [backend])
-  const [state, setState] = useState<PassportState | null>(null)
-  const [loaded, setLoaded] = useState(false)
+  // undefined = loading, null = no passport yet, object = active session
+  const [state, setState] = useState<PassportState | null | undefined>(undefined)
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [shared, setShared] = useState(false)
 
   useEffect(() => {
-    void api.load().then((loadedState) => {
-      setState(loadedState)
-      setLoaded(true)
-    })
+    void api.load().then(setState)
   }, [api])
 
-  if (!loaded) return null
+  if (state === undefined) return null
 
   if (!state) {
     return (
@@ -48,7 +46,7 @@ export function Passport({
           aria-label={t('namePlaceholder')}
           placeholder={t('namePlaceholder')}
           onChange={(e) => setName(e.target.value)}
-          className="rounded-lg border border-line bg-surface px-3 py-2 text-paper placeholder:text-muted"
+          className={inputClass}
         />
         <button
           type="button"

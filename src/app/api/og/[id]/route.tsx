@@ -1,5 +1,7 @@
 import { ImageResponse } from 'next/og'
-import { youtubeThumbnail } from '@/lib/moments'
+import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { eventLine, isMomentId, momentImageSrc } from '@/lib/moments'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 /**
@@ -8,15 +10,14 @@ import { supabaseServerAnon } from '@/lib/supabase/server-anon'
  * orange pulse. This endpoint is why /m/[id] exists (share loop).
  */
 
-let fontData: ArrayBuffer | null | undefined
+// Bundled Space Grotesk (OFL) — no CDN fetch on serverless cold starts,
+// where link-unfurler traffic concentrates.
+let fontData: Buffer | null | undefined
 
-async function loadFont(): Promise<ArrayBuffer | null> {
+async function loadFont(): Promise<Buffer | null> {
   if (fontData !== undefined) return fontData
   try {
-    const res = await fetch(
-      'https://cdn.jsdelivr.net/fontsource/fonts/space-grotesk@latest/latin-500-normal.ttf',
-    )
-    fontData = res.ok ? await res.arrayBuffer() : null
+    fontData = await readFile(fileURLToPath(new URL('./space-grotesk-500.ttf', import.meta.url)))
   } catch {
     fontData = null
   }
@@ -28,7 +29,7 @@ export async function GET(
   ctx: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await ctx.params
-  if (!/^[0-9a-f-]{36}$/.test(id)) return new Response(null, { status: 404 })
+  if (!isMomentId(id)) return new Response(null, { status: 404 })
 
   const { data } = await supabaseServerAnon()
     .from('memories')
@@ -39,16 +40,14 @@ export async function GET(
 
   const moment = data as unknown as {
     media_url: string | null
-    media_kind: string
+    media_kind: 'image' | 'gif' | 'clip'
     embed_url: string | null
     events: { festival: string; year: number; city: string | null } | null
   }
-  const src =
-    moment.media_kind === 'clip' ? youtubeThumbnail(moment.embed_url ?? '') : moment.media_url
+  const src = momentImageSrc({ ...moment, thumb_url: null })
   if (!src) return new Response(null, { status: 404 })
 
-  const event = moment.events
-  const line = event ? [event.city, event.year, event.festival].filter(Boolean).join(' · ') : null
+  const line = eventLine(moment.events)
   const font = await loadFont()
 
   return new ImageResponse(

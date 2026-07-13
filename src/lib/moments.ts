@@ -7,8 +7,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  */
 
 // Single literal on purpose — concatenation breaks supabase-js type inference.
+// This is the SSOT for anon-readable columns; the RLS grant test imports it.
 export const PUBLIC_MEMORY_COLUMNS =
-  'id, event_id, media_url, thumb_url, media_kind, embed_url, clip_start, clip_length, caption, source_lang, author_name, author_link, origin_country, status, created_at'
+  'id, event_id, media_url, thumb_url, media_kind, embed_url, clip_start, clip_length, caption, source_lang, author_name, author_link, author_id, origin_country, status, created_at'
 
 export interface Moment {
   id: string
@@ -23,9 +24,43 @@ export interface Moment {
   source_lang: string | null
   author_name: string | null
   author_link: string | null
+  author_id: string | null
   origin_country: string | null
   status: string
   created_at: string
+}
+
+/** Loose-but-sufficient id guard shared by the moment page and OG route. */
+export function isMomentId(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)
+}
+
+export interface MomentEvent {
+  festival: string
+  edition?: string | null
+  year: number
+  city: string | null
+}
+
+/** The shareable identity line (docs/12 G): `city · year · festival — edition`. */
+export function eventLine(event: MomentEvent | null): string | null {
+  if (!event) return null
+  const line = [event.city, event.year, event.festival].filter(Boolean).join(' · ')
+  return event.edition ? `${line} — ${event.edition}` : line
+}
+
+/**
+ * Displayable image source for a moment — clips fall back to their YouTube
+ * thumbnail. The single place to touch when thumb variants or a second
+ * embed host arrive.
+ */
+export function momentImageSrc(
+  moment: Pick<Moment, 'media_kind' | 'media_url' | 'thumb_url' | 'embed_url'>,
+  opts: { preferThumb?: boolean } = {},
+): string | null {
+  if (opts.preferThumb && moment.thumb_url) return moment.thumb_url
+  if (moment.media_kind === 'clip') return youtubeThumbnail(moment.embed_url ?? '')
+  return moment.media_url
 }
 
 export interface EditionChip {

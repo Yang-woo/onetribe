@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
-import { createAnonClient, createServiceClient } from './helpers'
+import { PUBLIC_MEMORY_COLUMNS } from '@/lib/moments'
+import { createAnonClient, createServiceClient, eventIdByYear } from './helpers'
 
 /**
  * RLS matrix tests — docs/17 T1.2, matrix in docs/02 + D9 P1.
@@ -8,11 +9,8 @@ import { createAnonClient, createServiceClient } from './helpers'
  * only builds fixtures. Testing RLS via service role would be meaningless.
  */
 
-// Columns anon may read — takedown_token is deliberately NOT readable.
-// Single literal on purpose — string concatenation widens the type and
-// breaks supabase-js column-type inference.
-const PUBLIC_MEMORY_COLUMNS =
-  'id, event_id, media_url, thumb_url, media_kind, embed_url, clip_start, clip_length, caption, source_lang, author_name, author_id, origin_country, status, created_at'
+// PUBLIC_MEMORY_COLUMNS comes from src/lib/moments — one list is the SSOT
+// for what anon may read; takedown_token is deliberately NOT on it.
 
 const service = createServiceClient()
 const anon = createAnonClient()
@@ -23,14 +21,7 @@ let hiddenId: string
 const createdUserIds: string[] = []
 
 beforeAll(async () => {
-  const { data: event, error } = await service
-    .from('events')
-    .select('id')
-    .eq('festival', 'Defqon.1')
-    .eq('year', 2019)
-    .single()
-  if (error || !event) throw new Error(`events seed missing (T1.4): ${error?.message}`)
-  eventId = event.id
+  eventId = await eventIdByYear(service, 2019)
 
   const { data: rows, error: insertError } = await service
     .from('memories')

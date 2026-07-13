@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { json, parseBody } from '@/lib/server/http'
 
 /**
  * Post-moderation admin — docs/15 §5, docs/09 E. Access model per D9 P10:
@@ -12,12 +13,6 @@ export interface AdminDeps {
   db: SupabaseClient // service role
   adminEmails: string[] // lowercase
 }
-
-const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json' },
-  })
 
 async function requireAdmin(deps: AdminDeps, req: Request): Promise<Response | null> {
   const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
@@ -86,13 +81,7 @@ export function createAdminActionHandler(deps: AdminDeps) {
     const denied = await requireAdmin(deps, req)
     if (denied) return denied
 
-    let body: unknown
-    try {
-      body = await req.json()
-    } catch {
-      return json(400, { error: 'invalid request' })
-    }
-    const parsed = actionSchema.safeParse(body)
+    const parsed = actionSchema.safeParse(await parseBody(req))
     if (!parsed.success) return json(400, { error: 'invalid request' })
     const { memoryId, action } = parsed.data
 

@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest'
 import en from '../../messages/en.json'
 import type { EditionChip } from '@/lib/moments'
 import type { PassportBackend, PassportState } from '@/lib/passport/backend'
-import { renderWithIntl } from '@/test-utils'
+import { momentFixture, renderWithIntl } from '@/test-utils'
 import { Passport } from './passport'
 
 /**
@@ -102,25 +102,7 @@ describe('Passport', () => {
       userId: 'u1',
       displayName: null,
       attendedEventIds: [],
-      moments: [
-        {
-          id: 'm1',
-          event_id: 'e2024',
-          media_url: 'https://media.test/m1.jpg',
-          thumb_url: null,
-          media_kind: 'image',
-          embed_url: null,
-          clip_start: null,
-          clip_length: null,
-          caption: 'my own moment',
-          source_lang: null,
-          author_name: 'tester',
-          author_link: null,
-          origin_country: null,
-          status: 'live',
-          created_at: '2026-07-13T00:00:00Z',
-        },
-      ],
+      moments: [momentFixture('m1', { caption: 'my own moment', author_name: 'tester' })],
     })
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 

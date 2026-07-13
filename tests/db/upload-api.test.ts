@@ -8,7 +8,7 @@ import {
   createReportHandler,
   type UploadDeps,
 } from '@/server/upload'
-import { createAnonClient, createServiceClient } from './helpers'
+import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
 /**
  * Upload pipeline — docs/17 T2.1. External boundaries (storage, Turnstile)
@@ -79,13 +79,7 @@ async function countMarkerRows(): Promise<number> {
 }
 
 beforeAll(async () => {
-  const { data } = await db
-    .from('events')
-    .select('id')
-    .eq('festival', 'Defqon.1')
-    .eq('year', 2023)
-    .single()
-  eventId = data!.id
+  eventId = await eventIdByYear(db, 2023)
 })
 
 afterAll(async () => {
@@ -412,19 +406,7 @@ describe('rate limiting (D9 P4)', () => {
 
 describe('POST /api/report — server-computed reporter_hint', () => {
   async function fixtureMemory(caption: string): Promise<string> {
-    const { data } = await db
-      .from('memories')
-      .insert({
-        event_id: eventId,
-        media_kind: 'image',
-        media_url: 'https://media.test/report-fixture.jpg',
-        caption,
-        rights_confirmed: true,
-        status: 'live',
-      })
-      .select('id')
-      .single()
-    return data!.id
+    return seedMemory(db, { event_id: eventId, caption })
   }
 
   test('files a report with the hint derived from the real IP', async () => {

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { createAnonClient, createServiceClient } from './helpers'
+import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
 /**
  * Wall data layer — docs/17 T2.5/T3.5.
@@ -15,32 +15,18 @@ let eventId: string
 const fixtureIds: string[] = []
 
 async function insertMemory(caption: string, status: 'live' | 'hidden'): Promise<string> {
-  const { data, error } = await service
-    .from('memories')
-    .insert({
-      event_id: eventId,
-      media_kind: 'image',
-      media_url: `https://example.com/${caption}.jpg`,
-      caption,
-      origin_country: 'KR',
-      rights_confirmed: true,
-      status,
-    })
-    .select('id')
-    .single()
-  if (error || !data) throw new Error(`fixture failed: ${error?.message}`)
-  fixtureIds.push(data.id)
-  return data.id
+  const id = await seedMemory(service, {
+    event_id: eventId,
+    caption,
+    origin_country: 'KR',
+    status,
+  })
+  fixtureIds.push(id)
+  return id
 }
 
 beforeAll(async () => {
-  const { data } = await service
-    .from('events')
-    .select('id')
-    .eq('festival', 'Defqon.1')
-    .eq('year', 2022)
-    .single()
-  eventId = data!.id
+  eventId = await eventIdByYear(service, 2022)
 })
 
 afterAll(async () => {

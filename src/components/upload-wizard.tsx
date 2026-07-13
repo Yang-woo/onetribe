@@ -1,12 +1,13 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { prepareForUpload, validateFiles } from '@/lib/upload/client-image'
-import { MAX_CAPTION_LENGTH, MAX_FILES_PER_MOMENT } from '@/lib/upload/constants'
+import { ALLOWED_MIME, MAX_CAPTION_LENGTH, MAX_FILES_PER_MOMENT } from '@/lib/upload/constants'
+import { inputClass } from './ui'
 
 /**
  * 3-step upload, no login — docs/15 §2. Instant publish (D7): submit ends
@@ -35,6 +36,8 @@ export function UploadWizard({
   const [step, setStep] = useState<Step>(1)
   const [mode, setMode] = useState<Mode>('files')
   const [files, setFiles] = useState<File[]>([])
+  // compression starts at selection so it overlaps steps 2-3 (form filling)
+  const [preparing, setPreparing] = useState<Promise<File>[] | null>(null)
   const [embedUrl, setEmbedUrl] = useState('')
   const [eventId, setEventId] = useState('')
   const [caption, setCaption] = useState('')
@@ -45,13 +48,14 @@ export function UploadWizard({
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<DoneMoment[] | null>(null)
 
-  const fileError = useMemo(() => {
-    const invalid = validateFiles(files)
-    if (!invalid) return null
-    if (invalid.kind === 'too-many') return t('errors.tooMany')
-    if (invalid.kind === 'unsupported-type') return t('errors.unsupported')
-    return t('errors.tooLarge')
-  }, [files])
+  const invalidFiles = validateFiles(files)
+  const fileError = !invalidFiles
+    ? null
+    : invalidFiles.kind === 'too-many'
+      ? t('errors.tooMany')
+      : invalidFiles.kind === 'unsupported-type'
+        ? t('errors.unsupported')
+        : t('errors.tooLarge')
 
   const step1Ready = mode === 'files' ? files.length > 0 && !fileError : embedUrl.trim().length > 0
 
@@ -93,7 +97,7 @@ export function UploadWizard({
 
       let payload: Record<string, unknown>
       if (mode === 'files') {
-        const prepared = await Promise.all(files.map((file) => prepareImpl(file)))
+        const prepared = await Promise.all(preparing ?? files.map((file) => prepareImpl(file)))
         const presignRes = await fetch('/api/upload/presign', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -165,10 +169,14 @@ export function UploadWizard({
             <>
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept={Object.keys(ALLOWED_MIME).join(',')}
                 multiple
                 aria-label="photos"
-                onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+                onChange={(e) => {
+                  const picked = Array.from(e.target.files ?? [])
+                  setFiles(picked)
+                  setPreparing(validateFiles(picked) ? null : picked.map((f) => prepareImpl(f)))
+                }}
                 className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-orange file:px-4 file:py-2 file:font-medium file:text-black"
               />
               {files.length > 0 && !fileError && (
@@ -199,7 +207,7 @@ export function UploadWizard({
                 aria-label="youtube link"
                 placeholder={t('embedPlaceholder')}
                 onChange={(e) => setEmbedUrl(e.target.value)}
-                className="rounded-lg border border-line bg-surface px-3 py-2 text-paper placeholder:text-muted"
+                className={inputClass}
               />
               <button
                 type="button"
@@ -220,7 +228,7 @@ export function UploadWizard({
             value={eventId}
             aria-label="edition"
             onChange={(e) => setEventId(e.target.value)}
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-paper"
+            className={inputClass}
           >
             <option value="">—</option>
             {editions.map((edition) => (
@@ -238,7 +246,7 @@ export function UploadWizard({
               maxLength={MAX_CAPTION_LENGTH}
               rows={3}
               onChange={(e) => setCaption(e.target.value)}
-              className="rounded-lg border border-line bg-surface px-3 py-2 text-paper"
+              className={inputClass}
             />
             <span className="self-end text-xs">
               {caption.length}/{MAX_CAPTION_LENGTH}
@@ -255,7 +263,7 @@ export function UploadWizard({
             <input
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
-              className="rounded-lg border border-line bg-surface px-3 py-2 text-paper"
+              className={inputClass}
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-muted">
@@ -264,7 +272,7 @@ export function UploadWizard({
               value={authorLink}
               placeholder="@yourhandle"
               onChange={(e) => setAuthorLink(e.target.value)}
-              className="rounded-lg border border-line bg-surface px-3 py-2 text-paper placeholder:text-muted"
+              className={inputClass}
             />
           </label>
           <label className="flex items-start gap-2 text-sm">
@@ -322,10 +330,12 @@ export function UploadWizard({
 
 function DoneScreen({ moments }: { moments: DoneMoment[] }) {
   const t = useTranslations('upload')
+  const locale = useLocale()
   const [copied, setCopied] = useState(false)
+  // Client-only screen (renders after submit) — window always exists.
+  // The locale prefix keeps the stored link redirect-free.
   const links = moments.map(
-    (moment) =>
-      `${typeof window !== 'undefined' ? window.location.origin : ''}/t/${moment.id}/${moment.takedownToken}`,
+    (moment) => `${window.location.origin}/${locale}/t/${moment.id}/${moment.takedownToken}`,
   )
 
   return (

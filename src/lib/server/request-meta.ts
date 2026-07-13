@@ -24,7 +24,7 @@ export function originCountry(req: Request): string | null {
  * IP is never stored (docs/05 GDPR posture). `scope` namespaces counters
  * so upload and report limits don't share a bucket.
  */
-export function hashIp(ip: string | null, scope = ''): string {
+export function hashIp(ip: string | null, scope: string): string {
   return createHash('sha256')
     .update(`${scope}:${ip ?? 'unknown'}`)
     .digest('hex')

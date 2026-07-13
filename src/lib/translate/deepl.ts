@@ -11,7 +11,7 @@ const TARGET_LANG_OVERRIDES: Record<string, string> = {
   pt: 'PT-PT',
 }
 
-export function deeplTargetLang(locale: string): string {
+function deeplTargetLang(locale: string): string {
   return TARGET_LANG_OVERRIDES[locale] ?? locale.toUpperCase()
 }
 

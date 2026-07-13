@@ -1,10 +1,17 @@
+import { cache } from 'react'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { CaptionToggle } from '@/components/caption-toggle'
 import { ReportButton } from '@/components/report-button'
 import { Link } from '@/i18n/navigation'
-import { PUBLIC_MEMORY_COLUMNS, youtubeThumbnail, type Moment } from '@/lib/moments'
+import {
+  eventLine,
+  isMomentId,
+  momentImageSrc,
+  PUBLIC_MEMORY_COLUMNS,
+  type Moment,
+} from '@/lib/moments'
 import { localeAlternates } from '@/lib/seo'
 import { siteUrl } from '@/lib/site-url'
 import { createServiceRoleClient } from '@/lib/server/supabase'
@@ -23,21 +30,16 @@ type MomentWithEvent = Moment & {
   events: { festival: string; edition: string | null; year: number; city: string | null } | null
 }
 
-async function fetchMoment(id: string): Promise<MomentWithEvent | null> {
-  if (!/^[0-9a-f-]{36}$/.test(id)) return null
+// cache(): generateMetadata and the page body share one fetch per request.
+const fetchMoment = cache(async (id: string): Promise<MomentWithEvent | null> => {
+  if (!isMomentId(id)) return null
   const { data } = await supabaseServerAnon()
     .from('memories')
     .select(`${PUBLIC_MEMORY_COLUMNS}, events ( festival, edition, year, city )`)
     .eq('id', id)
     .maybeSingle()
   return (data as unknown as MomentWithEvent) ?? null
-}
-
-function eventLine(event: MomentWithEvent['events']): string | null {
-  if (!event) return null
-  const line = [event.city, event.year, event.festival].filter(Boolean).join(' · ')
-  return event.edition ? `${line} — ${event.edition}` : line
-}
+})
 
 export async function generateMetadata({
   params,
@@ -71,22 +73,24 @@ export default async function MomentPage({
   if (!moment) notFound()
   const t = await getTranslations('moment')
 
-  // On-view caption translation with the permanent cache (docs/16).
-  let translatedCaption = moment.caption
+  // On-view caption translation (docs/16) runs concurrently with the
+  // independent prev/next lookups — a translation-cache miss must not
+  // delay neighbor navigation.
   const provider = createDefaultProvider()
-  if (moment.caption && provider && moment.source_lang !== locale) {
-    const outcome = await translateWithCache(
-      createServiceRoleClient(),
-      provider,
-      moment.caption,
-      locale,
-      moment.source_lang,
-    )
-    translatedCaption = outcome.text
-  }
+  const translationPromise =
+    moment.caption && provider && moment.source_lang !== locale
+      ? translateWithCache(
+          createServiceRoleClient(),
+          provider,
+          moment.caption,
+          locale,
+          moment.source_lang,
+        ).then((outcome) => outcome.text)
+      : Promise.resolve(moment.caption)
 
   const db = supabaseServerAnon()
-  const [{ data: prevRows }, { data: nextRows }] = await Promise.all([
+  const [translatedCaption, { data: prevRows }, { data: nextRows }] = await Promise.all([
+    translationPromise,
     db
       .from('memories')
       .select('id')
@@ -103,10 +107,7 @@ export default async function MomentPage({
   const prevId = prevRows?.[0]?.id as string | undefined
   const nextId = nextRows?.[0]?.id as string | undefined
 
-  const src =
-    moment.media_kind === 'clip'
-      ? (youtubeThumbnail(moment.embed_url ?? '') ?? undefined)
-      : (moment.media_url ?? undefined)
+  const src = momentImageSrc(moment) ?? undefined
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-8">

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { json, parseBody } from '@/lib/server/http'
 import { clientIp, hashIp, originCountry } from '@/lib/server/request-meta'
 import { detectCaptionLocale } from '@/lib/translate/detect'
 import type { TurnstileVerifier } from '@/lib/server/turnstile'
@@ -32,21 +33,7 @@ export interface UploadDeps {
   sessionSecret: string
 }
 
-const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json' },
-  })
-
 const mimeValues = Object.keys(ALLOWED_MIME) as [AllowedMime, ...AllowedMime[]]
-
-async function parseBody(req: Request): Promise<unknown | null> {
-  try {
-    return await req.json()
-  } catch {
-    return null
-  }
-}
 
 // ── rate limiting (DB-backed, per pseudonymized IP — D9 P4) ─────────────────
 
@@ -63,9 +50,13 @@ async function overRateLimit(db: SupabaseClient, ipHash: string, limit: number):
 
 async function recordRateEvent(db: SupabaseClient, ipHash: string): Promise<void> {
   await db.from('upload_events').insert({ ip_hash: ipHash })
-  // opportunistic cleanup — fire and forget
-  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  void db.from('upload_events').delete().lt('created_at', dayAgo)
+  // ~2% of writes sweep day-old rows, keeping the hot count query fast.
+  // Must be awaited: supabase-js builders are lazy and never fire when
+  // dropped with `void`.
+  if (Math.random() < 0.02) {
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    await db.from('upload_events').delete().lt('created_at', dayAgo)
+  }
 }
 
 // ── link normalization ──────────────────────────────────────────────────────
@@ -208,30 +199,33 @@ export function createMemoriesHandler(deps: UploadDeps) {
       return json(403, { error: 'verification failed' })
     }
 
+    // Independent pre-checks run concurrently; results apply in a fixed
+    // precedence (429 rate → 401 auth → 400 event) so errors stay
+    // deterministic.
     const ipHash = hashIp(ip, 'upload')
-    if (await overRateLimit(deps.db, ipHash, UPLOADS_PER_HOUR)) {
-      return json(429, { error: 'too many uploads — try again later' })
-    }
+    const [limited, authUser, event] = await Promise.all([
+      overRateLimit(deps.db, ipHash, UPLOADS_PER_HOUR),
+      input.authToken ? deps.db.auth.getUser(input.authToken) : Promise.resolve(null),
+      deps.db.from('events').select('id').eq('id', input.eventId).maybeSingle(),
+    ])
+
+    if (limited) return json(429, { error: 'too many uploads — try again later' })
 
     // Passport attribution: a valid anonymous-auth token links the moment
     // to its uploader (docs/15 §4). Invalid tokens are rejected, not
     // silently dropped — losing attribution quietly would be worse.
     let authorId: string | null = null
     if (input.authToken) {
-      const { data: userData, error: authError } = await deps.db.auth.getUser(input.authToken)
-      if (authError || !userData.user) return json(401, { error: 'invalid auth token' })
-      authorId = userData.user.id
+      if (authUser?.error || !authUser?.data.user) {
+        return json(401, { error: 'invalid auth token' })
+      }
+      authorId = authUser.data.user.id
       await deps.db
         .from('profiles')
         .upsert({ id: authorId }, { onConflict: 'id', ignoreDuplicates: true })
     }
 
-    const { data: event } = await deps.db
-      .from('events')
-      .select('id')
-      .eq('id', input.eventId)
-      .maybeSingle()
-    if (!event) return json(400, { error: 'unknown event' })
+    if (!event.data) return json(400, { error: 'unknown event' })
 
     const authorLink = input.authorLink ? normalizeInstagramLink(input.authorLink) : null
     if (input.authorLink && !authorLink) return json(400, { error: 'invalid instagram link' })

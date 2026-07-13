@@ -1,15 +1,11 @@
-import { youtubeThumbnail, type Moment } from '@/lib/moments'
+import { momentImageSrc, type Moment } from '@/lib/moments'
 
 /**
  * Wall card — the photo is the hero, UI stays quiet (docs/12).
  * Plain <img>: R2 sizing variants come with the W4 CDN setup.
  */
 export function MomentThumb({ moment }: { moment: Moment }) {
-  const src =
-    moment.thumb_url ??
-    (moment.media_kind === 'clip'
-      ? (youtubeThumbnail(moment.embed_url ?? '') ?? undefined)
-      : (moment.media_url ?? undefined))
+  const src = momentImageSrc(moment, { preferThumb: true })
   if (!src) return null
 
   return (

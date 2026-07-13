@@ -1,5 +1,5 @@
 import { act, screen } from '@testing-library/react'
-import { renderWithIntl } from '@/test-utils'
+import { momentFixture, renderWithIntl } from '@/test-utils'
 import { beforeAll, describe, expect, test, vi } from 'vitest'
 import type { Moment } from '@/lib/moments'
 import { MemoryWall } from './memory-wall'
@@ -21,26 +21,7 @@ beforeAll(() => {
   } as unknown as typeof IntersectionObserver
 })
 
-function moment(id: string, overrides: Partial<Moment> = {}): Moment {
-  return {
-    id,
-    event_id: 'event-1',
-    media_url: `https://media.test/${id}.jpg`,
-    thumb_url: null,
-    media_kind: 'image',
-    embed_url: null,
-    clip_start: null,
-    clip_length: null,
-    caption: `caption-${id}`,
-    source_lang: null,
-    author_name: null,
-    author_link: null,
-    origin_country: null,
-    status: 'live',
-    created_at: '2026-07-12T00:00:00Z',
-    ...overrides,
-  }
-}
+const moment = momentFixture
 
 const noSubscribe = () => () => {}
 const noLoadMore = async () => []
