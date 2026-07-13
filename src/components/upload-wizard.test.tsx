@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { renderWithIntl } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
@@ -35,7 +36,7 @@ afterEach(() => {
 describe('UploadWizard', () => {
   test('rejects more than 5 files inline and blocks advancing', async () => {
     const user = userEvent.setup()
-    render(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
     await user.upload(
       screen.getByLabelText('photos'),
       Array.from({ length: 6 }, (_, i) => gifFile(`f${i}.gif`)),
@@ -47,7 +48,7 @@ describe('UploadWizard', () => {
 
   test('back preserves earlier selections', async () => {
     const user = userEvent.setup()
-    render(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
     await user.upload(screen.getByLabelText('photos'), [gifFile('keepme.gif')])
     await user.click(screen.getByRole('button', { name: 'next' }))
     await user.click(screen.getByRole('button', { name: 'back' }))
@@ -56,7 +57,7 @@ describe('UploadWizard', () => {
 
   test('submit is disabled until the rights checkbox is ticked (legal gate)', async () => {
     const user = userEvent.setup()
-    render(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
     await fillToStep3(user)
 
     const submit = screen.getByRole('button', { name: 'share my moment' })
@@ -92,7 +93,7 @@ describe('UploadWizard', () => {
     })
     vi.stubGlobal('fetch', fetchStub)
 
-    render(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
     await fillToStep3(user)
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))
@@ -121,7 +122,7 @@ describe('UploadWizard', () => {
       }),
     )
 
-    render(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
     await user.click(screen.getByRole('button', { name: 'link a video instead' }))
     await user.type(screen.getByLabelText('youtube link'), 'https://youtu.be/dQw4w9WgXcQ')
     await user.click(screen.getByRole('button', { name: 'next' }))
@@ -140,7 +141,7 @@ describe('UploadWizard', () => {
       'fetch',
       vi.fn(async () => new Response(null, { status: 500 })),
     )
-    render(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
     await fillToStep3(user)
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))

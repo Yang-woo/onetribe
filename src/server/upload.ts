@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { clientIp, hashIp, originCountry } from '@/lib/server/request-meta'
+import { detectCaptionLocale } from '@/lib/translate/detect'
 import type { TurnstileVerifier } from '@/lib/server/turnstile'
 import { createUploadSession, verifyUploadSession } from '@/lib/server/upload-session'
 import type { StorageAdapter } from '@/lib/storage'
@@ -221,9 +222,11 @@ export function createMemoriesHandler(deps: UploadDeps) {
     const authorLink = input.authorLink ? normalizeInstagramLink(input.authorLink) : null
     if (input.authorLink && !authorLink) return json(400, { error: 'invalid instagram link' })
 
+    const caption = input.caption?.trim() || null
     const shared = {
       event_id: input.eventId,
-      caption: input.caption?.trim() || null,
+      caption,
+      source_lang: detectCaptionLocale(caption),
       author_name: input.authorName?.trim() || null,
       author_link: authorLink,
       origin_country: originCountry(req),

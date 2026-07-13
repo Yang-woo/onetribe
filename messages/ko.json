@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "올해, 그 주말은 오지 않았다.",
+    "body": "그래서 우리는 기억으로 짓는다 — 우리가 집에 가져온 모든 데프콘, 모든 스테이지, 모든 일출로. 당신의 순간을, 당신의 언어로 남겨주세요.",
+    "cta": "내 순간 남기기",
+    "counter": "{moments, plural, other {#개의 순간}} · {countries, plural, other {#개 나라}}"
+  },
+  "wall": {
+    "allEditions": "전체",
+    "lostEditionChip": "{year} — 오지 않은 주말",
+    "emptyTitle": "벽이 깨어나는 중",
+    "emptyBody": "이곳에 순간을 남기는 첫 사람이 되어주세요.",
+    "loadMore": "더 보기"
+  },
+  "moment": {
+    "openMoment": "순간 열기",
+    "close": "닫기",
+    "previous": "이전",
+    "next": "다음",
+    "watchOnYoutube": "YouTube에서 보기 ↗",
+    "backToWall": "← 벽으로 돌아가기",
+    "takedownLink": "삭제 요청",
+    "showOriginal": "원문 보기",
+    "showTranslation": "번역 보기"
+  },
+  "report": {
+    "button": "신고",
+    "thanks": "감사합니다 — 확인해볼게요.",
+    "retry": "다시 시도",
+    "reasons": {
+      "set-rip": "셋 전체 녹화 영상",
+      "nsfw": "선정적인 콘텐츠",
+      "minor": "아동이 주 피사체",
+      "privacy": "저예요 — 내려주세요",
+      "spam": "스팸/광고",
+      "other": "기타"
+    }
+  },
+  "upload": {
+    "title": "내 순간 남기기",
+    "step": "{n}/3 단계",
+    "pickTitle": "사진 고르기",
+    "pickHint": "사진·GIF 최대 5장 — 또는 YouTube 영상 링크로",
+    "embedToggle": "영상 링크로 대신하기",
+    "filesToggle": "사진 업로드로 돌아가기",
+    "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "whichMoment": "어느 순간인가요?",
+    "captionLabel": "한마디 남기기 (선택)",
+    "nameTitle": "서명하기 (선택)",
+    "nameLabel": "표시 이름",
+    "igLabel": "인스타그램 (선택)",
+    "rightsLabel": "내가 직접 촬영했고 공유할 권리가 있습니다",
+    "back": "뒤로",
+    "next": "다음",
+    "submit": "내 순간 공유하기",
+    "submitting": "공유하는 중…",
+    "doneTitle": "게시 완료 — 벽에 올라갔어요",
+    "doneBody": "아래 비공개 삭제 링크를 저장해주세요. 이 링크가 있으면 언제든 이 순간을 내릴 수 있어요 — 당신의 것이니까요.",
+    "copyLink": "삭제 링크 복사",
+    "copied": "복사됨",
+    "toWall": "벽에서 보기",
+    "errors": {
+      "tooMany": "한 번에 최대 5장까지예요",
+      "unsupported": "사진·GIF만 — 영상은 링크로 남겨주세요",
+      "tooLarge": "10MB가 넘는 파일이에요",
+      "needFiles": "사진을 고르거나 영상을 링크해주세요",
+      "badEmbed": "YouTube 링크가 아닌 것 같아요",
+      "needEvent": "에디션을 골라주세요",
+      "failed": "문제가 생겼어요 — 아무것도 게시되지 않았어요. 다시 시도해주세요."
+    }
+  },
+  "takedown": {
+    "confirmTitle": "이 순간을 내릴까요?",
+    "confirmBody": "벽에서 즉시 사라집니다. 여기서는 되돌릴 수 없어요.",
+    "confirm": "네, 내려주세요",
+    "done": "내려갔어요. 벽의 일부가 되어주셔서 고마워요.",
+    "invalid": "유효하지 않은 링크예요 — 이미 내려간 순간일 수 있어요."
+  },
+  "footer": {
+    "disclaimer": "비공식 팬 프로젝트 — Q-dance / Defqon.1과 무관하며, 후원·승인·연계 관계가 없습니다.",
+    "links": {
+      "terms": "이용약관",
+      "privacy": "개인정보",
+      "takedown": "삭제 요청",
+      "guidelines": "가이드라인",
+      "about": "소개"
+    }
+  }
+}

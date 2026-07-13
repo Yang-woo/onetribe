@@ -44,7 +44,22 @@ test('uploading a moment publishes it to the wall instantly', async ({ page }, t
 
 test('the wall renders with hero, counter and disclaimer', async ({ page }) => {
   await page.goto('/')
+  await expect(page).toHaveURL(/\/en$/) // locale negotiation redirect (T3.1)
   await expect(page.getByText('the weekend never happened.')).toBeVisible()
   await expect(page.getByText(/moments? · \d+ (country|countries)/)).toBeVisible()
   await expect(page.getByText(/Unofficial fan project/)).toBeVisible()
+})
+
+test('locale routes serve translated copy with full hreflang alternates (T3.1)', async ({
+  page,
+}) => {
+  await page.goto('/ko')
+  await expect(page.getByText('올해, 그 주말은 오지 않았다.')).toBeVisible()
+
+  const hreflangs = await page
+    .locator('link[rel="alternate"][hreflang]')
+    .evaluateAll((links) => links.map((l) => l.getAttribute('hreflang')))
+  for (const locale of ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'ja', 'ko', 'x-default']) {
+    expect(hreflangs).toContain(locale)
+  }
 })

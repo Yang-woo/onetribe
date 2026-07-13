@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "This year, the weekend never happened.",
+    "body": "So we’re building it from memory — every Defqon, every stage, every sunrise we ever took home. Add yours, in your own language.",
+    "cta": "add your moment",
+    "counter": "{moments, plural, one {# moment} other {# moments}} · {countries, plural, one {# country} other {# countries}}"
+  },
+  "wall": {
+    "allEditions": "all",
+    "lostEditionChip": "{year} — the weekend that never happened",
+    "emptyTitle": "the wall is waking up",
+    "emptyBody": "be one of the first to leave a moment here.",
+    "loadMore": "more moments"
+  },
+  "moment": {
+    "openMoment": "open moment",
+    "close": "close",
+    "previous": "previous",
+    "next": "next",
+    "watchOnYoutube": "watch on YouTube ↗",
+    "backToWall": "← back to the wall",
+    "takedownLink": "takedown",
+    "showOriginal": "show original",
+    "showTranslation": "show translation"
+  },
+  "report": {
+    "button": "report",
+    "thanks": "thank you — we’ll take a look.",
+    "retry": "try again",
+    "reasons": {
+      "set-rip": "full-set recording",
+      "nsfw": "NSFW content",
+      "minor": "child as the focus",
+      "privacy": "that’s me — take it down",
+      "spam": "spam or ad",
+      "other": "something else"
+    }
+  },
+  "upload": {
+    "title": "add your moment",
+    "step": "step {n}/3",
+    "pickTitle": "pick your photos",
+    "pickHint": "up to 5 photos or GIFs — or link a YouTube video instead",
+    "embedToggle": "link a video instead",
+    "filesToggle": "upload photos instead",
+    "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "whichMoment": "which moment?",
+    "captionLabel": "say something (optional)",
+    "nameTitle": "sign it (optional)",
+    "nameLabel": "display name",
+    "igLabel": "instagram (optional)",
+    "rightsLabel": "I captured this myself and have the right to share it",
+    "back": "back",
+    "next": "next",
+    "submit": "share my moment",
+    "submitting": "sharing…",
+    "doneTitle": "it’s live — it’s on the wall",
+    "doneBody": "save your private delete link below. anyone with it can take this moment down — it’s yours.",
+    "copyLink": "copy delete link",
+    "copied": "copied",
+    "toWall": "see it on the wall",
+    "errors": {
+      "tooMany": "up to 5 files per moment",
+      "unsupported": "photos and GIFs only — link videos instead",
+      "tooLarge": "that file is over 10MB",
+      "needFiles": "pick at least one photo, or link a video",
+      "badEmbed": "that doesn’t look like a YouTube link",
+      "needEvent": "pick an edition",
+      "failed": "something went wrong — nothing was posted. try again."
+    }
+  },
+  "takedown": {
+    "confirmTitle": "take this moment down?",
+    "confirmBody": "this hides it from the wall immediately. this cannot be undone from here.",
+    "confirm": "yes, take it down",
+    "done": "it’s down. thank you for being part of the wall.",
+    "invalid": "this link is not valid — the moment may already be gone."
+  },
+  "footer": {
+    "disclaimer": "Unofficial fan project — not affiliated with, endorsed by, or connected to Q-dance / Defqon.1.",
+    "links": {
+      "terms": "terms",
+      "privacy": "privacy",
+      "takedown": "takedown",
+      "guidelines": "guidelines",
+      "about": "about"
+    }
+  }
+}

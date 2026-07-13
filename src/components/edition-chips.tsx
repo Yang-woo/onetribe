@@ -1,5 +1,7 @@
-import Link from 'next/link'
-import { copy } from '@/lib/copy'
+'use client'
+
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import type { EditionChip } from '@/lib/moments'
 
 /**
@@ -14,6 +16,7 @@ export function EditionChips({
   editions: EditionChip[]
   selectedYear: number | null
 }) {
+  const t = useTranslations('wall')
   const base = 'shrink-0 rounded-full border px-3 py-1 text-sm transition-colors whitespace-nowrap'
   const idle = 'border-line text-muted hover:text-paper'
   const active = 'border-orange text-orange'
@@ -22,12 +25,14 @@ export function EditionChips({
   return (
     <nav aria-label="editions" className="flex gap-2 overflow-x-auto px-4 py-3">
       <Link href="/" className={`${base} ${selectedYear === null ? active : idle}`}>
-        {copy.wall.allEditions}
+        {t('allEditions')}
       </Link>
       {editions.map((edition) => {
         const isActive = selectedYear === edition.year
         const label =
-          edition.year === 2026 ? copy.wall.lostEditionChip(edition.year) : String(edition.year)
+          edition.year === 2026
+            ? t('lostEditionChip', { year: edition.year })
+            : String(edition.year)
         return (
           <Link
             key={edition.id}

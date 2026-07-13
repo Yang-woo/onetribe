@@ -1,16 +1,8 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { REPORT_REASONS, type ReportReason } from '@/lib/upload/constants'
-
-const REASON_LABELS: Record<ReportReason, string> = {
-  'set-rip': 'full-set recording',
-  nsfw: 'NSFW content',
-  minor: 'child as the focus',
-  privacy: "that's me — take it down",
-  spam: 'spam or ad',
-  other: 'something else',
-}
 
 /**
  * Community report — the first line of defence for instant publishing
@@ -18,6 +10,7 @@ const REASON_LABELS: Record<ReportReason, string> = {
  * derives the reporter fingerprint; 3 distinct reporters auto-hide.
  */
 export function ReportButton({ memoryId }: { memoryId: string }) {
+  const t = useTranslations('report')
   const [open, setOpen] = useState(false)
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
 
@@ -36,7 +29,7 @@ export function ReportButton({ memoryId }: { memoryId: string }) {
   }
 
   if (state === 'done') {
-    return <p className="text-sm text-muted">thank you — we’ll take a look.</p>
+    return <p className="text-sm text-muted">{t('thanks')}</p>
   }
 
   if (!open) {
@@ -46,7 +39,7 @@ export function ReportButton({ memoryId }: { memoryId: string }) {
         onClick={() => setOpen(true)}
         className="text-sm text-muted underline-offset-2 hover:text-paper hover:underline"
       >
-        report
+        {t('button')}
       </button>
     )
   }
@@ -61,10 +54,10 @@ export function ReportButton({ memoryId }: { memoryId: string }) {
           onClick={() => void submit(reason)}
           className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper disabled:opacity-50"
         >
-          {REASON_LABELS[reason]}
+          {t(`reasons.${reason}`)}
         </button>
       ))}
-      {state === 'error' && <span className="text-sm text-warning">try again</span>}
+      {state === 'error' && <span className="text-sm text-warning">{t('retry')}</span>}
     </div>
   )
 }

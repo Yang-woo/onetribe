@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "Dit jaar was er geen weekend.",
+    "body": "Dus bouwen we het uit herinneringen — elke Defqon, elk podium, elke zonsopgang die we mee naar huis namen. Voeg de jouwe toe, in je eigen taal.",
+    "cta": "deel jouw moment",
+    "counter": "{moments, plural, one {# moment} other {# momenten}} · {countries, plural, one {# land} other {# landen}}"
+  },
+  "wall": {
+    "allEditions": "alles",
+    "lostEditionChip": "{year} — het weekend dat er nooit kwam",
+    "emptyTitle": "de muur wordt wakker",
+    "emptyBody": "wees een van de eersten die hier een moment achterlaat.",
+    "loadMore": "meer momenten"
+  },
+  "moment": {
+    "openMoment": "moment openen",
+    "close": "sluiten",
+    "previous": "vorige",
+    "next": "volgende",
+    "watchOnYoutube": "bekijk op YouTube ↗",
+    "backToWall": "← terug naar de muur",
+    "takedownLink": "verwijderen",
+    "showOriginal": "origineel tonen",
+    "showTranslation": "vertaling tonen"
+  },
+  "report": {
+    "button": "melden",
+    "thanks": "bedankt — we kijken ernaar.",
+    "retry": "probeer opnieuw",
+    "reasons": {
+      "set-rip": "opname van volledige set",
+      "nsfw": "NSFW-inhoud",
+      "minor": "kind in beeld",
+      "privacy": "dat ben ik — haal het weg",
+      "spam": "spam of reclame",
+      "other": "iets anders"
+    }
+  },
+  "upload": {
+    "title": "deel jouw moment",
+    "step": "stap {n}/3",
+    "pickTitle": "kies je foto's",
+    "pickHint": "maximaal 5 foto's of GIF's — of link een YouTube-video",
+    "embedToggle": "liever een video linken",
+    "filesToggle": "toch foto's uploaden",
+    "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "whichMoment": "welk moment?",
+    "captionLabel": "zeg er iets bij (optioneel)",
+    "nameTitle": "onderteken het (optioneel)",
+    "nameLabel": "weergavenaam",
+    "igLabel": "instagram (optioneel)",
+    "rightsLabel": "Ik heb dit zelf vastgelegd en mag het delen",
+    "back": "terug",
+    "next": "verder",
+    "submit": "deel mijn moment",
+    "submitting": "delen…",
+    "doneTitle": "het staat live — het hangt aan de muur",
+    "doneBody": "bewaar hieronder je privé-verwijderlink. iedereen met deze link kan dit moment weghalen — het is van jou.",
+    "copyLink": "verwijderlink kopiëren",
+    "copied": "gekopieerd",
+    "toWall": "bekijk het op de muur",
+    "errors": {
+      "tooMany": "maximaal 5 bestanden per moment",
+      "unsupported": "alleen foto's en GIF's — link video's in plaats daarvan",
+      "tooLarge": "dat bestand is groter dan 10MB",
+      "needFiles": "kies minstens één foto, of link een video",
+      "badEmbed": "dat lijkt geen YouTube-link",
+      "needEvent": "kies een editie",
+      "failed": "er ging iets mis — er is niets geplaatst. probeer opnieuw."
+    }
+  },
+  "takedown": {
+    "confirmTitle": "dit moment weghalen?",
+    "confirmBody": "het verdwijnt direct van de muur. dit kan hier niet ongedaan worden gemaakt.",
+    "confirm": "ja, haal het weg",
+    "done": "het is weg. bedankt dat je deel was van de muur.",
+    "invalid": "deze link is niet geldig — het moment is misschien al weg."
+  },
+  "footer": {
+    "disclaimer": "Onofficieel fanproject — niet verbonden aan, goedgekeurd door of gelieerd aan Q-dance / Defqon.1.",
+    "links": {
+      "terms": "voorwaarden",
+      "privacy": "privacy",
+      "takedown": "verwijderen",
+      "guidelines": "richtlijnen",
+      "about": "over"
+    }
+  }
+}

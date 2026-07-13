@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
+import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { Inter, Space_Grotesk } from 'next/font/google'
+import { notFound } from 'next/navigation'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
-import './globals.css'
+import { routing } from '@/i18n/routing'
+import '../globals.css'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -20,17 +23,24 @@ export const metadata: Metadata = {
     'The moments we took home — a multilingual memory wall for the hard-dance community.',
 }
 
-export default function RootLayout({
+export default async function LocaleLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode
+  params: Promise<{ locale: string }>
 }>) {
+  const { locale } = await params
+  if (!hasLocale(routing.locales, locale)) notFound()
+
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
+    <html lang={locale} className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <NextIntlClientProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </NextIntlClientProvider>
       </body>
     </html>
   )

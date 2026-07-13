@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { useMemo, useState } from 'react'
-import { copy } from '@/lib/copy'
 import type { EditionChip } from '@/lib/moments'
 import { prepareForUpload, validateFiles } from '@/lib/upload/client-image'
 import { MAX_CAPTION_LENGTH, MAX_FILES_PER_MOMENT } from '@/lib/upload/constants'
@@ -30,6 +30,7 @@ export function UploadWizard({
   /** test seam — canvas compression can't run in jsdom */
   prepareImpl?: (file: File) => Promise<File>
 }) {
+  const t = useTranslations('upload')
   const [step, setStep] = useState<Step>(1)
   const [mode, setMode] = useState<Mode>('files')
   const [files, setFiles] = useState<File[]>([])
@@ -46,9 +47,9 @@ export function UploadWizard({
   const fileError = useMemo(() => {
     const invalid = validateFiles(files)
     if (!invalid) return null
-    if (invalid.kind === 'too-many') return copy.upload.errors.tooMany
-    if (invalid.kind === 'unsupported-type') return copy.upload.errors.unsupported
-    return copy.upload.errors.tooLarge
+    if (invalid.kind === 'too-many') return t('errors.tooMany')
+    if (invalid.kind === 'unsupported-type') return t('errors.unsupported')
+    return t('errors.tooLarge')
   }, [files])
 
   const step1Ready = mode === 'files' ? files.length > 0 && !fileError : embedUrl.trim().length > 0
@@ -56,11 +57,11 @@ export function UploadWizard({
   function next() {
     setError(null)
     if (step === 1 && !step1Ready) {
-      setError(mode === 'files' ? copy.upload.errors.needFiles : copy.upload.errors.badEmbed)
+      setError(mode === 'files' ? t('errors.needFiles') : t('errors.badEmbed'))
       return
     }
     if (step === 2 && !eventId) {
-      setError(copy.upload.errors.needEvent)
+      setError(t('errors.needEvent'))
       return
     }
     setStep((s) => Math.min(3, s + 1) as Step)
@@ -125,7 +126,7 @@ export function UploadWizard({
       const { moments } = (await res.json()) as { moments: DoneMoment[] }
       setDone(moments)
     } catch {
-      setError(copy.upload.errors.failed)
+      setError(t('errors.failed'))
     } finally {
       setSubmitting(false)
     }
@@ -136,7 +137,7 @@ export function UploadWizard({
   return (
     <div className="flex flex-col gap-6">
       <div aria-label="progress" className="flex items-center gap-2">
-        <span className="text-sm text-orange">{copy.upload.step(step)}</span>
+        <span className="text-sm text-orange">{t('step', { n: step })}</span>
         <div className="h-1 flex-1 rounded bg-surface">
           <div
             className="h-1 rounded bg-orange transition-all"
@@ -147,8 +148,8 @@ export function UploadWizard({
 
       {step === 1 && (
         <section className="flex flex-col gap-4">
-          <h2 className="font-display text-xl lowercase">{copy.upload.pickTitle}</h2>
-          <p className="text-sm text-muted">{copy.upload.pickHint}</p>
+          <h2 className="font-display text-xl lowercase">{t('pickTitle')}</h2>
+          <p className="text-sm text-muted">{t('pickHint')}</p>
           {mode === 'files' ? (
             <>
               <input
@@ -176,7 +177,7 @@ export function UploadWizard({
                 onClick={() => setMode('embed')}
                 className="self-start text-sm text-flame hover:underline"
               >
-                {copy.upload.embedToggle}
+                {t('embedToggle')}
               </button>
             </>
           ) : (
@@ -185,7 +186,7 @@ export function UploadWizard({
                 type="url"
                 value={embedUrl}
                 aria-label="youtube link"
-                placeholder={copy.upload.embedPlaceholder}
+                placeholder={t('embedPlaceholder')}
                 onChange={(e) => setEmbedUrl(e.target.value)}
                 className="rounded-lg border border-line bg-surface px-3 py-2 text-paper placeholder:text-muted"
               />
@@ -194,7 +195,7 @@ export function UploadWizard({
                 onClick={() => setMode('files')}
                 className="self-start text-sm text-flame hover:underline"
               >
-                {copy.upload.filesToggle}
+                {t('filesToggle')}
               </button>
             </>
           )}
@@ -203,7 +204,7 @@ export function UploadWizard({
 
       {step === 2 && (
         <section className="flex flex-col gap-4">
-          <h2 className="font-display text-xl lowercase">{copy.upload.whichMoment}</h2>
+          <h2 className="font-display text-xl lowercase">{t('whichMoment')}</h2>
           <select
             value={eventId}
             aria-label="edition"
@@ -220,7 +221,7 @@ export function UploadWizard({
             ))}
           </select>
           <label className="flex flex-col gap-1 text-sm text-muted">
-            {copy.upload.captionLabel}
+            {t('captionLabel')}
             <textarea
               value={caption}
               maxLength={MAX_CAPTION_LENGTH}
@@ -237,9 +238,9 @@ export function UploadWizard({
 
       {step === 3 && (
         <section className="flex flex-col gap-4">
-          <h2 className="font-display text-xl lowercase">{copy.upload.nameTitle}</h2>
+          <h2 className="font-display text-xl lowercase">{t('nameTitle')}</h2>
           <label className="flex flex-col gap-1 text-sm text-muted">
-            {copy.upload.nameLabel}
+            {t('nameLabel')}
             <input
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
@@ -247,7 +248,7 @@ export function UploadWizard({
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-muted">
-            {copy.upload.igLabel}
+            {t('igLabel')}
             <input
               value={authorLink}
               placeholder="@yourhandle"
@@ -262,7 +263,7 @@ export function UploadWizard({
               onChange={(e) => setRights(e.target.checked)}
               className="mt-0.5 accent-orange"
             />
-            <span>{copy.upload.rightsLabel}</span>
+            <span>{t('rightsLabel')}</span>
           </label>
         </section>
       )}
@@ -280,7 +281,7 @@ export function UploadWizard({
             onClick={() => setStep((s) => Math.max(1, s - 1) as Step)}
             className="rounded-full border border-line px-4 py-2 text-sm text-muted hover:text-paper"
           >
-            {copy.upload.back}
+            {t('back')}
           </button>
         ) : (
           <span />
@@ -291,7 +292,7 @@ export function UploadWizard({
             onClick={next}
             className="rounded-full bg-orange px-6 py-2 font-medium text-black disabled:opacity-40"
           >
-            {copy.upload.next}
+            {t('next')}
           </button>
         ) : (
           <button
@@ -300,7 +301,7 @@ export function UploadWizard({
             disabled={!rights || submitting}
             className="rounded-full bg-orange px-6 py-2 font-medium text-black disabled:opacity-40"
           >
-            {submitting ? copy.upload.submitting : copy.upload.submit}
+            {submitting ? t('submitting') : t('submit')}
           </button>
         )}
       </div>
@@ -309,6 +310,7 @@ export function UploadWizard({
 }
 
 function DoneScreen({ moments }: { moments: DoneMoment[] }) {
+  const t = useTranslations('upload')
   const [copied, setCopied] = useState(false)
   const links = moments.map(
     (moment) =>
@@ -317,8 +319,8 @@ function DoneScreen({ moments }: { moments: DoneMoment[] }) {
 
   return (
     <section className="flex flex-col items-center gap-4 text-center">
-      <h2 className="font-display text-2xl lowercase text-orange">{copy.upload.doneTitle}</h2>
-      <p className="max-w-md text-sm text-muted">{copy.upload.doneBody}</p>
+      <h2 className="font-display text-2xl lowercase text-orange">{t('doneTitle')}</h2>
+      <p className="max-w-md text-sm text-muted">{t('doneBody')}</p>
       <button
         type="button"
         onClick={async () => {
@@ -327,13 +329,13 @@ function DoneScreen({ moments }: { moments: DoneMoment[] }) {
         }}
         className="rounded-full border border-line px-4 py-2 text-sm text-muted hover:text-paper"
       >
-        {copied ? copy.upload.copied : copy.upload.copyLink}
+        {copied ? t('copied') : t('copyLink')}
       </button>
       <Link
         href="/"
         className="rounded-full bg-orange px-6 py-3 font-medium text-black transition-opacity hover:opacity-90"
       >
-        {copy.upload.toWall}
+        {t('toWall')}
       </Link>
     </section>
   )

@@ -89,7 +89,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await db.from('memories').delete().like('caption', `${MARKER}%`)
+  await db.from('memories').delete().like('caption', `%${MARKER}%`)
   await db
     .from('upload_events')
     .delete()
@@ -306,6 +306,24 @@ describe('POST /api/memories — embed flow', () => {
     expect(row!.clip_start).toBe(60)
     expect(row!.clip_length).toBe(30)
     expect(row!.media_url).toBeNull()
+  })
+})
+
+describe('write-time language detection (T3.3)', () => {
+  test('a confidently-English caption stores source_lang=en', async () => {
+    const caption = `the sunrise over the red stage was absolutely unreal ${MARKER}-lang`
+    const res = await createMemoriesHandler(deps())(
+      post({
+        turnstileToken: 't',
+        eventId,
+        caption,
+        rightsConfirmed: true,
+        embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
+      }),
+    )
+    expect(res.status).toBe(201)
+    const { data } = await db.from('memories').select('source_lang').eq('caption', caption).single()
+    expect(data!.source_lang).toBe('en')
   })
 })
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { copy } from '@/lib/copy'
+import { useTranslations } from 'next-intl'
 import { fetchMoments, WALL_PAGE_SIZE, type Moment } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { Lightbox } from './lightbox'
@@ -41,6 +41,7 @@ export function MemoryWall({
   loadMoreImpl?: LoadMore
   subscribeImpl?: Subscribe
 }) {
+  const t = useTranslations('wall')
   const [moments, setMoments] = useState(initialMoments)
   const [exhausted, setExhausted] = useState(initialMoments.length < WALL_PAGE_SIZE)
   const [loading, setLoading] = useState(false)
@@ -88,8 +89,8 @@ export function MemoryWall({
   if (moments.length === 0) {
     return (
       <section className="flex flex-col items-center gap-2 px-4 py-24 text-center">
-        <h2 className="font-display text-2xl lowercase">{copy.wall.emptyTitle}</h2>
-        <p className="text-muted">{copy.wall.emptyBody}</p>
+        <h2 className="font-display text-2xl lowercase">{t('emptyTitle')}</h2>
+        <p className="text-muted">{t('emptyBody')}</p>
       </section>
     )
   }
@@ -125,7 +126,7 @@ export function MemoryWall({
             disabled={loading}
             className="rounded-full border border-line px-4 py-2 text-sm text-muted hover:text-paper disabled:opacity-50"
           >
-            {copy.wall.loadMore}
+            {t('loadMore')}
           </button>
         </div>
       )}

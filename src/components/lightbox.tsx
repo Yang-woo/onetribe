@@ -1,6 +1,7 @@
 'use client'
 
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { useCallback, useEffect, useRef } from 'react'
 import { youtubeThumbnail, type Moment } from '@/lib/moments'
 
@@ -20,6 +21,7 @@ export function Lightbox({
   onClose: () => void
   onNavigate: (index: number) => void
 }) {
+  const t = useTranslations('moment')
   const moment = moments[index]
   const touchStartX = useRef<number | null>(null)
 
@@ -72,11 +74,11 @@ export function Lightbox({
           onClick={(e) => e.stopPropagation()}
           className="text-sm text-flame hover:underline"
         >
-          open moment
+          {t('openMoment')}
         </Link>
         <button
           type="button"
-          aria-label="close"
+          aria-label={t('close')}
           onClick={onClose}
           className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
         >
@@ -99,7 +101,7 @@ export function Lightbox({
       <div className="flex items-center justify-between p-4">
         <button
           type="button"
-          aria-label="previous"
+          aria-label={t('previous')}
           disabled={index === 0}
           onClick={(e) => {
             e.stopPropagation()
@@ -112,7 +114,7 @@ export function Lightbox({
         {moment.caption && <p className="px-4 text-center text-sm text-paper">{moment.caption}</p>}
         <button
           type="button"
-          aria-label="next"
+          aria-label={t('next')}
           disabled={index === moments.length - 1}
           onClick={(e) => {
             e.stopPropagation()

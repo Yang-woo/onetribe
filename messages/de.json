@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "Dieses Jahr gab es kein Wochenende.",
+    "body": "Also bauen wir es aus Erinnerungen — jedes Defqon, jede Stage, jeder Sonnenaufgang, den wir mit nach Hause nahmen. Füg deinen hinzu, in deiner Sprache.",
+    "cta": "teile deinen Moment",
+    "counter": "{moments, plural, one {# Moment} other {# Momente}} · {countries, plural, one {# Land} other {# Länder}}"
+  },
+  "wall": {
+    "allEditions": "alle",
+    "lostEditionChip": "{year} — das Wochenende, das nie kam",
+    "emptyTitle": "die Wand erwacht",
+    "emptyBody": "sei unter den Ersten, die hier einen Moment hinterlassen.",
+    "loadMore": "mehr Momente"
+  },
+  "moment": {
+    "openMoment": "Moment öffnen",
+    "close": "schließen",
+    "previous": "zurück",
+    "next": "weiter",
+    "watchOnYoutube": "auf YouTube ansehen ↗",
+    "backToWall": "← zurück zur Wand",
+    "takedownLink": "entfernen",
+    "showOriginal": "Original anzeigen",
+    "showTranslation": "Übersetzung anzeigen"
+  },
+  "report": {
+    "button": "melden",
+    "thanks": "danke — wir schauen es uns an.",
+    "retry": "erneut versuchen",
+    "reasons": {
+      "set-rip": "Aufnahme eines ganzen Sets",
+      "nsfw": "NSFW-Inhalt",
+      "minor": "Kind im Fokus",
+      "privacy": "das bin ich — bitte entfernen",
+      "spam": "Spam oder Werbung",
+      "other": "etwas anderes"
+    }
+  },
+  "upload": {
+    "title": "teile deinen Moment",
+    "step": "Schritt {n}/3",
+    "pickTitle": "wähle deine Fotos",
+    "pickHint": "bis zu 5 Fotos oder GIFs — oder verlinke ein YouTube-Video",
+    "embedToggle": "lieber ein Video verlinken",
+    "filesToggle": "doch Fotos hochladen",
+    "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "whichMoment": "welcher Moment?",
+    "captionLabel": "sag etwas dazu (optional)",
+    "nameTitle": "unterschreib ihn (optional)",
+    "nameLabel": "Anzeigename",
+    "igLabel": "Instagram (optional)",
+    "rightsLabel": "Ich habe das selbst aufgenommen und darf es teilen",
+    "back": "zurück",
+    "next": "weiter",
+    "submit": "meinen Moment teilen",
+    "submitting": "wird geteilt…",
+    "doneTitle": "er ist live — er hängt an der Wand",
+    "doneBody": "speichere unten deinen privaten Lösch-Link. Wer ihn hat, kann diesen Moment entfernen — er gehört dir.",
+    "copyLink": "Lösch-Link kopieren",
+    "copied": "kopiert",
+    "toWall": "auf der Wand ansehen",
+    "errors": {
+      "tooMany": "höchstens 5 Dateien pro Moment",
+      "unsupported": "nur Fotos und GIFs — Videos bitte verlinken",
+      "tooLarge": "diese Datei ist größer als 10MB",
+      "needFiles": "wähle mindestens ein Foto oder verlinke ein Video",
+      "badEmbed": "das sieht nicht nach einem YouTube-Link aus",
+      "needEvent": "wähle eine Edition",
+      "failed": "etwas ist schiefgelaufen — nichts wurde gepostet. versuch es erneut."
+    }
+  },
+  "takedown": {
+    "confirmTitle": "diesen Moment entfernen?",
+    "confirmBody": "er verschwindet sofort von der Wand. das lässt sich hier nicht rückgängig machen.",
+    "confirm": "ja, entfernen",
+    "done": "er ist weg. danke, dass du Teil der Wand warst.",
+    "invalid": "dieser Link ist ungültig — der Moment ist vielleicht schon weg."
+  },
+  "footer": {
+    "disclaimer": "Inoffizielles Fanprojekt — nicht verbunden mit, unterstützt von oder zugehörig zu Q-dance / Defqon.1.",
+    "links": {
+      "terms": "AGB",
+      "privacy": "Datenschutz",
+      "takedown": "Entfernen",
+      "guidelines": "Richtlinien",
+      "about": "Über"
+    }
+  }
+}

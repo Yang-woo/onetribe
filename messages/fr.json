@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "Cette année, le week-end n’a pas eu lieu.",
+    "body": "Alors on le reconstruit avec nos souvenirs — chaque Defqon, chaque scène, chaque lever de soleil qu’on a ramené à la maison. Ajoute le tien, dans ta langue.",
+    "cta": "ajoute ton moment",
+    "counter": "{moments, plural, one {# moment} other {# moments}} · {countries, plural, one {# pays} other {# pays}}"
+  },
+  "wall": {
+    "allEditions": "tout",
+    "lostEditionChip": "{year} — le week-end qui n’a jamais eu lieu",
+    "emptyTitle": "le mur se réveille",
+    "emptyBody": "sois parmi les premiers à laisser un moment ici.",
+    "loadMore": "plus de moments"
+  },
+  "moment": {
+    "openMoment": "ouvrir le moment",
+    "close": "fermer",
+    "previous": "précédent",
+    "next": "suivant",
+    "watchOnYoutube": "voir sur YouTube ↗",
+    "backToWall": "← retour au mur",
+    "takedownLink": "retirer",
+    "showOriginal": "voir l’original",
+    "showTranslation": "voir la traduction"
+  },
+  "report": {
+    "button": "signaler",
+    "thanks": "merci — on va regarder ça.",
+    "retry": "réessayer",
+    "reasons": {
+      "set-rip": "enregistrement d’un set entier",
+      "nsfw": "contenu NSFW",
+      "minor": "enfant au premier plan",
+      "privacy": "c’est moi — retirez-le",
+      "spam": "spam ou publicité",
+      "other": "autre chose"
+    }
+  },
+  "upload": {
+    "title": "ajoute ton moment",
+    "step": "étape {n}/3",
+    "pickTitle": "choisis tes photos",
+    "pickHint": "jusqu’à 5 photos ou GIF — ou mets un lien YouTube",
+    "embedToggle": "plutôt un lien vidéo",
+    "filesToggle": "plutôt des photos",
+    "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "whichMoment": "quel moment ?",
+    "captionLabel": "dis quelque chose (optionnel)",
+    "nameTitle": "signe-le (optionnel)",
+    "nameLabel": "nom affiché",
+    "igLabel": "instagram (optionnel)",
+    "rightsLabel": "Je l’ai capturé moi-même et j’ai le droit de le partager",
+    "back": "retour",
+    "next": "suivant",
+    "submit": "partager mon moment",
+    "submitting": "partage…",
+    "doneTitle": "c’est en ligne — c’est sur le mur",
+    "doneBody": "garde ton lien de suppression privé ci-dessous. quiconque l’a peut retirer ce moment — il est à toi.",
+    "copyLink": "copier le lien de suppression",
+    "copied": "copié",
+    "toWall": "le voir sur le mur",
+    "errors": {
+      "tooMany": "5 fichiers maximum par moment",
+      "unsupported": "photos et GIF uniquement — les vidéos, en lien",
+      "tooLarge": "ce fichier dépasse 10MB",
+      "needFiles": "choisis au moins une photo, ou mets un lien vidéo",
+      "badEmbed": "ça ne ressemble pas à un lien YouTube",
+      "needEvent": "choisis une édition",
+      "failed": "quelque chose a mal tourné — rien n’a été publié. réessaie."
+    }
+  },
+  "takedown": {
+    "confirmTitle": "retirer ce moment ?",
+    "confirmBody": "il disparaît du mur immédiatement. c’est irréversible depuis ici.",
+    "confirm": "oui, retire-le",
+    "done": "c’est retiré. merci d’avoir fait partie du mur.",
+    "invalid": "ce lien n’est pas valide — le moment n’existe peut-être plus."
+  },
+  "footer": {
+    "disclaimer": "Projet de fans non officiel — sans affiliation, approbation ni lien avec Q-dance / Defqon.1.",
+    "links": {
+      "terms": "conditions",
+      "privacy": "confidentialité",
+      "takedown": "retrait",
+      "guidelines": "règles",
+      "about": "à propos"
+    }
+  }
+}

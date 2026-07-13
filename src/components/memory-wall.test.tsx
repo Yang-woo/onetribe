@@ -1,4 +1,5 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
+import { renderWithIntl } from '@/test-utils'
 import { beforeAll, describe, expect, test, vi } from 'vitest'
 import type { Moment } from '@/lib/moments'
 import { MemoryWall } from './memory-wall'
@@ -46,13 +47,15 @@ const noLoadMore = async () => []
 
 describe('MemoryWall', () => {
   test('empty wall shows the waking-up state with an invitation', () => {
-    render(<MemoryWall initialMoments={[]} loadMoreImpl={noLoadMore} subscribeImpl={noSubscribe} />)
+    renderWithIntl(
+      <MemoryWall initialMoments={[]} loadMoreImpl={noLoadMore} subscribeImpl={noSubscribe} />,
+    )
     expect(screen.getByText('the wall is waking up')).toBeInTheDocument()
     expect(screen.getByText(/be one of the first/)).toBeInTheDocument()
   })
 
   test('renders initial moments with captions', () => {
-    render(
+    renderWithIntl(
       <MemoryWall
         initialMoments={[moment('a'), moment('b')]}
         loadMoreImpl={noLoadMore}
@@ -69,7 +72,7 @@ describe('MemoryWall', () => {
       emit = onInsert
       return () => {}
     }
-    render(
+    renderWithIntl(
       <MemoryWall
         initialMoments={[moment('old')]}
         loadMoreImpl={noLoadMore}
@@ -92,7 +95,7 @@ describe('MemoryWall', () => {
       emit = onInsert
       return () => {}
     }
-    render(
+    renderWithIntl(
       <MemoryWall
         initialMoments={[moment('old')]}
         eventIds={['event-1']}
@@ -111,7 +114,7 @@ describe('MemoryWall', () => {
   test('load more appends without duplicating existing moments', async () => {
     const user = (await import('@testing-library/user-event')).default.setup()
     const loadMore = vi.fn(async () => [moment('old'), moment('new')])
-    render(
+    renderWithIntl(
       <MemoryWall
         initialMoments={Array.from({ length: 40 }, (_, i) => moment(`m${i}`))}
         loadMoreImpl={loadMore}

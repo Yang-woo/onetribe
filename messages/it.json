@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "Quest’anno il weekend non c’è stato.",
+    "body": "Così lo ricostruiamo con i ricordi — ogni Defqon, ogni palco, ogni alba che ci siamo portati a casa. Aggiungi il tuo, nella tua lingua.",
+    "cta": "aggiungi il tuo momento",
+    "counter": "{moments, plural, one {# momento} other {# momenti}} · {countries, plural, one {# paese} other {# paesi}}"
+  },
+  "wall": {
+    "allEditions": "tutto",
+    "lostEditionChip": "{year} — il weekend che non è mai arrivato",
+    "emptyTitle": "il muro si sta svegliando",
+    "emptyBody": "sii tra i primi a lasciare un momento qui.",
+    "loadMore": "altri momenti"
+  },
+  "moment": {
+    "openMoment": "apri il momento",
+    "close": "chiudi",
+    "previous": "precedente",
+    "next": "successivo",
+    "watchOnYoutube": "guarda su YouTube ↗",
+    "backToWall": "← torna al muro",
+    "takedownLink": "rimuovi",
+    "showOriginal": "mostra originale",
+    "showTranslation": "mostra traduzione"
+  },
+  "report": {
+    "button": "segnala",
+    "thanks": "grazie — daremo un’occhiata.",
+    "retry": "riprova",
+    "reasons": {
+      "set-rip": "registrazione di un set intero",
+      "nsfw": "contenuto NSFW",
+      "minor": "minore in primo piano",
+      "privacy": "sono io — toglietelo",
+      "spam": "spam o pubblicità",
+      "other": "altro"
+    }
+  },
+  "upload": {
+    "title": "aggiungi il tuo momento",
+    "step": "passo {n}/3",
+    "pickTitle": "scegli le tue foto",
+    "pickHint": "fino a 5 foto o GIF — oppure collega un video YouTube",
+    "embedToggle": "meglio collegare un video",
+    "filesToggle": "meglio caricare foto",
+    "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "whichMoment": "quale momento?",
+    "captionLabel": "di’ qualcosa (facoltativo)",
+    "nameTitle": "firmalo (facoltativo)",
+    "nameLabel": "nome visibile",
+    "igLabel": "instagram (facoltativo)",
+    "rightsLabel": "L’ho catturato io e ho il diritto di condividerlo",
+    "back": "indietro",
+    "next": "avanti",
+    "submit": "condividi il mio momento",
+    "submitting": "condivisione…",
+    "doneTitle": "è live — è sul muro",
+    "doneBody": "salva qui sotto il tuo link privato di eliminazione. chiunque lo abbia può rimuovere questo momento — è tuo.",
+    "copyLink": "copia link di eliminazione",
+    "copied": "copiato",
+    "toWall": "guardalo sul muro",
+    "errors": {
+      "tooMany": "massimo 5 file per momento",
+      "unsupported": "solo foto e GIF — i video, tramite link",
+      "tooLarge": "quel file supera i 10MB",
+      "needFiles": "scegli almeno una foto, o collega un video",
+      "badEmbed": "non sembra un link YouTube",
+      "needEvent": "scegli un’edizione",
+      "failed": "qualcosa è andato storto — non è stato pubblicato nulla. riprova."
+    }
+  },
+  "takedown": {
+    "confirmTitle": "rimuovere questo momento?",
+    "confirmBody": "sparirà subito dal muro. da qui non si può annullare.",
+    "confirm": "sì, rimuovilo",
+    "done": "è stato rimosso. grazie per aver fatto parte del muro.",
+    "invalid": "questo link non è valido — il momento potrebbe già non esserci più."
+  },
+  "footer": {
+    "disclaimer": "Progetto non ufficiale di fan — non affiliato, approvato o collegato a Q-dance / Defqon.1.",
+    "links": {
+      "terms": "termini",
+      "privacy": "privacy",
+      "takedown": "rimozione",
+      "guidelines": "linee guida",
+      "about": "chi siamo"
+    }
+  }
+}

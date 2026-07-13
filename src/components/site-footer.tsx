@@ -1,16 +1,19 @@
-import Link from 'next/link'
-import { copy } from '@/lib/copy'
+import { getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
+
+const FOOTER_LINKS = ['terms', 'privacy', 'takedown', 'guidelines', 'about'] as const
 
 // The disclaimer is a legal guardrail (docs/05) — it renders on every page.
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations('footer')
   return (
     <footer className="mt-16 border-t border-line px-4 py-8 text-sm text-muted">
       <div className="mx-auto flex max-w-6xl flex-col gap-3">
-        <p>{copy.footer.disclaimer}</p>
+        <p>{t('disclaimer')}</p>
         <nav className="flex flex-wrap gap-4">
-          {copy.footer.links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-paper">
-              {link.label}
+          {FOOTER_LINKS.map((key) => (
+            <Link key={key} href={`/${key}`} className="hover:text-paper">
+              {t(`links.${key}`)}
             </Link>
           ))}
         </nav>

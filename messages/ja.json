@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "title": "今年、あの週末は来なかった。",
+    "body": "だから思い出でつくる — 持ち帰ったすべてのDefqon、すべてのステージ、すべての朝日で。あなたの瞬間を、あなたの言葉で。",
+    "cta": "瞬間を残す",
+    "counter": "{moments, plural, other {#つの瞬間}} · {countries, plural, other {#か国}}"
+  },
+  "wall": {
+    "allEditions": "すべて",
+    "lostEditionChip": "{year} — 来なかった週末",
+    "emptyTitle": "壁が目を覚ましはじめた",
+    "emptyBody": "最初のひとりになって、ここに瞬間を残そう。",
+    "loadMore": "もっと見る"
+  },
+  "moment": {
+    "openMoment": "瞬間を開く",
+    "close": "閉じる",
+    "previous": "前へ",
+    "next": "次へ",
+    "watchOnYoutube": "YouTubeで見る ↗",
+    "backToWall": "← 壁に戻る",
+    "takedownLink": "削除申請",
+    "showOriginal": "原文を見る",
+    "showTranslation": "翻訳を見る"
+  },
+  "report": {
+    "button": "報告",
+    "thanks": "ありがとう — 確認します。",
+    "retry": "もう一度",
+    "reasons": {
+      "set-rip": "セット全編の録画",
+      "nsfw": "NSFWコンテンツ",
+      "minor": "子どもが主な被写体",
+      "privacy": "これは私です — 削除してください",
+      "spam": "スパム・広告",
+      "other": "その他"
+    }
+  },
+  "upload": {
+    "title": "瞬間を残す",
+    "step": "ステップ {n}/3",
+    "pickTitle": "写真を選ぶ",
+    "pickHint": "写真・GIFを最大5枚 — またはYouTube動画のリンクで",
+    "embedToggle": "動画リンクにする",
+    "filesToggle": "写真のアップロードに戻る",
+    "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "whichMoment": "どの瞬間？",
+    "captionLabel": "ひとこと添える（任意）",
+    "nameTitle": "サインする（任意）",
+    "nameLabel": "表示名",
+    "igLabel": "インスタグラム（任意）",
+    "rightsLabel": "自分で撮影したもので、共有する権利があります",
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "瞬間をシェアする",
+    "submitting": "シェア中…",
+    "doneTitle": "公開されました — 壁に載っています",
+    "doneBody": "下のプライベート削除リンクを保存してください。このリンクがあればいつでもこの瞬間を取り下げられます — あなたのものだから。",
+    "copyLink": "削除リンクをコピー",
+    "copied": "コピーしました",
+    "toWall": "壁で見る",
+    "errors": {
+      "tooMany": "1回につき最大5ファイルまで",
+      "unsupported": "写真・GIFのみ — 動画はリンクで",
+      "tooLarge": "10MBを超えるファイルです",
+      "needFiles": "写真を選ぶか、動画をリンクしてください",
+      "badEmbed": "YouTubeのリンクではないようです",
+      "needEvent": "エディションを選んでください",
+      "failed": "問題が発生しました — 何も投稿されていません。もう一度お試しください。"
+    }
+  },
+  "takedown": {
+    "confirmTitle": "この瞬間を取り下げますか？",
+    "confirmBody": "壁からすぐに消えます。ここからは元に戻せません。",
+    "confirm": "はい、取り下げます",
+    "done": "取り下げました。壁の一部でいてくれてありがとう。",
+    "invalid": "このリンクは無効です — すでに取り下げられた可能性があります。"
+  },
+  "footer": {
+    "disclaimer": "非公式ファンプロジェクト — Q-dance / Defqon.1とは提携・承認・関係は一切ありません。",
+    "links": {
+      "terms": "利用規約",
+      "privacy": "プライバシー",
+      "takedown": "削除申請",
+      "guidelines": "ガイドライン",
+      "about": "このサイトについて"
+    }
+  }
+}

@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { renderWithIntl } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { ReportButton } from './report-button'
@@ -20,7 +21,7 @@ describe('ReportButton', () => {
     })
     vi.stubGlobal('fetch', fetchStub)
 
-    render(<ReportButton memoryId="mem-1" />)
+    renderWithIntl(<ReportButton memoryId="mem-1" />)
     await user.click(screen.getByRole('button', { name: 'report' }))
     await user.click(screen.getByRole('button', { name: 'full-set recording' }))
 
@@ -34,7 +35,7 @@ describe('ReportButton', () => {
       'fetch',
       vi.fn(async () => new Response(null, { status: 429 })),
     )
-    render(<ReportButton memoryId="mem-1" />)
+    renderWithIntl(<ReportButton memoryId="mem-1" />)
     await user.click(screen.getByRole('button', { name: 'report' }))
     await user.click(screen.getByRole('button', { name: 'spam or ad' }))
 
