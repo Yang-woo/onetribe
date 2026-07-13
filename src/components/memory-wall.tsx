@@ -7,7 +7,7 @@ import { supabaseBrowser } from '@/lib/supabase/browser'
 import { Lightbox } from './lightbox'
 import { MomentThumb } from './moment-thumb'
 
-type LoadMore = (before: string) => Promise<Moment[]>
+type LoadMore = (before: import('@/lib/moments').MomentCursor) => Promise<Moment[]>
 type Subscribe = (onInsert: (moment: Moment) => void) => () => void
 
 function defaultLoadMore(eventIds?: string[]): LoadMore {
@@ -54,7 +54,7 @@ export function MemoryWall({
       const last = moments[moments.length - 1]
       if (!last) return
       const impl = loadMoreImpl ?? defaultLoadMore(eventIds)
-      const next = await impl(last.created_at)
+      const next = await impl({ createdAt: last.created_at, id: last.id })
       if (next.length < WALL_PAGE_SIZE) setExhausted(true)
       setMoments((current) => {
         const seen = new Set(current.map((m) => m.id))

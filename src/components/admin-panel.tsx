@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { momentImageSrc } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { inputClass } from './ui'
 
@@ -16,7 +17,7 @@ interface AdminMemory {
   caption: string | null
   media_url: string | null
   thumb_url: string | null
-  media_kind: string
+  media_kind: 'image' | 'gif' | 'clip'
   embed_url: string | null
   status: string
   author_name: string | null
@@ -183,12 +184,19 @@ export function AdminPanel() {
               }}
               className="flex items-center gap-3 rounded-lg border border-line p-2 focus:border-orange"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={memory.thumb_url ?? memory.media_url ?? ''}
-                alt=""
-                className="h-14 w-14 rounded object-cover"
-              />
+              {(() => {
+                const thumb = momentImageSrc(memory, { preferThumb: true })
+                // clips have no local thumb until the CDN step; show a badge so
+                // the operator can still open the reported video (set-rip risk)
+                return thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={thumb} alt="" className="h-14 w-14 rounded object-cover" />
+                ) : (
+                  <div className="flex h-14 w-14 items-center justify-center rounded bg-surface text-xs text-muted">
+                    clip
+                  </div>
+                )
+              })()}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm">{memory.caption ?? '—'}</p>
                 <p className="text-xs text-muted">
@@ -196,6 +204,16 @@ export function AdminPanel() {
                   {memory.author_name ? ` · @${memory.author_name}` : ''}
                   {memory.origin_country ? ` · ${memory.origin_country}` : ''}
                 </p>
+                {memory.embed_url && (
+                  <a
+                    href={memory.embed_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-flame hover:underline"
+                  >
+                    open video ↗
+                  </a>
+                )}
               </div>
               <div className="flex gap-1">
                 <button

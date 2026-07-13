@@ -1,13 +1,19 @@
 import { createHash } from 'node:crypto'
 
-/** First hop of x-forwarded-for (Vercel/Cloudflare set it), else x-real-ip. */
+/**
+ * Client IP for rate limiting and the reporter fingerprint. Platform-set
+ * single-value headers come first — a client can prepend entries to
+ * x-forwarded-for when an upstream proxy appends rather than overwrites, so
+ * trusting its first hop would let an attacker forge reporter_hint and trip
+ * the auto-hide threshold. cf-connecting-ip / x-real-ip are set by the edge,
+ * not the client.
+ */
 export function clientIp(req: Request): string | null {
+  const trusted = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-real-ip')
+  if (trusted) return trusted
   const forwarded = req.headers.get('x-forwarded-for')
-  if (forwarded) {
-    const first = forwarded.split(',')[0]?.trim()
-    if (first) return first
-  }
-  return req.headers.get('x-real-ip')
+  const first = forwarded?.split(',')[0]?.trim()
+  return first || null
 }
 
 /** Request country for the "M countries" counter (D9 P9). Never trusted for auth. */

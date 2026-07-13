@@ -194,11 +194,18 @@ describe('profiles & attendance — own rows only (anonymous auth)', () => {
       .select('id')
     expect(hijack ?? []).toHaveLength(0)
 
-    // attendance: A checks an edition; B cannot write rows for A
+    // attendance: A checks an edition. The Passport UI uses upsert(), which
+    // needs UPDATE privilege even on first insert (ON CONFLICT DO UPDATE is
+    // planned regardless) — this is the exact path that failed 42501.
     const { error: attendOwn } = await userA
       .from('attendance')
-      .insert({ profile_id: uidA, event_id: eventId })
+      .upsert({ profile_id: uidA, event_id: eventId })
     expect(attendOwn).toBeNull()
+    // re-checking the same edition (a real double-tap) stays a no-op, not an error
+    const { error: attendAgain } = await userA
+      .from('attendance')
+      .upsert({ profile_id: uidA, event_id: eventId })
+    expect(attendAgain).toBeNull()
     const { error: attendForge } = await userB
       .from('attendance')
       .insert({ profile_id: uidA, event_id: eventId })

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
+import { fetchMoments } from '@/lib/moments'
 import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
 /**
@@ -48,6 +49,41 @@ test('wall_counters counts live rows only and distinct countries', async () => {
   expect(error).toBeNull()
   expect(after!.moments).toBe(before!.moments + 2) // hidden row is not counted
   expect(after!.countries).toBeGreaterThanOrEqual(1)
+})
+
+test('keyset pagination reaches every sibling of a same-timestamp batch', async () => {
+  // A 5-photo upload is one INSERT → all rows share created_at. A created_at-only
+  // cursor lands mid-batch and skips the rest; the (created_at, id) keyset must not.
+  const batchCaption = `wall-batch-${Date.now()}`
+  const { data: rows, error } = await service
+    .from('memories')
+    .insert(
+      Array.from({ length: 5 }, (_, i) => ({
+        event_id: eventId,
+        media_kind: 'image' as const,
+        media_url: `https://media.test/${batchCaption}-${i}.jpg`,
+        caption: batchCaption,
+        rights_confirmed: true,
+        status: 'live' as const,
+      })),
+    )
+    .select('id, created_at')
+  expect(error).toBeNull()
+  rows!.forEach((r) => fixtureIds.push(r.id))
+  const sharedTs = rows![0].created_at
+  expect(rows!.every((r) => r.created_at === sharedTs)).toBe(true)
+
+  // page size 2 forces a boundary inside the batch
+  const seen = new Set<string>()
+  let cursor: { createdAt: string; id: string } | undefined
+  for (let page = 0; page < 6; page++) {
+    const batch = await fetchMoments(anon, { before: cursor, limit: 2 })
+    if (batch.length === 0) break
+    batch.forEach((m) => seen.add(m.id))
+    const last = batch[batch.length - 1]
+    cursor = { createdAt: last.created_at, id: last.id }
+  }
+  for (const r of rows!) expect(seen.has(r.id)).toBe(true)
 })
 
 test('realtime delivers new live moments to anon without takedown_token', async () => {

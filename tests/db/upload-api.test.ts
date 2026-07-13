@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { afterAll, beforeAll, describe, expect, test } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { hashIp } from '@/lib/server/request-meta'
 import type { StorageAdapter } from '@/lib/storage'
 import {
@@ -80,6 +80,13 @@ async function countMarkerRows(): Promise<number> {
 
 beforeAll(async () => {
   eventId = await eventIdByYear(db, 2023)
+})
+
+// presign now records a rate event, so the shared default IP accumulates
+// across tests — clear it after each so tests stay order-independent. Tests
+// that assert rate limiting use their own dedicated IPs.
+afterEach(async () => {
+  await db.from('upload_events').delete().eq('ip_hash', hashIp(IP, 'upload'))
 })
 
 afterAll(async () => {
@@ -401,6 +408,34 @@ describe('rate limiting (D9 P4)', () => {
       }),
     )
     expect(memories.status).toBe(429)
+  })
+
+  test('presign records a rate event so minting R2 grants is bounded', async () => {
+    const presignIp = `10.20.${runId}.9`
+    const before = await db
+      .from('upload_events')
+      .select('*', { count: 'exact', head: true })
+      .eq('ip_hash', hashIp(presignIp, 'upload'))
+
+    const res = await createPresignHandler(deps())(
+      new Request('http://localhost/api/test', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': presignIp },
+        body: JSON.stringify({
+          turnstileToken: 't',
+          files: [{ contentType: 'image/jpeg', size: 1000 }],
+        }),
+      }),
+    )
+    expect(res.status).toBe(200)
+
+    const after = await db
+      .from('upload_events')
+      .select('*', { count: 'exact', head: true })
+      .eq('ip_hash', hashIp(presignIp, 'upload'))
+    expect((after.count ?? 0) - (before.count ?? 0)).toBe(1)
+
+    await db.from('upload_events').delete().eq('ip_hash', hashIp(presignIp, 'upload'))
   })
 })
 

@@ -143,6 +143,10 @@ export function createPresignHandler(deps: UploadDeps) {
       UPLOAD_SESSION_TTL_MS,
       deps.sessionSecret,
     )
+    // Count the event here: presign is what mints the expensive R2 PUT grants,
+    // so unbounded presigns (never completed with /api/memories) can't abuse
+    // storage. The file flow does NOT record again at memories.
+    await recordRateEvent(deps.db, hashIp(ip, 'upload'))
     return json(200, { uploads, session })
   }
 }
@@ -278,7 +282,10 @@ export function createMemoriesHandler(deps: UploadDeps) {
       .select('id, takedown_token')
     if (error || !inserted) return json(500, { error: 'could not save your moment' })
 
-    await recordRateEvent(deps.db, ipHash)
+    // File uploads were already counted at presign; only the embed flow (no
+    // presign) records its rate event here — otherwise a file upload would
+    // consume two of the hourly budget.
+    if (input.embed) await recordRateEvent(deps.db, ipHash)
     return json(201, {
       moments: inserted.map((row) => ({ id: row.id, takedownToken: row.takedown_token })),
     })

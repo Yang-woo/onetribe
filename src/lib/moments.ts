@@ -37,10 +37,13 @@ export function isMomentId(id: string): boolean {
 
 export interface MomentEvent {
   festival: string
-  edition?: string | null
+  edition: string | null
   year: number
   city: string | null
 }
+
+/** The events join fragment feeding eventLine() — one list for the page and OG. */
+export const EVENT_LINE_COLUMNS = 'events ( festival, edition, year, city )'
 
 /** The shareable identity line (docs/12 G): `city · year · festival — edition`. */
 export function eventLine(event: MomentEvent | null): string | null {
@@ -72,17 +75,30 @@ export interface EditionChip {
 
 export const WALL_PAGE_SIZE = 40
 
+/** Keyset cursor — created_at alone is not unique (a 5-photo batch shares one
+ * timestamp), so pagination and neighbors key on (created_at, id). */
+export interface MomentCursor {
+  createdAt: string
+  id: string
+}
+
 export async function fetchMoments(
   db: SupabaseClient,
-  opts: { eventIds?: string[]; before?: string; limit?: number } = {},
+  opts: { eventIds?: string[]; before?: MomentCursor; limit?: number } = {},
 ): Promise<Moment[]> {
   let query = db
     .from('memories')
     .select(PUBLIC_MEMORY_COLUMNS)
     .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
     .limit(opts.limit ?? WALL_PAGE_SIZE)
   if (opts.eventIds && opts.eventIds.length > 0) query = query.in('event_id', opts.eventIds)
-  if (opts.before) query = query.lt('created_at', opts.before)
+  if (opts.before) {
+    // (created_at, id) < (cursor) — the older side of the keyset
+    query = query.or(
+      `created_at.lt.${opts.before.createdAt},and(created_at.eq.${opts.before.createdAt},id.lt.${opts.before.id})`,
+    )
+  }
   const { data, error } = await query
   if (error) throw new Error(`fetchMoments failed: ${error.message}`)
   return (data ?? []) as unknown as Moment[]

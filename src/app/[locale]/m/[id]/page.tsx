@@ -6,11 +6,13 @@ import { CaptionToggle } from '@/components/caption-toggle'
 import { ReportButton } from '@/components/report-button'
 import { Link } from '@/i18n/navigation'
 import {
+  EVENT_LINE_COLUMNS,
   eventLine,
   isMomentId,
   momentImageSrc,
   PUBLIC_MEMORY_COLUMNS,
   type Moment,
+  type MomentEvent,
 } from '@/lib/moments'
 import { localeAlternates } from '@/lib/seo'
 import { siteUrl } from '@/lib/site-url'
@@ -26,16 +28,14 @@ import { createDefaultProvider, translateWithCache } from '@/lib/translate'
  */
 export const dynamic = 'force-dynamic'
 
-type MomentWithEvent = Moment & {
-  events: { festival: string; edition: string | null; year: number; city: string | null } | null
-}
+type MomentWithEvent = Moment & { events: MomentEvent | null }
 
 // cache(): generateMetadata and the page body share one fetch per request.
 const fetchMoment = cache(async (id: string): Promise<MomentWithEvent | null> => {
   if (!isMomentId(id)) return null
   const { data } = await supabaseServerAnon()
     .from('memories')
-    .select(`${PUBLIC_MEMORY_COLUMNS}, events ( festival, edition, year, city )`)
+    .select(`${PUBLIC_MEMORY_COLUMNS}, ${EVENT_LINE_COLUMNS}`)
     .eq('id', id)
     .maybeSingle()
   return (data as unknown as MomentWithEvent) ?? null
@@ -88,20 +88,28 @@ export default async function MomentPage({
         ).then((outcome) => outcome.text)
       : Promise.resolve(moment.caption)
 
+  // Keyset neighbors: (created_at, id) so batch siblings (same timestamp) are
+  // reachable via ←/→ instead of being skipped.
   const db = supabaseServerAnon()
   const [translatedCaption, { data: prevRows }, { data: nextRows }] = await Promise.all([
     translationPromise,
     db
       .from('memories')
       .select('id')
-      .lt('created_at', moment.created_at)
+      .or(
+        `created_at.lt.${moment.created_at},and(created_at.eq.${moment.created_at},id.lt.${moment.id})`,
+      )
       .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .limit(1),
     db
       .from('memories')
       .select('id')
-      .gt('created_at', moment.created_at)
+      .or(
+        `created_at.gt.${moment.created_at},and(created_at.eq.${moment.created_at},id.gt.${moment.id})`,
+      )
       .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
       .limit(1),
   ])
   const prevId = prevRows?.[0]?.id as string | undefined

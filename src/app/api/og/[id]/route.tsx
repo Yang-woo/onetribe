@@ -1,7 +1,13 @@
 import { ImageResponse } from 'next/og'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-import { eventLine, isMomentId, momentImageSrc } from '@/lib/moments'
+import {
+  EVENT_LINE_COLUMNS,
+  eventLine,
+  isMomentId,
+  momentImageSrc,
+  type MomentEvent,
+} from '@/lib/moments'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 /**
@@ -33,7 +39,7 @@ export async function GET(
 
   const { data } = await supabaseServerAnon()
     .from('memories')
-    .select('media_url, media_kind, embed_url, events ( festival, year, city )')
+    .select(`media_url, media_kind, embed_url, ${EVENT_LINE_COLUMNS}`)
     .eq('id', id)
     .maybeSingle()
   if (!data) return new Response(null, { status: 404 })
@@ -42,24 +48,37 @@ export async function GET(
     media_url: string | null
     media_kind: 'image' | 'gif' | 'clip'
     embed_url: string | null
-    events: { festival: string; year: number; city: string | null } | null
+    events: MomentEvent | null
   }
-  const src = momentImageSrc({ ...moment, thumb_url: null })
-  if (!src) return new Response(null, { status: 404 })
+  // satori (next/og) decodes JPEG/PNG only — webp/animated-gif would throw and
+  // blank the card. YouTube thumbs are jpg (safe); drop unsafe uploads to the
+  // branded text-only card rather than a broken image.
+  const rawSrc = momentImageSrc({ ...moment, thumb_url: null })
+  const src = rawSrc && /\.(jpe?g|png)(\?|$)/i.test(rawSrc) ? rawSrc : null
 
   const line = eventLine(moment.events)
   const font = await loadFont()
 
   return new ImageResponse(
-    <div style={{ display: 'flex', width: '100%', height: '100%', position: 'relative' }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt=""
-        width={1200}
-        height={630}
-        style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-      />
+    <div
+      style={{
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        background: '#0B0908',
+      }}
+    >
+      {src && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt=""
+          width={1200}
+          height={630}
+          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+        />
+      )}
       <div
         style={{
           position: 'absolute',

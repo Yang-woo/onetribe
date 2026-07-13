@@ -6,7 +6,13 @@ import { useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { prepareForUpload, validateFiles } from '@/lib/upload/client-image'
-import { ALLOWED_MIME, MAX_CAPTION_LENGTH, MAX_FILES_PER_MOMENT } from '@/lib/upload/constants'
+import {
+  ALLOWED_MIME,
+  MAX_AUTHOR_NAME_LENGTH,
+  MAX_CAPTION_LENGTH,
+  MAX_FILES_PER_MOMENT,
+} from '@/lib/upload/constants'
+import { isTurnstileEnabled, Turnstile } from './turnstile'
 import { inputClass } from './ui'
 
 /**
@@ -47,6 +53,7 @@ export function UploadWizard({
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<DoneMoment[] | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
   const invalidFiles = validateFiles(files)
   const fileError = !invalidFiles
@@ -97,11 +104,19 @@ export function UploadWizard({
 
       let payload: Record<string, unknown>
       if (mode === 'files') {
-        const prepared = await Promise.all(preparing ?? files.map((file) => prepareImpl(file)))
+        // Retry recompresses from scratch: a cached rejected prepare promise
+        // would otherwise re-await the same failure forever.
+        let prepared: File[]
+        try {
+          prepared = await Promise.all(preparing ?? files.map((file) => prepareImpl(file)))
+        } catch {
+          prepared = await Promise.all(files.map((file) => prepareImpl(file)))
+        }
         const presignRes = await fetch('/api/upload/presign', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
+            turnstileToken: turnstileToken ?? undefined,
             files: prepared.map((file) => ({ contentType: file.type, size: file.size })),
           }),
         })
@@ -129,7 +144,11 @@ export function UploadWizard({
           })),
         }
       } else {
-        payload = { ...shared, embed: { url: embedUrl.trim() } }
+        payload = {
+          ...shared,
+          turnstileToken: turnstileToken ?? undefined,
+          embed: { url: embedUrl.trim() },
+        }
       }
 
       const res = await fetch('/api/memories', {
@@ -175,7 +194,15 @@ export function UploadWizard({
                 onChange={(e) => {
                   const picked = Array.from(e.target.files ?? [])
                   setFiles(picked)
-                  setPreparing(validateFiles(picked) ? null : picked.map((f) => prepareImpl(f)))
+                  if (validateFiles(picked)) {
+                    setPreparing(null)
+                  } else {
+                    const promises = picked.map((f) => prepareImpl(f))
+                    // mark handled so a decode failure never unhandled-rejects
+                    // before submit attaches its own handler
+                    promises.forEach((prom) => prom.catch(() => {}))
+                    setPreparing(promises)
+                  }
                 }}
                 className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-orange file:px-4 file:py-2 file:font-medium file:text-black"
               />
@@ -262,6 +289,7 @@ export function UploadWizard({
             {t('nameLabel')}
             <input
               value={authorName}
+              maxLength={MAX_AUTHOR_NAME_LENGTH}
               onChange={(e) => setAuthorName(e.target.value)}
               className={inputClass}
             />
@@ -284,6 +312,7 @@ export function UploadWizard({
             />
             <span>{t('rightsLabel')}</span>
           </label>
+          <Turnstile onToken={setTurnstileToken} />
         </section>
       )}
 
@@ -317,7 +346,7 @@ export function UploadWizard({
           <button
             type="button"
             onClick={() => void submit()}
-            disabled={!rights || submitting}
+            disabled={!rights || submitting || (isTurnstileEnabled() && !turnstileToken)}
             className="rounded-full bg-orange px-6 py-2 font-medium text-black disabled:opacity-40"
           >
             {submitting ? t('submitting') : t('submit')}

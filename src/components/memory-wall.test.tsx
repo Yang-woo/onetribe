@@ -105,7 +105,8 @@ describe('MemoryWall', () => {
 
     await user.click(screen.getByRole('button', { name: 'more moments' }))
 
-    expect(loadMore).toHaveBeenCalledWith('2026-07-12T00:00:00Z')
+    // compound keyset cursor (created_at + id) so batch siblings aren't skipped
+    expect(loadMore).toHaveBeenCalledWith({ createdAt: '2026-07-12T00:00:00Z', id: 'm39' })
     expect(screen.getAllByText('caption-old')).toHaveLength(1)
     expect(screen.getByText('caption-new')).toBeInTheDocument()
   })
