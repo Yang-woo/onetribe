@@ -1,0 +1,121 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { z } from 'zod'
+
+/**
+ * Post-moderation admin — docs/15 §5, docs/09 E. Access model per D9 P10:
+ * a Supabase email session whose address is on the ADMIN_EMAILS allowlist;
+ * all writes run through these routes with the service role. There are no
+ * admin RLS policies by design.
+ */
+
+export interface AdminDeps {
+  db: SupabaseClient // service role
+  adminEmails: string[] // lowercase
+}
+
+const json = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  })
+
+async function requireAdmin(deps: AdminDeps, req: Request): Promise<Response | null> {
+  const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+  if (!token) return json(401, { error: 'sign in required' })
+  const { data, error } = await deps.db.auth.getUser(token)
+  const email = data.user?.email?.toLowerCase()
+  if (error || !email) return json(401, { error: 'sign in required' })
+  if (!deps.adminEmails.includes(email)) return json(403, { error: 'not an operator' })
+  return null
+}
+
+// Admin reads use the service role — includes hidden rows on purpose
+// (that's the job) but never takedown_token (nothing here needs it).
+const ADMIN_MEMORY_COLUMNS =
+  'id, caption, media_url, thumb_url, media_kind, embed_url, status, author_name, origin_country, created_at'
+
+export function createAdminQueueHandler(deps: AdminDeps) {
+  return async (req: Request): Promise<Response> => {
+    const denied = await requireAdmin(deps, req)
+    if (denied) return denied
+
+    const startOfDay = new Date()
+    startOfDay.setUTCHours(0, 0, 0, 0)
+
+    const [reports, recent, hidden, todayLive, openReports] = await Promise.all([
+      deps.db
+        .from('reports')
+        .select(`id, reason, created_at, memories ( ${ADMIN_MEMORY_COLUMNS} )`)
+        .order('created_at', { ascending: false })
+        .limit(100),
+      deps.db
+        .from('memories')
+        .select(ADMIN_MEMORY_COLUMNS)
+        .order('created_at', { ascending: false })
+        .limit(50),
+      deps.db.from('memories').select('*', { count: 'exact', head: true }).eq('status', 'hidden'),
+      deps.db
+        .from('memories')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'live')
+        .gte('created_at', startOfDay.toISOString()),
+      deps.db.from('reports').select('*', { count: 'exact', head: true }),
+    ])
+
+    return json(200, {
+      reports: reports.data ?? [],
+      recent: recent.data ?? [],
+      counters: {
+        hidden: hidden.count ?? 0,
+        todayLive: todayLive.count ?? 0,
+        openReports: openReports.count ?? 0,
+      },
+    })
+  }
+}
+
+const actionSchema = z.object({
+  memoryId: z.uuid(),
+  // hide: take down · unhide: restore after review · delete: remove for good
+  // dismiss: keep it up, clear its reports (the "OK" key — docs/15 §5)
+  action: z.enum(['hide', 'unhide', 'delete', 'dismiss']),
+})
+
+export function createAdminActionHandler(deps: AdminDeps) {
+  return async (req: Request): Promise<Response> => {
+    const denied = await requireAdmin(deps, req)
+    if (denied) return denied
+
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return json(400, { error: 'invalid request' })
+    }
+    const parsed = actionSchema.safeParse(body)
+    if (!parsed.success) return json(400, { error: 'invalid request' })
+    const { memoryId, action } = parsed.data
+
+    if (action === 'hide' || action === 'unhide') {
+      const { error } = await deps.db
+        .from('memories')
+        .update({ status: action === 'hide' ? 'hidden' : 'live' })
+        .eq('id', memoryId)
+      if (error) return json(500, { error: error.message })
+    } else if (action === 'delete') {
+      const { error } = await deps.db.from('memories').delete().eq('id', memoryId)
+      if (error) return json(500, { error: error.message })
+    } else {
+      const { error } = await deps.db.from('reports').delete().eq('memory_id', memoryId)
+      if (error) return json(500, { error: error.message })
+    }
+    return json(200, { ok: true })
+  }
+}
+
+export function adminEmailsFromEnv(): string[] {
+  return (process.env.ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+}
