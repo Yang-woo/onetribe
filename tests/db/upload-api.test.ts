@@ -37,6 +37,8 @@ const fakeStorage: StorageAdapter = {
     }
   },
   publicUrl: (key) => `https://media.test/${key}`,
+  keyForUrl: (url) => (url.startsWith('https://media.test/') ? url.slice(19) : null),
+  deleteObject: async () => {},
 }
 
 const allow = async () => true

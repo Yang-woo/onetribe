@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { json, parseBody } from '@/lib/server/http'
+import type { StorageAdapter } from '@/lib/storage'
 
 /**
  * Post-moderation admin — docs/15 §5, docs/09 E. Access model per D9 P10:
@@ -12,6 +13,7 @@ import { json, parseBody } from '@/lib/server/http'
 export interface AdminDeps {
   db: SupabaseClient // service role
   adminEmails: string[] // lowercase
+  storage: StorageAdapter // delete removes the media object too (docs/00 D9-c)
 }
 
 async function requireAdmin(deps: AdminDeps, req: Request): Promise<Response | null> {
@@ -92,8 +94,27 @@ export function createAdminActionHandler(deps: AdminDeps) {
         .eq('id', memoryId)
       if (error) return json(500, { error: error.message })
     } else if (action === 'delete') {
+      // Media refs must be read before the row goes — with the row deleted
+      // the object is unreachable (nothing else stores the key).
+      const { data: memory } = await deps.db
+        .from('memories')
+        .select('media_url, thumb_url')
+        .eq('id', memoryId)
+        .maybeSingle()
       const { error } = await deps.db.from('memories').delete().eq('id', memoryId)
       if (error) return json(500, { error: error.message })
+      // Row first (taking content down must not depend on storage being up);
+      // object delete is best-effort — a failure just leaves an orphan.
+      for (const url of [memory?.media_url, memory?.thumb_url]) {
+        if (!url) continue
+        const key = deps.storage.keyForUrl(url)
+        if (!key) continue
+        try {
+          await deps.storage.deleteObject(key)
+        } catch (err) {
+          console.error(`admin delete: media object cleanup failed for ${key}`, err)
+        }
+      }
     } else {
       const { error } = await deps.db.from('reports').delete().eq('memory_id', memoryId)
       if (error) return json(500, { error: error.message })

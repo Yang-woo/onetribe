@@ -17,4 +17,8 @@ export interface StorageAdapter {
     contentLength: number
   }): Promise<PresignedUpload>
   publicUrl(key: string): string
+  /** Inverse of publicUrl — null when the URL wasn't minted by this adapter. */
+  keyForUrl(url: string): string | null
+  /** Remove an object. Idempotent — deleting a missing key is not an error. */
+  deleteObject(key: string): Promise<void>
 }

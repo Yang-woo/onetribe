@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { createAdminActionHandler, createAdminQueueHandler } from '@/server/admin'
+import type { StorageAdapter } from '@/lib/storage'
 import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
 /**
@@ -26,8 +27,22 @@ let eventId: string
 const userIds: string[] = []
 const fixtureIds: string[] = []
 
+// Mirrors seedMemory's `https://media.test/<name>.jpg` URLs so the delete
+// path can derive keys; records what it deletes for assertions.
+const deletedKeys: string[] = []
+const fakeStorage: StorageAdapter = {
+  async presignUpload() {
+    throw new Error('not used in admin tests')
+  },
+  publicUrl: (key) => `https://media.test/${key}`,
+  keyForUrl: (url) => (url.startsWith('https://media.test/') ? url.slice(19) : null),
+  async deleteObject(key) {
+    deletedKeys.push(key)
+  },
+}
+
 function deps() {
-  return { db: service, adminEmails: [OPERATOR.email.toLowerCase()] }
+  return { db: service, adminEmails: [OPERATOR.email.toLowerCase()], storage: fakeStorage }
 }
 
 function withAuth(token?: string, body?: unknown): Request {
@@ -137,8 +152,9 @@ describe('actions', () => {
     expect(data!.status).toBe('live')
   })
 
-  test('delete removes the memory (reports cascade)', async () => {
-    const id = await createMemory(`admin-delete-${randomUUID().slice(0, 6)}`)
+  test('delete removes the memory (reports cascade) and its storage object', async () => {
+    const caption = `admin-delete-${randomUUID().slice(0, 6)}`
+    const id = await createMemory(caption)
     await service.from('reports').insert({ memory_id: id, reason: 'spam', reporter_hint: 'x' })
 
     await createAdminActionHandler(deps())(
@@ -152,5 +168,18 @@ describe('actions', () => {
       .select('*', { count: 'exact', head: true })
       .eq('memory_id', id)
     expect(count).toBe(0)
+    // The media object went with the row (docs/00 D9-c — no orphan left behind).
+    expect(deletedKeys).toContain(`${caption}.jpg`)
+  })
+
+  test('hide leaves the storage object alone (reversible action)', async () => {
+    const caption = `admin-hide-keep-${randomUUID().slice(0, 6)}`
+    const id = await createMemory(caption)
+
+    await createAdminActionHandler(deps())(
+      withAuth(operatorToken, { memoryId: id, action: 'hide' }),
+    )
+
+    expect(deletedKeys).not.toContain(`${caption}.jpg`)
   })
 })

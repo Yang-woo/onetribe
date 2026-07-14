@@ -52,5 +52,20 @@ export function createR2Storage(config: R2Config): StorageAdapter {
     publicUrl(key) {
       return `${config.publicBaseUrl.replace(/\/$/, '')}/${key}`
     },
+    keyForUrl(url) {
+      const base = `${config.publicBaseUrl.replace(/\/$/, '')}/`
+      return url.startsWith(base) ? url.slice(base.length) : null
+    },
+    async deleteObject(key) {
+      const signed = await client.sign(new Request(`${endpoint}/${key}`, { method: 'DELETE' }), {
+        aws: { allHeaders: true },
+      })
+      const res = await fetch(signed)
+      // S3 DeleteObject is idempotent (204 even for missing keys) — anything
+      // else means the delete didn't happen and the caller should know.
+      if (!res.ok && res.status !== 404) {
+        throw new Error(`R2 delete failed for ${key}: ${res.status}`)
+      }
+    },
   }
 }

@@ -29,6 +29,13 @@ export function createLocalStorage(siteUrl: string): StorageAdapter {
     publicUrl(key) {
       return `${base}/api/local-storage/${key}`
     },
+    keyForUrl(url) {
+      const prefix = `${base}/api/local-storage/`
+      return url.startsWith(prefix) ? url.slice(prefix.length) : null
+    },
+    async deleteObject(key) {
+      localStorageStore().delete(key)
+    },
   }
 }
 
