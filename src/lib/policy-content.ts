@@ -1,9 +1,17 @@
 /**
- * User-facing policies — verbatim from docs/10 (EN drafts). [BRACKET]
- * placeholders are replaced before launch (docs/10 checklist — user
- * action: contact email, country, retention). English is the binding
- * text; other locales see the enNotice banner.
+ * User-facing policies — verbatim from docs/10 (EN drafts). English is the
+ * binding text; other locales see the enNotice banner.
+ *
+ * Contact is a temporary personal inbox (yangwoo.dev@gmail.com) — swap for a
+ * domain address (e.g. privacy@/hello@onetribe.dance) once the domain + mailbox
+ * are live (docs/10 checklist). Bump POLICY_LAST_UPDATED whenever text changes.
  */
+
+/** ISO date shown as "last updated" across every policy page. */
+export const POLICY_LAST_UPDATED = '2026-07-14'
+
+/** Where removal / privacy / rights-holder requests are sent (see note above). */
+export const POLICY_CONTACT_EMAIL = 'yangwoo.dev@gmail.com'
 
 export interface PolicySection {
   heading?: string
@@ -55,7 +63,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '6. Changes; contact',
         paragraphs: [
-          'We may update these terms; continued use means acceptance. Contact: [CONTACT_EMAIL].',
+          `We may update these terms; continued use means acceptance. Contact: ${POLICY_CONTACT_EMAIL}.`,
         ],
       },
     ],
@@ -67,7 +75,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '1. Who we are',
         paragraphs: [
-          'One Tribe (onetribe.dance) is a non-commercial fan project operated from [COUNTRY]. Contact: [CONTACT_EMAIL].',
+          `One Tribe (onetribe.dance) is a non-commercial fan project operated from South Korea. Contact: ${POLICY_CONTACT_EMAIL}.`,
         ],
       },
       {
@@ -83,13 +91,13 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
         heading: '3. People in crowd photos',
         paragraphs: [
           'Festival photos may show other attendees. Our legal basis for publishing is legitimate interest in community documentation of public events, balanced against your rights.',
-          'If you appear in a photo and want it removed or blurred, tell us — we will act within 48 hours, no questions asked: [PRIVACY_FORM/EMAIL].',
+          `If you appear in a photo and want it removed or blurred, tell us — we will act within 48 hours, no questions asked: ${POLICY_CONTACT_EMAIL}.`,
         ],
       },
       {
         heading: '4. Your rights (GDPR)',
         paragraphs: [
-          'Access, rectification, erasure, restriction, objection, portability. Email [CONTACT_EMAIL]. You may also complain to your local data-protection authority.',
+          `Access, rectification, erasure, restriction, objection, portability. Email ${POLICY_CONTACT_EMAIL}. You may also complain to your local data-protection authority.`,
         ],
       },
       {
@@ -101,7 +109,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '6. Retention',
         paragraphs: [
-          'Published Memories stay until you delete them or a valid request removes them. Deleted content is purged from active systems within [30] days.',
+          'Published Memories stay until you delete them or a valid request removes them. Deleted content is purged from active systems within 30 days.',
         ],
       },
       {
@@ -126,13 +134,13 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: 'You’re in a photo and don’t want to be?',
         paragraphs: [
-          'Email [PRIVACY_FORM/EMAIL] with the photo link. Removed or blurred within 48 hours, no questions asked.',
+          `Email ${POLICY_CONTACT_EMAIL} with the photo link. Removed or blurred within 48 hours, no questions asked.`,
         ],
       },
       {
         heading: 'You’re a rights holder',
         paragraphs: [
-          '(artist, label, festival, photographer): email [CONTACT_EMAIL] with (1) the content link, (2) what you own, (3) your contact. We review promptly and remove valid claims — typically within 24–48 hours. Repeat infringers are blocked from uploading.',
+          `(artist, label, festival, photographer): email ${POLICY_CONTACT_EMAIL} with (1) the content link, (2) what you own, (3) your contact. We review promptly and remove valid claims — typically within 24–48 hours. Repeat infringers are blocked from uploading.`,
           'Counter-notice: if your upload was removed and you believe it was a mistake, reply with an explanation; we may restore after review.',
           'We’re fans, not adversaries. If something bothers you, tell us and it comes down.',
         ],

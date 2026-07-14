@@ -18,6 +18,8 @@ for (const { path, marker } of POLICY_PAGES) {
     await page.goto(path)
     await expect(page.getByRole('heading', { name: marker })).toBeVisible()
     await expect(page.getByText(/Unofficial fan project/)).toBeVisible()
+    // no [BRACKET] placeholder may survive to a live policy page (docs/10)
+    await expect(page.locator('main')).not.toContainText(/\[[A-Z_/]+\]/)
   })
 }
 
