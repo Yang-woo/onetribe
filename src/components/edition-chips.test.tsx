@@ -33,4 +33,52 @@ describe('EditionChips', () => {
     expect(screen.getByRole('link', { name: '2025' })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: '2019' })).not.toHaveAttribute('aria-current')
   })
+
+  // Desktop mouse: a vertical wheel must scroll the overflowing row sideways
+  // (macOS hides the scrollbar and a mouse can't reach it) but yield to the
+  // page at the ends. jsdom has no layout, so fake the scroll metrics.
+  function fakeScroller(overflow: { scrollWidth: number; clientWidth: number; scrollLeft: number }) {
+    const nav = screen.getByRole('navigation', { name: 'editions' })
+    let scrollLeft = overflow.scrollLeft
+    Object.defineProperty(nav, 'scrollWidth', { value: overflow.scrollWidth, configurable: true })
+    Object.defineProperty(nav, 'clientWidth', { value: overflow.clientWidth, configurable: true })
+    Object.defineProperty(nav, 'scrollLeft', {
+      get: () => scrollLeft,
+      set: (v: number) => {
+        scrollLeft = v
+      },
+      configurable: true,
+    })
+    const wheel = (init: WheelEventInit) => {
+      const evt = Object.assign(new Event('wheel', { bubbles: true, cancelable: true }), init)
+      const notPrevented = nav.dispatchEvent(evt)
+      return { prevented: !notPrevented, scrollLeft: nav.scrollLeft }
+    }
+    return { nav, wheel }
+  }
+
+  test('vertical wheel scrolls the row sideways and suppresses page scroll', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    const { wheel } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
+    const r = wheel({ deltaY: 120, deltaX: 0 })
+    expect(r.scrollLeft).toBe(120)
+    expect(r.prevented).toBe(true)
+  })
+
+  test('at the right edge, the wheel yields to the page (no preventDefault)', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    // scrollLeft 300 == scrollWidth(500) - clientWidth(200): already at the end
+    const { wheel } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 300 })
+    const r = wheel({ deltaY: 120, deltaX: 0 })
+    expect(r.scrollLeft).toBe(300)
+    expect(r.prevented).toBe(false)
+  })
+
+  test('horizontal (trackpad) gestures pass through untouched', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    const { wheel } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
+    const r = wheel({ deltaY: 5, deltaX: 120 })
+    expect(r.scrollLeft).toBe(0)
+    expect(r.prevented).toBe(false)
+  })
 })
