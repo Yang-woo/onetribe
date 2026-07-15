@@ -88,6 +88,7 @@
     }
   },
   "passport": {
+    "nav": "여권",
     "title": "페스티벌 여권",
     "startTitle": "익명으로 시작 — 이름만 지어주세요",
     "namePlaceholder": "벽에 남길 이름",

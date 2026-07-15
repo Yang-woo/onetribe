@@ -88,6 +88,7 @@
     }
   },
   "passport": {
+    "nav": "passaporte",
     "title": "passaporte de festival",
     "startTitle": "começa anónimo — escolhe só um nome",
     "namePlaceholder": "o teu nome no mural",

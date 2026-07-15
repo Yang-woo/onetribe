@@ -88,6 +88,7 @@
     }
   },
   "passport": {
+    "nav": "pass",
     "title": "festival-pass",
     "startTitle": "anonym starten — wähl nur einen Namen",
     "namePlaceholder": "dein Name an der Wand",
