@@ -51,12 +51,17 @@ test('theme spot-checks against verified anthem titles', async () => {
   const byYear = new Map(rows.map((r) => [r.year, r.edition]))
   expect(byYear.get(2013)).toBe('Weekend Warriors')
   expect(byYear.get(2016)).toBe('Dragonblood')
+  expect(byYear.get(2017)).toBe('Victory Forever')
   expect(byYear.get(2024)).toBe('Power of the Tribe')
+  // 2025/2026 confirmed (Wikipedia + Hardstyle Mag); 2026 keeps its anthem
+  // despite being canceled mid-event (docs/11 A)
+  expect(byYear.get(2025)).toBe('Where Legends Rise')
+  expect(byYear.get(2026)).toBe('Sacred Oath')
 })
 
-test('unverified themes stay null until confirmed (2025, 2027; canceled 2020/21/26)', async () => {
+test('only genuinely themeless years stay null (COVID 2020/21, upcoming 2027)', async () => {
   const rows = await nlEditions()
-  for (const year of [2020, 2021, 2025, 2026, 2027]) {
+  for (const year of [2020, 2021, 2027]) {
     expect(rows.find((r) => r.year === year)?.edition).toBeNull()
   }
 })
