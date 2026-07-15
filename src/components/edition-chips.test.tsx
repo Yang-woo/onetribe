@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { renderWithIntl } from '@/test-utils'
 import { describe, expect, test } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
@@ -80,5 +80,50 @@ describe('EditionChips', () => {
     const r = wheel({ deltaY: 5, deltaX: 120 })
     expect(r.scrollLeft).toBe(0)
     expect(r.prevented).toBe(false)
+  })
+
+  // Desktop mouse: grab-and-drag scrolls the row, and the click that a drag
+  // ends in must not navigate the chip under the cursor.
+  test('mouse drag scrolls the row sideways', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    const { nav } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
+    fireEvent.pointerDown(nav, { pointerType: 'mouse', button: 0, pointerId: 1, clientX: 100 })
+    fireEvent.pointerMove(nav, { pointerType: 'mouse', pointerId: 1, clientX: 40 }) // dx = -60
+    expect(nav.scrollLeft).toBe(60) // startLeft(0) - dx(-60)
+    fireEvent.pointerUp(nav, { pointerType: 'mouse', pointerId: 1 })
+  })
+
+  test('a click that ends a drag is cancelled (no navigation)', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    const { nav } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
+    fireEvent.pointerDown(nav, { pointerType: 'mouse', button: 0, pointerId: 1, clientX: 100 })
+    fireEvent.pointerMove(nav, { pointerType: 'mouse', pointerId: 1, clientX: 40 })
+    fireEvent.pointerUp(nav, { pointerType: 'mouse', pointerId: 1 })
+    // fireEvent returns false when the handler called preventDefault
+    const notPrevented = fireEvent.click(screen.getByRole('link', { name: '2025' }))
+    expect(notPrevented).toBe(false)
+  })
+
+  test('a plain click (no drag) still navigates', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
+    const notPrevented = fireEvent.click(screen.getByRole('link', { name: '2025' }))
+    expect(notPrevented).toBe(true)
+  })
+
+  test('touch pointers are left to native scrolling (no JS drag)', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    const { nav } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
+    fireEvent.pointerDown(nav, { pointerType: 'touch', pointerId: 2, clientX: 100 })
+    fireEvent.pointerMove(nav, { pointerType: 'touch', pointerId: 2, clientX: 40 })
+    expect(nav.scrollLeft).toBe(0)
+  })
+
+  // Load-bearing: without draggable=false, grabbing a chip starts a native
+  // link drag-and-drop that steals the pointer stream and the scroll dies.
+  test('chips are not natively draggable', () => {
+    renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
+    expect(screen.getByRole('link', { name: 'all' })).toHaveAttribute('draggable', 'false')
+    expect(screen.getByRole('link', { name: '2025' })).toHaveAttribute('draggable', 'false')
   })
 })
