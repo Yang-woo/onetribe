@@ -34,7 +34,9 @@ export function EditionChips({
   useEffect(() => {
     const el = scrollerRef.current
     if (!el) return
-    const drag = { down: false, startX: 0, startLeft: 0, moved: false }
+    // drag is active only while the window listeners are attached, so no
+    // "down" flag is needed — the pointermove handler can't fire otherwise.
+    const drag = { startX: 0, startLeft: 0, moved: false }
 
     const onWheel = (e: WheelEvent) => {
       // leave horizontal gestures (trackpad) alone — only remap vertical wheel
@@ -55,7 +57,6 @@ export function EditionChips({
       el.scrollLeft = drag.startLeft - dx
     }
     const onPointerUp = () => {
-      drag.down = false
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
     }
@@ -63,7 +64,6 @@ export function EditionChips({
       // mouse only — touch scrolls natively; don't fight it
       if (e.pointerType !== 'mouse' || e.button !== 0) return
       if (el.scrollWidth <= el.clientWidth) return // nothing to drag
-      drag.down = true
       drag.startX = e.clientX
       drag.startLeft = el.scrollLeft
       drag.moved = false
