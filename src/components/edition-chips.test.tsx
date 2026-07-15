@@ -24,7 +24,7 @@ describe('EditionChips', () => {
   test('2026 gets the lost-weekend label (launch hook)', () => {
     renderWithIntl(<EditionChips editions={editions} selectedYear={null} />)
     expect(
-      screen.getByRole('link', { name: '2026 — the weekend that never happened' }),
+      screen.getByRole('link', { name: '2026 — the lost weekend' }),
     ).toBeInTheDocument()
   })
 

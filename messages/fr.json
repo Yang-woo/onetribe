@@ -7,7 +7,7 @@
   },
   "wall": {
     "allEditions": "tout",
-    "lostEditionChip": "{year} — le week-end qui n’a jamais eu lieu",
+    "lostEditionChip": "{year} — le week-end perdu",
     "emptyTitle": "le mur se réveille",
     "emptyBody": "sois parmi les premiers à laisser un moment ici.",
     "loadMore": "plus de moments"
