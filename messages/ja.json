@@ -94,12 +94,13 @@
     "namePlaceholder": "壁に残す名前",
     "start": "パスポートを作る",
     "journey": "私の旅",
-    "badge": "{n}回目のDefqon",
+    "firstDefqon": "初めてのdefqon",
+    "since": "{year}年から · {count}エディション",
+    "editionsHeading": "行ったエディション",
+    "addFirstMoment": "最初の瞬間を追加",
     "noneChecked": "行ったエディションをタップしてチェック。",
     "myMoments": "私の瞬間 ({count})",
     "noMoments": "まだありません — アップロードがここに集まります。",
-    "share": "シェア",
-    "shared": "コピーしました",
     "signOut": "この端末にパスポートを残す"
   },
   "policies": {

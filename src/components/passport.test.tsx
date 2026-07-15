@@ -1,37 +1,17 @@
 import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createTranslator } from 'next-intl'
 import { describe, expect, test } from 'vitest'
-import en from '../../messages/en.json'
 import type { EditionChip } from '@/lib/moments'
 import type { PassportBackend, PassportState } from '@/lib/passport/backend'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { Passport } from './passport'
 
 /**
- * Passport spec — docs/15 §4. The badge ordinal comes from ICU
- * selectordinal (11th/21st are the classic trap cases); the grid toggle
- * drives N; starting is anonymous with just a name.
+ * Passport spec — docs/15 §4. Moment-centric: moments are the hero; the
+ * identity line reads as a story ("since <first year> · N editions", or
+ * "my first defqon" for a first-timer) and the grid toggle drives it;
+ * starting is anonymous with just a name.
  */
-
-const t = createTranslator({ locale: 'en', messages: en })
-
-describe('badge ordinal (ICU selectordinal)', () => {
-  test.each([
-    [1, 'my 1st defqon'],
-    [2, 'my 2nd defqon'],
-    [3, 'my 3rd defqon'],
-    [4, 'my 4th defqon'],
-    [11, 'my 11th defqon'],
-    [12, 'my 12th defqon'],
-    [13, 'my 13th defqon'],
-    [21, 'my 21st defqon'],
-    [22, 'my 22nd defqon'],
-    [23, 'my 23rd defqon'],
-  ])('n=%i → %s', (n, expected) => {
-    expect(t('passport.badge', { n })).toBe(expected)
-  })
-})
 
 const editions: EditionChip[] = [
   { id: 'e2026', year: 2026, edition: null, canceled: true },
@@ -70,9 +50,11 @@ describe('Passport', () => {
     expect(await screen.findByText('my journey')).toBeInTheDocument()
     expect(screen.getByText('@weekend warrior')).toBeInTheDocument()
     expect(screen.getByText(/tap the editions/)).toBeInTheDocument() // n=0
+    // empty passport nudges the first upload
+    expect(screen.getByRole('link', { name: 'add your first moment' })).toBeInTheDocument()
   })
 
-  test('checking editions updates the Nth badge optimistically', async () => {
+  test('checking editions updates the identity line optimistically', async () => {
     const user = userEvent.setup()
     const backend = fakeBackend({
       userId: 'u1',
@@ -82,18 +64,21 @@ describe('Passport', () => {
     })
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 
-    expect(await screen.findByText('my 1st defqon')).toBeInTheDocument()
+    // n=1 → the first-timer line, not a raw ordinal
+    expect(await screen.findByText('my first defqon')).toBeInTheDocument()
 
+    // add 2025 → n=2, earliest attended edition is 2024
     await act(async () => {
       await user.click(screen.getByRole('button', { name: '2025' }))
     })
-    expect(screen.getByText('my 2nd defqon')).toBeInTheDocument()
+    expect(screen.getByText('since 2024 · 2 editions')).toBeInTheDocument()
     expect(backend.toggles).toContain('e2025:true')
 
+    // remove 2024 → back to a single edition
     await act(async () => {
       await user.click(screen.getByRole('button', { name: '2024' }))
     })
-    await waitFor(() => expect(screen.getByText('my 1st defqon')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('my first defqon')).toBeInTheDocument())
     expect(backend.toggles).toContain('e2024:false')
   })
 

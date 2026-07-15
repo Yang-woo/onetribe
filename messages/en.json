@@ -94,12 +94,13 @@
     "namePlaceholder": "your name on the wall",
     "start": "create my passport",
     "journey": "my journey",
-    "badge": "my {n, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} defqon",
+    "firstDefqon": "my first defqon",
+    "since": "since {year} · {count} editions",
+    "editionsHeading": "editions i've been to",
+    "addFirstMoment": "add your first moment",
     "noneChecked": "tap the editions you were there for.",
     "myMoments": "my moments ({count})",
     "noMoments": "no moments yet — your uploads will gather here.",
-    "share": "share",
-    "shared": "copied",
     "signOut": "leave this passport on this device"
   },
   "policies": {

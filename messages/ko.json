@@ -94,12 +94,13 @@
     "namePlaceholder": "벽에 남길 이름",
     "start": "여권 만들기",
     "journey": "나의 여정",
-    "badge": "나의 {n}번째 데프콘",
+    "firstDefqon": "나의 첫 데프콘",
+    "since": "{year}년부터 · {count}개 에디션",
+    "editionsHeading": "다녀온 에디션",
+    "addFirstMoment": "첫 순간 올리기",
     "noneChecked": "다녀온 에디션을 눌러 체크해주세요.",
     "myMoments": "내 순간들 ({count})",
     "noMoments": "아직 없어요 — 업로드한 순간들이 여기에 모여요.",
-    "share": "공유",
-    "shared": "복사됨",
     "signOut": "이 기기에 여권 남겨두기"
   },
   "policies": {

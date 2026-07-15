@@ -94,12 +94,13 @@
     "namePlaceholder": "je naam op de muur",
     "start": "maak mijn paspoort",
     "journey": "mijn reis",
-    "badge": "mijn {n, selectordinal, other {#e}} defqon",
+    "firstDefqon": "mijn eerste defqon",
+    "since": "sinds {year} · {count} edities",
+    "editionsHeading": "edities waar ik was",
+    "addFirstMoment": "voeg je eerste moment toe",
     "noneChecked": "tik de edities aan waar je bij was.",
     "myMoments": "mijn momenten ({count})",
     "noMoments": "nog niets — je uploads verzamelen zich hier.",
-    "share": "delen",
-    "shared": "gekopieerd",
     "signOut": "paspoort op dit apparaat laten"
   },
   "policies": {

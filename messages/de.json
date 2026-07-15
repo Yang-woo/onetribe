@@ -94,12 +94,13 @@
     "namePlaceholder": "dein Name an der Wand",
     "start": "meinen Pass erstellen",
     "journey": "meine Reise",
-    "badge": "mein {n, selectordinal, other {#.}} Defqon",
+    "firstDefqon": "mein erstes defqon",
+    "since": "seit {year} · {count} editionen",
+    "editionsHeading": "editionen, auf denen ich war",
+    "addFirstMoment": "deinen ersten moment hinzufügen",
     "noneChecked": "tippe die Editionen an, bei denen du dabei warst.",
     "myMoments": "meine Momente ({count})",
     "noMoments": "noch nichts — deine Uploads sammeln sich hier.",
-    "share": "teilen",
-    "shared": "kopiert",
     "signOut": "Pass auf diesem Gerät behalten"
   },
   "policies": {

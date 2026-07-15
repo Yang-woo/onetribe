@@ -94,12 +94,13 @@
     "namePlaceholder": "o teu nome no mural",
     "start": "criar o meu passaporte",
     "journey": "a minha jornada",
-    "badge": "o meu {n, selectordinal, other {#º}} defqon",
+    "firstDefqon": "meu primeiro defqon",
+    "since": "desde {year} · {count} edições",
+    "editionsHeading": "edições em que estive",
+    "addFirstMoment": "adiciona o teu primeiro momento",
     "noneChecked": "marca as edições em que estiveste.",
     "myMoments": "os meus momentos ({count})",
     "noMoments": "ainda nada — os teus uploads juntam-se aqui.",
-    "share": "partilhar",
-    "shared": "copiado",
     "signOut": "deixar o passaporte neste dispositivo"
   },
   "policies": {

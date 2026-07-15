@@ -94,12 +94,13 @@
     "namePlaceholder": "tu nombre en el muro",
     "start": "crear mi pasaporte",
     "journey": "mi viaje",
-    "badge": "mi {n, selectordinal, other {#º}} defqon",
+    "firstDefqon": "mi primer defqon",
+    "since": "desde {year} · {count} ediciones",
+    "editionsHeading": "ediciones a las que fui",
+    "addFirstMoment": "añade tu primer momento",
     "noneChecked": "marca las ediciones en las que estuviste.",
     "myMoments": "mis momentos ({count})",
     "noMoments": "aún nada — tus subidas se reunirán aquí.",
-    "share": "compartir",
-    "shared": "copiado",
     "signOut": "dejar el pasaporte en este dispositivo"
   },
   "policies": {
