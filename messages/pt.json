@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "Este ano não houve fim de semana.",
-    "body": "Então estamos a construí-lo com memórias — cada Defqon, cada palco, cada nascer do sol que trouxemos para casa. Acrescenta o teu, na tua língua.",
+    "subtitle": "Então estamos a construí-lo com memórias.",
+    "body": "Cada Defqon, cada palco, cada nascer do sol que trouxemos para casa. Acrescenta o teu, na tua língua.",
     "cta": "acrescenta o teu momento",
-    "counter": "{moments, plural, one {# momento} other {# momentos}} · {countries, plural, one {# país} other {# países}}"
+    "liveBadge": "neste momento recorda-se em {countries} países",
+    "browseWall": "percorre o mural ↓",
+    "counterMoments": "{moments, plural, one { momento} other { momentos}}",
+    "counterCountries": "{countries, plural, one { país} other { países}}"
   },
   "wall": {
     "allEditions": "tudo",
     "lostEditionChip": "{year} — o fim de semana perdido",
     "emptyTitle": "o mural está a acordar",
     "emptyBody": "sê dos primeiros a deixar um momento aqui.",
-    "loadMore": "mais momentos"
+    "loadMore": "mais momentos",
+    "liveFeed": "{n, plural, one {# momento acabou de chegar} other {# momentos acabaram de chegar}}",
+    "lostEditionSub": "o mural recorda a edição que nunca abriu",
+    "anonymous": "anónimo"
   },
   "moment": {
     "openMoment": "abrir momento",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "acrescenta o teu momento",
-    "step": "passo {n}/3",
-    "pickTitle": "escolhe as tuas fotos",
-    "pickHint": "até 5 fotos ou GIFs — ou liga um vídeo do YouTube",
-    "embedToggle": "prefiro ligar um vídeo",
-    "filesToggle": "prefiro carregar fotos",
+    "step": "{n} / 2",
+    "signTitle": "assina e publica",
+    "modePhotos": "carregar fotos",
+    "modeEmbed": "link de vídeo",
+    "dropHint": "até 5 fotos ou GIFs, 10MB cada — também podes arrastar e largar",
+    "embedHint": "um momento curto que filmaste — não a gravação de um set inteiro",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "remover foto",
     "whichMoment": "que momento?",
+    "olderEditions": "edições anteriores",
+    "collapse": "recolher",
     "captionLabel": "diz alguma coisa (opcional)",
-    "nameTitle": "assina-o (opcional)",
     "nameLabel": "nome visível",
     "igLabel": "instagram (opcional)",
     "rightsLabel": "Fui eu que o capturei e tenho o direito de o partilhar",
@@ -54,11 +64,12 @@
     "next": "seguinte",
     "submit": "partilhar o meu momento",
     "submitting": "a partilhar…",
-    "doneTitle": "está live — está no mural",
-    "doneBody": "guarda em baixo o teu link privado de remoção. quem o tiver pode retirar este momento — é teu.",
+    "doneTitle": "já está no mural",
+    "doneBody": "este momento é teu — com o link privado abaixo podes retirá-lo quando quiseres.",
     "copyLink": "copiar link de remoção",
     "copied": "copiado",
     "toWall": "vê-lo no mural",
+    "toPassport": "guarda-o no teu passaporte",
     "errors": {
       "tooMany": "no máximo 5 ficheiros por momento",
       "unsupported": "apenas fotos e GIFs — vídeos, por link",
@@ -67,8 +78,7 @@
       "badEmbed": "isso não parece um link do YouTube",
       "needEvent": "escolhe uma edição",
       "failed": "algo correu mal — nada foi publicado. tenta outra vez."
-    },
-    "toPassport": "guarda-o no teu passaporte"
+    }
   },
   "takedown": {
     "confirmTitle": "remover este momento?",
@@ -98,7 +108,11 @@
     "since": "desde {year} · {count} edições",
     "editionsHeading": "edições em que estive",
     "addFirstMoment": "adiciona o teu primeiro momento",
+    "addMoment": "acrescenta um momento",
     "noneChecked": "marca as edições em que estiveste.",
+    "stampOrdinal": "{n}º",
+    "stampCanceled": "cancelada",
+    "stampHint": "toca num carimbo para marcar as edições em que estiveste · vermelho = um ano cancelado",
     "myMoments": "os meus momentos ({count})",
     "noMoments": "ainda nada — os teus uploads juntam-se aqui.",
     "signOut": "deixar o passaporte neste dispositivo"

@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { prepareForUpload, validateFiles } from '@/lib/upload/client-image'
@@ -16,18 +16,39 @@ import { isTurnstileEnabled, Turnstile } from './turnstile'
 import { inputClass } from './ui'
 
 /**
- * 3-step upload, no login — docs/15 §2. Instant publish (D7): submit ends
- * with the moment already on the wall plus a private delete link.
- * The rights checkbox is the legal gate (docs/05): submit stays disabled
- * without it, and the server enforces it again.
+ * 2-step upload, no login — docs/15 §2 (redesign 2026-07-16 §3). Step 1 is
+ * media + edition + caption; step 2 is the signature, the rights gate and the
+ * bot check. Instant publish (D7): submit ends with the moment already on the
+ * wall plus a private delete link. The rights checkbox is the legal gate
+ * (docs/05): submit stays disabled without it, and the server enforces it again.
+ * The submit pipeline (presign → R2 PUT → /api/memories) is unchanged — fields
+ * only moved between steps.
  */
 
-type Step = 1 | 2 | 3
+type Step = 1 | 2
 type Mode = 'files' | 'embed'
+
+/** A selected photo with its preview URL and in-flight compression promise. */
+interface Picked {
+  file: File
+  /** object URL for the thumbnail — revoked on remove and on unmount */
+  url: string
+  /** compression starts at selection so it overlaps step 2 (form filling) */
+  prepare: Promise<File>
+}
 
 interface DoneMoment {
   id: string
   takedownToken: string
+}
+
+const EDITION_PREVIEW_COUNT = 6
+
+/** Same label grammar the old <select> used, so stored values are unchanged. */
+function editionLabel(edition: EditionChip): string {
+  return `${edition.year}${edition.edition ? ` — ${edition.edition}` : ''}${
+    edition.canceled ? ' (canceled)' : ''
+  }`
 }
 
 export function UploadWizard({
@@ -41,11 +62,11 @@ export function UploadWizard({
   const t = useTranslations('upload')
   const [step, setStep] = useState<Step>(1)
   const [mode, setMode] = useState<Mode>('files')
-  const [files, setFiles] = useState<File[]>([])
-  // compression starts at selection so it overlaps steps 2-3 (form filling)
-  const [preparing, setPreparing] = useState<Promise<File>[] | null>(null)
+  const [picked, setPicked] = useState<Picked[]>([])
+  const [dragging, setDragging] = useState(false)
   const [embedUrl, setEmbedUrl] = useState('')
   const [eventId, setEventId] = useState('')
+  const [olderOpen, setOlderOpen] = useState(false)
   const [caption, setCaption] = useState('')
   const [authorName, setAuthorName] = useState('')
   const [authorLink, setAuthorLink] = useState('')
@@ -54,7 +75,22 @@ export function UploadWizard({
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<DoneMoment[] | null>(null)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Revoke leftover preview URLs only when the wizard unmounts — a ref keeps
+  // the latest list without re-running cleanup on every selection change.
+  const pickedRef = useRef(picked)
+  useEffect(() => {
+    pickedRef.current = picked
+  })
+  useEffect(
+    () => () => {
+      for (const p of pickedRef.current) URL.revokeObjectURL(p.url)
+    },
+    [],
+  )
+
+  const files = picked.map((p) => p.file)
   const invalidFiles = validateFiles(files)
   const fileError = !invalidFiles
     ? null
@@ -64,19 +100,51 @@ export function UploadWizard({
         ? t('errors.unsupported')
         : t('errors.tooLarge')
 
-  const step1Ready = mode === 'files' ? files.length > 0 && !fileError : embedUrl.trim().length > 0
+  const mediaReady =
+    mode === 'files' ? files.length > 0 && !fileError : embedUrl.trim().length > 0
+
+  const selectedEdition = editions.find((e) => e.id === eventId) ?? null
+  const visibleEditions = olderOpen ? editions : editions.slice(0, EDITION_PREVIEW_COUNT)
+  const hasOlderEditions = editions.length > EDITION_PREVIEW_COUNT
+
+  /** Append newly picked files (selection or drop). Old code replaced. */
+  function appendFiles(incoming: File[]) {
+    if (incoming.length === 0) return
+    setError(null)
+    const entries: Picked[] = incoming.map((file) => {
+      const prepare = prepareImpl(file)
+      // mark handled so a decode failure never unhandled-rejects before submit
+      // attaches its own handler
+      prepare.catch(() => {})
+      return { file, url: URL.createObjectURL(file), prepare }
+    })
+    setPicked((prev) => [...prev, ...entries])
+  }
+
+  function removeFile(index: number) {
+    setError(null)
+    setPicked((prev) => {
+      const next = [...prev]
+      const [gone] = next.splice(index, 1)
+      if (gone) URL.revokeObjectURL(gone.url)
+      return next
+    })
+  }
 
   function next() {
     setError(null)
-    if (step === 1 && !step1Ready) {
+    if (!mediaReady) {
+      // a file-level error (too many / wrong type / too large) already renders
+      // its own alert; only nudge when there's nothing usable yet
+      if (mode === 'files' && files.length > 0) return
       setError(mode === 'files' ? t('errors.needFiles') : t('errors.badEmbed'))
       return
     }
-    if (step === 2 && !eventId) {
+    if (!eventId) {
       setError(t('errors.needEvent'))
       return
     }
-    setStep((s) => Math.min(3, s + 1) as Step)
+    setStep(2)
   }
 
   async function submit() {
@@ -108,9 +176,9 @@ export function UploadWizard({
         // would otherwise re-await the same failure forever.
         let prepared: File[]
         try {
-          prepared = await Promise.all(preparing ?? files.map((file) => prepareImpl(file)))
+          prepared = await Promise.all(picked.map((p) => p.prepare))
         } catch {
-          prepared = await Promise.all(files.map((file) => prepareImpl(file)))
+          prepared = await Promise.all(picked.map((p) => prepareImpl(p.file)))
         }
         const presignRes = await fetch('/api/upload/presign', {
           method: 'POST',
@@ -168,66 +236,120 @@ export function UploadWizard({
 
   if (done) return <DoneScreen moments={done} />
 
+  const segBase = 'flex-1 rounded-full py-1.5 text-center transition-colors'
+  const segActive = 'bg-orange font-medium text-black'
+  const segIdle = 'text-muted hover:text-paper'
+
   return (
     <div className="flex flex-col gap-6">
-      <div aria-label="progress" className="flex items-center gap-2">
-        <span className="text-sm text-orange">{t('step', { n: step })}</span>
-        <div className="h-1 flex-1 rounded bg-surface">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="font-display text-3xl font-medium lowercase tracking-tight">
+            {step === 1 ? t('title') : t('signTitle')}
+          </h1>
+          <span className="font-display text-sm text-orange">{t('step', { n: step })}</span>
+        </div>
+        <div aria-label="progress" className="h-[3px] rounded-full bg-surface">
           <div
-            className="h-1 rounded bg-orange transition-all"
-            style={{ width: `${(step / 3) * 100}%` }}
+            className="h-[3px] rounded-full bg-orange transition-[width] duration-250"
+            style={{ width: step === 1 ? '50%' : '100%' }}
           />
         </div>
       </div>
 
       {step === 1 && (
-        <section className="flex flex-col gap-4">
-          <h2 className="font-display text-xl lowercase">{t('pickTitle')}</h2>
-          <p className="text-sm text-muted">{t('pickHint')}</p>
+        <section className="flex flex-col gap-5">
+          {/* mode segment — replaces the old text-link toggle */}
+          <div role="tablist" className="flex rounded-full border border-line p-[3px] text-sm">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'files'}
+              onClick={() => setMode('files')}
+              className={`${segBase} ${mode === 'files' ? segActive : segIdle}`}
+            >
+              {t('modePhotos')}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'embed'}
+              onClick={() => setMode('embed')}
+              className={`${segBase} ${mode === 'embed' ? segActive : segIdle}`}
+            >
+              {t('modeEmbed')}
+            </button>
+          </div>
+
           {mode === 'files' ? (
-            <>
+            <div className="flex flex-col gap-2">
+              {/* always mounted so getByLabel('photos') works at any file count */}
               <input
+                ref={fileInputRef}
                 type="file"
                 accept={Object.keys(ALLOWED_MIME).join(',')}
                 multiple
                 aria-label="photos"
+                className="sr-only"
                 onChange={(e) => {
-                  const picked = Array.from(e.target.files ?? [])
-                  setFiles(picked)
-                  if (validateFiles(picked)) {
-                    setPreparing(null)
-                  } else {
-                    const promises = picked.map((f) => prepareImpl(f))
-                    // mark handled so a decode failure never unhandled-rejects
-                    // before submit attaches its own handler
-                    promises.forEach((prom) => prom.catch(() => {}))
-                    setPreparing(promises)
-                  }
+                  appendFiles(Array.from(e.target.files ?? []))
+                  e.target.value = '' // let the same file re-trigger change
                 }}
-                className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-orange file:px-4 file:py-2 file:font-medium file:text-black"
               />
-              {files.length > 0 && !fileError && (
-                <ul className="flex flex-col gap-1 text-sm text-muted">
-                  {files.slice(0, MAX_FILES_PER_MOMENT).map((file) => (
-                    <li key={file.name}>{file.name}</li>
-                  ))}
-                </ul>
-              )}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setDragging(true)
+                }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  setDragging(false)
+                  appendFiles(Array.from(e.dataTransfer.files))
+                }}
+                className="grid grid-cols-3 gap-2 sm:grid-cols-4"
+              >
+                {picked.map((p, i) => (
+                  <div
+                    key={p.url}
+                    className="relative aspect-square overflow-hidden rounded-lg bg-surface"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      aria-label={t('removePhoto')}
+                      onClick={() => removeFile(i)}
+                      className="absolute right-1 top-1 grid h-[22px] w-[22px] place-items-center rounded-full bg-[rgba(11,9,8,.85)] text-[11px] text-muted hover:text-paper"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                {picked.length < MAX_FILES_PER_MOMENT && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-dashed ${
+                      dragging ? 'border-[rgba(255,106,0,.6)]' : 'border-[rgba(163,154,144,.35)]'
+                    } hover:border-[rgba(255,106,0,.6)]`}
+                  >
+                    <span className="text-xl text-orange">+</span>
+                    <span className="text-[11px] text-muted">
+                      {picked.length} / {MAX_FILES_PER_MOMENT}
+                    </span>
+                  </button>
+                )}
+              </div>
+              <p className="text-[13px] text-[#6e655c]">{t('dropHint')}</p>
               {fileError && (
                 <p role="alert" className="text-sm text-warning">
                   {fileError}
                 </p>
               )}
-              <button
-                type="button"
-                onClick={() => setMode('embed')}
-                className="self-start text-sm text-flame hover:underline"
-              >
-                {t('embedToggle')}
-              </button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex flex-col gap-2">
               <input
                 type="url"
                 value={embedUrl}
@@ -236,36 +358,58 @@ export function UploadWizard({
                 onChange={(e) => setEmbedUrl(e.target.value)}
                 className={inputClass}
               />
-              <button
-                type="button"
-                onClick={() => setMode('files')}
-                className="self-start text-sm text-flame hover:underline"
-              >
-                {t('filesToggle')}
-              </button>
-            </>
+              <p className="text-[13px] text-[#6e655c]">{t('embedHint')}</p>
+            </div>
           )}
-        </section>
-      )}
 
-      {step === 2 && (
-        <section className="flex flex-col gap-4">
-          <h2 className="font-display text-xl lowercase">{t('whichMoment')}</h2>
-          <select
-            value={eventId}
-            aria-label="edition"
-            onChange={(e) => setEventId(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">—</option>
-            {editions.map((edition) => (
-              <option key={edition.id} value={edition.id}>
-                {edition.year}
-                {edition.edition ? ` — ${edition.edition}` : ''}
-                {edition.canceled ? ' (canceled)' : ''}
-              </option>
-            ))}
-          </select>
+          {/* edition chips — replace the old <select> */}
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-muted">{t('whichMoment')}</span>
+            <div
+              role="radiogroup"
+              aria-label={t('whichMoment')}
+              className="flex flex-wrap gap-1.5"
+            >
+              {visibleEditions.map((edition) => {
+                const selected = edition.id === eventId
+                return (
+                  <button
+                    key={edition.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => {
+                      setEventId(edition.id)
+                      setError(null)
+                    }}
+                    className={`min-h-[32px] whitespace-nowrap rounded-full border px-3 py-1 text-sm transition-colors ${
+                      selected
+                        ? 'border-orange text-orange'
+                        : edition.canceled
+                          ? 'border-red/40 text-red'
+                          : 'border-line text-muted hover:text-paper'
+                    }`}
+                  >
+                    {edition.year}
+                  </button>
+                )
+              })}
+              {hasOlderEditions && (
+                <button
+                  type="button"
+                  onClick={() => setOlderOpen((o) => !o)}
+                  className="min-h-[32px] whitespace-nowrap rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
+                >
+                  {olderOpen ? `${t('collapse')} ▴` : `${t('olderEditions')} ▾`}
+                </button>
+              )}
+            </div>
+            {selectedEdition && (
+              <p className="text-xs text-flame">{editionLabel(selectedEdition)}</p>
+            )}
+          </div>
+
+          {/* caption — unchanged copy/limits so getByLabel(/say something/) matches */}
           <label className="flex flex-col gap-1 text-sm text-muted">
             {t('captionLabel')}
             <textarea
@@ -282,9 +426,8 @@ export function UploadWizard({
         </section>
       )}
 
-      {step === 3 && (
+      {step === 2 && (
         <section className="flex flex-col gap-4">
-          <h2 className="font-display text-xl lowercase">{t('nameTitle')}</h2>
           <label className="flex flex-col gap-1 text-sm text-muted">
             {t('nameLabel')}
             <input
@@ -303,13 +446,27 @@ export function UploadWizard({
               className={inputClass}
             />
           </label>
-          <label className="flex items-start gap-2 text-sm">
+          {/* rights confirmation card — the checkbox is real (sr-only) so tests
+              and form a11y keep working; the server double-checks rightsConfirmed */}
+          <label
+            className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3.5 text-sm leading-[1.45] ${
+              rights ? 'border-[rgba(255,106,0,.5)] bg-[rgba(255,106,0,.06)]' : 'border-line'
+            }`}
+          >
             <input
               type="checkbox"
               checked={rights}
               onChange={(e) => setRights(e.target.checked)}
-              className="mt-0.5 accent-orange"
+              className="sr-only"
             />
+            <span
+              aria-hidden="true"
+              className={`mt-px grid h-4 w-4 shrink-0 place-items-center rounded text-[11px] ${
+                rights ? 'bg-orange text-black' : 'border border-[rgba(163,154,144,.4)]'
+              }`}
+            >
+              {rights ? '✓' : ''}
+            </span>
             <span>{t('rightsLabel')}</span>
           </label>
           <Turnstile onToken={setTurnstileToken} />
@@ -326,7 +483,7 @@ export function UploadWizard({
         {step > 1 ? (
           <button
             type="button"
-            onClick={() => setStep((s) => Math.max(1, s - 1) as Step)}
+            onClick={() => setStep(1)}
             className="rounded-full border border-line px-4 py-2 text-sm text-muted hover:text-paper"
           >
             {t('back')}
@@ -334,11 +491,11 @@ export function UploadWizard({
         ) : (
           <span />
         )}
-        {step < 3 ? (
+        {step === 1 ? (
           <button
             type="button"
             onClick={next}
-            className="rounded-full bg-orange px-6 py-2 font-medium text-black disabled:opacity-40"
+            className="rounded-full bg-orange px-7 py-2.5 font-medium text-black transition-opacity hover:opacity-90"
           >
             {t('next')}
           </button>
@@ -347,7 +504,7 @@ export function UploadWizard({
             type="button"
             onClick={() => void submit()}
             disabled={!rights || submitting || (isTurnstileEnabled() && !turnstileToken)}
-            className="rounded-full bg-orange px-6 py-2 font-medium text-black disabled:opacity-40"
+            className="rounded-full bg-orange px-7 py-2.5 font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             {submitting ? t('submitting') : t('submit')}
           </button>
@@ -360,7 +517,7 @@ export function UploadWizard({
 function DoneScreen({ moments }: { moments: DoneMoment[] }) {
   const t = useTranslations('upload')
   const locale = useLocale()
-  const [copied, setCopied] = useState(false)
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   // Client-only screen (renders after submit) — window always exists.
   // The locale prefix keeps the stored link redirect-free.
   const links = moments.map(
@@ -368,19 +525,29 @@ function DoneScreen({ moments }: { moments: DoneMoment[] }) {
   )
 
   return (
-    <section className="flex flex-col items-center gap-4 text-center">
-      <h2 className="font-display text-2xl lowercase text-orange">{t('doneTitle')}</h2>
-      <p className="max-w-md text-sm text-muted">{t('doneBody')}</p>
-      <button
-        type="button"
-        onClick={async () => {
-          await navigator.clipboard.writeText(links.join('\n'))
-          setCopied(true)
-        }}
-        className="rounded-full border border-line px-4 py-2 text-sm text-muted hover:text-paper"
-      >
-        {copied ? t('copied') : t('copyLink')}
-      </button>
+    <section className="flex flex-col items-center gap-5 text-center">
+      <h1 className="font-display text-2xl font-medium lowercase text-orange">{t('doneTitle')}</h1>
+      <p className="max-w-[420px] text-sm text-muted">{t('doneBody')}</p>
+      <div className="flex w-full flex-col gap-2">
+        {links.map((link, i) => (
+          <div
+            key={link}
+            className="flex items-center gap-2 rounded-lg border border-[rgba(163,154,144,.2)] bg-surface px-3 py-2.5"
+          >
+            <span className="flex-1 truncate text-left font-mono text-xs text-muted">{link}</span>
+            <button
+              type="button"
+              onClick={async () => {
+                await navigator.clipboard.writeText(link)
+                setCopiedIndex(i)
+              }}
+              className="rounded-md bg-orange px-3 py-1 text-[13px] font-medium text-black transition-opacity hover:opacity-90"
+            >
+              {copiedIndex === i ? t('copied') : t('copyLink')}
+            </button>
+          </div>
+        ))}
+      </div>
       <div className="flex items-center gap-3">
         <Link
           href="/"
@@ -388,7 +555,10 @@ function DoneScreen({ moments }: { moments: DoneMoment[] }) {
         >
           {t('toWall')}
         </Link>
-        <Link href="/passport" className="text-sm text-flame hover:underline">
+        <Link
+          href="/passport"
+          className="rounded-full border border-[rgba(163,154,144,.3)] px-5 py-3 text-sm text-paper hover:text-paper"
+        >
           {t('toPassport')}
         </Link>
       </div>

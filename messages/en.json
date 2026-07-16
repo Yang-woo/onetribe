@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "This year, the weekend never happened.",
-    "body": "So we’re building it from memory — every Defqon, every stage, every sunrise we ever took home. Add yours, in your own language.",
+    "subtitle": "So we’re building it from memory.",
+    "body": "Every Defqon, every stage, every sunrise we ever took home. Add yours, in your own language.",
     "cta": "add your moment",
-    "counter": "{moments, plural, one {# moment} other {# moments}} · {countries, plural, one {# country} other {# countries}}"
+    "liveBadge": "remembering across {countries} countries right now",
+    "browseWall": "browse the wall ↓",
+    "counterMoments": "{moments, plural, one { moment} other { moments}}",
+    "counterCountries": "{countries, plural, one { country} other { countries}}"
   },
   "wall": {
     "allEditions": "all",
     "lostEditionChip": "{year} — the lost weekend",
     "emptyTitle": "the wall is waking up",
     "emptyBody": "be one of the first to leave a moment here.",
-    "loadMore": "more moments"
+    "loadMore": "more moments",
+    "liveFeed": "{n, plural, one {# moment} other {# moments}} just landed",
+    "lostEditionSub": "the wall remembers the edition that never opened",
+    "anonymous": "anonymous"
   },
   "moment": {
     "openMoment": "open moment",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "add your moment",
-    "step": "step {n}/3",
-    "pickTitle": "pick your photos",
-    "pickHint": "up to 5 photos or GIFs — or link a YouTube video instead",
-    "embedToggle": "link a video instead",
-    "filesToggle": "upload photos instead",
+    "step": "{n} / 2",
+    "signTitle": "sign & publish",
+    "modePhotos": "upload photos",
+    "modeEmbed": "video link",
+    "dropHint": "up to 5 photos or GIFs, 10MB each — drag & drop works too",
+    "embedHint": "a short moment you filmed — not a full-set recording",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "remove photo",
     "whichMoment": "which moment?",
+    "olderEditions": "older editions",
+    "collapse": "collapse",
     "captionLabel": "say something (optional)",
-    "nameTitle": "sign it (optional)",
     "nameLabel": "display name",
     "igLabel": "instagram (optional)",
     "rightsLabel": "I captured this myself and have the right to share it",
@@ -54,11 +64,12 @@
     "next": "next",
     "submit": "share my moment",
     "submitting": "sharing…",
-    "doneTitle": "it’s live — it’s on the wall",
-    "doneBody": "save your private delete link below. anyone with it can take this moment down — it’s yours.",
+    "doneTitle": "it’s on the wall",
+    "doneBody": "this moment is yours — with the private link below you can take it down anytime.",
     "copyLink": "copy delete link",
     "copied": "copied",
     "toWall": "see it on the wall",
+    "toPassport": "save it to your passport",
     "errors": {
       "tooMany": "up to 5 files per moment",
       "unsupported": "photos and GIFs only — link videos instead",
@@ -67,8 +78,7 @@
       "badEmbed": "that doesn’t look like a YouTube link",
       "needEvent": "pick an edition",
       "failed": "something went wrong — nothing was posted. try again."
-    },
-    "toPassport": "save it to your passport"
+    }
   },
   "takedown": {
     "confirmTitle": "take this moment down?",
@@ -98,7 +108,11 @@
     "since": "since {year} · {count} editions",
     "editionsHeading": "editions i've been to",
     "addFirstMoment": "add your first moment",
+    "addMoment": "add a moment",
     "noneChecked": "tap the editions you were there for.",
+    "stampOrdinal": "{n, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}",
+    "stampCanceled": "canceled",
+    "stampHint": "tap a stamp to mark editions you attended · red = a canceled year",
     "myMoments": "my moments ({count})",
     "noMoments": "no moments yet — your uploads will gather here.",
     "signOut": "leave this passport on this device"

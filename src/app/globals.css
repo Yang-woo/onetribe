@@ -28,6 +28,19 @@
   background-image: linear-gradient(92deg, var(--color-orange), var(--color-red));
 }
 
+/* Pulse dot — live-signal accent, used only by the hero badge and the wall
+ * live feed (see PulseDot). Applied via animate-[pulse-dot_…]; the
+ * motion-reduce variant turns it off for reduced-motion users. */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
 /* Single dark theme by design (night culture) — no light mode. */
 body {
   background: var(--color-black);

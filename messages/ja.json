@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "今年、あの週末は来なかった。",
-    "body": "だから思い出でつくる — 持ち帰ったすべてのDefqon、すべてのステージ、すべての朝日で。あなたの瞬間を、あなたの言葉で。",
+    "subtitle": "だから思い出でつくる。",
+    "body": "持ち帰ったすべてのDefqon、すべてのステージ、すべての朝日で。あなたの瞬間を、あなたの言葉で。",
     "cta": "瞬間を残す",
-    "counter": "{moments, plural, other {#つの瞬間}} · {countries, plural, other {#か国}}"
+    "liveBadge": "いま{countries}か国で思い出している",
+    "browseWall": "壁を見てみる ↓",
+    "counterMoments": "{moments, plural, other {個の瞬間}}",
+    "counterCountries": "{countries, plural, other {か国}}"
   },
   "wall": {
     "allEditions": "すべて",
     "lostEditionChip": "{year} — 失われた週末",
     "emptyTitle": "壁が目を覚ましはじめた",
     "emptyBody": "最初のひとりになって、ここに瞬間を残そう。",
-    "loadMore": "もっと見る"
+    "loadMore": "もっと見る",
+    "liveFeed": "たったいま{n, plural, other {#件}}の瞬間が届いた",
+    "lostEditionSub": "開かれなかったエディションを、壁が代わりに覚えている",
+    "anonymous": "匿名"
   },
   "moment": {
     "openMoment": "瞬間を開く",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "瞬間を残す",
-    "step": "ステップ {n}/3",
-    "pickTitle": "写真を選ぶ",
-    "pickHint": "写真・GIFを最大5枚 — またはYouTube動画のリンクで",
-    "embedToggle": "動画リンクにする",
-    "filesToggle": "写真のアップロードに戻る",
+    "step": "{n} / 2",
+    "signTitle": "サインして公開",
+    "modePhotos": "写真をアップロード",
+    "modeEmbed": "動画リンク",
+    "dropHint": "写真・GIFを最大5枚、1枚10MBまで — ドラッグ&ドロップもできます",
+    "embedHint": "あなたが撮った短い瞬間で — セット全編の録画は不可",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "写真を削除",
     "whichMoment": "どの瞬間？",
+    "olderEditions": "以前のエディション",
+    "collapse": "たたむ",
     "captionLabel": "ひとこと添える（任意）",
-    "nameTitle": "サインする（任意）",
     "nameLabel": "表示名",
     "igLabel": "インスタグラム（任意）",
     "rightsLabel": "自分で撮影したもので、共有する権利があります",
@@ -54,11 +64,12 @@
     "next": "次へ",
     "submit": "瞬間をシェアする",
     "submitting": "シェア中…",
-    "doneTitle": "公開されました — 壁に載っています",
-    "doneBody": "下のプライベート削除リンクを保存してください。このリンクがあればいつでもこの瞬間を取り下げられます — あなたのものだから。",
+    "doneTitle": "壁に載りました",
+    "doneBody": "この瞬間はあなたのもの — 下のプライベートリンクがあれば、いつでも取り下げられます。",
     "copyLink": "削除リンクをコピー",
     "copied": "コピーしました",
     "toWall": "壁で見る",
+    "toPassport": "パスポートに保存",
     "errors": {
       "tooMany": "1回につき最大5ファイルまで",
       "unsupported": "写真・GIFのみ — 動画はリンクで",
@@ -67,8 +78,7 @@
       "badEmbed": "YouTubeのリンクではないようです",
       "needEvent": "エディションを選んでください",
       "failed": "問題が発生しました — 何も投稿されていません。もう一度お試しください。"
-    },
-    "toPassport": "パスポートに保存"
+    }
   },
   "takedown": {
     "confirmTitle": "この瞬間を取り下げますか？",
@@ -98,7 +108,11 @@
     "since": "{year}年から · {count}エディション",
     "editionsHeading": "行ったエディション",
     "addFirstMoment": "最初の瞬間を追加",
+    "addMoment": "瞬間を追加",
     "noneChecked": "行ったエディションをタップしてチェック。",
+    "stampOrdinal": "{n}回目",
+    "stampCanceled": "中止",
+    "stampHint": "スタンプをタップして行ったエディションをチェック · 赤 = 中止になった年",
     "myMoments": "私の瞬間 ({count})",
     "noMoments": "まだありません — アップロードがここに集まります。",
     "signOut": "この端末にパスポートを残す"

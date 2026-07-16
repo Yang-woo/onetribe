@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test'
 
 /**
- * Upload happy path — docs/17 T2.4. Runs against the local storage driver
- * (STORAGE_DRIVER=local) and the local Supabase stack: pick a GIF →
- * edition → rights → submit → delete-link screen → the moment is on the
- * wall. Plus the legal gate: no rights checkbox, no submit.
+ * Upload happy path — docs/17 T2.4 (redesign 2026-07-16 §3: 2 steps). Runs
+ * against the local storage driver (STORAGE_DRIVER=local) and the local
+ * Supabase stack: pick a GIF → edition chip → caption → sign → rights →
+ * submit → delete-link screen → the moment is on the wall. Plus the legal
+ * gate: no rights checkbox, no submit.
  */
 
 // A 1x1 transparent GIF — GIFs skip canvas compression, so this exercises
@@ -15,18 +16,17 @@ test('uploading a moment publishes it to the wall instantly', async ({ page }, t
   const caption = `e2e-${testInfo.project.name}-${Date.now()}`
 
   await page.goto('/upload')
+  // step 1: media + edition + caption (photos is the default mode)
   await page.getByLabel('photos').setInputFiles({
     name: 'moment.gif',
     mimeType: 'image/gif',
     buffer: TINY_GIF,
   })
-  await page.getByRole('button', { name: 'next', exact: true }).click()
-
-  await page.getByLabel('edition').selectOption({ index: 2 })
+  await page.getByRole('radio').nth(2).click() // pick an edition chip (a recent edition)
   await page.getByLabel(/say something/).fill(caption)
   await page.getByRole('button', { name: 'next', exact: true }).click()
 
-  // legal gate: submit stays disabled until rights are confirmed
+  // step 2: sign & publish — legal gate: submit stays disabled until rights
   const submit = page.getByRole('button', { name: 'share my moment' })
   await expect(submit).toBeDisabled()
   await page.getByRole('checkbox').check()
@@ -34,7 +34,7 @@ test('uploading a moment publishes it to the wall instantly', async ({ page }, t
   await submit.click()
 
   // instant publish confirmation with the private delete link
-  await expect(page.getByText(/it’s live/)).toBeVisible()
+  await expect(page.getByRole('heading', { name: /on the wall/ })).toBeVisible()
   await expect(page.getByRole('button', { name: 'copy delete link' })).toBeVisible()
 
   // and the wall already shows it

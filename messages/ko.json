@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "올해, 그 주말은 오지 않았다.",
-    "body": "그래서 우리는 기억으로 짓는다 — 우리가 집에 가져온 모든 데프콘, 모든 스테이지, 모든 일출로. 당신의 순간을, 당신의 언어로 남겨주세요.",
+    "subtitle": "그래서 우리는 기억으로 짓는다.",
+    "body": "우리가 집에 가져온 모든 데프콘, 모든 스테이지, 모든 일출로. 당신의 순간을, 당신의 언어로 남겨주세요.",
     "cta": "내 순간 남기기",
-    "counter": "{moments, plural, other {#개의 순간}} · {countries, plural, other {#개 나라}}"
+    "liveBadge": "지금 {countries}개 나라에서 기억하는 중",
+    "browseWall": "벽 구경하기 ↓",
+    "counterMoments": "{moments, plural, other {개의 순간}}",
+    "counterCountries": "{countries, plural, other {개 나라}}"
   },
   "wall": {
     "allEditions": "전체",
     "lostEditionChip": "{year} — 잃어버린 주말",
     "emptyTitle": "벽이 깨어나는 중",
     "emptyBody": "이곳에 순간을 남기는 첫 사람이 되어주세요.",
-    "loadMore": "더 보기"
+    "loadMore": "더 보기",
+    "liveFeed": "방금 {n, plural, other {#개}}의 순간이 올라왔어요",
+    "lostEditionSub": "열리지 못한 에디션을 위해 벽이 대신 기억합니다",
+    "anonymous": "익명"
   },
   "moment": {
     "openMoment": "순간 열기",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "내 순간 남기기",
-    "step": "{n}/3 단계",
-    "pickTitle": "사진 고르기",
-    "pickHint": "사진·GIF 최대 5장 — 또는 YouTube 영상 링크로",
-    "embedToggle": "영상 링크로 대신하기",
-    "filesToggle": "사진 업로드로 돌아가기",
+    "step": "{n} / 2",
+    "signTitle": "서명하고 게시",
+    "modePhotos": "사진 업로드",
+    "modeEmbed": "영상 링크",
+    "dropHint": "사진·GIF 최대 5장, 장당 10MB — 드래그해서 놓아도 돼요",
+    "embedHint": "셋 전체 녹화가 아닌, 당신이 찍은 짧은 순간으로",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "사진 제거",
     "whichMoment": "어느 순간인가요?",
+    "olderEditions": "이전 에디션",
+    "collapse": "접기",
     "captionLabel": "한마디 남기기 (선택)",
-    "nameTitle": "서명하기 (선택)",
     "nameLabel": "표시 이름",
     "igLabel": "인스타그램 (선택)",
     "rightsLabel": "내가 직접 촬영했고 공유할 권리가 있습니다",
@@ -54,11 +64,12 @@
     "next": "다음",
     "submit": "내 순간 공유하기",
     "submitting": "공유하는 중…",
-    "doneTitle": "게시 완료 — 벽에 올라갔어요",
-    "doneBody": "아래 비공개 삭제 링크를 저장해주세요. 이 링크가 있으면 언제든 이 순간을 내릴 수 있어요 — 당신의 것이니까요.",
+    "doneTitle": "벽에 올라갔어요",
+    "doneBody": "이 순간은 당신의 것 — 아래 비공개 링크만 있으면 언제든 내릴 수 있어요.",
     "copyLink": "삭제 링크 복사",
     "copied": "복사됨",
     "toWall": "벽에서 보기",
+    "toPassport": "여권에 저장하기",
     "errors": {
       "tooMany": "한 번에 최대 5장까지예요",
       "unsupported": "사진·GIF만 — 영상은 링크로 남겨주세요",
@@ -67,8 +78,7 @@
       "badEmbed": "YouTube 링크가 아닌 것 같아요",
       "needEvent": "에디션을 골라주세요",
       "failed": "문제가 생겼어요 — 아무것도 게시되지 않았어요. 다시 시도해주세요."
-    },
-    "toPassport": "여권에 저장하기"
+    }
   },
   "takedown": {
     "confirmTitle": "이 순간을 내릴까요?",
@@ -98,7 +108,11 @@
     "since": "{year}년부터 · {count}개 에디션",
     "editionsHeading": "다녀온 에디션",
     "addFirstMoment": "첫 순간 올리기",
+    "addMoment": "순간 올리기",
     "noneChecked": "다녀온 에디션을 눌러 체크해주세요.",
+    "stampOrdinal": "{n}번째",
+    "stampCanceled": "취소",
+    "stampHint": "스탬프를 눌러 다녀온 에디션을 체크하세요 · 빨강 = 취소된 해",
     "myMoments": "내 순간들 ({count})",
     "noMoments": "아직 없어요 — 업로드한 순간들이 여기에 모여요.",
     "signOut": "이 기기에 여권 남겨두기"

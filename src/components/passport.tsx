@@ -12,6 +12,12 @@ import { Link } from '@/i18n/navigation'
 import { MomentThumb } from './moment-thumb'
 import { inputClass } from './ui'
 
+// Deterministic "hand-stamped" tilt per edition id (§4-1) — stable across
+// renders, never random and never per-render. Only attended/canceled stamps
+// tilt; unvisited years stay flat.
+const ROTS = [-3, -2, -1, 1, 2, 3]
+const rot = (id: string) => ROTS[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % ROTS.length]
+
 /**
  * Festival Passport — docs/15 §4, the retention seed (D3). Anonymous
  * start, edition checklist, the "my Nth defqon" badge, own uploads.
@@ -70,6 +76,14 @@ export function Passport({
   const attended = new Set(state.attendedEventIds)
   const attendedYears = editions.filter((e) => attended.has(e.id)).map((e) => e.year)
   const firstYear = attendedYears.length ? Math.min(...attendedYears) : null
+  // 1-based ordinal of each attended edition among the user's attended years,
+  // sorted ascending — the stamp sublabel ("1st", "2nd", …) (§4-1).
+  const ordinalById = new Map(
+    editions
+      .filter((e) => attended.has(e.id))
+      .sort((a, b) => a.year - b.year)
+      .map((e, i) => [e.id, i + 1] as const),
+  )
   // a quiet story line, not a rank badge: "since 2019 · 3 editions", or the
   // emotionally bigger "my first defqon" for a first-timer. year is a string
   // so ICU doesn't number-format it into "2,024".
@@ -117,6 +131,16 @@ export function Passport({
             {state.moments.map((moment) => (
               <MomentThumb key={moment.id} moment={moment} />
             ))}
+            {/* one more moment — a quiet dashed tile at the end of the wall */}
+            <Link
+              href="/upload"
+              className="mb-3 flex aspect-square break-inside-avoid flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-[rgba(163,154,144,.3)] hover:border-orange"
+            >
+              <span aria-hidden="true" className="text-[18px] text-orange">
+                +
+              </span>
+              <span className="text-[11px] text-muted">{t('addMoment')}</span>
+            </Link>
           </div>
         )}
       </section>
@@ -126,31 +150,41 @@ export function Passport({
         <h3 className="font-display lowercase">{t('editionsHeading')}</h3>
         {n === 0 && <p className="text-sm text-muted">{t('noneChecked')}</p>}
         <div
-          className="grid grid-cols-4 gap-2 sm:grid-cols-6"
+          className="grid grid-cols-4 gap-3 sm:grid-cols-5"
           role="group"
           aria-label={t('editionsHeading')}
         >
           {editions.map((edition) => {
             const on = attended.has(edition.id)
+            const canceled = edition.canceled
             return (
               <button
                 key={edition.id}
                 type="button"
                 aria-pressed={on}
                 onClick={() => void toggle(edition.id)}
-                className={`rounded-lg border px-2 py-2 text-sm transition-colors ${
+                // stable per-id tilt; only stamped (attended/canceled) years lean
+                style={{ transform: on || canceled ? `rotate(${rot(edition.id)}deg)` : undefined }}
+                className={`flex aspect-square flex-col items-center justify-center gap-px rounded-full transition-colors ${
                   on
-                    ? 'border-orange bg-surface text-orange'
-                    : edition.canceled
-                      ? 'border-red/30 text-red/70'
-                      : 'border-line text-muted hover:text-paper'
+                    ? 'border-2 border-orange bg-[rgba(255,106,0,.07)] text-orange'
+                    : canceled
+                      ? 'border-2 border-dashed border-red/45 text-red/70'
+                      : 'border border-line text-muted hover:text-paper'
                 }`}
               >
-                {edition.year}
+                <span className="font-display text-[15px] font-semibold">{edition.year}</span>
+                {(on || canceled) && (
+                  // decorative sublabel — the year stays the button's a11y name
+                  <span aria-hidden="true" className="text-[9px] tracking-[.04em] opacity-75">
+                    {on ? t('stampOrdinal', { n: ordinalById.get(edition.id) ?? 0 }) : t('stampCanceled')}
+                  </span>
+                )}
               </button>
             )
           })}
         </div>
+        <p className="text-xs text-[#6e655c]">{t('stampHint')}</p>
       </section>
     </section>
   )

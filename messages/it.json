@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "Quest’anno il weekend non c’è stato.",
-    "body": "Così lo ricostruiamo con i ricordi — ogni Defqon, ogni palco, ogni alba che ci siamo portati a casa. Aggiungi il tuo, nella tua lingua.",
+    "subtitle": "Così lo ricostruiamo con i ricordi.",
+    "body": "Ogni Defqon, ogni palco, ogni alba che ci siamo portati a casa. Aggiungi il tuo, nella tua lingua.",
     "cta": "aggiungi il tuo momento",
-    "counter": "{moments, plural, one {# momento} other {# momenti}} · {countries, plural, one {# paese} other {# paesi}}"
+    "liveBadge": "in questo momento si ricorda in {countries} paesi",
+    "browseWall": "sfoglia il muro ↓",
+    "counterMoments": "{moments, plural, one { momento} other { momenti}}",
+    "counterCountries": "{countries, plural, one { paese} other { paesi}}"
   },
   "wall": {
     "allEditions": "tutto",
     "lostEditionChip": "{year} — il weekend perduto",
     "emptyTitle": "il muro si sta svegliando",
     "emptyBody": "sii tra i primi a lasciare un momento qui.",
-    "loadMore": "altri momenti"
+    "loadMore": "altri momenti",
+    "liveFeed": "{n, plural, one {# momento appena arrivato} other {# momenti appena arrivati}}",
+    "lostEditionSub": "il muro ricorda l’edizione che non si è mai aperta",
+    "anonymous": "anonimo"
   },
   "moment": {
     "openMoment": "apri il momento",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "aggiungi il tuo momento",
-    "step": "passo {n}/3",
-    "pickTitle": "scegli le tue foto",
-    "pickHint": "fino a 5 foto o GIF — oppure collega un video YouTube",
-    "embedToggle": "meglio collegare un video",
-    "filesToggle": "meglio caricare foto",
+    "step": "{n} / 2",
+    "signTitle": "firma e pubblica",
+    "modePhotos": "carica foto",
+    "modeEmbed": "link video",
+    "dropHint": "fino a 5 foto o GIF, 10MB ciascuna — puoi anche trascinarle qui",
+    "embedHint": "un breve momento che hai filmato — non la registrazione di un set intero",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "rimuovi foto",
     "whichMoment": "quale momento?",
+    "olderEditions": "edizioni precedenti",
+    "collapse": "comprimi",
     "captionLabel": "di’ qualcosa (facoltativo)",
-    "nameTitle": "firmalo (facoltativo)",
     "nameLabel": "nome visibile",
     "igLabel": "instagram (facoltativo)",
     "rightsLabel": "L’ho catturato io e ho il diritto di condividerlo",
@@ -54,11 +64,12 @@
     "next": "avanti",
     "submit": "condividi il mio momento",
     "submitting": "condivisione…",
-    "doneTitle": "è live — è sul muro",
-    "doneBody": "salva qui sotto il tuo link privato di eliminazione. chiunque lo abbia può rimuovere questo momento — è tuo.",
+    "doneTitle": "è sul muro",
+    "doneBody": "questo momento è tuo — con il link privato qui sotto puoi rimuoverlo quando vuoi.",
     "copyLink": "copia link di eliminazione",
     "copied": "copiato",
     "toWall": "guardalo sul muro",
+    "toPassport": "salvalo nel passaporto",
     "errors": {
       "tooMany": "massimo 5 file per momento",
       "unsupported": "solo foto e GIF — i video, tramite link",
@@ -67,8 +78,7 @@
       "badEmbed": "non sembra un link YouTube",
       "needEvent": "scegli un’edizione",
       "failed": "qualcosa è andato storto — non è stato pubblicato nulla. riprova."
-    },
-    "toPassport": "salvalo nel passaporto"
+    }
   },
   "takedown": {
     "confirmTitle": "rimuovere questo momento?",
@@ -98,7 +108,11 @@
     "since": "dal {year} · {count} edizioni",
     "editionsHeading": "le edizioni a cui sono stato",
     "addFirstMoment": "aggiungi il tuo primo momento",
+    "addMoment": "aggiungi un momento",
     "noneChecked": "segna le edizioni a cui c’eri.",
+    "stampOrdinal": "{n}º",
+    "stampCanceled": "annullata",
+    "stampHint": "tocca un timbro per segnare le edizioni a cui sei stato · rosso = un anno annullato",
     "myMoments": "i miei momenti ({count})",
     "noMoments": "ancora nulla — i tuoi upload si raccoglieranno qui.",
     "signOut": "lascia il passaporto su questo dispositivo"

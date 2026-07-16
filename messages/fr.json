@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "Cette année, le week-end n’a pas eu lieu.",
-    "body": "Alors on le reconstruit avec nos souvenirs — chaque Defqon, chaque scène, chaque lever de soleil qu’on a ramené à la maison. Ajoute le tien, dans ta langue.",
+    "subtitle": "Alors on le reconstruit avec nos souvenirs.",
+    "body": "Chaque Defqon, chaque scène, chaque lever de soleil qu’on a ramené à la maison. Ajoute le tien, dans ta langue.",
     "cta": "ajoute ton moment",
-    "counter": "{moments, plural, one {# moment} other {# moments}} · {countries, plural, one {# pays} other {# pays}}"
+    "liveBadge": "on se souvient en ce moment dans {countries} pays",
+    "browseWall": "parcourir le mur ↓",
+    "counterMoments": "{moments, plural, one { moment} other { moments}}",
+    "counterCountries": "{countries, plural, one { pays} other { pays}}"
   },
   "wall": {
     "allEditions": "tout",
     "lostEditionChip": "{year} — le week-end perdu",
     "emptyTitle": "le mur se réveille",
     "emptyBody": "sois parmi les premiers à laisser un moment ici.",
-    "loadMore": "plus de moments"
+    "loadMore": "plus de moments",
+    "liveFeed": "{n, plural, one {# moment vient d’arriver} other {# moments viennent d’arriver}}",
+    "lostEditionSub": "le mur se souvient de l’édition qui n’a jamais ouvert",
+    "anonymous": "anonyme"
   },
   "moment": {
     "openMoment": "ouvrir le moment",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "ajoute ton moment",
-    "step": "étape {n}/3",
-    "pickTitle": "choisis tes photos",
-    "pickHint": "jusqu’à 5 photos ou GIF — ou mets un lien YouTube",
-    "embedToggle": "plutôt un lien vidéo",
-    "filesToggle": "plutôt des photos",
+    "step": "{n} / 2",
+    "signTitle": "signe et publie",
+    "modePhotos": "importer des photos",
+    "modeEmbed": "lien vidéo",
+    "dropHint": "jusqu’à 5 photos ou GIF, 10 Mo chacune — le glisser-déposer marche aussi",
+    "embedHint": "un court moment que tu as filmé — pas l’enregistrement d’un set entier",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "retirer la photo",
     "whichMoment": "quel moment ?",
+    "olderEditions": "éditions plus anciennes",
+    "collapse": "réduire",
     "captionLabel": "dis quelque chose (optionnel)",
-    "nameTitle": "signe-le (optionnel)",
     "nameLabel": "nom affiché",
     "igLabel": "instagram (optionnel)",
     "rightsLabel": "Je l’ai capturé moi-même et j’ai le droit de le partager",
@@ -54,11 +64,12 @@
     "next": "suivant",
     "submit": "partager mon moment",
     "submitting": "partage…",
-    "doneTitle": "c’est en ligne — c’est sur le mur",
-    "doneBody": "garde ton lien de suppression privé ci-dessous. quiconque l’a peut retirer ce moment — il est à toi.",
+    "doneTitle": "c’est sur le mur",
+    "doneBody": "ce moment est à toi — avec le lien privé ci-dessous, tu peux le retirer quand tu veux.",
     "copyLink": "copier le lien de suppression",
     "copied": "copié",
     "toWall": "le voir sur le mur",
+    "toPassport": "enregistre-le dans ton passeport",
     "errors": {
       "tooMany": "5 fichiers maximum par moment",
       "unsupported": "photos et GIF uniquement — les vidéos, en lien",
@@ -67,8 +78,7 @@
       "badEmbed": "ça ne ressemble pas à un lien YouTube",
       "needEvent": "choisis une édition",
       "failed": "quelque chose a mal tourné — rien n’a été publié. réessaie."
-    },
-    "toPassport": "enregistre-le dans ton passeport"
+    }
   },
   "takedown": {
     "confirmTitle": "retirer ce moment ?",
@@ -98,7 +108,11 @@
     "since": "depuis {year} · {count} éditions",
     "editionsHeading": "les éditions où j'étais",
     "addFirstMoment": "ajoute ton premier moment",
+    "addMoment": "ajoute un moment",
     "noneChecked": "coche les éditions où tu étais.",
+    "stampOrdinal": "{n, selectordinal, one {#er} other {#e}}",
+    "stampCanceled": "annulée",
+    "stampHint": "touche un tampon pour marquer les éditions où tu étais · rouge = une année annulée",
     "myMoments": "mes moments ({count})",
     "noMoments": "rien encore — tes uploads se rassembleront ici.",
     "signOut": "laisser le passeport sur cet appareil"

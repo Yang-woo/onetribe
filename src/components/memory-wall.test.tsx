@@ -1,7 +1,7 @@
 import { act, screen } from '@testing-library/react'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { beforeAll, describe, expect, test, vi } from 'vitest'
-import type { Moment } from '@/lib/moments'
+import type { EditionChip, Moment } from '@/lib/moments'
 import { MemoryWall } from './memory-wall'
 
 // Spec: docs/15 §1 — empty state invites the first upload; realtime
@@ -109,5 +109,64 @@ describe('MemoryWall', () => {
     expect(loadMore).toHaveBeenCalledWith({ createdAt: '2026-07-12T00:00:00Z', id: 'm39' })
     expect(screen.getAllByText('caption-old')).toHaveLength(1)
     expect(screen.getByText('caption-new')).toBeInTheDocument()
+  })
+
+  // docs/15 §1 — filtered views get an edition header; the live signal counts
+  // this session's inserts and only appears once something has landed.
+  test('a canceled-year filter shows the lost-weekend header and a live signal after an insert', () => {
+    let emit: (m: Moment) => void = () => {}
+    const subscribe = (onInsert: (m: Moment) => void) => {
+      emit = onInsert
+      return () => {}
+    }
+    const lost: EditionChip = { id: 'e2026', year: 2026, edition: 'Sacred Oath', canceled: true }
+    renderWithIntl(
+      <MemoryWall
+        initialMoments={[moment('a', { event_id: 'e2026' })]}
+        eventIds={['e2026']}
+        filterEdition={lost}
+        subscribeImpl={subscribe}
+        loadMoreImpl={noLoadMore}
+      />,
+    )
+
+    expect(screen.getByRole('heading', { name: '2026 — the lost weekend' })).toBeInTheDocument()
+    expect(screen.getByText(/the wall remembers the edition that never opened/)).toBeInTheDocument()
+    expect(screen.queryByText(/just landed/)).not.toBeInTheDocument()
+
+    act(() => {
+      emit(moment('fresh', { event_id: 'e2026' }))
+      emit(moment('fresh', { event_id: 'e2026' })) // duplicate delivery must not double-count
+    })
+    expect(screen.getByText(/1 moment just landed/)).toBeInTheDocument()
+  })
+
+  test('a normal edition filter titles by anthem with no lost-weekend subtitle', () => {
+    const ed: EditionChip = { id: 'e2024', year: 2024, edition: 'Power of the Tribe', canceled: false }
+    renderWithIntl(
+      <MemoryWall
+        initialMoments={[moment('a', { event_id: 'e2024' })]}
+        filterEdition={ed}
+        editionById={new Map([['e2024', ed]])}
+        loadMoreImpl={noLoadMore}
+        subscribeImpl={noSubscribe}
+      />,
+    )
+    expect(screen.getByRole('heading', { name: '2024 — Power of the Tribe' })).toBeInTheDocument()
+    expect(screen.queryByText(/never opened/)).not.toBeInTheDocument()
+  })
+
+  test('cards carry the edition tag (year + anthem initials) and an anonymous meta line', () => {
+    const ed: EditionChip = { id: 'e2024', year: 2024, edition: 'Power of the Tribe', canceled: false }
+    renderWithIntl(
+      <MemoryWall
+        initialMoments={[moment('a', { event_id: 'e2024', author_name: null })]}
+        editionById={new Map([['e2024', ed]])}
+        loadMoreImpl={noLoadMore}
+        subscribeImpl={noSubscribe}
+      />,
+    )
+    expect(screen.getByText('2024 POTT')).toBeInTheDocument()
+    expect(screen.getByText('anonymous')).toBeInTheDocument()
   })
 })

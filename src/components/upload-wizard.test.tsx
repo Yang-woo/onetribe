@@ -6,9 +6,10 @@ import type { EditionChip } from '@/lib/moments'
 import { UploadWizard } from './upload-wizard'
 
 /**
- * Wizard spec from docs/15 §2: 3 steps with preserved state, ≤5 files,
- * rights checkbox gates submit (legal core — docs/05), completion screen
- * hands out the private delete link.
+ * Wizard spec from docs/15 §2 + redesign 2026-07-16 §3: 2 steps with preserved
+ * state, ≤5 files (appended, not replaced), a mode segment, edition chips
+ * (radiogroup), the rights checkbox gating submit (legal core — docs/05), and a
+ * completion screen that hands out a private delete link per moment.
  */
 
 const editions: EditionChip[] = [
@@ -22,10 +23,10 @@ function gifFile(name: string): File {
   return new File([new Uint8Array([0x47, 0x49, 0x46])], name, { type: 'image/gif' })
 }
 
-async function fillToStep3(user: ReturnType<typeof userEvent.setup>) {
+// Step 1 now holds media + edition + caption; step 2 holds the signature.
+async function fillToStep2(user: ReturnType<typeof userEvent.setup>, editionYear = '2023') {
   await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif')])
-  await user.click(screen.getByRole('button', { name: 'next' }))
-  await user.selectOptions(screen.getByLabelText('edition'), 'e2023')
+  await user.click(screen.getByRole('radio', { name: editionYear }))
   await user.click(screen.getByRole('button', { name: 'next' }))
 }
 
@@ -46,19 +47,70 @@ describe('UploadWizard', () => {
     expect(screen.getByLabelText('photos')).toBeInTheDocument() // still on step 1
   })
 
+  test('selecting more files appends instead of replacing', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif'), gifFile('b.gif')])
+    expect(screen.getAllByRole('button', { name: 'remove photo' })).toHaveLength(2)
+    await user.upload(screen.getByLabelText('photos'), [gifFile('c.gif')])
+    // appended (old code replaced): 3 tiles, not 1
+    expect(screen.getAllByRole('button', { name: 'remove photo' })).toHaveLength(3)
+  })
+
+  test('removing a photo drops just that tile', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif'), gifFile('b.gif')])
+    await user.click(screen.getAllByRole('button', { name: 'remove photo' })[0])
+    expect(screen.getAllByRole('button', { name: 'remove photo' })).toHaveLength(1)
+  })
+
+  test('the mode segment switches between photos and a video link', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    // photos is the default mode
+    expect(screen.getByLabelText('photos')).toBeInTheDocument()
+    expect(screen.queryByLabelText('youtube link')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: 'video link' }))
+    expect(screen.getByLabelText('youtube link')).toBeInTheDocument()
+    expect(screen.queryByLabelText('photos')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: 'upload photos' }))
+    expect(screen.getByLabelText('photos')).toBeInTheDocument()
+  })
+
+  test('an edition chip toggles aria-checked and blocks advancing until picked', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif')])
+    // no edition yet → next is blocked with the needEvent error
+    await user.click(screen.getByRole('button', { name: 'next' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('pick an edition')
+
+    const chip = screen.getByRole('radio', { name: '2023' })
+    expect(chip).toHaveAttribute('aria-checked', 'false')
+    await user.click(chip)
+    expect(chip).toHaveAttribute('aria-checked', 'true')
+    await user.click(screen.getByRole('button', { name: 'next' }))
+    // advanced to step 2 (signature)
+    expect(screen.getByRole('button', { name: 'share my moment' })).toBeInTheDocument()
+  })
+
   test('back preserves earlier selections', async () => {
     const user = userEvent.setup()
     renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
-    await user.upload(screen.getByLabelText('photos'), [gifFile('keepme.gif')])
-    await user.click(screen.getByRole('button', { name: 'next' }))
+    await fillToStep2(user)
     await user.click(screen.getByRole('button', { name: 'back' }))
-    expect(screen.getByText('keepme.gif')).toBeInTheDocument()
+    // the photo tile and the edition selection both survived the round trip
+    expect(screen.getAllByRole('button', { name: 'remove photo' })).toHaveLength(1)
+    expect(screen.getByRole('radio', { name: '2023' })).toHaveAttribute('aria-checked', 'true')
   })
 
   test('submit is disabled until the rights checkbox is ticked (legal gate)', async () => {
     const user = userEvent.setup()
     renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
-    await fillToStep3(user)
+    await fillToStep2(user)
 
     const submit = screen.getByRole('button', { name: 'share my moment' })
     expect(submit).toBeDisabled()
@@ -94,11 +146,13 @@ describe('UploadWizard', () => {
     vi.stubGlobal('fetch', fetchStub)
 
     renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
-    await fillToStep3(user)
+    await fillToStep2(user)
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))
 
-    expect(await screen.findByText(/it’s live/)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+    // the delete link is promoted to a field + a per-link copy button
+    expect(screen.getByRole('button', { name: 'copy delete link' })).toBeInTheDocument()
 
     const memoriesCall = calls.find((c) => c.url.endsWith('/api/memories'))!
     const payload = JSON.parse(String(memoriesCall.init?.body))
@@ -123,15 +177,14 @@ describe('UploadWizard', () => {
     )
 
     renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
-    await user.click(screen.getByRole('button', { name: 'link a video instead' }))
+    await user.click(screen.getByRole('tab', { name: 'video link' }))
     await user.type(screen.getByLabelText('youtube link'), 'https://youtu.be/dQw4w9WgXcQ')
-    await user.click(screen.getByRole('button', { name: 'next' }))
-    await user.selectOptions(screen.getByLabelText('edition'), 'e2025')
+    await user.click(screen.getByRole('radio', { name: '2025' }))
     await user.click(screen.getByRole('button', { name: 'next' }))
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))
 
-    expect(await screen.findByText(/it’s live/)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
     expect(calls).toHaveLength(1)
   })
 
@@ -142,7 +195,7 @@ describe('UploadWizard', () => {
       vi.fn(async () => new Response(null, { status: 500 })),
     )
     renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
-    await fillToStep3(user)
+    await fillToStep2(user)
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))
     expect(await screen.findByRole('alert')).toHaveTextContent(/nothing was posted/)

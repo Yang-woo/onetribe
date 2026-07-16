@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "Dieses Jahr gab es kein Wochenende.",
-    "body": "Also bauen wir es aus Erinnerungen — jedes Defqon, jede Stage, jeder Sonnenaufgang, den wir mit nach Hause nahmen. Füg deinen hinzu, in deiner Sprache.",
+    "subtitle": "Also bauen wir es aus Erinnerungen.",
+    "body": "Jedes Defqon, jede Stage, jeder Sonnenaufgang, den wir mit nach Hause nahmen. Füg deinen hinzu, in deiner Sprache.",
     "cta": "teile deinen Moment",
-    "counter": "{moments, plural, one {# Moment} other {# Momente}} · {countries, plural, one {# Land} other {# Länder}}"
+    "liveBadge": "gerade wird in {countries} Ländern erinnert",
+    "browseWall": "die Wand durchstöbern ↓",
+    "counterMoments": "{moments, plural, one { Moment} other { Momente}}",
+    "counterCountries": "{countries, plural, one { Land} other { Länder}}"
   },
   "wall": {
     "allEditions": "alle",
     "lostEditionChip": "{year} — das verlorene Wochenende",
     "emptyTitle": "die Wand erwacht",
     "emptyBody": "sei unter den Ersten, die hier einen Moment hinterlassen.",
-    "loadMore": "mehr Momente"
+    "loadMore": "mehr Momente",
+    "liveFeed": "{n, plural, one {# Moment} other {# Momente}} soeben gelandet",
+    "lostEditionSub": "die Wand erinnert an die Edition, die nie stattfand",
+    "anonymous": "anonym"
   },
   "moment": {
     "openMoment": "Moment öffnen",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "teile deinen Moment",
-    "step": "Schritt {n}/3",
-    "pickTitle": "wähle deine Fotos",
-    "pickHint": "bis zu 5 Fotos oder GIFs — oder verlinke ein YouTube-Video",
-    "embedToggle": "lieber ein Video verlinken",
-    "filesToggle": "doch Fotos hochladen",
+    "step": "{n} / 2",
+    "signTitle": "unterschreiben & veröffentlichen",
+    "modePhotos": "Fotos hochladen",
+    "modeEmbed": "Videolink",
+    "dropHint": "bis zu 5 Fotos oder GIFs, je 10MB — Drag & Drop geht auch",
+    "embedHint": "ein kurzer Moment, den du gefilmt hast — keine Aufnahme eines ganzen Sets",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "Foto entfernen",
     "whichMoment": "welcher Moment?",
+    "olderEditions": "ältere Editionen",
+    "collapse": "einklappen",
     "captionLabel": "sag etwas dazu (optional)",
-    "nameTitle": "unterschreib ihn (optional)",
     "nameLabel": "Anzeigename",
     "igLabel": "Instagram (optional)",
     "rightsLabel": "Ich habe das selbst aufgenommen und darf es teilen",
@@ -54,11 +64,12 @@
     "next": "weiter",
     "submit": "meinen Moment teilen",
     "submitting": "wird geteilt…",
-    "doneTitle": "er ist live — er hängt an der Wand",
-    "doneBody": "speichere unten deinen privaten Lösch-Link. Wer ihn hat, kann diesen Moment entfernen — er gehört dir.",
+    "doneTitle": "er hängt an der Wand",
+    "doneBody": "dieser Moment gehört dir — mit dem privaten Link unten kannst du ihn jederzeit entfernen.",
     "copyLink": "Lösch-Link kopieren",
     "copied": "kopiert",
     "toWall": "auf der Wand ansehen",
+    "toPassport": "im Pass speichern",
     "errors": {
       "tooMany": "höchstens 5 Dateien pro Moment",
       "unsupported": "nur Fotos und GIFs — Videos bitte verlinken",
@@ -67,8 +78,7 @@
       "badEmbed": "das sieht nicht nach einem YouTube-Link aus",
       "needEvent": "wähle eine Edition",
       "failed": "etwas ist schiefgelaufen — nichts wurde gepostet. versuch es erneut."
-    },
-    "toPassport": "im Pass speichern"
+    }
   },
   "takedown": {
     "confirmTitle": "diesen Moment entfernen?",
@@ -98,7 +108,11 @@
     "since": "seit {year} · {count} editionen",
     "editionsHeading": "editionen, auf denen ich war",
     "addFirstMoment": "deinen ersten moment hinzufügen",
+    "addMoment": "einen moment hinzufügen",
     "noneChecked": "tippe die Editionen an, bei denen du dabei warst.",
+    "stampOrdinal": "{n}.",
+    "stampCanceled": "abgesagt",
+    "stampHint": "tippe auf einen Stempel, um besuchte Editionen zu markieren · rot = ein abgesagtes Jahr",
     "myMoments": "meine Momente ({count})",
     "noMoments": "noch nichts — deine Uploads sammeln sich hier.",
     "signOut": "Pass auf diesem Gerät behalten"

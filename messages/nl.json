@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "Dit jaar was er geen weekend.",
-    "body": "Dus bouwen we het uit herinneringen — elke Defqon, elk podium, elke zonsopgang die we mee naar huis namen. Voeg de jouwe toe, in je eigen taal.",
+    "subtitle": "Dus bouwen we het uit herinneringen.",
+    "body": "Elke Defqon, elk podium, elke zonsopgang die we mee naar huis namen. Voeg de jouwe toe, in je eigen taal.",
     "cta": "deel jouw moment",
-    "counter": "{moments, plural, one {# moment} other {# momenten}} · {countries, plural, one {# land} other {# landen}}"
+    "liveBadge": "op dit moment wordt er in {countries} landen herinnerd",
+    "browseWall": "blader door de muur ↓",
+    "counterMoments": "{moments, plural, one { moment} other { momenten}}",
+    "counterCountries": "{countries, plural, one { land} other { landen}}"
   },
   "wall": {
     "allEditions": "alles",
     "lostEditionChip": "{year} — het verloren weekend",
     "emptyTitle": "de muur wordt wakker",
     "emptyBody": "wees een van de eersten die hier een moment achterlaat.",
-    "loadMore": "meer momenten"
+    "loadMore": "meer momenten",
+    "liveFeed": "{n, plural, one {# moment} other {# momenten}} zojuist geland",
+    "lostEditionSub": "de muur herinnert zich de editie die nooit openging",
+    "anonymous": "anoniem"
   },
   "moment": {
     "openMoment": "moment openen",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "deel jouw moment",
-    "step": "stap {n}/3",
-    "pickTitle": "kies je foto's",
-    "pickHint": "maximaal 5 foto's of GIF's — of link een YouTube-video",
-    "embedToggle": "liever een video linken",
-    "filesToggle": "toch foto's uploaden",
+    "step": "{n} / 2",
+    "signTitle": "onderteken & publiceer",
+    "modePhotos": "foto's uploaden",
+    "modeEmbed": "videolink",
+    "dropHint": "maximaal 5 foto's of GIF's, elk 10MB — slepen en neerzetten kan ook",
+    "embedHint": "een kort moment dat je filmde — geen opname van een volledige set",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "foto verwijderen",
     "whichMoment": "welk moment?",
+    "olderEditions": "oudere edities",
+    "collapse": "inklappen",
     "captionLabel": "zeg er iets bij (optioneel)",
-    "nameTitle": "onderteken het (optioneel)",
     "nameLabel": "weergavenaam",
     "igLabel": "instagram (optioneel)",
     "rightsLabel": "Ik heb dit zelf vastgelegd en mag het delen",
@@ -54,11 +64,12 @@
     "next": "verder",
     "submit": "deel mijn moment",
     "submitting": "delen…",
-    "doneTitle": "het staat live — het hangt aan de muur",
-    "doneBody": "bewaar hieronder je privé-verwijderlink. iedereen met deze link kan dit moment weghalen — het is van jou.",
+    "doneTitle": "het hangt aan de muur",
+    "doneBody": "dit moment is van jou — met de privélink hieronder kun je het altijd weghalen.",
     "copyLink": "verwijderlink kopiëren",
     "copied": "gekopieerd",
     "toWall": "bekijk het op de muur",
+    "toPassport": "bewaar in je paspoort",
     "errors": {
       "tooMany": "maximaal 5 bestanden per moment",
       "unsupported": "alleen foto's en GIF's — link video's in plaats daarvan",
@@ -67,8 +78,7 @@
       "badEmbed": "dat lijkt geen YouTube-link",
       "needEvent": "kies een editie",
       "failed": "er ging iets mis — er is niets geplaatst. probeer opnieuw."
-    },
-    "toPassport": "bewaar in je paspoort"
+    }
   },
   "takedown": {
     "confirmTitle": "dit moment weghalen?",
@@ -98,7 +108,11 @@
     "since": "sinds {year} · {count} edities",
     "editionsHeading": "edities waar ik was",
     "addFirstMoment": "voeg je eerste moment toe",
+    "addMoment": "voeg een moment toe",
     "noneChecked": "tik de edities aan waar je bij was.",
+    "stampOrdinal": "{n}e",
+    "stampCanceled": "afgelast",
+    "stampHint": "tik op een stempel om edities te markeren waar je was · rood = een afgelast jaar",
     "myMoments": "mijn momenten ({count})",
     "noMoments": "nog niets — je uploads verzamelen zich hier.",
     "signOut": "paspoort op dit apparaat laten"

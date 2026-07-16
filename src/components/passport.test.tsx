@@ -50,8 +50,10 @@ describe('Passport', () => {
     expect(await screen.findByText('my journey')).toBeInTheDocument()
     expect(screen.getByText('@weekend warrior')).toBeInTheDocument()
     expect(screen.getByText(/tap the editions/)).toBeInTheDocument() // n=0
-    // empty passport nudges the first upload
+    expect(screen.getByText(/tap a stamp/)).toBeInTheDocument() // stamp help line
+    // empty passport nudges the first upload — and shows no "+ add" tile
     expect(screen.getByRole('link', { name: 'add your first moment' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'add a moment' })).not.toBeInTheDocument()
   })
 
   test('checking editions updates the identity line optimistically', async () => {
@@ -67,11 +69,17 @@ describe('Passport', () => {
     // n=1 → the first-timer line, not a raw ordinal
     expect(await screen.findByText('my first defqon')).toBeInTheDocument()
 
-    // add 2025 → n=2, earliest attended edition is 2024
+    // attended 2024 stamp carries its ordinal sublabel; the canceled 2026 stamp
+    // reads "canceled" (its year stays the button's accessible name)
+    expect(screen.getByText('1st')).toBeInTheDocument()
+    expect(screen.getByText('canceled')).toBeInTheDocument()
+
+    // add 2025 → n=2, earliest attended edition is 2024, so 2025 becomes the 2nd
     await act(async () => {
       await user.click(screen.getByRole('button', { name: '2025' }))
     })
     expect(screen.getByText('since 2024 · 2 editions')).toBeInTheDocument()
+    expect(screen.getByText('2nd')).toBeInTheDocument()
     expect(backend.toggles).toContain('e2025:true')
 
     // remove 2024 → back to a single edition
@@ -93,5 +101,8 @@ describe('Passport', () => {
 
     expect(await screen.findByText('my moments (1)')).toBeInTheDocument()
     expect(screen.getByText('my own moment')).toBeInTheDocument()
+    // with moments present, the grid ends in a "+ add a moment" tile to /upload
+    const addTile = screen.getByRole('link', { name: 'add a moment' })
+    expect(addTile).toHaveAttribute('href', '/en/upload')
   })
 })

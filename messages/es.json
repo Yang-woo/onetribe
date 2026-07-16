@@ -1,16 +1,23 @@
 {
   "hero": {
     "title": "Este año no hubo fin de semana.",
-    "body": "Así que lo estamos construyendo con recuerdos — cada Defqon, cada escenario, cada amanecer que nos llevamos a casa. Añade el tuyo, en tu idioma.",
+    "subtitle": "Así que lo estamos construyendo con recuerdos.",
+    "body": "Cada Defqon, cada escenario, cada amanecer que nos llevamos a casa. Añade el tuyo, en tu idioma.",
     "cta": "añade tu momento",
-    "counter": "{moments, plural, one {# momento} other {# momentos}} · {countries, plural, one {# país} other {# países}}"
+    "liveBadge": "recordando ahora mismo en {countries} países",
+    "browseWall": "explora el muro ↓",
+    "counterMoments": "{moments, plural, one { momento} other { momentos}}",
+    "counterCountries": "{countries, plural, one { país} other { países}}"
   },
   "wall": {
     "allEditions": "todo",
     "lostEditionChip": "{year} — el fin de semana perdido",
     "emptyTitle": "el muro está despertando",
     "emptyBody": "sé de los primeros en dejar un momento aquí.",
-    "loadMore": "más momentos"
+    "loadMore": "más momentos",
+    "liveFeed": "{n, plural, one {# momento acaba de llegar} other {# momentos acaban de llegar}}",
+    "lostEditionSub": "el muro recuerda la edición que nunca abrió",
+    "anonymous": "anónimo"
   },
   "moment": {
     "openMoment": "abrir momento",
@@ -38,15 +45,18 @@
   },
   "upload": {
     "title": "añade tu momento",
-    "step": "paso {n}/3",
-    "pickTitle": "elige tus fotos",
-    "pickHint": "hasta 5 fotos o GIFs — o enlaza un vídeo de YouTube",
-    "embedToggle": "mejor enlazar un vídeo",
-    "filesToggle": "mejor subir fotos",
+    "step": "{n} / 2",
+    "signTitle": "firma y publica",
+    "modePhotos": "subir fotos",
+    "modeEmbed": "enlace de vídeo",
+    "dropHint": "hasta 5 fotos o GIFs, 10MB cada una — también puedes arrastrar y soltar",
+    "embedHint": "un momento corto que grabaste — no la grabación de un set completo",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
+    "removePhoto": "quitar foto",
     "whichMoment": "¿qué momento?",
+    "olderEditions": "ediciones anteriores",
+    "collapse": "contraer",
     "captionLabel": "di algo (opcional)",
-    "nameTitle": "fírmalo (opcional)",
     "nameLabel": "nombre visible",
     "igLabel": "instagram (opcional)",
     "rightsLabel": "Lo capturé yo y tengo derecho a compartirlo",
@@ -54,11 +64,12 @@
     "next": "siguiente",
     "submit": "compartir mi momento",
     "submitting": "compartiendo…",
-    "doneTitle": "ya está en vivo — está en el muro",
-    "doneBody": "guarda abajo tu enlace privado de borrado. cualquiera con él puede retirar este momento — es tuyo.",
+    "doneTitle": "ya está en el muro",
+    "doneBody": "este momento es tuyo — con el enlace privado de abajo puedes retirarlo cuando quieras.",
     "copyLink": "copiar enlace de borrado",
     "copied": "copiado",
     "toWall": "verlo en el muro",
+    "toPassport": "guárdalo en tu pasaporte",
     "errors": {
       "tooMany": "hasta 5 archivos por momento",
       "unsupported": "solo fotos y GIFs — los vídeos, por enlace",
@@ -67,8 +78,7 @@
       "badEmbed": "eso no parece un enlace de YouTube",
       "needEvent": "elige una edición",
       "failed": "algo salió mal — no se publicó nada. inténtalo de nuevo."
-    },
-    "toPassport": "guárdalo en tu pasaporte"
+    }
   },
   "takedown": {
     "confirmTitle": "¿retirar este momento?",
@@ -98,7 +108,11 @@
     "since": "desde {year} · {count} ediciones",
     "editionsHeading": "ediciones a las que fui",
     "addFirstMoment": "añade tu primer momento",
+    "addMoment": "añade un momento",
     "noneChecked": "marca las ediciones en las que estuviste.",
+    "stampOrdinal": "{n}º",
+    "stampCanceled": "cancelada",
+    "stampHint": "toca un sello para marcar las ediciones a las que fuiste · rojo = un año cancelado",
     "myMoments": "mis momentos ({count})",
     "noMoments": "aún nada — tus subidas se reunirán aquí.",
     "signOut": "dejar el pasaporte en este dispositivo"
