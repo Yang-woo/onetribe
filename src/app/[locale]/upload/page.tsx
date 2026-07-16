@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { UploadWizard } from '@/components/upload-wizard'
-import { fetchEditions } from '@/lib/moments'
+import { getCachedEditions } from '@/lib/moments-cache'
 import { localeAlternates } from '@/lib/seo'
-import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
 // The h1 lives inside the wizard header row now (redesign §3): it swaps copy
 // between step 1 and step 2, so the page just hosts the container.
 export default async function UploadPage() {
-  const editions = await fetchEditions(supabaseServerAnon())
+  const editions = await getCachedEditions()
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-10">
       <UploadWizard editions={editions} />

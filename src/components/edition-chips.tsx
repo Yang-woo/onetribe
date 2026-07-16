@@ -1,9 +1,20 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useLinkStatus } from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import type { EditionChip } from '@/lib/moments'
+
+/**
+ * Chip label with a pending cue — the filter is a dynamic server navigation,
+ * so `useLinkStatus` dims the tapped chip the instant it's clicked (before the
+ * server responds), pairing with the wall skeleton so the click never feels dead.
+ */
+function ChipLabel({ children }: { children: React.ReactNode }) {
+  const { pending } = useLinkStatus()
+  return <span className={pending ? 'animate-pulse opacity-60' : undefined}>{children}</span>
+}
 
 /**
  * Horizontal edition filter — docs/15 §1. Canceled editions render in
@@ -108,7 +119,7 @@ export function EditionChips({
         draggable={false}
         className={`${base} ${selectedYear === null ? active : idle}`}
       >
-        {t('allEditions')}
+        <ChipLabel>{t('allEditions')}</ChipLabel>
       </Link>
       {editions.map((edition) => {
         const isActive = selectedYear === edition.year
@@ -124,7 +135,7 @@ export function EditionChips({
             aria-current={isActive ? 'page' : undefined}
             className={`${base} ${isActive ? active : edition.canceled ? lost : idle}`}
           >
-            {label}
+            <ChipLabel>{label}</ChipLabel>
           </Link>
         )
       })}

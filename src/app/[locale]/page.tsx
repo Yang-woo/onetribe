@@ -1,51 +1,67 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { BrowseWallButton } from '@/components/browse-wall-button'
 import { EditionChips } from '@/components/edition-chips'
 import { MemoryWall } from '@/components/memory-wall'
 import { PulseDot } from '@/components/pulse-dot'
+import { WallSkeleton } from '@/components/wall-skeleton'
 import { Link } from '@/i18n/navigation'
-import { fetchCounters, fetchEditions, fetchMoments } from '@/lib/moments'
+import { fetchMoments, type EditionChip } from '@/lib/moments'
+import { getCachedCounters, getCachedEditions } from '@/lib/moments-cache'
 import { localeAlternates } from '@/lib/seo'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 // Landing + wall in one page — the wall must feel alive on first paint
 // (docs/15 §1). Reads go through the ANON client: RLS is the filter.
+// The shell (hero + chips) renders from cached editions/counters so an edition
+// filter click updates instantly; only the moments query stays dynamic, and it
+// streams inside a Suspense boundary with a skeleton.
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: localeAlternates('/') }
 }
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
-  const t = await getTranslations('hero')
-  const locale = await getLocale()
+/** Dynamic part — the filtered moments. Streams in behind <Suspense>. */
+async function WallSection({
+  selectedYear,
+  editions,
+}: {
+  selectedYear: number | null
+  editions: EditionChip[]
+}) {
   const db = supabaseServerAnon()
-  const { e } = await searchParams
-  const selectedYear = e && /^\d{4}$/.test(e) ? Number(e) : null
-
-  // All first-paint reads start together; moments only chain behind
-  // editions when a year filter needs their ids.
-  const editionsPromise = fetchEditions(db)
-  const momentsPromise = selectedYear
-    ? editionsPromise.then((editions) =>
-        fetchMoments(db, {
-          eventIds: editions.filter((ed) => ed.year === selectedYear).map((ed) => ed.id),
-        }),
-      )
-    : fetchMoments(db)
-  const [editions, moments, counters] = await Promise.all([
-    editionsPromise,
-    momentsPromise,
-    fetchCounters(db),
-  ])
   const selectedEventIds = selectedYear
     ? editions.filter((ed) => ed.year === selectedYear).map((ed) => ed.id)
     : undefined
+  const moments = selectedEventIds
+    ? await fetchMoments(db, { eventIds: selectedEventIds })
+    : await fetchMoments(db)
   const filterEdition = selectedYear
     ? editions.find((ed) => ed.year === selectedYear)
     : undefined
   const editionById = new Map(editions.map((ed) => [ed.id, ed]))
+
+  return (
+    <MemoryWall
+      initialMoments={moments}
+      eventIds={selectedEventIds}
+      filterEdition={filterEdition}
+      editionById={editionById}
+    />
+  )
+}
+
+export default async function Home({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
+  const t = await getTranslations('hero')
+  const locale = await getLocale()
+  const { e } = await searchParams
+  const selectedYear = e && /^\d{4}$/.test(e) ? Number(e) : null
+
+  // Shell data — cached, not filter-specific, so the hero and chips render
+  // immediately on a filter navigation instead of waiting on the DB.
+  const [editions, counters] = await Promise.all([getCachedEditions(), getCachedCounters()])
 
   return (
     <main className="flex-1">
@@ -105,13 +121,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
 
       <div id="wall" className="mx-auto max-w-6xl scroll-mt-16">
         <EditionChips editions={editions} selectedYear={selectedYear} />
-        <MemoryWall
-          key={selectedYear ?? 'all'}
-          initialMoments={moments}
-          eventIds={selectedEventIds}
-          filterEdition={filterEdition}
-          editionById={editionById}
-        />
+        <Suspense key={selectedYear ?? 'all'} fallback={<WallSkeleton />}>
+          <WallSection selectedYear={selectedYear} editions={editions} />
+        </Suspense>
       </div>
     </main>
   )
