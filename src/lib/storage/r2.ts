@@ -6,7 +6,7 @@ export interface R2Config {
   accessKeyId: string
   secretAccessKey: string
   bucket: string
-  publicBaseUrl: string // e.g. https://media.onetribe.dance
+  publicBaseUrl: string // e.g. https://media.onetribe.world
   /** R2 jurisdiction (e.g. "eu"). Jurisdiction-scoped buckets are only reachable
    *  via their jurisdiction endpoint — the default endpoint 404s for them. */
   jurisdiction?: string

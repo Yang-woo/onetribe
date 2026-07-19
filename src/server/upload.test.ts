@@ -37,13 +37,13 @@ describe('normalizeYoutubeUrl', () => {
 
 describe('normalizeInstagramLink', () => {
   test('handles with or without @ become profile URLs', () => {
-    expect(normalizeInstagramLink('@onetribe.dance')).toBe('https://instagram.com/onetribe.dance')
-    expect(normalizeInstagramLink('onetribe.dance')).toBe('https://instagram.com/onetribe.dance')
+    expect(normalizeInstagramLink('@onetribe.world')).toBe('https://instagram.com/onetribe.world')
+    expect(normalizeInstagramLink('onetribe.world')).toBe('https://instagram.com/onetribe.world')
   })
 
   test('instagram.com profile URLs are normalized', () => {
-    expect(normalizeInstagramLink('https://www.instagram.com/onetribe.dance/')).toBe(
-      'https://instagram.com/onetribe.dance',
+    expect(normalizeInstagramLink('https://www.instagram.com/onetribe.world/')).toBe(
+      'https://instagram.com/onetribe.world',
     )
   })
 

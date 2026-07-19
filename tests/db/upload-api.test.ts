@@ -229,7 +229,7 @@ describe('POST /api/memories — file flow', () => {
           eventId,
           caption: `${MARKER}-happy`,
           authorName: 'tester',
-          authorLink: '@onetribe.dance',
+          authorLink: '@onetribe.world',
           rightsConfirmed: true,
           media: [
             { key: uploads[0].key, contentType: 'image/jpeg' },
@@ -258,7 +258,7 @@ describe('POST /api/memories — file flow', () => {
       expect(row.status).toBe('live')
       expect(row.media_url).toMatch(/^https:\/\/media\.test\/m\/\d{4}\//)
       expect(row.origin_country).toBe('KR')
-      expect(row.author_link).toBe('https://instagram.com/onetribe.dance')
+      expect(row.author_link).toBe('https://instagram.com/onetribe.world')
       expect(row.author_name).toBe('tester')
     }
   })

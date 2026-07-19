@@ -3,12 +3,12 @@
  * binding text; other locales see the enNotice banner.
  *
  * Contact is a temporary personal inbox (yangwoo.dev@gmail.com) — swap for a
- * domain address (e.g. privacy@/hello@onetribe.dance) once the domain + mailbox
- * are live (docs/10 checklist). Bump POLICY_LAST_UPDATED whenever text changes.
+ * domain address (privacy@onetribe.world) once Cloudflare Email Routing is
+ * live (docs/10 checklist). Bump POLICY_LAST_UPDATED whenever text changes.
  */
 
 /** ISO date shown as "last updated" across every policy page. */
-export const POLICY_LAST_UPDATED = '2026-07-14'
+export const POLICY_LAST_UPDATED = '2026-07-20'
 
 /** Where removal / privacy / rights-holder requests are sent (see note above). */
 export const POLICY_CONTACT_EMAIL = 'yangwoo.dev@gmail.com'
@@ -57,7 +57,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '5. No warranty; limitation',
         paragraphs: [
-          'The site is provided "as is", free of charge. To the maximum extent permitted by law, we accept no liability for damages arising from use of the site. Content reflects its uploaders, not the operator.',
+          'The site is provided "as is", free of charge. Voluntary donations only cover hosting costs and confer no benefits, features, or priority. To the maximum extent permitted by law, we accept no liability for damages arising from use of the site. Content reflects its uploaders, not the operator.',
         ],
       },
       {
@@ -75,7 +75,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '1. Who we are',
         paragraphs: [
-          `One Tribe (onetribe.dance) is a non-commercial fan project operated from South Korea. Contact: ${POLICY_CONTACT_EMAIL}.`,
+          `One Tribe (onetribe.world) is a non-commercial fan project operated from South Korea. Contact: ${POLICY_CONTACT_EMAIL}.`,
         ],
       },
       {
@@ -104,6 +104,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
         heading: '5. Storage & processors',
         paragraphs: [
           'Content is stored with our infrastructure providers (database/auth: Supabase; media: Cloudflare R2; translation: DeepL). Captions are machine-translated; translated text is cached. Data may be processed in the EU and US under standard safeguards.',
+          'Donations are processed off-site by Ko-fi and GitHub Sponsors; we receive no payment data.',
         ],
       },
       {
@@ -191,4 +192,10 @@ export const ABOUT = {
     'Principles: fan-owned, non-commercial, no ads, no merch. The moments belong to the people who lived them. If something here bothers you, tell us and it comes down — see the takedown page.',
     'Not affiliated with Q-dance or Defqon.1 in any way.',
   ],
+}
+
+/** About `#support` section (docs/00 D15) — shown only when a donation rail exists. */
+export const ABOUT_SUPPORT = {
+  title: 'support',
+  body: 'One Tribe runs on a small server bill and nothing else. If you want to help keep the wall alive, you can buy the server a coffee — donations cover hosting costs only, buy no perks, and never turn this into a business.',
 }

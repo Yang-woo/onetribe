@@ -17,7 +17,7 @@ function localEnv(): Record<string, string> {
   return env
 }
 
-const OPERATOR = { email: 'op@onetribe.dance', password: 'operator-e2e-pass-1' }
+const OPERATOR = { email: 'op@onetribe.world', password: 'operator-e2e-pass-1' }
 
 test.beforeAll(async () => {
   const env = localEnv()

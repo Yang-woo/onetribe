@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
+import { hasSupportLinks } from '@/lib/support'
 
 const FOOTER_LINKS = ['terms', 'privacy', 'takedown', 'guidelines', 'about'] as const
 
@@ -16,6 +17,12 @@ export async function SiteFooter() {
               {t(`links.${key}`)}
             </Link>
           ))}
+          {/* Donations enter via About's no-perk framing, never a direct external link (D15). */}
+          {hasSupportLinks() && (
+            <Link href="/about#support" className="hover:text-paper">
+              {t('links.support')}
+            </Link>
+          )}
         </nav>
       </div>
     </footer>

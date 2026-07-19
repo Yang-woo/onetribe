@@ -4,7 +4,7 @@ A place where hardstyle fans around the world keep the moments they took home fr
 
 > ⚠️ **Unofficial fan project — not affiliated with, endorsed by, or connected to Q-dance / Defqon.1.** No official logos, trademarks, or assets are used.
 
-🌐 [onetribe.dance](https://onetribe.dance) · 🚧 **Work in progress**
+🌐 [onetribe.world](https://onetribe.world) · 🚧 **Work in progress**
 
 ## What it is
 

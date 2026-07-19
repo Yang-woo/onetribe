@@ -59,7 +59,7 @@ jobs:
           STORAGE_DRIVER=local
           UPLOAD_SESSION_SECRET=ci-e2e-only-secret
           TURNSTILE_BYPASS=1
-          ADMIN_EMAILS=op@onetribe.dance
+          ADMIN_EMAILS=op@onetribe.world
           EOF
 
       - run: yarn build

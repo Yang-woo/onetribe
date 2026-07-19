@@ -1,6 +1,10 @@
-import { ABOUT } from '@/lib/policy-content'
+import { ABOUT, ABOUT_SUPPORT } from '@/lib/policy-content'
+import { SUPPORT_LINKS, hasSupportLinks } from '@/lib/support'
 
 export const dynamic = 'force-dynamic'
+
+const supportButtonClass =
+  'rounded-full border border-line px-5 py-2 text-sm font-medium text-paper transition-colors hover:border-orange hover:text-orange'
 
 export default function AboutPage() {
   return (
@@ -11,6 +15,36 @@ export default function AboutPage() {
           <p key={paragraph.slice(0, 24)}>{paragraph}</p>
         ))}
       </div>
+      {hasSupportLinks() && (
+        <section id="support" className="mt-10 border-t border-line pt-8">
+          <h2 className="mb-4 font-display text-2xl lowercase tracking-tight">
+            {ABOUT_SUPPORT.title}
+          </h2>
+          <p className="text-paper/90">{ABOUT_SUPPORT.body}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {SUPPORT_LINKS.kofi && (
+              <a
+                href={SUPPORT_LINKS.kofi}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={supportButtonClass}
+              >
+                ko-fi ↗
+              </a>
+            )}
+            {SUPPORT_LINKS.githubSponsors && (
+              <a
+                href={SUPPORT_LINKS.githubSponsors}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={supportButtonClass}
+              >
+                github sponsors ↗
+              </a>
+            )}
+          </div>
+        </section>
+      )}
     </main>
   )
 }
