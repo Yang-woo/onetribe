@@ -1,32 +1,25 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useLinkStatus } from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import type { EditionChip } from '@/lib/moments'
 
-/**
- * Chip label with a pending cue — the filter is a dynamic server navigation,
- * so `useLinkStatus` dims the tapped chip the instant it's clicked (before the
- * server responds), pairing with the wall skeleton so the click never feels dead.
- */
-function ChipLabel({ children }: { children: React.ReactNode }) {
-  const { pending } = useLinkStatus()
-  return <span className={pending ? 'animate-pulse opacity-60' : undefined}>{children}</span>
-}
+/** The year value a chip filters to — `'all'` clears the filter. */
+export type ChipYear = number | 'all'
 
 /**
  * Horizontal edition filter — docs/15 §1. Canceled editions render in
  * Defqon Red (emotion role, docs/12 B); 2026 carries the "lost weekend"
- * label. Filter state lives in the URL (?e=2026) so views are shareable.
+ * label. Filter state lives in the URL (?e=2026) so views are shareable;
+ * WallFilter drives it from `onSelect` (docs/00 D13).
  *
  * The row scrolls sideways. Touch and trackpad already swipe it. On desktop
  * we add two mouse affordances (macOS hides the overlay scrollbar, so a mouse
  * otherwise can't reach the older editions): a wheel handler that remaps the
  * vertical wheel to horizontal scroll (yielding to the page at the ends), and
  * click-drag — grab the row and pull. A drag past a few px cancels the click
- * that follows so dragging never navigates a chip.
+ * that follows so dragging never fires the filter.
  *
  * Drag tracking uses window-level pointer listeners (not setPointerCapture,
  * which retargets the trailing click and breaks React's delegated handlers)
@@ -35,9 +28,19 @@ function ChipLabel({ children }: { children: React.ReactNode }) {
 export function EditionChips({
   editions,
   selectedYear,
+  onSelect,
+  pendingYear,
 }: {
   editions: EditionChip[]
   selectedYear: number | null
+  /**
+   * Filters in the browser instead of navigating: the click is intercepted
+   * (`preventDefault`) and the year handed to the parent. The `<a href>` is
+   * still real, so crawlers and modified clicks get the server-rendered view.
+   */
+  onSelect: (year: number | null) => void
+  /** The chip currently being fetched, so its label pulses. */
+  pendingYear?: ChipYear | null
 }) {
   const t = useTranslations('wall')
   const scrollerRef = useRef<HTMLElement>(null)
@@ -82,7 +85,8 @@ export function EditionChips({
       window.addEventListener('pointermove', onPointerMove)
       window.addEventListener('pointerup', onPointerUp)
     }
-    // capture phase beats the Link's click, so a drag never navigates
+    // capture phase beats the chip's own click handler, so a drag neither
+    // filters nor navigates
     const onClickCapture = (e: MouseEvent) => {
       if (!drag.moved) return
       e.preventDefault()
@@ -108,6 +112,19 @@ export function EditionChips({
   const active = 'border-orange text-orange'
   const lost = 'border-red/40 text-red'
 
+  // The tapped chip pulses until the parent's fetch lands — nothing navigates,
+  // so this and the wall's dim are the only "we heard you" (docs/15 states).
+  const chipLabel = (year: ChipYear, label: string) => (
+    <span className={pendingYear === year ? 'animate-pulse opacity-60' : undefined}>{label}</span>
+  )
+
+  const chipClick = (year: number | null) => (e: React.MouseEvent) => {
+    // modified clicks mean "open the filter in a new tab" — leave the href alone
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    e.preventDefault()
+    onSelect(year)
+  }
+
   return (
     <nav
       ref={scrollerRef}
@@ -117,9 +134,11 @@ export function EditionChips({
       <Link
         href="/"
         draggable={false}
+        onClick={chipClick(null)}
+        aria-current={selectedYear === null ? 'page' : undefined}
         className={`${base} ${selectedYear === null ? active : idle}`}
       >
-        <ChipLabel>{t('allEditions')}</ChipLabel>
+        {chipLabel('all', t('allEditions'))}
       </Link>
       {editions.map((edition) => {
         const isActive = selectedYear === edition.year
@@ -132,10 +151,11 @@ export function EditionChips({
             key={edition.id}
             href={`/?e=${edition.year}`}
             draggable={false}
+            onClick={chipClick(edition.year)}
             aria-current={isActive ? 'page' : undefined}
             className={`${base} ${isActive ? active : edition.canceled ? lost : idle}`}
           >
-            <ChipLabel>{label}</ChipLabel>
+            {chipLabel(edition.year, label)}
           </Link>
         )
       })}

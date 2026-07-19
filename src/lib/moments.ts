@@ -73,6 +73,42 @@ export interface EditionChip {
   canceled: boolean
 }
 
+/**
+ * The wall's `?e=` edition filter. One parser for both readers — the server
+ * page (searchParams, docs/15 §1) and the client filter (popstate, docs/00 D13)
+ * — so a deep link and a chip click can never disagree on what a URL means.
+ * Anything that isn't a 4-digit year reads as "no filter".
+ */
+export function parseEditionYear(value: string | null | undefined): number | null {
+  return value && /^\d{4}$/.test(value) ? Number(value) : null
+}
+
+/** The props a filter year resolves to on the wall. */
+export interface WallFilterProps {
+  /** The events behind the year — `undefined` (all) means no filter. */
+  eventIds: string[] | undefined
+  /** The edition driving the filter header (docs/15 §1). */
+  filterEdition: EditionChip | undefined
+  /** Id → edition for the per-card tag. */
+  editionById: Map<string, EditionChip>
+}
+
+/**
+ * Everything the wall needs for a given edition year, derived from the chip
+ * list. The other half of the "single source, both readers" rule that
+ * `parseEditionYear` starts (docs/00 D13): the server page and the client
+ * filter share this, so the SSR wall and a post-click wall can't drift for the
+ * same year.
+ */
+export function wallFilterFor(editions: EditionChip[], year: number | null): WallFilterProps {
+  return {
+    eventIds:
+      year === null ? undefined : editions.filter((ed) => ed.year === year).map((ed) => ed.id),
+    filterEdition: year === null ? undefined : editions.find((ed) => ed.year === year),
+    editionById: new Map(editions.map((ed) => [ed.id, ed])),
+  }
+}
+
 export const WALL_PAGE_SIZE = 40
 
 /** Keyset cursor — created_at alone is not unique (a 5-photo batch shares one

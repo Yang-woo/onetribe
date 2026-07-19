@@ -8,8 +8,8 @@ import { Lightbox } from './lightbox'
 import { MomentThumb } from './moment-thumb'
 import { PulseDot } from './pulse-dot'
 
-type LoadMore = (before: import('@/lib/moments').MomentCursor) => Promise<Moment[]>
-type Subscribe = (onInsert: (moment: Moment) => void) => () => void
+export type LoadMore = (before: import('@/lib/moments').MomentCursor) => Promise<Moment[]>
+export type Subscribe = (onInsert: (moment: Moment) => void) => () => void
 
 function defaultLoadMore(eventIds?: string[]): LoadMore {
   return (before) => fetchMoments(supabaseBrowser(), { eventIds, before })
