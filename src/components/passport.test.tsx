@@ -2,7 +2,11 @@ import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
-import type { PassportBackend, PassportState } from '@/lib/passport/backend'
+import type {
+  PassportBackend,
+  PassportIdentity,
+  PassportState,
+} from '@/lib/passport/backend'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { Passport } from './passport'
 
@@ -19,6 +23,8 @@ const editions: EditionChip[] = [
   { id: 'e2024', year: 2024, edition: 'Power of the Tribe', canceled: false },
 ]
 
+const ANON_IDENTITY: PassportIdentity = { email: null, providers: [], isAnonymous: true }
+
 function fakeBackend(initial: PassportState | null): PassportBackend & { toggles: string[] } {
   let state = initial
   const backend = {
@@ -27,11 +33,38 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
       return state
     },
     async start(displayName: string) {
-      state = { userId: 'u1', displayName, attendedEventIds: [], moments: [] }
+      state = {
+        userId: 'u1',
+        displayName,
+        attendedEventIds: [],
+        moments: [],
+        identity: ANON_IDENTITY,
+      }
       return state
     },
     async setAttendance(eventId: string, attended: boolean) {
       backend.toggles.push(`${eventId}:${attended}`)
+    },
+    async linkEmailStart() {},
+    async linkEmailVerify() {},
+    async linkGoogle() {},
+    async signInEmailStart() {},
+    async signInEmailVerify(email: string): Promise<PassportState> {
+      state = {
+        userId: 'u-linked',
+        displayName: 'returning warrior',
+        attendedEventIds: [],
+        moments: [],
+        identity: { email, providers: [], isAnonymous: false },
+      }
+      return state
+    },
+    async signInGoogle() {},
+    async signOut() {
+      state = null
+    },
+    async deleteAccount() {
+      state = null
     },
   }
   return backend
@@ -63,6 +96,7 @@ describe('Passport', () => {
       displayName: 'tester',
       attendedEventIds: ['e2024'],
       moments: [],
+      identity: ANON_IDENTITY,
     })
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 
@@ -96,6 +130,7 @@ describe('Passport', () => {
       displayName: null,
       attendedEventIds: [],
       moments: [momentFixture('m1', { caption: 'my own moment', author_name: 'tester' })],
+      identity: ANON_IDENTITY,
     })
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 
@@ -104,5 +139,36 @@ describe('Passport', () => {
     // with moments present, the grid ends in a "+ add a moment" tile to /upload
     const addTile = screen.getByRole('link', { name: 'add a moment' })
     expect(addTile).toHaveAttribute('href', '/en/upload')
+  })
+
+  test('the journey view carries the keep-this-passport section (D16)', async () => {
+    const backend = fakeBackend({
+      userId: 'u1',
+      displayName: 'tester',
+      attendedEventIds: [],
+      moments: [],
+      identity: ANON_IDENTITY,
+    })
+    renderWithIntl(<Passport editions={editions} backend={backend} />)
+
+    expect(await screen.findByText('keep this passport')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'connect an email' })).toBeInTheDocument()
+  })
+
+  test('a returning warrior signs in from the start screen via email OTP (D16)', async () => {
+    const user = userEvent.setup()
+    const backend = fakeBackend(null)
+    renderWithIntl(<Passport editions={editions} backend={backend} />)
+
+    await user.click(await screen.findByRole('button', { name: 'i already have a passport' }))
+    await user.type(screen.getByLabelText('your email'), 'raver@example.com')
+    await user.click(screen.getByRole('button', { name: 'send me a code' }))
+    await user.type(await screen.findByLabelText('6-digit code'), '123456')
+    await user.click(screen.getByRole('button', { name: 'confirm' }))
+
+    // signed in → journey view with the linked identity
+    expect(await screen.findByText('my journey')).toBeInTheDocument()
+    expect(screen.getByText('@returning warrior')).toBeInTheDocument()
+    expect(screen.getByText('connected as raver@example.com')).toBeInTheDocument()
   })
 })

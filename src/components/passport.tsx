@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import {
@@ -9,7 +9,9 @@ import {
   type PassportState,
 } from '@/lib/passport/backend'
 import { Link } from '@/i18n/navigation'
+import { EmailOtpForm } from './email-otp-form'
 import { MomentThumb } from './moment-thumb'
+import { PassportAccount, passportReturnUrl } from './passport-account'
 import { inputClass } from './ui'
 
 // Deterministic "hand-stamped" tilt per edition id (§4-1) — stable across
@@ -30,44 +32,111 @@ export function Passport({
   backend?: PassportBackend
 }) {
   const t = useTranslations('passport')
+  const locale = useLocale()
   const api = useMemo(() => backend ?? createSupabasePassportBackend(), [backend])
   // undefined = loading, null = no passport yet, object = active session
   const [state, setState] = useState<PassportState | null | undefined>(undefined)
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
+  const [signIn, setSignIn] = useState(false)
+  const [oauthErrorKey, setOauthErrorKey] = useState<string | null>(null)
+  const googleEnabled = process.env.NEXT_PUBLIC_AUTH_GOOGLE === '1'
 
   useEffect(() => {
-    void api.load().then(setState)
+    // OAuth return (D16): errors come back as URL params, not promises. Read
+    // them, then strip every auth param so a reload doesn't replay the state.
+    const params = new URLSearchParams(window.location.search)
+    const returnedError =
+      params.has('error_code') || params.has('error')
+        ? params.get('error_code') === 'identity_already_exists'
+          ? 'googleInUse'
+          : 'genericError'
+        : null
+    let dirty = false
+    for (const key of ['code', 'error', 'error_code', 'error_description']) {
+      if (params.has(key)) {
+        params.delete(key)
+        dirty = true
+      }
+    }
+    if (dirty) {
+      const query = params.toString()
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${query ? `?${query}` : ''}`,
+      )
+    }
+    void api.load().then((loaded) => {
+      setState(loaded)
+      if (returnedError) setOauthErrorKey(returnedError)
+    })
   }, [api])
 
   if (state === undefined) return null
 
   if (!state) {
     return (
-      <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl lowercase">{t('startTitle')}</h2>
-        <input
-          value={name}
-          aria-label={t('namePlaceholder')}
-          placeholder={t('namePlaceholder')}
-          onChange={(e) => setName(e.target.value)}
-          className={inputClass}
-        />
-        <button
-          type="button"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true)
-            try {
-              setState(await api.start(name))
-            } finally {
-              setBusy(false)
-            }
-          }}
-          className="self-start rounded-full bg-orange px-6 py-3 font-medium text-black disabled:opacity-50"
-        >
-          {t('start')}
-        </button>
+      <section className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <h2 className="font-display text-xl lowercase">{t('startTitle')}</h2>
+          <input
+            value={name}
+            aria-label={t('namePlaceholder')}
+            placeholder={t('namePlaceholder')}
+            onChange={(e) => setName(e.target.value)}
+            className={inputClass}
+          />
+          <button
+            type="button"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true)
+              try {
+                setState(await api.start(name))
+              } finally {
+                setBusy(false)
+              }
+            }}
+            className="self-start rounded-full bg-orange px-6 py-3 font-medium text-black disabled:opacity-50"
+          >
+            {t('start')}
+          </button>
+        </div>
+
+        {/* returning warrior — no session on this screen, so signing in can't orphan stamps */}
+        <div className="flex flex-col gap-3 border-t border-line pt-5">
+          {oauthErrorKey && <p className="text-sm text-red">{t(oauthErrorKey)}</p>}
+          {!signIn ? (
+            <button
+              type="button"
+              onClick={() => setSignIn(true)}
+              className="self-start text-sm text-muted underline-offset-2 hover:text-paper hover:underline"
+            >
+              {t('signInTitle')}
+            </button>
+          ) : (
+            <>
+              <h3 className="font-display lowercase">{t('signInTitle')}</h3>
+              <p className="text-sm text-muted">{t('signInHint')}</p>
+              <EmailOtpForm
+                send={(email) => api.signInEmailStart(email)}
+                verify={async (email, code) => {
+                  setState(await api.signInEmailVerify(email, code))
+                }}
+              />
+              {googleEnabled && (
+                <button
+                  type="button"
+                  onClick={() => void api.signInGoogle(passportReturnUrl(locale))}
+                  className="self-start rounded-full border border-line px-4 py-2 text-sm text-paper transition-colors hover:border-orange hover:text-orange"
+                >
+                  {t('connectGoogle')}
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </section>
     )
   }
@@ -186,6 +255,13 @@ export function Passport({
         </div>
         <p className="text-xs text-[#6e655c]">{t('stampHint')}</p>
       </section>
+
+      {/* keep / manage the passport — upgrade while anonymous, account controls after */}
+      <PassportAccount
+        identity={state.identity}
+        api={api}
+        onRefresh={() => void api.load().then(setState)}
+      />
     </section>
   )
 }

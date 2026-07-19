@@ -82,7 +82,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
         heading: '2. What we collect',
         paragraphs: [
           'Memories: photos/GIFs you upload and video links you embed, captions, event/city/year, an optional display name and social link. Published publicly immediately; may be hidden or removed on review or report.',
-          'Account (optional): anonymous account ID, display name, home country, festival attendance log ("Passport").',
+          'Account (optional): account ID (anonymous by default), display name, home country, festival attendance log ("Passport"), and — only if you choose to link them — your email address or Google account identity.',
           'Technical: privacy-friendly analytics (no cross-site tracking, no ad cookies), and logs needed to run the service.',
           'We do not run facial recognition or automatic tagging of people. We do not sell data.',
         ],
@@ -97,13 +97,13 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '4. Your rights (GDPR)',
         paragraphs: [
-          `Access, rectification, erasure, restriction, objection, portability. Email ${POLICY_CONTACT_EMAIL}. You may also complain to your local data-protection authority.`,
+          `Access, rectification, erasure, restriction, objection, portability. You can delete your passport yourself on the passport page — your moments stay on the wall, anonymized, each with its own delete link. Email ${POLICY_CONTACT_EMAIL} for anything else. You may also complain to your local data-protection authority.`,
         ],
       },
       {
         heading: '5. Storage & processors',
         paragraphs: [
-          'Content is stored with our infrastructure providers (database/auth: Supabase; media: Cloudflare R2; translation: DeepL). Captions are machine-translated; translated text is cached. Data may be processed in the EU and US under standard safeguards.',
+          'Content is stored with our infrastructure providers (database/auth: Supabase; media: Cloudflare R2; translation: DeepL; sign-in emails: Resend). Captions are machine-translated; translated text is cached. Data may be processed in the EU and US under standard safeguards.',
           'Donations are processed off-site by Ko-fi and GitHub Sponsors; we receive no payment data.',
         ],
       },
