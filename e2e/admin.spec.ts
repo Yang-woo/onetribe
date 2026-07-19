@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
 import { expect, test } from '@playwright/test'
@@ -43,7 +44,9 @@ test('a non-operator cannot get past the sign-in form', async ({ page }) => {
 test('the operator hides a reported moment and it leaves the wall', async ({ page }) => {
   const env = localEnv()
   const service = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
-  const caption = `admin-e2e-${Date.now()}`
+  // unique per invocation — the mobile/desktop projects run this spec in
+  // parallel against one DB, and Date.now() captions can collide across them
+  const caption = `admin-e2e-${randomUUID().slice(0, 8)}`
 
   const { data: event } = await service
     .from('events')
