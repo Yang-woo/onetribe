@@ -2,16 +2,16 @@
  * User-facing policies — verbatim from docs/10 (EN drafts). English is the
  * binding text; other locales see the enNotice banner.
  *
- * Contact is a temporary personal inbox (yangwoo.dev@gmail.com) — swap for a
- * domain address (privacy@onetribe.world) once Cloudflare Email Routing is
- * live (docs/10 checklist). Bump POLICY_LAST_UPDATED whenever text changes.
+ * Contact goes through Cloudflare Email Routing (privacy@onetribe.world →
+ * operator inbox, live since 2026-07-20). policy-content.test.ts guards the
+ * domain. Bump POLICY_LAST_UPDATED whenever text changes.
  */
 
 /** ISO date shown as "last updated" across every policy page. */
 export const POLICY_LAST_UPDATED = '2026-07-20'
 
 /** Where removal / privacy / rights-holder requests are sent (see note above). */
-export const POLICY_CONTACT_EMAIL = 'yangwoo.dev@gmail.com'
+export const POLICY_CONTACT_EMAIL = 'privacy@onetribe.world'
 
 export interface PolicySection {
   heading?: string
