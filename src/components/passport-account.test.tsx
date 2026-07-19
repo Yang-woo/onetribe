@@ -136,4 +136,17 @@ describe('PassportAccount — upgraded', () => {
     expect(api.deleteAccount).toHaveBeenCalled()
     await waitFor(() => expect(onRefresh).toHaveBeenCalled())
   })
+
+  test('a failed deletion surfaces an error and re-enables the button', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const api = fakeApi({ deleteAccount: vi.fn().mockRejectedValue(new Error('boom')) })
+    const onRefresh = vi.fn()
+    renderWithIntl(<PassportAccount identity={LINKED} api={api} onRefresh={onRefresh} />)
+
+    await user.click(screen.getByRole('button', { name: 'delete my passport' }))
+    expect(await screen.findByText('something went wrong — try again')).toBeInTheDocument()
+    expect(onRefresh).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'delete my passport' })).toBeEnabled()
+  })
 })

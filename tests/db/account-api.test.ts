@@ -64,6 +64,14 @@ describe('account delete route', () => {
       author_link: 'https://instagram.com/doomed',
     })
     fixtureIds.push(memoryId)
+    // a bystander's moment — anonymization must scope to the deleted user only
+    const bystanderId = await seedMemory(service, {
+      event_id: eventId,
+      caption: `bystander-${randomUUID().slice(0, 8)}`,
+      author_name: 'innocent',
+      author_link: 'https://instagram.com/innocent',
+    })
+    fixtureIds.push(bystanderId)
 
     const res = await handler(deleteRequest(token))
     expect(res.status).toBe(200)
@@ -86,5 +94,14 @@ describe('account delete route', () => {
     expect(moment?.author_id).toBeNull()
     expect(moment?.author_name).toBeNull()
     expect(moment?.author_link).toBeNull()
+
+    // and nobody else's credit was touched (a scope bug here would wipe the wall)
+    const { data: bystander } = await service
+      .from('memories')
+      .select('author_name, author_link')
+      .eq('id', bystanderId)
+      .single()
+    expect(bystander?.author_name).toBe('innocent')
+    expect(bystander?.author_link).toBe('https://instagram.com/innocent')
   })
 })

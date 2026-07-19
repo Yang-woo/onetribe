@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, describe, expect, test } from 'vitest'
+import { createSupabasePassportBackend } from '@/lib/passport/backend'
 import { createAnonClient, createServiceClient, eventIdByYear } from './helpers'
 
 /**
@@ -14,32 +15,30 @@ const service = createServiceClient()
 const MAILPIT = 'http://127.0.0.1:54324' // supabase/config.toml [local_smtp]
 const userIds: string[] = []
 
-async function clearMailbox(): Promise<void> {
-  await fetch(`${MAILPIT}/api/v1/messages`, { method: 'DELETE' })
-}
-
-/** Poll Mailpit for the newest mail to `address` and pull the 6-digit code. */
-async function otpFor(address: string, timeoutMs = 20_000): Promise<string> {
+/**
+ * Poll Mailpit for a fresh 6-digit code mailed to `address` (excluding a
+ * previously seen `not` code). Address-scoped so this suite never touches
+ * other suites' mail — safe to run alongside e2e.
+ */
+async function otpFor(address: string, not?: string, timeoutMs = 20_000): Promise<string> {
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
     const list = (await (await fetch(`${MAILPIT}/api/v1/messages`)).json()) as {
       messages?: Array<{ ID: string; To?: Array<{ Address?: string }> }>
     }
-    const mail = (list.messages ?? []).find((m) =>
-      m.To?.some((to) => to.Address?.toLowerCase() === address.toLowerCase()),
-    )
-    if (mail) {
+    for (const mail of list.messages ?? []) {
+      if (!mail.To?.some((to) => to.Address?.toLowerCase() === address.toLowerCase())) continue
       const detail = (await (await fetch(`${MAILPIT}/api/v1/message/${mail.ID}`)).json()) as {
         Text?: string
         HTML?: string
       }
       const match = `${detail.Text ?? ''} ${detail.HTML ?? ''}`.match(/\b(\d{6})\b/)
-      if (match) return match[1]
+      if (match && match[1] !== not) return match[1]
     }
     await new Promise((resolve) => setTimeout(resolve, 400))
   }
   throw new Error(
-    `no OTP mail for ${address} within ${timeoutMs}ms — is local Supabase (Mailpit :54324) up?`,
+    `no fresh OTP mail for ${address} within ${timeoutMs}ms — is local Supabase (Mailpit :54324) up?`,
   )
 }
 
@@ -72,7 +71,6 @@ describe('anonymous → email promotion (D16)', () => {
     expect(stampError).toBeNull()
 
     // 2 — link the email: real OTP out of Mailpit, verified as email_change
-    await clearMailbox()
     const { error: linkError } = await client.auth.updateUser({ email })
     expect(linkError).toBeNull()
     const code = await otpFor(email)
@@ -117,13 +115,12 @@ describe('anonymous → email promotion (D16)', () => {
     // 5 — "another device": fresh client signs in with the same email via OTP
     await client.auth.signOut({ scope: 'local' })
     const otherDevice = createAnonClient()
-    await clearMailbox()
     const { error: signInError } = await otherDevice.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false },
     })
     expect(signInError).toBeNull()
-    const signInCode = await otpFor(email)
+    const signInCode = await otpFor(email, code)
     const { data: back, error: backError } = await otherDevice.auth.verifyOtp({
       email,
       token: signInCode,
@@ -148,4 +145,37 @@ describe('anonymous → email promotion (D16)', () => {
     expect(error).not.toBeNull()
     expect((error as { code?: string }).code).toBe('otp_disabled')
   })
+
+  test('the app backend wires the round trip itself — not just raw supabase-js', async () => {
+    const email = `wired-${randomUUID().slice(0, 8)}@test.onetribe`
+    const backend = createSupabasePassportBackend(createAnonClient())
+
+    const started = await backend.start('wired warrior')
+    userIds.push(started.userId)
+    expect(started.identity.isAnonymous).toBe(true)
+
+    // link — a wrong verifyOtp type in the backend would make GoTrue reject here
+    await backend.linkEmailStart(email)
+    const code = await otpFor(email)
+    await backend.linkEmailVerify(email, code)
+    const linked = await backend.load()
+    expect(linked!.userId).toBe(started.userId)
+    expect(linked!.identity.isAnonymous).toBe(false)
+    expect(linked!.identity.email).toBe(email)
+
+    // leave this device, come back through the backend's sign-in path
+    await backend.signOut()
+    expect(await backend.load()).toBeNull()
+    const otherDevice = createSupabasePassportBackend(createAnonClient())
+    await otherDevice.signInEmailStart(email)
+    const signInCode = await otpFor(email, code)
+    const back = await otherDevice.signInEmailVerify(email, signInCode)
+    expect(back.userId).toBe(started.userId)
+    expect(back.displayName).toBe('wired warrior')
+
+    // D16 explicit behavior: the backend never mints a passport on sign-in
+    await expect(
+      backend.signInEmailStart(`ghost-${randomUUID().slice(0, 8)}@test.onetribe`),
+    ).rejects.toMatchObject({ code: 'otp_disabled' })
+  }, 60_000)
 })

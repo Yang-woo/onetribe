@@ -31,6 +31,7 @@ export function PassportAccount({
   const locale = useLocale()
   const [panel, setPanel] = useState<'none' | 'link-email' | 'sign-in'>('none')
   const [busy, setBusy] = useState(false)
+  const [errorKey, setErrorKey] = useState<string | null>(null)
 
   const secondaryButton =
     'rounded-full border border-line px-4 py-2 text-sm text-paper transition-colors hover:border-orange hover:text-orange disabled:opacity-50'
@@ -123,15 +124,18 @@ export function PassportAccount({
             : null}
       </p>
       <p className="text-sm text-muted">{t('otherDeviceHint')}</p>
+      {errorKey && <p className="text-sm text-red">{t(errorKey)}</p>}
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
           disabled={busy}
           onClick={() => {
             setBusy(true)
+            setErrorKey(null)
             void api
               .signOut()
               .then(onRefresh)
+              .catch(() => setErrorKey('genericError'))
               .finally(() => setBusy(false))
           }}
           className={secondaryButton}
@@ -144,9 +148,11 @@ export function PassportAccount({
           onClick={() => {
             if (!window.confirm(t('deleteConfirm'))) return
             setBusy(true)
+            setErrorKey(null)
             void api
               .deleteAccount()
               .then(onRefresh)
+              .catch(() => setErrorKey('genericError'))
               .finally(() => setBusy(false))
           }}
           className="rounded-full border border-red/45 px-4 py-2 text-sm text-red/80 transition-colors hover:border-red hover:text-red disabled:opacity-50"
