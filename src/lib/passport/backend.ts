@@ -29,22 +29,27 @@ export interface PassportState {
   identity: PassportIdentity
 }
 
-/** UI-facing buckets for auth failures — mapped from GoTrue error codes. */
+/**
+ * Auth failure buckets — the values ARE the passport i18n message keys, so
+ * every surface (OTP form, account panel, OAuth return) translates a GoTrue
+ * code through this one map.
+ */
 export type PassportAuthErrorCode =
-  | 'email-in-use'
-  | 'no-passport'
-  | 'bad-code'
-  | 'rate-limited'
-  | 'unknown'
+  | 'emailInUse'
+  | 'googleInUse'
+  | 'noPassport'
+  | 'badCode'
+  | 'rateLimited'
+  | 'genericError'
 
 const AUTH_ERROR_CODES: Record<string, PassportAuthErrorCode> = {
-  email_exists: 'email-in-use',
-  identity_already_exists: 'email-in-use',
+  email_exists: 'emailInUse',
+  identity_already_exists: 'googleInUse', // only linkIdentity (Google) raises this
   // signInWithOtp({ shouldCreateUser: false }) rejects unknown emails with this
-  otp_disabled: 'no-passport',
-  otp_expired: 'bad-code',
-  over_email_send_rate_limit: 'rate-limited',
-  over_request_rate_limit: 'rate-limited',
+  otp_disabled: 'noPassport',
+  otp_expired: 'badCode',
+  over_email_send_rate_limit: 'rateLimited',
+  over_request_rate_limit: 'rateLimited',
 }
 
 export function passportAuthErrorCode(error: unknown): PassportAuthErrorCode {
@@ -52,7 +57,39 @@ export function passportAuthErrorCode(error: unknown): PassportAuthErrorCode {
     const mapped = AUTH_ERROR_CODES[String((error as { code?: unknown }).code)]
     if (mapped) return mapped
   }
-  return 'unknown'
+  return 'genericError'
+}
+
+/** Google linking is a deploy-gated capability of this backend (docs/00 D16). */
+export const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_GOOGLE === '1'
+
+/** Where OAuth flows return to — the locale-prefixed passport page. */
+export function passportReturnUrl(locale: string): string {
+  return `${window.location.origin}/${locale}/passport`
+}
+
+/**
+ * OAuth returns report errors as URL params, not promises. Read them through
+ * the same GoTrue map as everything else, then strip every auth param so a
+ * reload doesn't replay the state. Call once on passport mount.
+ */
+export function consumeOauthReturnError(): PassportAuthErrorCode | null {
+  const params = new URLSearchParams(window.location.search)
+  const failed = params.has('error_code') || params.has('error')
+  const code = params.get('error_code')
+  let dirty = false
+  for (const key of ['code', 'error', 'error_code', 'error_description']) {
+    if (params.has(key)) {
+      params.delete(key)
+      dirty = true
+    }
+  }
+  if (dirty) {
+    const query = params.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
+  }
+  if (!failed) return null
+  return (code && AUTH_ERROR_CODES[code]) || 'genericError'
 }
 
 export interface PassportBackend {
@@ -61,7 +98,7 @@ export interface PassportBackend {
   setAttendance(eventId: string, attended: boolean): Promise<void>
   // ── upgrade: keeps the current user id, data carries over ──
   linkEmailStart(email: string): Promise<void>
-  linkEmailVerify(email: string, code: string): Promise<void>
+  linkEmailVerify(email: string, code: string): Promise<PassportIdentity>
   linkGoogle(redirectTo: string): Promise<void>
   // ── sign in on another device: replaces the local session ──
   signInEmailStart(email: string): Promise<void>
@@ -155,8 +192,15 @@ export function createSupabasePassportBackend(
     },
 
     async linkEmailVerify(email, code) {
-      const { error } = await client.auth.verifyOtp({ email, token: code, type: 'email_change' })
+      const { data, error } = await client.auth.verifyOtp({
+        email,
+        token: code,
+        type: 'email_change',
+      })
       if (error) throw error
+      if (!data.user) throw new Error('email link returned no user')
+      // only identity changes on a link — callers merge it instead of refetching
+      return identityOf(data.user)
     },
 
     async linkGoogle(redirectTo) {

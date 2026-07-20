@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
+import { otpFor } from '../tests/mailpit'
 
 /**
  * Passport upgrade round trip — docs/15 §4, D16. Anonymous start → link an
@@ -7,29 +8,6 @@ import { expect, test } from '@playwright/test'
  * same passport (stamps intact) opens. This is the whole point of D16:
  * the passport survives the browser.
  */
-
-const MAILPIT = 'http://127.0.0.1:54324' // supabase/config.toml [local_smtp]
-
-/** Newest 6-digit code mailed to `address`, excluding `not` (a previous code). */
-async function otpFor(address: string, not?: string, timeoutMs = 20_000): Promise<string> {
-  const deadline = Date.now() + timeoutMs
-  while (Date.now() < deadline) {
-    const list = (await (await fetch(`${MAILPIT}/api/v1/messages`)).json()) as {
-      messages?: Array<{ ID: string; To?: Array<{ Address?: string }> }>
-    }
-    for (const mail of list.messages ?? []) {
-      if (!mail.To?.some((to) => to.Address?.toLowerCase() === address.toLowerCase())) continue
-      const detail = (await (await fetch(`${MAILPIT}/api/v1/message/${mail.ID}`)).json()) as {
-        Text?: string
-        HTML?: string
-      }
-      const match = `${detail.Text ?? ''} ${detail.HTML ?? ''}`.match(/\b(\d{6})\b/)
-      if (match && match[1] !== not) return match[1]
-    }
-    await new Promise((resolve) => setTimeout(resolve, 400))
-  }
-  throw new Error(`no fresh OTP mail for ${address} — is local Supabase (Mailpit :54324) up?`)
-}
 
 test('anonymous passport → email link → sign back in with stamps intact', async ({ page }) => {
   const email = `e2e-link-${randomUUID().slice(0, 8)}@test.onetribe`

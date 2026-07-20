@@ -12,15 +12,10 @@ import { inputClass } from './ui'
  * mobile "link opened in the wrong browser" trap can't happen.
  */
 
-const ERROR_KEYS: Record<PassportAuthErrorCode, string> = {
-  'email-in-use': 'emailInUse',
-  'no-passport': 'noPassport',
-  'bad-code': 'badCode',
-  'rate-limited': 'rateLimited',
-  unknown: 'genericError',
-}
-
 const RESEND_COOLDOWN_MS = 60_000
+
+const primaryButtonClass =
+  'rounded-full bg-orange px-5 py-2 text-sm font-medium text-black disabled:opacity-50'
 
 export function EmailOtpForm({
   send,
@@ -34,7 +29,7 @@ export function EmailOtpForm({
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
-  const [errorKey, setErrorKey] = useState<string | null>(null)
+  const [errorKey, setErrorKey] = useState<PassportAuthErrorCode | null>(null)
   const [canResend, setCanResend] = useState(false)
   const resendTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
@@ -46,7 +41,7 @@ export function EmailOtpForm({
     try {
       await action()
     } catch (error) {
-      setErrorKey(ERROR_KEYS[passportAuthErrorCode(error)])
+      setErrorKey(passportAuthErrorCode(error))
     } finally {
       setBusy(false)
     }
@@ -80,11 +75,15 @@ export function EmailOtpForm({
           onChange={(e) => setEmail(e.target.value)}
           className={inputClass}
         />
-        {errorKey && <p className="text-sm text-red">{t(errorKey)}</p>}
+        {errorKey && (
+          <p role="alert" className="text-sm text-red">
+            {t(errorKey)}
+          </p>
+        )}
         <button
           type="submit"
           disabled={busy || !email.trim()}
-          className="self-start rounded-full bg-orange px-5 py-2 text-sm font-medium text-black disabled:opacity-50"
+          className={`self-start ${primaryButtonClass}`}
         >
           {t('sendCode')}
         </button>
@@ -111,13 +110,13 @@ export function EmailOtpForm({
         onChange={(e) => setCode(e.target.value)}
         className={inputClass}
       />
-      {errorKey && <p className="text-sm text-red">{t(errorKey)}</p>}
+      {errorKey && (
+        <p role="alert" className="text-sm text-red">
+          {t(errorKey)}
+        </p>
+      )}
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={busy || !code.trim()}
-          className="rounded-full bg-orange px-5 py-2 text-sm font-medium text-black disabled:opacity-50"
-        >
+        <button type="submit" disabled={busy || !code.trim()} className={primaryButtonClass}>
           {t('verifyCode')}
         </button>
         <button

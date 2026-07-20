@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
-import { json, parseBody } from '@/lib/server/http'
+import { json, parseBody, requireBearerUser } from '@/lib/server/http'
 import type { StorageAdapter } from '@/lib/storage'
 
 /**
@@ -17,11 +17,10 @@ export interface AdminDeps {
 }
 
 async function requireAdmin(deps: AdminDeps, req: Request): Promise<Response | null> {
-  const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-  if (!token) return json(401, { error: 'sign in required' })
-  const { data, error } = await deps.db.auth.getUser(token)
-  const email = data.user?.email?.toLowerCase()
-  if (error || !email) return json(401, { error: 'sign in required' })
+  const auth = await requireBearerUser(deps.db, req)
+  if (auth.denied) return auth.denied
+  const email = auth.user.email?.toLowerCase()
+  if (!email) return json(401, { error: 'sign in required' })
   if (!deps.adminEmails.includes(email)) return json(403, { error: 'not an operator' })
   return null
 }

@@ -35,7 +35,8 @@ async function WallSection({
 }) {
   const db = supabaseServerAnon()
   const { eventIds, filterEdition, editionById } = wallFilterFor(editions, selectedYear)
-  const moments = eventIds ? await fetchMoments(db, { eventIds }) : await fetchMoments(db)
+  // fetchMoments ignores an absent/empty eventIds itself — no branching needed
+  const moments = await fetchMoments(db, { eventIds })
 
   return (
     <MemoryWall

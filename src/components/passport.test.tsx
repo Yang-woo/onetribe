@@ -46,7 +46,11 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
       backend.toggles.push(`${eventId}:${attended}`)
     },
     async linkEmailStart() {},
-    async linkEmailVerify() {},
+    async linkEmailVerify(email: string) {
+      const identity = { email, providers: [], isAnonymous: false }
+      if (state) state = { ...state, identity }
+      return identity
+    },
     async linkGoogle() {},
     async signInEmailStart() {},
     async signInEmailVerify(email: string): Promise<PassportState> {

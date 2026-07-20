@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server'
-import { POLICY_LAST_UPDATED, type PolicyDoc } from '@/lib/policy-content'
+import { POLICY_LAST_UPDATED, SITE_DOMAIN, type PolicyDoc } from '@/lib/policy-content'
 
 /**
  * Policy renderer — EN is the binding text (docs/10 checklist); non-EN
@@ -13,7 +13,7 @@ export async function PolicyArticle({ doc }: { doc: PolicyDoc }) {
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
       <h1 className="mb-2 font-display text-3xl tracking-tight">{doc.title}</h1>
       <p className="mb-6 text-sm text-muted">
-        One Tribe (onetribe.world) — last updated: {POLICY_LAST_UPDATED}
+        One Tribe ({SITE_DOMAIN}) — last updated: {POLICY_LAST_UPDATED}
       </p>
       {locale !== 'en' && (
         <p className="mb-6 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-muted">

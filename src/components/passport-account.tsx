@@ -2,8 +2,15 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
-import type { PassportBackend, PassportIdentity } from '@/lib/passport/backend'
+import {
+  GOOGLE_AUTH_ENABLED,
+  passportReturnUrl,
+  type PassportBackend,
+  type PassportIdentity,
+  type PassportState,
+} from '@/lib/passport/backend'
 import { EmailOtpForm } from './email-otp-form'
+import { secondaryButtonClass } from './ui'
 
 /**
  * Passport account section (docs/15 §4, D16). Anonymous passports get the
@@ -12,29 +19,41 @@ import { EmailOtpForm } from './email-otp-form'
  * sign-out and GDPR self-serve deletion.
  */
 
-export function passportReturnUrl(locale: string): string {
-  return `${window.location.origin}/${locale}/passport`
-}
-
 export function PassportAccount({
   identity,
   api,
-  onRefresh,
-  googleEnabled = process.env.NEXT_PUBLIC_AUTH_GOOGLE === '1',
+  onIdentity,
+  onState,
+  googleEnabled = GOOGLE_AUTH_ENABLED,
 }: {
   identity: PassportIdentity
   api: PassportBackend
-  onRefresh: () => void
+  /** A link upgraded this passport in place — merge the fresh identity. */
+  onIdentity: (identity: PassportIdentity) => void
+  /** The session itself changed — signed into another passport (state) or out (null). */
+  onState: (state: PassportState | null) => void
   googleEnabled?: boolean
 }) {
   const t = useTranslations('passport')
   const locale = useLocale()
   const [panel, setPanel] = useState<'none' | 'link-email' | 'sign-in'>('none')
   const [busy, setBusy] = useState(false)
-  const [errorKey, setErrorKey] = useState<string | null>(null)
+  const [errorKey, setErrorKey] = useState<'genericError' | null>(null)
 
-  const secondaryButton =
-    'rounded-full border border-line px-4 py-2 text-sm text-paper transition-colors hover:border-orange hover:text-orange disabled:opacity-50'
+  // signOut/deleteAccount both end this device's session — same rail.
+  const endSession = (action: () => Promise<void>) => {
+    setBusy(true)
+    setErrorKey(null)
+    void action()
+      .then(() => onState(null))
+      .catch(() => setErrorKey('genericError'))
+      .finally(() => setBusy(false))
+  }
+  // OAuth navigates away on success — busy only resets on failure.
+  const oauth = (start: (redirectTo: string) => Promise<void>) => {
+    setBusy(true)
+    void start(passportReturnUrl(locale)).catch(() => setBusy(false))
+  }
 
   if (identity.isAnonymous) {
     return (
@@ -45,7 +64,7 @@ export function PassportAccount({
           <button
             type="button"
             onClick={() => setPanel(panel === 'link-email' ? 'none' : 'link-email')}
-            className={secondaryButton}
+            className={secondaryButtonClass}
           >
             {t('connectEmail')}
           </button>
@@ -53,11 +72,8 @@ export function PassportAccount({
             <button
               type="button"
               disabled={busy}
-              onClick={() => {
-                setBusy(true)
-                void api.linkGoogle(passportReturnUrl(locale)).catch(() => setBusy(false))
-              }}
-              className={secondaryButton}
+              onClick={() => oauth(api.linkGoogle)}
+              className={secondaryButtonClass}
             >
               {t('connectGoogle')}
             </button>
@@ -67,8 +83,7 @@ export function PassportAccount({
           <EmailOtpForm
             send={(email) => api.linkEmailStart(email)}
             verify={async (email, code) => {
-              await api.linkEmailVerify(email, code)
-              onRefresh()
+              onIdentity(await api.linkEmailVerify(email, code))
             }}
           />
         )}
@@ -90,19 +105,15 @@ export function PassportAccount({
             <EmailOtpForm
               send={(email) => api.signInEmailStart(email)}
               verify={async (email, code) => {
-                await api.signInEmailVerify(email, code)
-                onRefresh()
+                onState(await api.signInEmailVerify(email, code))
               }}
             />
             {googleEnabled && (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => {
-                  setBusy(true)
-                  void api.signInGoogle(passportReturnUrl(locale)).catch(() => setBusy(false))
-                }}
-                className={`self-start ${secondaryButton}`}
+                onClick={() => oauth(api.signInGoogle)}
+                className={`self-start ${secondaryButtonClass}`}
               >
                 {t('connectGoogle')}
               </button>
@@ -113,32 +124,28 @@ export function PassportAccount({
     )
   }
 
+  const connectedLabel = identity.email
+    ? t('linkedAs', { email: identity.email })
+    : identity.providers.includes('google')
+      ? t('linkedGoogle')
+      : null
+
   return (
     <section className="flex flex-col gap-3 border-t border-line pt-6">
       <h3 className="font-display lowercase">{t('keepTitle')}</h3>
-      <p className="text-sm text-orange">
-        {identity.email
-          ? t('linkedAs', { email: identity.email })
-          : identity.providers.includes('google')
-            ? t('linkedGoogle')
-            : null}
-      </p>
+      {connectedLabel && <p className="text-sm text-orange">{connectedLabel}</p>}
       <p className="text-sm text-muted">{t('otherDeviceHint')}</p>
-      {errorKey && <p className="text-sm text-red">{t(errorKey)}</p>}
+      {errorKey && (
+        <p role="alert" className="text-sm text-red">
+          {t(errorKey)}
+        </p>
+      )}
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
           disabled={busy}
-          onClick={() => {
-            setBusy(true)
-            setErrorKey(null)
-            void api
-              .signOut()
-              .then(onRefresh)
-              .catch(() => setErrorKey('genericError'))
-              .finally(() => setBusy(false))
-          }}
-          className={secondaryButton}
+          onClick={() => endSession(() => api.signOut())}
+          className={secondaryButtonClass}
         >
           {t('signOut')}
         </button>
@@ -147,13 +154,7 @@ export function PassportAccount({
           disabled={busy}
           onClick={() => {
             if (!window.confirm(t('deleteConfirm'))) return
-            setBusy(true)
-            setErrorKey(null)
-            void api
-              .deleteAccount()
-              .then(onRefresh)
-              .catch(() => setErrorKey('genericError'))
-              .finally(() => setBusy(false))
+            endSession(() => api.deleteAccount())
           }}
           className="rounded-full border border-red/45 px-4 py-2 text-sm text-red/80 transition-colors hover:border-red hover:text-red disabled:opacity-50"
         >

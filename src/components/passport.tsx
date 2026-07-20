@@ -4,15 +4,19 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import {
+  GOOGLE_AUTH_ENABLED,
+  consumeOauthReturnError,
   createSupabasePassportBackend,
+  passportReturnUrl,
+  type PassportAuthErrorCode,
   type PassportBackend,
   type PassportState,
 } from '@/lib/passport/backend'
 import { Link } from '@/i18n/navigation'
 import { EmailOtpForm } from './email-otp-form'
 import { MomentThumb } from './moment-thumb'
-import { PassportAccount, passportReturnUrl } from './passport-account'
-import { inputClass } from './ui'
+import { PassportAccount } from './passport-account'
+import { inputClass, secondaryButtonClass } from './ui'
 
 // Deterministic "hand-stamped" tilt per edition id (§4-1) — stable across
 // renders, never random and never per-render. Only attended/canceled stamps
@@ -39,34 +43,12 @@ export function Passport({
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [signIn, setSignIn] = useState(false)
-  const [oauthErrorKey, setOauthErrorKey] = useState<string | null>(null)
-  const googleEnabled = process.env.NEXT_PUBLIC_AUTH_GOOGLE === '1'
+  const [oauthErrorKey, setOauthErrorKey] = useState<PassportAuthErrorCode | null>(null)
 
   useEffect(() => {
-    // OAuth return (D16): errors come back as URL params, not promises. Read
-    // them, then strip every auth param so a reload doesn't replay the state.
-    const params = new URLSearchParams(window.location.search)
-    const returnedError =
-      params.has('error_code') || params.has('error')
-        ? params.get('error_code') === 'identity_already_exists'
-          ? 'googleInUse'
-          : 'genericError'
-        : null
-    let dirty = false
-    for (const key of ['code', 'error', 'error_code', 'error_description']) {
-      if (params.has(key)) {
-        params.delete(key)
-        dirty = true
-      }
-    }
-    if (dirty) {
-      const query = params.toString()
-      window.history.replaceState(
-        null,
-        '',
-        `${window.location.pathname}${query ? `?${query}` : ''}`,
-      )
-    }
+    // OAuth return errors arrive as URL params — the backend reads and strips
+    // them through the same GoTrue error map as the promise-based flows (D16).
+    const returnedError = consumeOauthReturnError()
     void api.load().then((loaded) => {
       setState(loaded)
       if (returnedError) setOauthErrorKey(returnedError)
@@ -106,7 +88,11 @@ export function Passport({
 
         {/* returning warrior — no session on this screen, so signing in can't orphan stamps */}
         <div className="flex flex-col gap-3 border-t border-line pt-5">
-          {oauthErrorKey && <p className="text-sm text-red">{t(oauthErrorKey)}</p>}
+          {oauthErrorKey && (
+            <p role="alert" className="text-sm text-red">
+              {t(oauthErrorKey)}
+            </p>
+          )}
           {!signIn ? (
             <button
               type="button"
@@ -125,11 +111,11 @@ export function Passport({
                   setState(await api.signInEmailVerify(email, code))
                 }}
               />
-              {googleEnabled && (
+              {GOOGLE_AUTH_ENABLED && (
                 <button
                   type="button"
                   onClick={() => void api.signInGoogle(passportReturnUrl(locale))}
-                  className="self-start rounded-full border border-line px-4 py-2 text-sm text-paper transition-colors hover:border-orange hover:text-orange"
+                  className={`self-start ${secondaryButtonClass}`}
                 >
                   {t('connectGoogle')}
                 </button>
@@ -260,7 +246,9 @@ export function Passport({
       <PassportAccount
         identity={state.identity}
         api={api}
-        onRefresh={() => void api.load().then(setState)}
+        // a link only changes who the passport belongs to — merge, don't refetch
+        onIdentity={(identity) => setState((s) => (s ? { ...s, identity } : s))}
+        onState={setState}
       />
     </section>
   )

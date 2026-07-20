@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { POLICY_CONTACT_EMAIL, POLICY_LAST_UPDATED } from './policy-content'
+import { POLICY_CONTACT_EMAIL, POLICY_LAST_UPDATED, SITE_DOMAIN } from './policy-content'
 
 /**
  * docs/10 checklist guard: the published contact must be the domain inbox.
@@ -7,8 +7,9 @@ import { POLICY_CONTACT_EMAIL, POLICY_LAST_UPDATED } from './policy-content'
  * personal gmail would sail through it, so this pins the domain itself.
  */
 describe('policy constants', () => {
-  test('contact email is the domain inbox, never a personal fallback', () => {
-    expect(POLICY_CONTACT_EMAIL.endsWith('@onetribe.world')).toBe(true)
+  test('site domain and contact inbox are pinned to onetribe.world (D14)', () => {
+    expect(SITE_DOMAIN).toBe('onetribe.world')
+    expect(POLICY_CONTACT_EMAIL).toBe(`privacy@${SITE_DOMAIN}`)
   })
 
   test('last-updated is a plausible ISO date', () => {

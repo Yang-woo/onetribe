@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { json } from '@/lib/server/http'
+import { json, requireBearerUser } from '@/lib/server/http'
 
 /**
  * Self-service account deletion (docs/00 D16, GDPR erasure). The bearer
@@ -14,11 +14,9 @@ export interface AccountDeps {
 
 export function createAccountDeleteHandler(deps: AccountDeps) {
   return async (req: Request): Promise<Response> => {
-    const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-    if (!token) return json(401, { error: 'sign in required' })
-    const { data, error } = await deps.db.auth.getUser(token)
-    if (error || !data.user) return json(401, { error: 'sign in required' })
-    const userId = data.user.id
+    const auth = await requireBearerUser(deps.db, req)
+    if (auth.denied) return auth.denied
+    const userId = auth.user.id
 
     // Anonymize before deleteUser — after it, author_id is already null
     // (FK set null) and these rows can no longer be found.

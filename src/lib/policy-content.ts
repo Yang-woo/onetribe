@@ -10,8 +10,11 @@
 /** ISO date shown as "last updated" across every policy page. */
 export const POLICY_LAST_UPDATED = '2026-07-20'
 
+/** Public site domain (D14) — display strings derive from this one literal. */
+export const SITE_DOMAIN = 'onetribe.world'
+
 /** Where removal / privacy / rights-holder requests are sent (see note above). */
-export const POLICY_CONTACT_EMAIL = 'privacy@onetribe.world'
+export const POLICY_CONTACT_EMAIL = `privacy@${SITE_DOMAIN}`
 
 export interface PolicySection {
   heading?: string
@@ -75,7 +78,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '1. Who we are',
         paragraphs: [
-          `One Tribe (onetribe.world) is a non-commercial fan project operated from South Korea. Contact: ${POLICY_CONTACT_EMAIL}.`,
+          `One Tribe (${SITE_DOMAIN}) is a non-commercial fan project operated from South Korea. Contact: ${POLICY_CONTACT_EMAIL}.`,
         ],
       },
       {

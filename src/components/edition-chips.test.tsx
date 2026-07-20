@@ -12,6 +12,9 @@ import { EditionChips } from './edition-chips'
 
 const noop = () => {}
 
+const renderChips = (overrides: Partial<Parameters<typeof EditionChips>[0]> = {}) =>
+  renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} {...overrides} />)
+
 const editions: EditionChip[] = [
   { id: 'e2026', year: 2026, edition: null, canceled: true },
   { id: 'e2025', year: 2025, edition: null, canceled: false },
@@ -20,19 +23,19 @@ const editions: EditionChip[] = [
 
 describe('EditionChips', () => {
   test('renders an "all" chip plus one chip per edition, locale-prefixed links (T3.1)', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     expect(screen.getByRole('link', { name: 'all' })).toHaveAttribute('href', '/en')
     expect(screen.getByRole('link', { name: '2025' })).toHaveAttribute('href', '/en?e=2025')
     expect(screen.getByRole('link', { name: '2019' })).toHaveAttribute('href', '/en?e=2019')
   })
 
   test('2026 gets the lost-weekend label (launch hook)', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     expect(screen.getByRole('link', { name: '2026 — the lost weekend' })).toBeInTheDocument()
   })
 
   test('the selected year is marked as current', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={2025} onSelect={noop} />)
+    renderChips({ selectedYear: 2025 })
     expect(screen.getByRole('link', { name: '2025' })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: '2019' })).not.toHaveAttribute('aria-current')
     expect(screen.getByRole('link', { name: 'all' })).not.toHaveAttribute('aria-current')
@@ -41,7 +44,7 @@ describe('EditionChips', () => {
   // "all" is a selection too. Nothing navigates any more, so aria-current is
   // the only thing telling a screen reader which filter is live.
   test('the unfiltered wall marks the "all" chip as current', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     expect(screen.getByRole('link', { name: 'all' })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: '2025' })).not.toHaveAttribute('aria-current')
   })
@@ -74,7 +77,7 @@ describe('EditionChips', () => {
   }
 
   test('vertical wheel scrolls the row sideways and suppresses page scroll', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     const { wheel } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
     const r = wheel({ deltaY: 120, deltaX: 0 })
     expect(r.scrollLeft).toBe(120)
@@ -82,7 +85,7 @@ describe('EditionChips', () => {
   })
 
   test('at the right edge, the wheel yields to the page (no preventDefault)', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     // scrollLeft 300 == scrollWidth(500) - clientWidth(200): already at the end
     const { wheel } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 300 })
     const r = wheel({ deltaY: 120, deltaX: 0 })
@@ -91,7 +94,7 @@ describe('EditionChips', () => {
   })
 
   test('horizontal (trackpad) gestures pass through untouched', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     const { wheel } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
     const r = wheel({ deltaY: 5, deltaX: 120 })
     expect(r.scrollLeft).toBe(0)
@@ -101,7 +104,7 @@ describe('EditionChips', () => {
   // Desktop mouse: grab-and-drag scrolls the row, and the click a drag ends in
   // must neither filter nor navigate the chip under the cursor.
   test('mouse drag scrolls the row sideways', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     const { nav } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
     fireEvent.pointerDown(nav, { pointerType: 'mouse', button: 0, pointerId: 1, clientX: 100 })
     fireEvent.pointerMove(nav, { pointerType: 'mouse', pointerId: 1, clientX: 40 }) // dx = -60
@@ -111,7 +114,7 @@ describe('EditionChips', () => {
 
   test('a click that ends a drag is cancelled', () => {
     const onSelect = vi.fn()
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={onSelect} />)
+    renderChips({ onSelect })
     const { nav } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
     fireEvent.pointerDown(nav, { pointerType: 'mouse', button: 0, pointerId: 1, clientX: 100 })
     fireEvent.pointerMove(nav, { pointerType: 'mouse', pointerId: 1, clientX: 40 })
@@ -128,7 +131,7 @@ describe('EditionChips', () => {
   // "a chip click filters instead of navigating" case.
   test('a plain click (no drag) filters and is prevented', () => {
     const onSelect = vi.fn()
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={onSelect} />)
+    renderChips({ onSelect })
     fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
     const notPrevented = fireEvent.click(screen.getByRole('link', { name: '2025' }))
     expect(onSelect).toHaveBeenCalledWith(2025)
@@ -136,7 +139,7 @@ describe('EditionChips', () => {
   })
 
   test('touch pointers are left to native scrolling (no JS drag)', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     const { nav } = fakeScroller({ scrollWidth: 500, clientWidth: 200, scrollLeft: 0 })
     fireEvent.pointerDown(nav, { pointerType: 'touch', pointerId: 2, clientX: 100 })
     fireEvent.pointerMove(nav, { pointerType: 'touch', pointerId: 2, clientX: 40 })
@@ -146,14 +149,14 @@ describe('EditionChips', () => {
   // Load-bearing: without draggable=false, grabbing a chip starts a native
   // link drag-and-drop that steals the pointer stream and the scroll dies.
   test('chips are not natively draggable', () => {
-    renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} />)
+    renderChips()
     expect(screen.getByRole('link', { name: 'all' })).toHaveAttribute('draggable', 'false')
     expect(screen.getByRole('link', { name: '2025' })).toHaveAttribute('draggable', 'false')
   })
 
   test('the "all" chip clears the filter', () => {
     const onSelect = vi.fn()
-    renderWithIntl(<EditionChips editions={editions} selectedYear={2025} onSelect={onSelect} />)
+    renderChips({ selectedYear: 2025, onSelect })
     fireEvent.click(screen.getByRole('link', { name: 'all' }))
     expect(onSelect).toHaveBeenCalledWith(null)
   })
@@ -163,7 +166,7 @@ describe('EditionChips', () => {
     // would swallow the click and open nothing.
     test('a modified click falls through to the real link', () => {
       const onSelect = vi.fn()
-      renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={onSelect} />)
+      renderChips({ onSelect })
       const notPrevented = fireEvent.click(screen.getByRole('link', { name: '2025' }), {
         metaKey: true,
       })
@@ -189,7 +192,7 @@ describe('EditionChips', () => {
     })
 
     test('nothing pulses when no fetch is in flight', () => {
-      renderWithIntl(<EditionChips editions={editions} selectedYear={2025} onSelect={noop} />)
+      renderChips({ selectedYear: 2025 })
       expect(screen.getByText('all')).not.toHaveClass('animate-pulse')
       expect(screen.getByText('2025')).not.toHaveClass('animate-pulse')
     })

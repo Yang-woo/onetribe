@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, describe, expect, test } from 'vitest'
 import { createSupabasePassportBackend } from '@/lib/passport/backend'
+import { otpFor } from '../mailpit'
 import { createAnonClient, createServiceClient, eventIdByYear } from './helpers'
 
 /**
@@ -12,35 +13,7 @@ import { createAnonClient, createServiceClient, eventIdByYear } from './helpers'
  */
 
 const service = createServiceClient()
-const MAILPIT = 'http://127.0.0.1:54324' // supabase/config.toml [local_smtp]
 const userIds: string[] = []
-
-/**
- * Poll Mailpit for a fresh 6-digit code mailed to `address` (excluding a
- * previously seen `not` code). Address-scoped so this suite never touches
- * other suites' mail — safe to run alongside e2e.
- */
-async function otpFor(address: string, not?: string, timeoutMs = 20_000): Promise<string> {
-  const deadline = Date.now() + timeoutMs
-  while (Date.now() < deadline) {
-    const list = (await (await fetch(`${MAILPIT}/api/v1/messages`)).json()) as {
-      messages?: Array<{ ID: string; To?: Array<{ Address?: string }> }>
-    }
-    for (const mail of list.messages ?? []) {
-      if (!mail.To?.some((to) => to.Address?.toLowerCase() === address.toLowerCase())) continue
-      const detail = (await (await fetch(`${MAILPIT}/api/v1/message/${mail.ID}`)).json()) as {
-        Text?: string
-        HTML?: string
-      }
-      const match = `${detail.Text ?? ''} ${detail.HTML ?? ''}`.match(/\b(\d{6})\b/)
-      if (match && match[1] !== not) return match[1]
-    }
-    await new Promise((resolve) => setTimeout(resolve, 400))
-  }
-  throw new Error(
-    `no fresh OTP mail for ${address} within ${timeoutMs}ms — is local Supabase (Mailpit :54324) up?`,
-  )
-}
 
 afterAll(async () => {
   for (const id of userIds) {
@@ -157,7 +130,9 @@ describe('anonymous → email promotion (D16)', () => {
     // link — a wrong verifyOtp type in the backend would make GoTrue reject here
     await backend.linkEmailStart(email)
     const code = await otpFor(email)
-    await backend.linkEmailVerify(email, code)
+    const freshIdentity = await backend.linkEmailVerify(email, code)
+    expect(freshIdentity.isAnonymous).toBe(false)
+    expect(freshIdentity.email).toBe(email)
     const linked = await backend.load()
     expect(linked!.userId).toBe(started.userId)
     expect(linked!.identity.isAnonymous).toBe(false)
