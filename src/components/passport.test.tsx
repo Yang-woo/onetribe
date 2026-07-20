@@ -2,11 +2,7 @@ import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
-import type {
-  PassportBackend,
-  PassportIdentity,
-  PassportState,
-} from '@/lib/passport/backend'
+import type { PassportBackend, PassportIdentity, PassportState } from '@/lib/passport/backend'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { Passport } from './passport'
 

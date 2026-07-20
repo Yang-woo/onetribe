@@ -71,11 +71,17 @@ describe('createR2Storage', () => {
     })
 
     it('tolerates missing keys but surfaces real failures', async () => {
-      vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 404 })))
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => new Response(null, { status: 404 })),
+      )
       const storage = createR2Storage(base)
       await expect(storage.deleteObject('gone.webp')).resolves.toBeUndefined()
 
-      vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 500 })))
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => new Response(null, { status: 500 })),
+      )
       await expect(storage.deleteObject('key.webp')).rejects.toThrow('R2 delete failed')
     })
   })

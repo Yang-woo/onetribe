@@ -136,10 +136,7 @@ export function MemoryWall({
         )}
       </div>
       {liveCount > 0 && (
-        <p
-          aria-live="polite"
-          className="flex shrink-0 items-center gap-1.5 text-[13px] text-flame"
-        >
+        <p aria-live="polite" className="flex shrink-0 items-center gap-1.5 text-[13px] text-flame">
           <PulseDot />
           {t('liveFeed', { n: liveCount })}
         </p>

@@ -143,7 +143,11 @@ export function Passport({
   // emotionally bigger "my first defqon" for a first-timer. year is a string
   // so ICU doesn't number-format it into "2,024".
   const identity =
-    n === 1 ? t('firstDefqon') : firstYear ? t('since', { year: String(firstYear), count: n }) : null
+    n === 1
+      ? t('firstDefqon')
+      : firstYear
+        ? t('since', { year: String(firstYear), count: n })
+        : null
 
   async function toggle(eventId: string) {
     if (!state) return
@@ -232,7 +236,9 @@ export function Passport({
                 {(on || canceled) && (
                   // decorative sublabel — the year stays the button's a11y name
                   <span aria-hidden="true" className="text-[9px] tracking-[.04em] opacity-75">
-                    {on ? t('stampOrdinal', { n: ordinalById.get(edition.id) ?? 0 }) : t('stampCanceled')}
+                    {on
+                      ? t('stampOrdinal', { n: ordinalById.get(edition.id) ?? 0 })
+                      : t('stampCanceled')}
                   </span>
                 )}
               </button>

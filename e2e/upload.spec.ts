@@ -29,7 +29,9 @@ test('uploading a moment publishes it to the wall instantly', async ({ page }, t
   // step 2: sign & publish — legal gate: submit stays disabled until rights
   const submit = page.getByRole('button', { name: 'share my moment' })
   await expect(submit).toBeDisabled()
-  await page.getByRole('checkbox').check()
+  // the rights checkbox is a real input but sr-only (styled as a card, D11);
+  // force past Playwright's visibility actionability check.
+  await page.getByRole('checkbox').check({ force: true })
   await expect(submit).toBeEnabled()
   await submit.click()
 

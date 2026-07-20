@@ -16,7 +16,9 @@ const POLICY_PAGES = [
 for (const { path, marker } of POLICY_PAGES) {
   test(`${path} renders with the disclaimer footer`, async ({ page }) => {
     await page.goto(path)
-    await expect(page.getByRole('heading', { name: marker })).toBeVisible()
+    // D18 stacks every language on one page: the doc title appears as the page
+    // <h1> and again as each language block's <h2>. Pin the page heading.
+    await expect(page.getByRole('heading', { level: 1, name: marker })).toBeVisible()
     await expect(page.getByText(/Unofficial fan project/)).toBeVisible()
     // no [BRACKET] placeholder may survive to a live policy page (docs/10)
     await expect(page.locator('main')).not.toContainText(/\[[A-Z_/]+\]/)
@@ -28,9 +30,11 @@ test('about tells the creator story', async ({ page }) => {
   await expect(page.getByText(/fan from South Korea/)).toBeVisible()
 })
 
-test('non-EN locales see the binding-language notice', async ({ page }) => {
+test('every locale sees the binding-language notice', async ({ page }) => {
+  // D18: the page is identical for every URL locale and carries one English
+  // binding notice (the per-locale enNotice banner was retired).
   await page.goto('/ko/terms')
-  await expect(page.getByText('영문 원문이 우선 적용됩니다.')).toBeVisible()
+  await expect(page.getByText(/English is the binding version/)).toBeVisible()
 })
 
 test('security headers ship on every page (docs/03)', async ({ page }) => {

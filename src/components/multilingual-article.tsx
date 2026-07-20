@@ -30,8 +30,8 @@ export function MultilingualArticle({
       <h1 className="mb-2 font-display text-3xl tracking-tight">{heading}</h1>
       {lastUpdated && <p className="mb-4 text-sm text-muted">last updated: {lastUpdated}</p>}
       <p className="mb-6 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-muted">
-        English is the binding version. The other languages are machine-assisted
-        translations for convenience — if anything differs, the English text prevails.
+        English is the binding version. The other languages are machine-assisted translations for
+        convenience — if anything differs, the English text prevails.
       </p>
       <nav aria-label="Languages" className="mb-10 flex flex-wrap gap-x-3 gap-y-1 text-sm">
         {LOCALES.map((locale) => (

@@ -14,7 +14,10 @@ export default function AboutPage() {
   const byLocale = Object.fromEntries(
     LOCALES.map((locale) => [
       locale,
-      { title: ABOUT_I18N[locale].title, sections: [{ paragraphs: ABOUT_I18N[locale].paragraphs }] },
+      {
+        title: ABOUT_I18N[locale].title,
+        sections: [{ paragraphs: ABOUT_I18N[locale].paragraphs }],
+      },
     ]),
   ) as Record<Locale, LocalizedContent>
 

@@ -13,7 +13,9 @@ import { EditionChips } from './edition-chips'
 const noop = () => {}
 
 const renderChips = (overrides: Partial<Parameters<typeof EditionChips>[0]> = {}) =>
-  renderWithIntl(<EditionChips editions={editions} selectedYear={null} onSelect={noop} {...overrides} />)
+  renderWithIntl(
+    <EditionChips editions={editions} selectedYear={null} onSelect={noop} {...overrides} />,
+  )
 
 const editions: EditionChip[] = [
   { id: 'e2026', year: 2026, edition: null, canceled: true },

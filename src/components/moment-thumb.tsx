@@ -51,7 +51,12 @@ export function MomentThumb({ moment, edition }: { moment: Moment; edition?: Edi
     <figure className="mb-3 break-inside-avoid overflow-hidden rounded-lg bg-surface">
       <div className="relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={moment.caption ?? 'festival moment'} loading="lazy" className="w-full" />
+        <img
+          src={src}
+          alt={moment.caption ?? 'festival moment'}
+          loading="lazy"
+          className="w-full"
+        />
         {tag && (
           <span
             aria-hidden="true"

@@ -142,7 +142,12 @@ describe('MemoryWall', () => {
   })
 
   test('a normal edition filter titles by anthem with no lost-weekend subtitle', () => {
-    const ed: EditionChip = { id: 'e2024', year: 2024, edition: 'Power of the Tribe', canceled: false }
+    const ed: EditionChip = {
+      id: 'e2024',
+      year: 2024,
+      edition: 'Power of the Tribe',
+      canceled: false,
+    }
     renderWithIntl(
       <MemoryWall
         initialMoments={[moment('a', { event_id: 'e2024' })]}
@@ -157,7 +162,12 @@ describe('MemoryWall', () => {
   })
 
   test('cards carry the edition tag (year + anthem initials) and an anonymous meta line', () => {
-    const ed: EditionChip = { id: 'e2024', year: 2024, edition: 'Power of the Tribe', canceled: false }
+    const ed: EditionChip = {
+      id: 'e2024',
+      year: 2024,
+      edition: 'Power of the Tribe',
+      canceled: false,
+    }
     renderWithIntl(
       <MemoryWall
         initialMoments={[moment('a', { event_id: 'e2024', author_name: null })]}

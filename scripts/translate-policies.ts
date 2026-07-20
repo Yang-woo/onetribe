@@ -41,7 +41,10 @@ function makeTranslator(locale: string) {
   }
 }
 
-async function translateDoc(doc: PolicyDoc, tr: (s: string) => Promise<string>): Promise<LocalizedDoc> {
+async function translateDoc(
+  doc: PolicyDoc,
+  tr: (s: string) => Promise<string>,
+): Promise<LocalizedDoc> {
   const title = await tr(doc.title)
   const sections: LocalizedDoc['sections'] = []
   for (const sec of doc.sections) {
@@ -56,7 +59,9 @@ async function translateDoc(doc: PolicyDoc, tr: (s: string) => Promise<string>):
 function stripDoc(doc: PolicyDoc): LocalizedDoc {
   return {
     title: doc.title,
-    sections: doc.sections.map((s) => (s.heading ? { heading: s.heading, paragraphs: s.paragraphs } : { paragraphs: s.paragraphs })),
+    sections: doc.sections.map((s) =>
+      s.heading ? { heading: s.heading, paragraphs: s.paragraphs } : { paragraphs: s.paragraphs },
+    ),
   }
 }
 

@@ -53,8 +53,13 @@ test('a chip click filters in the browser — no request to the app server', asy
   page.on('request', (r) => {
     const url = r.url()
     if (!url.startsWith('http://localhost:3000')) return
+    // In production Next prefetches in-viewport footer <Link>s (RSC requests to
+    // /en/about, /en/guidelines, …) — filtering to 2026 shortens the wall and
+    // pulls the footer into view. Those aren't the wall navigation D13 kills;
+    // only a full document load or an RSC re-render of the wall route counts.
+    const path = new URL(url).pathname
     if (r.resourceType() === 'document') roundTrips.push(`document ${url}`)
-    else if (url.includes('_rsc=')) roundTrips.push(`rsc ${url}`)
+    else if (url.includes('_rsc=') && path === '/en') roundTrips.push(`rsc ${url}`)
   })
 
   await page.getByRole('link', { name: /2026/ }).click()

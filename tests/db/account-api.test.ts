@@ -81,7 +81,10 @@ describe('account delete route', () => {
     expect(ghost.user).toBeNull()
     const { data: profiles } = await service.from('profiles').select('id').eq('id', uid)
     expect(profiles).toHaveLength(0)
-    const { data: stamps } = await service.from('attendance').select('event_id').eq('profile_id', uid)
+    const { data: stamps } = await service
+      .from('attendance')
+      .select('event_id')
+      .eq('profile_id', uid)
     expect(stamps).toHaveLength(0)
 
     // the moment stays on the wall, fully anonymized

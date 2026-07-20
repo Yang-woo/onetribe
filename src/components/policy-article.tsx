@@ -13,5 +13,11 @@ export function PolicyArticle({ doc }: { doc: PolicyDoc }) {
     LOCALES.map((locale) => [locale, POLICY_I18N[locale][doc.slug]]),
   ) as Record<Locale, (typeof POLICY_I18N)[Locale][PolicyDoc['slug']]>
 
-  return <MultilingualArticle heading={doc.title} lastUpdated={POLICY_LAST_UPDATED} byLocale={byLocale} />
+  return (
+    <MultilingualArticle
+      heading={doc.title}
+      lastUpdated={POLICY_LAST_UPDATED}
+      byLocale={byLocale}
+    />
+  )
 }

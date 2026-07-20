@@ -35,12 +35,7 @@ export interface PassportState {
  * code through this one map.
  */
 export type PassportAuthErrorCode =
-  | 'emailInUse'
-  | 'googleInUse'
-  | 'noPassport'
-  | 'badCode'
-  | 'rateLimited'
-  | 'genericError'
+  'emailInUse' | 'googleInUse' | 'noPassport' | 'badCode' | 'rateLimited' | 'genericError'
 
 const AUTH_ERROR_CODES: Record<string, PassportAuthErrorCode> = {
   email_exists: 'emailInUse',

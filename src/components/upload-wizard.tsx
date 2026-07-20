@@ -100,8 +100,7 @@ export function UploadWizard({
         ? t('errors.unsupported')
         : t('errors.tooLarge')
 
-  const mediaReady =
-    mode === 'files' ? files.length > 0 && !fileError : embedUrl.trim().length > 0
+  const mediaReady = mode === 'files' ? files.length > 0 && !fileError : embedUrl.trim().length > 0
 
   const selectedEdition = editions.find((e) => e.id === eventId) ?? null
   const visibleEditions = olderOpen ? editions : editions.slice(0, EDITION_PREVIEW_COUNT)
@@ -365,11 +364,7 @@ export function UploadWizard({
           {/* edition chips — replace the old <select> */}
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted">{t('whichMoment')}</span>
-            <div
-              role="radiogroup"
-              aria-label={t('whichMoment')}
-              className="flex flex-wrap gap-1.5"
-            >
+            <div role="radiogroup" aria-label={t('whichMoment')} className="flex flex-wrap gap-1.5">
               {visibleEditions.map((edition) => {
                 const selected = edition.id === eventId
                 return (
