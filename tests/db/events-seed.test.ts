@@ -66,7 +66,7 @@ test('only genuinely themeless years stay null (COVID 2020/21, upcoming 2027)', 
   }
 })
 
-test('international editions: Australia 2009-2018, Chile 2014-2016', async () => {
+test('international editions: Australia 2009-2018, Chile 2015-2016', async () => {
   const { data: au } = await anon
     .from('events')
     .select('year, country')
@@ -82,6 +82,8 @@ test('international editions: Australia 2009-2018, Chile 2014-2016', async () =>
     .select('year, country')
     .eq('festival', 'Defqon.1 Chile')
     .order('year')
-  expect(cl?.map((r) => r.year)).toEqual([2014, 2015, 2016])
+  // Chile had no 2014 edition — 2015 was the first (docs/11 B; migration
+  // 20260720000100 removes the erroneously-seeded 2014 row).
+  expect(cl?.map((r) => r.year)).toEqual([2015, 2016])
   expect(cl?.every((r) => r.country === 'CL')).toBe(true)
 })
