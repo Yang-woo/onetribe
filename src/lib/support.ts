@@ -4,8 +4,8 @@
  * hide themselves so a dead link never ships. Fill in the URL and redeploy.
  */
 export const SUPPORT_LINKS = {
-  kofi: null as string | null, // e.g. 'https://ko-fi.com/onetribeworld'
-  githubSponsors: null as string | null, // e.g. 'https://github.com/sponsors/Yang-woo'
+  kofi: 'https://ko-fi.com/onetribeworld' as string | null, // D15 rail — live 2026-07-20, one-time tips, no perks
+  githubSponsors: null as string | null, // 'https://github.com/sponsors/Yang-woo' — pending GitHub approval
 }
 
 export function hasSupportLinks(): boolean {
