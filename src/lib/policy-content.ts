@@ -200,5 +200,5 @@ export const ABOUT = {
 /** About `#support` section (docs/00 D15) — shown only when a donation rail exists. */
 export const ABOUT_SUPPORT = {
   title: 'support',
-  body: 'One Tribe runs on a small server bill and nothing else. If you want to help keep the wall alive, you can buy the server a coffee — donations cover hosting costs only, buy no perks, and never turn this into a business.',
+  body: 'One Tribe runs on a small server bill and nothing else. If you want to help keep the wall alive, you can buy the server a coffee — donations cover hosting costs only, buy you no perks, and never turn this into a business.',
 }
