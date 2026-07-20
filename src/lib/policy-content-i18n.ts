@@ -69,7 +69,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Memories: photos/GIFs you upload and video links you embed, captions, event/city/year, an optional display name and social link. Published publicly immediately; may be hidden or removed on review or report.",
             "Account (optional): account ID (anonymous by default), display name, home country, festival attendance log (\"Passport\"), and — only if you choose to link them — your email address or Google account identity.",
-            "Technical: privacy-friendly analytics (no cross-site tracking, no ad cookies), and logs needed to run the service.",
+            "Technical: server logs needed to run and secure the service. Any analytics we add will be privacy-friendly — no cross-site tracking, no ad cookies.",
             "We do not run facial recognition or automatic tagging of people. We do not sell data."
           ]
         },
@@ -236,7 +236,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Herinneringen: foto’s/GIF’s die je uploadt en videolinks die je insluit, bijschriften, evenement/stad/jaar, een optionele weergavenaam en een link naar sociale media. Wordt onmiddellijk openbaar gepubliceerd; kan na beoordeling of na een melding worden verborgen of verwijderd.",
             "Account (optioneel): account-ID (standaard anoniem), weergavenaam, land van herkomst, festivalbezoeklogboek („Passport”) en — alleen als je ervoor kiest om deze te koppelen — je e-mailadres of Google-account.",
-            "Technisch: privacyvriendelijke analyse (geen tracking tussen websites, geen advertentiecookies) en logbestanden die nodig zijn om de dienst te laten draaien.",
+            "Technisch: serverlogbestanden zijn nodig om de dienst te laten draaien en te beveiligen. Eventuele analysefuncties die we toevoegen, zullen privacyvriendelijk zijn — geen cross-site tracking, geen advertentiecookies.",
             "Wij maken geen gebruik van gezichtsherkenning of het automatisch taggen van personen. Wij verkopen geen gegevens."
           ]
         },
@@ -403,7 +403,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Erinnerungen: Fotos/GIFs, die Sie hochladen, sowie eingebettete Videolinks, Bildunterschriften, Veranstaltung/Stadt/Jahr, ein optionaler Anzeigename und ein Link zu sozialen Netzwerken. Werden sofort öffentlich veröffentlicht; können nach Überprüfung oder aufgrund einer Meldung ausgeblendet oder entfernt werden.",
             "Konto (optional): Konto-ID (standardmäßig anonym), Anzeigename, Heimatland, Festivalbesuchsprotokoll („Passport“) und – nur, wenn Sie sich dafür entscheiden, diese zu verknüpfen – Ihre E-Mail-Adresse oder Ihre Google-Konto-ID.",
-            "Technische Aspekte: datenschutzfreundliche Analysen (kein webseitenübergreifendes Tracking, keine Werbe-Cookies) sowie Protokolle, die für den Betrieb des Dienstes erforderlich sind.",
+            "Technische Hinweise: Für den Betrieb und die Sicherheit des Dienstes sind Serverprotokolle erforderlich. Alle von uns hinzugefügten Analysefunktionen sind datenschutzfreundlich – kein standortübergreifendes Tracking, keine Werbe-Cookies.",
             "Wir führen weder Gesichtserkennung noch automatische Personenmarkierung durch. Wir verkaufen keine Daten."
           ]
         },
@@ -570,7 +570,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Recuerdos: fotos o GIF que subas y enlaces a vídeos que incrustes, pies de foto, evento, ciudad y año, un nombre de usuario opcional y un enlace a redes sociales. Se publican de forma pública de inmediato; pueden ocultarse o eliminarse tras una revisión o una denuncia.",
             "Cuenta (opcional): ID de cuenta (anónima por defecto), nombre de usuario, país de origen, registro de asistencia a festivales («Passport») y —solo si decides vincularlos— tu dirección de correo electrónico o tu cuenta de Google.",
-            "Aspectos técnicos: análisis respetuosos con la privacidad (sin seguimiento entre sitios web, sin cookies publicitarias) y los registros necesarios para el funcionamiento del servicio.",
+            "Aspectos técnicos: se necesitan los registros del servidor para el funcionamiento y la seguridad del servicio. Cualquier herramienta de análisis que incorporemos respetará la privacidad: sin seguimiento entre sitios web ni cookies publicitarias.",
             "No utilizamos el reconocimiento facial ni el etiquetado automático de personas. No vendemos datos."
           ]
         },
@@ -737,7 +737,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Souvenirs : photos/GIF que vous publiez et liens vers des vidéos que vous intégrez, légendes, événement/ville/année, nom d'affichage facultatif et lien vers les réseaux sociaux. Publiés immédiatement ; peuvent être masqués ou supprimés à la suite d'un examen ou d'un signalement.",
             "Compte (facultatif) : identifiant du compte (anonyme par défaut), nom d'affichage, pays d'origine, historique de participation aux festivals (« Passport ») et — uniquement si vous choisissez de les associer — votre adresse e-mail ou votre identifiant Google.",
-            "Aspects techniques : outils d'analyse respectueux de la vie privée (pas de suivi intersite, pas de cookies publicitaires) et fichiers journaux nécessaires au fonctionnement du service.",
+            "Aspect technique : les journaux du serveur sont nécessaires au fonctionnement et à la sécurité du service. Les outils d'analyse que nous ajouterons respecteront la vie privée : pas de suivi intersite, pas de cookies publicitaires.",
             "Nous n'utilisons ni la reconnaissance faciale ni le marquage automatique des personnes. Nous ne vendons pas de données."
           ]
         },
@@ -904,7 +904,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Ricordi: foto/GIF caricate e link a video incorporati, didascalie, evento/città/anno, un nome visualizzato facoltativo e un link ai social. Pubblicati immediatamente in modo pubblico; possono essere nascosti o rimossi a seguito di revisione o segnalazione.",
             "Account (facoltativo): ID account (anonimo per impostazione predefinita), nome visualizzato, paese di residenza, registro delle partecipazioni ai festival (“Passport”) e — solo se si sceglie di collegarli — l’indirizzo e-mail o l’identificativo dell’account Google.",
-            "Aspetti tecnici: analisi dei dati nel rispetto della privacy (nessun tracciamento tra siti, nessun cookie pubblicitario) e log necessari per il funzionamento del servizio.",
+            "Aspetti tecnici: i log del server sono necessari per il funzionamento e la sicurezza del servizio. Eventuali strumenti di analisi che aggiungeremo rispetteranno la privacy: nessun tracciamento tra siti, nessun cookie pubblicitario.",
             "Non utilizziamo sistemi di riconoscimento facciale né di tagging automatico delle persone. Non vendiamo dati."
           ]
         },
@@ -1071,7 +1071,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Memórias: fotografias/GIFs que carregas e links de vídeo que incorporas, legendas, evento/cidade/ano, um nome de exibição opcional e um link para redes sociais. Publicadas publicamente de imediato; podem ser ocultadas ou removidas após revisão ou denúncia.",
             "Conta (opcional): ID da conta (anónima por predefinição), nome de exibição, país de origem, registo de participação em festivais («Passaporte») e — apenas se optar por as associar — o seu endereço de e-mail ou a identidade da sua conta Google.",
-            "Aspectos técnicos: análise de dados que respeita a privacidade (sem rastreamento entre sites, sem cookies publicitários) e registos necessários para o funcionamento do serviço.",
+            "Aspectos técnicos: são necessários registos do servidor para o funcionamento e a segurança do serviço. Quaisquer ferramentas de análise que adicionarmos respeitarão a privacidade — sem rastreamento entre sites, sem cookies publicitários.",
             "Não utilizamos reconhecimento facial nem a identificação automática de pessoas. Não vendemos dados."
           ]
         },
@@ -1238,7 +1238,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "思い出：アップロードした写真やGIF、埋め込んだ動画リンク、キャプション、イベント・都市・年、任意の表示名およびソーシャルメディアへのリンク。公開されるとすぐに誰でも閲覧可能になりますが、審査や通報により非表示にされたり削除されたりする場合があります。",
             "アカウント（任意）：アカウントID（デフォルトでは匿名）、表示名、居住国、フェスティバル参加履歴（「パスポート」）、および（連携を選択した場合のみ）メールアドレスまたはGoogleアカウントのID。",
-            "技術面：プライバシーに配慮した分析機能（クロスサイト追跡なし、広告用クッキーなし）、およびサービスの運営に必要なログ。",
+            "技術面：サービスの運用およびセキュリティ確保のためにサーバーログが必要です。追加する分析機能はすべてプライバシーに配慮したものであり、クロスサイト追跡や広告用クッキーは一切使用しません。",
             "当社では、顔認識や人物の自動タグ付けは行っていません。また、データの販売も行っていません。"
           ]
         },
@@ -1405,7 +1405,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "추억: 사용자가 업로드한 사진/GIF, 삽입한 동영상 링크, 캡션, 이벤트/도시/연도, 선택 사항인 표시 이름 및 소셜 링크. 게시 즉시 공개되며, 검토 또는 신고를 통해 숨겨지거나 삭제될 수 있습니다.",
             "계정 (선택 사항): 계정 ID(기본적으로 익명), 표시 이름, 거주 국가, 축제 참가 기록(“Passport”), 그리고 — 연동을 선택한 경우에만 — 이메일 주소 또는 Google 계정 ID.",
-            "기술적 사항: 개인정보 보호에 중점을 둔 분석 기능(크로스사이트 추적 및 광고 쿠키 없음)과 서비스 운영에 필요한 로그.",
+            "기술적 사항: 서비스 운영 및 보안을 위해 서버 로그가 필요합니다. 향후 추가될 모든 분석 기능은 개인정보 보호에 중점을 둘 것이며, 크로스사이트 추적이나 광고용 쿠키는 사용하지 않을 것입니다.",
             "당사는 얼굴 인식이나 사람에 대한 자동 태깅 기능을 운영하지 않습니다. 또한 데이터를 판매하지 않습니다."
           ]
         },

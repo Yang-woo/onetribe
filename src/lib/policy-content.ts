@@ -1,6 +1,7 @@
 /**
  * User-facing policies — verbatim from docs/10 (EN drafts). English is the
- * binding text; other locales see the enNotice banner.
+ * binding text; every locale is stacked on one page via MultilingualArticle
+ * (D18), not a per-locale banner. (The enNotice message key is now unused.)
  *
  * Contact goes through Cloudflare Email Routing (privacy@onetribe.world →
  * operator inbox, live since 2026-07-20). policy-content.test.ts guards the
@@ -86,7 +87,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
         paragraphs: [
           'Memories: photos/GIFs you upload and video links you embed, captions, event/city/year, an optional display name and social link. Published publicly immediately; may be hidden or removed on review or report.',
           'Account (optional): account ID (anonymous by default), display name, home country, festival attendance log ("Passport"), and — only if you choose to link them — your email address or Google account identity.',
-          'Technical: privacy-friendly analytics (no cross-site tracking, no ad cookies), and logs needed to run the service.',
+          'Technical: server logs needed to run and secure the service. Any analytics we add will be privacy-friendly — no cross-site tracking, no ad cookies.',
           'We do not run facial recognition or automatic tagging of people. We do not sell data.',
         ],
       },

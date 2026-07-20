@@ -1,5 +1,6 @@
 /**
- * Shared class recipes (docs/12 is the visual SSOT). Only truly identical
+ * Shared class recipes (visual SSOT = deployed code, D10; docs/12 B is the
+ * palette source). Only truly identical
  * shapes live here — button variants differ in sizing/state on purpose.
  */
 

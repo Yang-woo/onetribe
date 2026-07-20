@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
- * fire palette — single source: docs/12-brand.md B (matches Figma Paint Styles 1:1).
+ * fire palette — single source: docs/12-brand.md B (D10: deployed code is the visual SSOT; Figma retired).
  * Role separation: orange = identity (CTA, counters, focus), red = emotion (hearts, loss).
  * The default Tailwind palette is stripped on purpose — tokens only.
  */
