@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
 
+# Docker Hub auth (optional) lifts the anonymous image-pull rate limit that
+# `supabase start` hits (toomanyrequests). No-op unless the secrets are set.
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -24,6 +30,13 @@ jobs:
       - run: yarn test
 
       # DB/RLS integration tests against a real local Supabase (docs/00 D8).
+      - name: Log in to Docker Hub (raises the image-pull rate limit — skipped without secrets)
+        if: env.DOCKERHUB_TOKEN != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
       - name: Start local Supabase
         run: yarn supabase start -x studio,imgproxy,logflare,vector
 
@@ -44,6 +57,13 @@ jobs:
           cache: yarn
 
       - run: yarn install --frozen-lockfile
+
+      - name: Log in to Docker Hub (raises the image-pull rate limit — skipped without secrets)
+        if: env.DOCKERHUB_TOKEN != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
 
       - name: Start local Supabase
         run: yarn supabase start -x studio,imgproxy,logflare,vector
