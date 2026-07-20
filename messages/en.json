@@ -26,7 +26,7 @@
     "next": "next",
     "watchOnYoutube": "watch on YouTube ↗",
     "backToWall": "← back to the wall",
-    "takedownLink": "takedown",
+    "takedownLink": "removal",
     "showOriginal": "show original",
     "showTranslation": "show translation"
   },
@@ -92,7 +92,7 @@
     "links": {
       "terms": "terms",
       "privacy": "privacy",
-      "takedown": "takedown",
+      "takedown": "removals",
       "guidelines": "guidelines",
       "about": "about",
       "support": "support"
