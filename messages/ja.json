@@ -2,11 +2,11 @@
   "hero": {
     "title": "今年、あの週末は来なかった。",
     "subtitle": "だから思い出でつくる。",
-    "body": "持ち帰ったすべてのDefqon、すべてのステージ、すべての朝日で。あなたの瞬間を、あなたの言葉で。",
+    "body": "持ち帰ったすべてのDefqon、すべてのステージ、すべての朝日。あなたの瞬間を、あなたの言葉で。",
     "cta": "瞬間を残す",
     "liveBadge": "いま{countries}か国で思い出している",
     "browseWall": "壁を見てみる ↓",
-    "counterMoments": "{moments, plural, other {個の瞬間}}",
+    "counterMoments": "{moments, plural, other {件の瞬間}}",
     "counterCountries": "{countries, plural, other {か国}}"
   },
   "wall": {
@@ -31,7 +31,7 @@
     "showTranslation": "翻訳を見る"
   },
   "report": {
-    "button": "報告",
+    "button": "通報",
     "thanks": "ありがとう — 確認します。",
     "retry": "もう一度",
     "reasons": {
@@ -50,7 +50,7 @@
     "modePhotos": "写真をアップロード",
     "modeEmbed": "動画リンク",
     "dropHint": "写真・GIFを最大5枚、1枚10MBまで — ドラッグ&ドロップもできます",
-    "embedHint": "あなたが撮った短い瞬間で — セット全編の録画は不可",
+    "embedHint": "あなたが撮った短い瞬間を — セット全編の録画は不可",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "写真を削除",
     "whichMoment": "どの瞬間？",
@@ -58,7 +58,7 @@
     "collapse": "たたむ",
     "captionLabel": "ひとこと添える（任意）",
     "nameLabel": "表示名",
-    "igLabel": "インスタグラム（任意）",
+    "igLabel": "Instagram（任意）",
     "rightsLabel": "自分で撮影したもので、共有する権利があります",
     "back": "戻る",
     "next": "次へ",

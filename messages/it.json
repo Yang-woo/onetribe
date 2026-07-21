@@ -4,13 +4,13 @@
     "subtitle": "Così lo ricostruiamo con i ricordi.",
     "body": "Ogni Defqon, ogni palco, ogni alba che ci siamo portati a casa. Aggiungi il tuo, nella tua lingua.",
     "cta": "aggiungi il tuo momento",
-    "liveBadge": "in questo momento si ricorda in {countries} paesi",
+    "liveBadge": "in {countries} paesi si sta ricordando in questo momento",
     "browseWall": "sfoglia il muro ↓",
     "counterMoments": "{moments, plural, one { momento} other { momenti}}",
     "counterCountries": "{countries, plural, one { paese} other { paesi}}"
   },
   "wall": {
-    "allEditions": "tutto",
+    "allEditions": "tutte",
     "lostEditionChip": "{year} — il weekend perduto",
     "emptyTitle": "il muro si sta svegliando",
     "emptyBody": "sii tra i primi a lasciare un momento qui.",
@@ -59,7 +59,7 @@
     "captionLabel": "di’ qualcosa (facoltativo)",
     "nameLabel": "nome visibile",
     "igLabel": "instagram (facoltativo)",
-    "rightsLabel": "L’ho catturato io e ho il diritto di condividerlo",
+    "rightsLabel": "L’ho realizzato io e ho il diritto di condividerlo",
     "back": "indietro",
     "next": "avanti",
     "submit": "condividi il mio momento",
@@ -101,7 +101,7 @@
   "passport": {
     "nav": "passaporto",
     "title": "passaporto festival",
-    "startTitle": "inizia in anonimo — scegli solo un nome",
+    "startTitle": "inizia in forma anonima — scegli solo un nome",
     "namePlaceholder": "il tuo nome sul muro",
     "start": "crea il mio passaporto",
     "journey": "il mio viaggio",

@@ -17,6 +17,13 @@ const ISO639_3_TO_LOCALE: Record<string, Locale> = {
   por: 'pt',
   jpn: 'ja',
   kor: 'ko',
+  pol: 'pl',
+  swe: 'sv',
+  tur: 'tr',
+  cmn: 'zh',
+  ind: 'id',
+  tha: 'th',
+  vie: 'vi',
 }
 
 export function detectCaptionLocale(caption: string | null | undefined): Locale | null {

@@ -14,6 +14,13 @@ const LOCALE_LABELS: Record<Locale, string> = {
   pt: 'PT',
   ja: '日本語',
   ko: '한국어',
+  pl: 'PL',
+  sv: 'SV',
+  tr: 'TR',
+  zh: '中文',
+  id: 'ID',
+  th: 'ไทย',
+  vi: 'VI',
 }
 
 /**

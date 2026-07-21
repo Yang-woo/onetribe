@@ -1,5 +1,5 @@
 // Locale set — docs/00 D9 P5 (matches the hero copy set in docs/08 B).
-export const LOCALES = ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'ja', 'ko'] as const
+export const LOCALES = ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'ja', 'ko', 'pl', 'sv', 'tr', 'zh', 'id', 'th', 'vi'] as const
 export type Locale = (typeof LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = 'en'
 
@@ -19,4 +19,11 @@ export const LOCALE_NAMES: Record<Locale, string> = {
   pt: 'Português',
   ja: '日本語',
   ko: '한국어',
+  pl: 'Polski',
+  sv: 'Svenska',
+  tr: 'Türkçe',
+  zh: '中文',
+  id: 'Bahasa Indonesia',
+  th: 'ไทย',
+  vi: 'Tiếng Việt',
 }

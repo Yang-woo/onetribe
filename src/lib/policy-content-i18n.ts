@@ -193,7 +193,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Je inhoud",
           "paragraphs": [
             "Wanneer je een foto of GIF uploadt, of een link naar een video plaatst (“Herinnering”), bevestig je dat: je deze zelf hebt gemaakt en de rechten hebt om deze te delen; deze is gemaakt tijdens een muziekevenement dat je hebt bijgewoond; je One Tribe een niet-exclusieve, wereldwijde, royaltyvrije licentie verleent om de foto te hosten, weer te geven, het formaat aan te passen en het bijschrift te vertalen, uitsluitend ten behoeve van de exploitatie van deze website.",
-            "Je blijft eigenaar. Je kunt je Memory op elk moment verwijderen via de verwijderingslink."
+            "Je blijft eigenaar. Je kunt je Herinnering op elk moment verwijderen via de verwijderingslink."
           ]
         },
         {
@@ -205,7 +205,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Moderatie",
           "paragraphs": [
-            "Uploads verschijnen direct op de tijdlijn. We beoordelen recente uploads en meldingen na publicatie en kunnen naar eigen goeddunken inhoud verbergen of verwijderen. We geven snel gevolg aan verzoeken van rechthebbenden en privacyverzoeken (zie ‘verwijdering’), en elke Memory heeft een meldingslink."
+            "Uploads verschijnen direct op de muur. We beoordelen recente uploads en meldingen na publicatie en kunnen naar eigen goeddunken inhoud verbergen of verwijderen. We geven snel gevolg aan verzoeken van rechthebbenden en privacyverzoeken (zie ‘verwijdering’), en elke Herinnering heeft een meldingslink."
           ]
         },
         {
@@ -234,7 +234,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Welke gegevens we verzamelen",
           "paragraphs": [
-            "Herinneringen: foto’s/GIF’s die je uploadt en videolinks die je insluit, bijschriften, evenement/stad/jaar, een optionele weergavenaam en een link naar sociale media. Wordt onmiddellijk openbaar gepubliceerd; kan na beoordeling of na een melding worden verborgen of verwijderd.",
+            "Herinneringen: foto’s/GIF’s die je uploadt en videolinks die je insluit, bijschriften, evenement/stad/jaar, een optionele weergavenaam en een link naar sociale media. Worden onmiddellijk openbaar gepubliceerd; kunnen na beoordeling of na een melding worden verborgen of verwijderd.",
             "Account (optioneel): account-ID (standaard anoniem), weergavenaam, land van herkomst, festivalbezoeklogboek („Passport”) en — alleen als je ervoor kiest om deze te koppelen — je e-mailadres of Google-account.",
             "Technisch: serverlogbestanden zijn nodig om de dienst te laten draaien en te beveiligen. Eventuele analysefuncties die we toevoegen, zullen privacyvriendelijk zijn — geen cross-site tracking, geen advertentiecookies.",
             "Wij maken geen gebruik van gezichtsherkenning of het automatisch taggen van personen. Wij verkopen geen gegevens."
@@ -248,7 +248,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "4. Uw rechten (AVG)",
+          "heading": "4. Je rechten (AVG)",
           "paragraphs": [
             "Toegang, rectificatie, verwijdering, beperking, bezwaar, overdraagbaarheid. Je kunt je paspoort zelf verwijderen op de paspoortpagina — je momenten blijven op de muur staan, geanonimiseerd, elk met een eigen verwijderlink. Stuur een e-mail naar privacy@onetribe.world voor overige zaken. Je kunt ook een klacht indienen bij je lokale gegevensbeschermingsautoriteit."
           ]
@@ -256,12 +256,12 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "5. Opslag en verwerkers",
           "paragraphs": [
-            "De inhoud wordt opgeslagen bij onze infrastructuurproviders (database/authenticatie: Supabase; media: Cloudflare R2; vertaling: DeepL; e-mails voor het aanmaken van een account: Resend). Ondertitels worden automatisch vertaald; de vertaalde tekst wordt in de cache opgeslagen. Gegevens kunnen in de EU en de VS worden verwerkt onder naleving van de standaardwaarborgen.",
+            "De inhoud wordt opgeslagen bij onze infrastructuurproviders (database/authenticatie: Supabase; media: Cloudflare R2; vertaling: DeepL; inlog-e-mails: Resend). Bijschriften worden automatisch vertaald; de vertaalde tekst wordt in de cache opgeslagen. Gegevens kunnen in de EU en de VS worden verwerkt onder naleving van de standaardwaarborgen.",
             "Donaties worden extern verwerkt door Ko-fi en GitHub Sponsors; wij ontvangen geen betalingsgegevens."
           ]
         },
         {
-          "heading": "6. Behoud",
+          "heading": "6. Bewaartermijn",
           "paragraphs": [
             "Gepubliceerde herinneringen blijven staan totdat je ze verwijdert of totdat ze op basis van een geldig verzoek worden verwijderd. Verwijderde inhoud wordt binnen 30 dagen uit de actieve systemen gewist."
           ]
@@ -269,7 +269,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "7. Minderjarigen",
           "paragraphs": [
-            "De website is niet gericht op kinderen. Op verzoek of naar eigen goeddunken zullen wij afbeeldingen waarop minderjarigen te zien zijn, vervagen of verwijderen."
+            "De website is niet gericht op kinderen. Op verzoek of naar eigen goeddunken zullen wij afbeeldingen waarop minderjarigen centraal staan, vervagen of verwijderen."
           ]
         }
       ]
@@ -295,7 +295,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "U bent een rechthebbende",
+          "heading": "Je bent rechthebbende",
           "paragraphs": [
             "(artiest, platenlabel, festival, fotograaf): stuur een e-mail naar privacy@onetribe.world met (1) de link naar de inhoud, (2) wat jouw eigendom is, (3) je contactgegevens. We beoordelen dit zo snel mogelijk en verwijderen gegronde claims — doorgaans binnen 24 tot 48 uur. Herhaaldelijke overtreders krijgen een uploadverbod.",
             "Tegenmelding: als je upload is verwijderd en je denkt dat dit ten onrechte is gebeurd, reageer dan met een toelichting; na beoordeling kunnen we de upload mogelijk weer herstellen.",
@@ -308,15 +308,15 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
       "title": "Richtlijnen voor de community",
       "sections": [
         {
-          "heading": "Houd het voor jezelf.",
+          "heading": "Deel alleen wat van jou is.",
           "paragraphs": [
             "Upload alleen materiaal dat je zelf hebt opgenomen."
           ]
         },
         {
-          "heading": "Blijf jezelf.",
+          "heading": "Hou het echt.",
           "paragraphs": [
-            "Alleen echte momenten — geen AI-afbeeldingen, geen officiële media-uitknipsels."
+            "Alleen echte momenten — geen AI-afbeeldingen, geen gekopieerde officiële media."
           ]
         },
         {
@@ -334,7 +334,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Minderjarigen",
           "paragraphs": [
-            "Stel kinderen niet centraal; anders raken we misschien uit beeld."
+            "Stel kinderen niet centraal; we vervagen ze mogelijk."
           ]
         },
         {
@@ -360,7 +360,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Ihre Inhalte",
           "paragraphs": [
             "Wenn Sie ein Foto oder ein GIF hochladen oder ein Video verlinken („Erinnerung“), bestätigen Sie, dass: Sie das Material selbst aufgenommen haben und über die Rechte zur Weitergabe verfügen; es bei einer Musikveranstaltung aufgenommen wurde, an der Sie teilgenommen haben; Sie gewähren One Tribe eine nicht-exklusive, weltweite, gebührenfreie Lizenz zum Hosten, Anzeigen, Anpassen der Größe und Übersetzen der Bildunterschrift, ausschließlich zum Zweck des Betriebs dieser Website.",
-            "Sie behalten das Eigentumsrecht. Sie können Ihre „Memory“ jederzeit über Ihren Löschlink löschen."
+            "Sie behalten das Eigentumsrecht. Sie können Ihre „Erinnerung“ jederzeit über Ihren Löschlink löschen."
           ]
         },
         {
@@ -372,7 +372,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Moderation",
           "paragraphs": [
-            "Hochgeladene Inhalte erscheinen sofort auf der Pinnwand. Wir prüfen aktuelle Uploads und Meldungen nach der Veröffentlichung und behalten uns vor, Inhalte nach eigenem Ermessen auszublenden oder zu entfernen. Wir kommen Anfragen von Rechteinhabern und Datenschutzanfragen umgehend nach (siehe „Takedown“), und jedes „Memory“ verfügt über einen Link zum Melden."
+            "Hochgeladene Inhalte erscheinen sofort auf der Wand. Wir prüfen aktuelle Uploads und Meldungen nach der Veröffentlichung und behalten uns vor, Inhalte nach eigenem Ermessen auszublenden oder zu entfernen. Wir kommen Anfragen von Rechteinhabern und Datenschutzanfragen umgehend nach (siehe „Takedown“), und jede „Erinnerung“ verfügt über einen Link zum Melden."
           ]
         },
         {
@@ -408,7 +408,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "3. Personen auf Gruppenfotos",
+          "heading": "3. Personen auf Fotos aus der Menge",
           "paragraphs": [
             "Auf Festivalfotos sind möglicherweise andere Besucher zu sehen. Unsere Rechtsgrundlage für die Veröffentlichung ist das berechtigte Interesse an der Dokumentation öffentlicher Veranstaltungen durch die Gemeinschaft, abgewogen gegen Ihre Rechte.",
             "Wenn Sie auf einem Foto zu sehen sind und möchten, dass es entfernt oder unkenntlich gemacht wird, teilen Sie uns dies bitte mit – wir werden innerhalb von 48 Stunden handeln, ohne Fragen zu stellen: privacy@onetribe.world."
@@ -417,7 +417,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Ihre Rechte (DSGVO)",
           "paragraphs": [
-            "Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch, Datenübertragbarkeit. Sie können Ihren Pass selbst auf der Pass-Seite löschen – Ihre Momente bleiben anonymisiert auf der Pinnwand erhalten, jeweils mit einem eigenen Löschlink. Bei weiteren Fragen senden Sie bitte eine E-Mail an privacy@onetribe.world. Sie können außerdem eine Beschwerde bei Ihrer örtlichen Datenschutzbehörde einreichen."
+            "Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch, Datenübertragbarkeit. Sie können Ihren Pass selbst auf der Pass-Seite löschen – Ihre Momente bleiben anonymisiert auf der Wand erhalten, jeweils mit einem eigenen Löschlink. Bei weiteren Fragen senden Sie bitte eine E-Mail an privacy@onetribe.world. Sie können außerdem eine Beschwerde bei Ihrer örtlichen Datenschutzbehörde einreichen."
           ]
         },
         {
@@ -428,7 +428,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "6. Kundenbindung",
+          "heading": "6. Aufbewahrung",
           "paragraphs": [
             "Veröffentlichte Erinnerungen bleiben so lange bestehen, bis Sie sie löschen oder sie aufgrund einer gültigen Anfrage entfernt werden. Gelöschte Inhalte werden innerhalb von 30 Tagen aus den aktiven Systemen entfernt."
           ]
@@ -452,17 +452,17 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Du hast es hochgeladen und möchtest es jetzt wieder löschen?",
           "paragraphs": [
-            "Nutzen Sie den Löschlink, den Sie erhalten haben, oder senden Sie uns eine E-Mail – der Eintrag wird umgehend gelöscht."
+            "Nutze den Löschlink, den du erhalten hast, oder schreib uns eine E-Mail – der Eintrag wird umgehend gelöscht."
           ]
         },
         {
           "heading": "Du bist auf einem Foto zu sehen und möchtest das nicht?",
           "paragraphs": [
-            "Senden Sie eine E-Mail an privacy@onetribe.world mit dem Link zum Foto. Das Foto wird innerhalb von 48 Stunden entfernt oder unkenntlich gemacht, ohne dass Fragen gestellt werden."
+            "Schreib eine E-Mail an privacy@onetribe.world mit dem Link zum Foto. Das Foto wird innerhalb von 48 Stunden entfernt oder unkenntlich gemacht, ohne dass Fragen gestellt werden."
           ]
         },
         {
-          "heading": "Sie sind Rechteinhaber",
+          "heading": "Du bist Rechteinhaber",
           "paragraphs": [
             "(Künstler, Label, Festival, Fotograf): Senden Sie eine E-Mail an privacy@onetribe.world mit (1) dem Link zum Inhalt, (2) Angaben dazu, was Ihnen gehört, und (3) Ihren Kontaktdaten. Wir prüfen die Meldung umgehend und entfernen berechtigte Ansprüche – in der Regel innerhalb von 24 bis 48 Stunden. Wiederholungstäter werden für das Hochladen gesperrt.",
             "Widerspruch: Falls Ihr Beitrag entfernt wurde und Sie der Meinung sind, dass dies ein Irrtum war, antworten Sie bitte mit einer Erklärung; nach Prüfung werden wir den Beitrag möglicherweise wiederherstellen.",
@@ -475,7 +475,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
       "title": "Community-Richtlinien",
       "sections": [
         {
-          "heading": "Behalte es für dich.",
+          "heading": "Nur was dir gehört.",
           "paragraphs": [
             "Lade nur Inhalte hoch, die du selbst aufgenommen hast."
           ]
@@ -501,7 +501,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Minderjährige",
           "paragraphs": [
-            "Stellt die Kinder nicht in den Mittelpunkt; sonst könnten wir den Blick verlieren."
+            "Stell Kinder nicht in den Mittelpunkt; wir machen sie sonst vielleicht unkenntlich."
           ]
         },
         {
@@ -526,8 +526,8 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Tu contenido",
           "paragraphs": [
-            "Al subir una foto o un GIF, o al enlazar un vídeo («Recuerdo»), confirmas que: lo has capturado tú mismo y tienes los derechos para compartirlo; fue tomado en un evento musical al que asististe; concedes a One Tribe una licencia no exclusiva, mundial y libre de derechos de autor para alojar, mostrar, redimensionar y traducir su pie de foto, con el único fin de gestionar este sitio web.",
-            "La propiedad sigue siendo tuya. Puedes eliminar tu «Memory» en cualquier momento utilizando el enlace de eliminación."
+            "Al subir una foto o un GIF, o al enlazar un vídeo («Recuerdo»), confirmas que: lo has capturado tú mismo y tienes los derechos para compartirlo; fue tomado en un evento musical al que asististe; concedes a One Tribe una licencia no exclusiva, mundial y libre de regalías para alojar, mostrar, redimensionar y traducir su pie de foto, con el único fin de gestionar este sitio web.",
+            "La propiedad sigue siendo tuya. Puedes eliminar tu «Recuerdo» en cualquier momento utilizando el enlace de eliminación."
           ]
         },
         {
@@ -539,7 +539,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Moderación",
           "paragraphs": [
-            "Las publicaciones aparecen en el muro de inmediato. Revisamos las publicaciones recientes y las denuncias tras su publicación, y podemos ocultar o eliminar cualquier contenido a nuestra discreción. Atendemos con rapidez las solicitudes de los titulares de derechos y las relacionadas con la privacidad (véase «retirada de contenidos»), y cada «Memory» cuenta con un enlace para denunciarlo."
+            "Las publicaciones aparecen en el muro de inmediato. Revisamos las publicaciones recientes y las denuncias tras su publicación, y podemos ocultar o eliminar cualquier contenido a nuestra discreción. Atendemos con rapidez las solicitudes de los titulares de derechos y las relacionadas con la privacidad (véase «retirada de contenidos»), y cada «Recuerdo» cuenta con un enlace para denunciarlo."
           ]
         },
         {
@@ -590,7 +590,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "5. Almacenamiento y procesadores",
           "paragraphs": [
-            "El contenido se almacena en los servidores de nuestros proveedores de infraestructura (base de datos/autenticación: Supabase; archivos multimedia: Cloudflare R2; traducción: DeepL; correos electrónicos de inicio de sesión: Resend). Los subtítulos se traducen automáticamente; el texto traducido se almacena en caché. Los datos pueden tratarse en la UE y en EE. UU. bajo las garantías habituales.",
+            "El contenido se almacena en los servidores de nuestros proveedores de infraestructura (base de datos/autenticación: Supabase; archivos multimedia: Cloudflare R2; traducción: DeepL; correos electrónicos de inicio de sesión: Resend). Los pies de foto se traducen automáticamente; el texto traducido se almacena en caché. Los datos pueden tratarse en la UE y en EE. UU. bajo las garantías habituales.",
             "Las donaciones las gestionan externamente Ko-fi y GitHub Sponsors; nosotros no recibimos ningún dato relativo a los pagos."
           ]
         },
@@ -603,7 +603,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "7. Menores de edad",
           "paragraphs": [
-            "Esta página web no está dirigida a niños. Si se nos solicita o a nuestra discreción, difuminamos o eliminamos las imágenes en las que aparecen menores."
+            "Esta página web no está dirigida a niños. Si se nos solicita o a nuestra discreción, difuminamos o eliminamos las imágenes centradas en menores."
           ]
         }
       ]
@@ -633,7 +633,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "(artista, discográfica, festival, fotógrafo): envía un correo electrónico a privacy@onetribe.world indicando (1) el enlace al contenido, (2) qué derechos tienes sobre él y (3) tus datos de contacto. Revisamos las reclamaciones con rapidez y eliminamos aquellas que sean válidas, normalmente en un plazo de 24 a 48 horas. A quienes reincidan en las infracciones se les bloqueará la posibilidad de subir contenido.",
             "Contra-notificación: si se ha eliminado tu contenido y crees que se trata de un error, responde explicando el motivo; es posible que lo restablezcamos tras revisarlo.",
-            "Somos seguidores, no adversarios. Si hay algo que te molesta, dínoslo y lo retiraremos."
+            "Somos fans, no adversarios. Si hay algo que te molesta, dínoslo y lo retiraremos."
           ]
         }
       ]
@@ -662,13 +662,13 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Sé amable.",
           "paragraphs": [
-            "No se permite burlarse de nadie, ni contenido no apto para el trabajo, ni símbolos de odio. Si un desconocido es el protagonista de tu foto, imagina que él la viera."
+            "No se permite burlarse de nadie, ni contenido NSFW, ni símbolos de odio. Si un desconocido es el protagonista de tu foto, imagina que la ve."
           ]
         },
         {
           "heading": "Menores de edad",
           "paragraphs": [
-            "No pongáis a los niños en el centro de atención; podríamos perder la perspectiva."
+            "No pongas a los niños en el centro; podemos difuminar."
           ]
         },
         {
@@ -694,7 +694,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Votre contenu",
           "paragraphs": [
             "Lorsque vous publiez une photo ou un GIF, ou que vous ajoutez un lien vers une vidéo (« Souvenir »), vous confirmez que : vous en êtes l'auteur et que vous détenez les droits nécessaires pour la partager ; elle a été prise lors d'un événement musical auquel vous avez assisté ; vous accordez à One Tribe une licence non exclusive, mondiale et libre de droits pour héberger, afficher, redimensionner et traduire sa légende, dans le seul but d’exploiter ce site.",
-            "Vous en restez propriétaire. Vous pouvez supprimer votre « Memory » à tout moment à l'aide de votre lien de suppression."
+            "Vous en restez propriétaire. Vous pouvez supprimer votre « Souvenir » à tout moment à l'aide de votre lien de suppression."
           ]
         },
         {
@@ -706,7 +706,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Modération",
           "paragraphs": [
-            "Les publications apparaissent immédiatement sur le mur. Nous examinons les publications récentes et les signalements après leur mise en ligne, et nous nous réservons le droit de masquer ou de supprimer tout contenu à notre entière discrétion. Nous traitons rapidement les demandes des ayants droit et celles relatives à la vie privée (voir « retrait »), et chaque « Memory » comporte un lien permettant de le signaler."
+            "Les publications apparaissent immédiatement sur le mur. Nous examinons les publications récentes et les signalements après leur mise en ligne, et nous nous réservons le droit de masquer ou de supprimer tout contenu à notre entière discrétion. Nous traitons rapidement les demandes des ayants droit et celles relatives à la vie privée (voir « retrait »), et chaque « Souvenir » comporte un lien permettant de le signaler."
           ]
         },
         {
@@ -755,16 +755,16 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "5. Stockage et processeurs",
+          "heading": "5. Stockage et sous-traitants",
           "paragraphs": [
             "Le contenu est hébergé chez nos fournisseurs d'infrastructure (base de données/authentification : Supabase ; médias : Cloudflare R2 ; traduction : DeepL ; e-mails de connexion : Resend). Les légendes sont traduites automatiquement ; le texte traduit est mis en cache. Les données peuvent être traitées dans l'UE et aux États-Unis dans le respect des garanties standard.",
             "Les dons sont traités en externe par Ko-fi et GitHub Sponsors ; nous ne recevons aucune donnée relative aux paiements."
           ]
         },
         {
-          "heading": "6. Fidélisation",
+          "heading": "6. Conservation des données",
           "paragraphs": [
-            "Les « Memories » publiés restent en ligne jusqu'à ce que vous les supprimiez ou qu'une demande valide entraîne leur suppression. Le contenu supprimé est effacé des systèmes actifs dans un délai de 30 jours."
+            "Les « Souvenirs » publiés restent en ligne jusqu'à ce que vous les supprimiez ou qu'une demande valide entraîne leur suppression. Le contenu supprimé est effacé des systèmes actifs dans un délai de 30 jours."
           ]
         },
         {
@@ -786,7 +786,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Vous l'avez mis en ligne et vous voulez le supprimer ?",
           "paragraphs": [
-            "Utilisez le lien de suppression que vous avez reçu ou envoyez-nous un e-mail : votre compte sera supprimé immédiatement."
+            "Utilisez le lien de suppression que vous avez reçu ou envoyez-nous un e-mail : il sera supprimé immédiatement."
           ]
         },
         {
@@ -798,7 +798,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Vous êtes titulaire de droits",
           "paragraphs": [
-            "(artiste, label, festival, photographe) : envoyez un e-mail à privacy@onetribe.world en précisant (1) le lien vers le contenu, (2) les droits que vous détenez, (3) vos coordonnées. Nous examinons rapidement les demandes et supprimons les contenus faisant l'objet de réclamations valables, généralement dans un délai de 24 à 48 heures. Les contrevenants récidivistes se verront interdire tout téléchargement.",
+            "(artiste, label, festival, photographe) : envoyez un e-mail à privacy@onetribe.world en précisant (1) le lien vers le contenu, (2) les droits que vous détenez, (3) vos coordonnées. Nous examinons rapidement les demandes et supprimons les contenus faisant l'objet de réclamations valables, généralement dans un délai de 24 à 48 heures. Les contrevenants récidivistes se verront interdire toute mise en ligne.",
             "Contre-notification : si votre contenu a été supprimé et que vous estimez qu'il s'agit d'une erreur, répondez en fournissant une explication ; nous pourrons le rétablir après examen.",
             "Nous sommes des fans, pas des adversaires. Si quelque chose vous dérange, dites-le-nous et on le retirera."
           ]
@@ -809,7 +809,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
       "title": "Règles de la communauté",
       "sections": [
         {
-          "heading": "Garde-le pour toi.",
+          "heading": "Gardez-le pour vous.",
           "paragraphs": [
             "Ne publiez que les photos que vous avez prises vous-même."
           ]
@@ -829,13 +829,13 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Restez aimable.",
           "paragraphs": [
-            "Pas de moqueries, pas de contenu inapproprié au travail, pas de symboles haineux. Si un inconnu est le sujet de votre photo, imaginez-le en train de la voir."
+            "Pas de moqueries, pas de NSFW, pas de symboles haineux. Si un inconnu est le sujet de votre photo, imaginez-le en train de la voir."
           ]
         },
         {
           "heading": "Mineurs",
           "paragraphs": [
-            "Ne mettez pas les enfants au centre de l'attention ; on risque de perdre de vue l'essentiel."
+            "Ne mettez pas les enfants au centre de l'attention ; au besoin, on floute l'image."
           ]
         },
         {
@@ -854,26 +854,26 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "1. Di cosa si tratta",
           "paragraphs": [
-            "One Tribe è un progetto amatoriale non ufficiale e non commerciale: un archivio di ricordi condivisi dedicato alla comunità dell’hard-dance. Non è affiliato, né avallato, né collegato a Q-dance, Defqon.1 o a qualsiasi altro festival, artista o etichetta discografica."
+            "One Tribe è un progetto di fan non ufficiale e non commerciale: un archivio di ricordi condivisi dedicato alla comunità dell’hard-dance. Non è affiliato, né avallato, né collegato a Q-dance, Defqon.1 o a qualsiasi altro festival, artista o etichetta discografica."
           ]
         },
         {
           "heading": "2. I tuoi contenuti",
           "paragraphs": [
             "Quando carichi una foto o una GIF, oppure inserisci il link a un video (“Ricordo”), confermi che: l’hai scattata o registrata tu stesso e ne detieni i diritti di condivisione; è stata scattata o registrata durante un evento musicale a cui hai partecipato; concedi a One Tribe una licenza non esclusiva, valida in tutto il mondo e esente da royalty per ospitare, visualizzare, ridimensionare e tradurre la didascalia, esclusivamente ai fini del funzionamento di questo sito.",
-            "La proprietà rimane a te. Puoi cancellare la tua Memory in qualsiasi momento utilizzando il link di cancellazione."
+            "La proprietà rimane a te. Puoi cancellare il tuo Ricordo in qualsiasi momento utilizzando il link di cancellazione."
           ]
         },
         {
           "heading": "3. Cosa non è consentito caricare",
           "paragraphs": [
-            "Contenuti non registrati dall’utente; registrazioni continue di intere esibizioni (“set rips”); contenuti multimediali ufficiali (aftermovie, foto professionali, registrazioni di trasmissioni televisive); contenuti NSFW o a carattere sessuale; contenuti incentrati su minori; immagini generate dall’intelligenza artificiale o manipolate presentate come momenti reali; spam o pubblicità; contenuti che deridono o sminuiscono persone identificabili."
+            "Contenuti che non hai catturato tu; registrazioni continue di intere esibizioni (“set rips”); contenuti multimediali ufficiali (aftermovie, foto professionali, registrazioni di trasmissioni televisive); contenuti NSFW o a carattere sessuale; contenuti incentrati su minori; immagini generate dall’intelligenza artificiale o manipolate presentate come momenti reali; spam o pubblicità; contenuti che deridono o sminuiscono persone identificabili."
           ]
         },
         {
           "heading": "4. Moderazione",
           "paragraphs": [
-            "I contenuti caricati vengono visualizzati immediatamente sulla bacheca. Esaminiamo i contenuti caricati di recente e le segnalazioni dopo la pubblicazione e ci riserviamo il diritto di nascondere o rimuovere qualsiasi contenuto a nostra discrezione. Rispondiamo tempestivamente alle richieste dei titolari dei diritti e in materia di privacy (vedi “rimozione dei contenuti”), e ogni Memory dispone di un link per la segnalazione."
+            "I contenuti caricati vengono visualizzati immediatamente sul muro. Esaminiamo i contenuti caricati di recente e le segnalazioni dopo la pubblicazione e ci riserviamo il diritto di nascondere o rimuovere qualsiasi contenuto a nostra discrezione. Rispondiamo tempestivamente alle richieste dei titolari dei diritti e in materia di privacy (vedi “rimozione dei contenuti”), e ogni Ricordo dispone di un link per la segnalazione."
           ]
         },
         {
@@ -896,7 +896,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "1. Chi siamo",
           "paragraphs": [
-            "One Tribe (onetribe.world) è un progetto amatoriale senza scopo di lucro gestito dalla Corea del Sud. Contatti: privacy@onetribe.world."
+            "One Tribe (onetribe.world) è un progetto di fan senza scopo di lucro gestito dalla Corea del Sud. Contatti: privacy@onetribe.world."
           ]
         },
         {
@@ -918,26 +918,26 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. I tuoi diritti (GDPR)",
           "paragraphs": [
-            "Accesso, rettifica, cancellazione, limitazione del trattamento, opposizione, portabilità. Puoi cancellare tu stesso il tuo passaporto dalla pagina dedicata: i tuoi momenti rimarranno sulla bacheca, in forma anonima, ciascuno con il proprio link di cancellazione. Per qualsiasi altra richiesta, invia un’e-mail all’indirizzo privacy@onetribe.world. Puoi inoltre presentare un reclamo all’autorità locale garante della protezione dei dati."
+            "Accesso, rettifica, cancellazione, limitazione del trattamento, opposizione, portabilità. Puoi cancellare tu stesso il tuo passaporto dalla pagina dedicata: i tuoi momenti rimarranno sul muro, in forma anonima, ciascuno con il proprio link di cancellazione. Per qualsiasi altra richiesta, invia un’e-mail all’indirizzo privacy@onetribe.world. Puoi inoltre presentare un reclamo all’autorità locale garante della protezione dei dati."
           ]
         },
         {
-          "heading": "5. Archiviazione e elaboratori",
+          "heading": "5. Archiviazione e responsabili del trattamento",
           "paragraphs": [
             "I contenuti sono archiviati presso i nostri fornitori di infrastrutture (database/autenticazione: Supabase; file multimediali: Cloudflare R2; traduzione: DeepL; e-mail di accesso: Resend). Le didascalie sono tradotte automaticamente; il testo tradotto viene memorizzato nella cache. I dati possono essere trattati nell'UE e negli Stati Uniti nel rispetto delle garanzie standard.",
             "Le donazioni vengono gestite esternamente da Ko-fi e GitHub Sponsors; non riceviamo alcun dato relativo ai pagamenti."
           ]
         },
         {
-          "heading": "6. Fidelizzazione",
+          "heading": "6. Conservazione dei dati",
           "paragraphs": [
-            "I \"Memories\" pubblicati rimangono visibili finché non li elimini o non vengono rimossi in seguito a una richiesta valida. I contenuti eliminati vengono cancellati definitivamente dai sistemi attivi entro 30 giorni."
+            "I Ricordi pubblicati rimangono visibili finché non li elimini o non vengono rimossi in seguito a una richiesta valida. I contenuti eliminati vengono cancellati definitivamente dai sistemi attivi entro 30 giorni."
           ]
         },
         {
           "heading": "7. Minori",
           "paragraphs": [
-            "Il sito non è rivolto ai bambini. Su richiesta o a nostra discrezione, sfociamo o rimuoviamo le immagini che ritraggono minori."
+            "Il sito non è rivolto ai bambini. Su richiesta o a nostra discrezione, sfochiamo o rimuoviamo le immagini che ritraggono minori."
           ]
         }
       ]
@@ -976,7 +976,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
       "title": "Linee guida della community",
       "sections": [
         {
-          "heading": "Tienitelo per te.",
+          "heading": "Solo ciò che è tuo.",
           "paragraphs": [
             "Carica solo ciò che hai scattato tu stesso."
           ]
@@ -990,19 +990,19 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Sii conciso.",
           "paragraphs": [
-            "Foto e GIF: inserite il link a un video invece di caricarlo. Niente registrazioni complete: sostenete gli artisti."
+            "Foto e GIF: inserisci il link a un video invece di caricarlo. Niente registrazioni complete: sostieni gli artisti."
           ]
         },
         {
           "heading": "Sii gentile.",
           "paragraphs": [
-            "Niente prese in giro, niente contenuti non adatti al lavoro, niente simboli di odio. Se il soggetto della tua foto è uno sconosciuto, immagina come si sentirebbe vedendola."
+            "Niente prese in giro, niente contenuti NSFW, niente simboli di odio. Se il soggetto della tua foto è uno sconosciuto, immagina come si sentirebbe vedendola."
           ]
         },
         {
           "heading": "Minori",
           "paragraphs": [
-            "Non mettete i bambini al centro dell’attenzione; potremmo perdere di vista il quadro generale."
+            "Non mettere i bambini al centro dell’attenzione; potremmo sfocarli."
           ]
         },
         {
@@ -1027,14 +1027,14 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. O seu conteúdo",
           "paragraphs": [
-            "Ao carregares uma fotografia ou um GIF, ou ao partilhares um vídeo («Memória»), confirmas que: foste tu próprio que o captaste e deténs os direitos para o partilhar; foi captado num evento musical em que estiveste presente; concede à One Tribe uma licença não exclusiva, mundial e isenta de direitos de autor para alojar, exibir, redimensionar e traduzir a sua legenda, exclusivamente para o funcionamento deste site.",
+            "Ao carregares uma fotografia ou um GIF, ou ao partilhares um vídeo («Memória»), confirmas que: foste tu próprio que o captaste e deténs os direitos para o partilhar; foi captado num evento musical em que estiveste presente; concedes ao One Tribe uma licença não exclusiva, mundial e isenta de royalties para alojar, exibir, redimensionar e traduzir a sua legenda, exclusivamente para o funcionamento deste site.",
             "A propriedade continua a ser sua. Pode eliminar a sua Memória a qualquer momento através do seu link de eliminação."
           ]
         },
         {
           "heading": "3. O que não pode carregar",
           "paragraphs": [
-            "Conteúdo que não foi gravado por si; gravações contínuas de atuações com músicas completas («set rips»); meios de comunicação oficiais (vídeos pós-espetáculo, fotografias profissionais, capturas de transmissões); Conteúdo impróprio para o local de trabalho (NSFW) ou de caráter sexual; conteúdo centrado em menores; imagens geradas por IA ou manipuladas apresentadas como momentos reais; spam ou anúncios; conteúdo que ridicularize ou humilhe pessoas identificáveis."
+            "Conteúdo que não foi gravado por si; gravações contínuas de atuações com músicas completas («set rips»); material oficial (vídeos pós-espetáculo, fotografias profissionais, capturas de transmissões); conteúdo impróprio para o local de trabalho (NSFW) ou de caráter sexual; conteúdo centrado em menores; imagens geradas por IA ou manipuladas apresentadas como momentos reais; spam ou anúncios; conteúdo que ridicularize ou humilhe pessoas identificáveis."
           ]
         },
         {
@@ -1071,7 +1071,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "paragraphs": [
             "Memórias: fotografias/GIFs que carregas e links de vídeo que incorporas, legendas, evento/cidade/ano, um nome de exibição opcional e um link para redes sociais. Publicadas publicamente de imediato; podem ser ocultadas ou removidas após revisão ou denúncia.",
             "Conta (opcional): ID da conta (anónima por predefinição), nome de exibição, país de origem, registo de participação em festivais («Passaporte») e — apenas se optar por as associar — o seu endereço de e-mail ou a identidade da sua conta Google.",
-            "Aspectos técnicos: são necessários registos do servidor para o funcionamento e a segurança do serviço. Quaisquer ferramentas de análise que adicionarmos respeitarão a privacidade — sem rastreamento entre sites, sem cookies publicitários.",
+            "Aspetos técnicos: são necessários registos do servidor para o funcionamento e a segurança do serviço. Quaisquer ferramentas de análise que adicionarmos respeitarão a privacidade — sem rastreio entre sites, sem cookies publicitários.",
             "Não utilizamos reconhecimento facial nem a identificação automática de pessoas. Não vendemos dados."
           ]
         },
@@ -1120,7 +1120,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Carregaste o ficheiro e agora queres apagá-lo?",
           "paragraphs": [
-            "Utilize o link de eliminação que recebeu ou envie-nos um e-mail — será eliminado imediatamente."
+            "Usa o link de eliminação que recebeste ou envia-nos um e-mail — será eliminado imediatamente."
           ]
         },
         {
@@ -1155,9 +1155,9 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "Seja breve.",
+          "heading": "Sê breve.",
           "paragraphs": [
-            "Fotografias e GIFs — partilhe um link para um vídeo em vez de o carregar. Não publique gravações completas de concertos — apoie os artistas."
+            "Fotografias e GIFs — partilha um link para um vídeo em vez de o carregares. Não publiques gravações completas de concertos — apoia os artistas."
           ]
         },
         {
@@ -1169,7 +1169,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Menores de idade",
           "paragraphs": [
-            "Não coloquem as crianças no centro das atenções; podemos perder o foco."
+            "Não coloques as crianças no centro das atenções; podemos desfocar a imagem."
           ]
         },
         {
@@ -1207,7 +1207,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. モデレーション",
           "paragraphs": [
-            "投稿されたコンテンツは、すぐにウォールに表示されます。当社は公開後の最新の投稿や通報内容を審査し、独自の判断でコンテンツを非表示または削除する場合があります。権利者やプライバシーに関する要請には迅速に対応しており（削除要請についてはこちらをご覧ください）、すべての「Memory」には通報用のリンクが用意されています。"
+            "投稿されたコンテンツは、すぐに壁に表示されます。当社は公開後の最近の投稿や通報内容を審査し、独自の判断でコンテンツを非表示または削除する場合があります。権利者やプライバシーに関する要請には迅速に対応しており（削除要請についてはこちらをご覧ください）、すべての「Memory」には通報用のリンクが用意されています。"
           ]
         },
         {
@@ -1252,7 +1252,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. お客様の権利（GDPR）",
           "paragraphs": [
-            "アクセス、訂正、削除、処理の制限、異議申立て、データポータビリティ。パスポートページからご自身でパスポートを削除することができます。投稿された「モーメント」は、匿名化された状態でウォールに残り、それぞれに削除用リンクが付いています。その他のお問い合わせは、privacy@onetribe.world までメールでお寄せください。また、お住まいの地域のデータ保護当局に苦情を申し立てることも可能です。"
+            "アクセス、訂正、削除、処理の制限、異議申立て、データポータビリティ。パスポートページからご自身でパスポートを削除することができます。投稿されたあなたの瞬間は、匿名化された状態で壁に残り、それぞれに削除用リンクが付いています。その他のお問い合わせは、privacy@onetribe.world までメールでお寄せください。また、お住まいの地域のデータ保護当局に苦情を申し立てることも可能です。"
           ]
         },
         {
@@ -1263,7 +1263,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "6. 顧客維持",
+          "heading": "6. データの保持",
           "paragraphs": [
             "公開された「Memories」は、ユーザーが削除するか、有効なリクエストによって削除されるまで残ります。削除されたコンテンツは、30日以内に稼働中のシステムから完全に削除されます。"
           ]
@@ -1287,7 +1287,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "アップロードしたのに、削除したいんですか？",
           "paragraphs": [
-            "受け取った削除リンクをご利用いただくか、弊社までメールをお送りください。直ちに削除いたします。"
+            "受け取った削除リンクをご利用いただくか、私たちまでメールをお送りください。直ちに削除いたします。"
           ]
         },
         {
@@ -1310,7 +1310,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
       "title": "コミュニティガイドライン",
       "sections": [
         {
-          "heading": "自分だけのものにしておいてください。",
+          "heading": "自分で撮ったものだけを。",
           "paragraphs": [
             "自分で撮影した写真のみをアップロードしてください。"
           ]
@@ -1336,13 +1336,13 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "未成年者",
           "paragraphs": [
-            "子供たちを主役にしないでください。そうすると、私たちの存在がぼやけてしまうかもしれません。"
+            "子どもを主役にしないでください。場合によっては、こちらでぼかし処理を行うことがあります。"
           ]
         },
         {
           "heading": "写真に写っている誰かが異議を唱えていますか？",
           "paragraphs": [
-            "彼らは勝つ。いつもだ。"
+            "その人の勝ちです。いつでも。"
           ]
         }
       ]
@@ -1374,7 +1374,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. 검토",
           "paragraphs": [
-            "업로드된 콘텐츠는 즉시 타임라인에 표시됩니다. 당사는 게시 후 최근 업로드된 콘텐츠와 신고 내용을 검토하며, 재량에 따라 해당 콘텐츠를 숨기거나 삭제할 수 있습니다. 당사는 권리자 및 개인정보 보호 관련 요청을 신속하게 처리하며(‘게시물 삭제’ 참조), 모든 ‘메모리’에는 신고 링크가 제공됩니다."
+            "업로드된 콘텐츠는 즉시 벽에 표시됩니다. 당사는 게시 후 최근 업로드된 콘텐츠와 신고 내용을 검토하며, 재량에 따라 해당 콘텐츠를 숨기거나 삭제할 수 있습니다. 당사는 권리자 및 개인정보 보호 관련 요청을 신속하게 처리하며(‘게시물 삭제’ 참조), 모든 ‘메모리’에는 신고 링크가 제공됩니다."
           ]
         },
         {
@@ -1403,7 +1403,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. 수집하는 정보",
           "paragraphs": [
-            "추억: 사용자가 업로드한 사진/GIF, 삽입한 동영상 링크, 캡션, 이벤트/도시/연도, 선택 사항인 표시 이름 및 소셜 링크. 게시 즉시 공개되며, 검토 또는 신고를 통해 숨겨지거나 삭제될 수 있습니다.",
+            "메모리: 사용자가 업로드한 사진/GIF, 삽입한 동영상 링크, 캡션, 이벤트/도시/연도, 선택 사항인 표시 이름 및 소셜 링크. 게시 즉시 공개되며, 검토 또는 신고를 통해 숨겨지거나 삭제될 수 있습니다.",
             "계정 (선택 사항): 계정 ID(기본적으로 익명), 표시 이름, 거주 국가, 축제 참가 기록(“Passport”), 그리고 — 연동을 선택한 경우에만 — 이메일 주소 또는 Google 계정 ID.",
             "기술적 사항: 서비스 운영 및 보안을 위해 서버 로그가 필요합니다. 향후 추가될 모든 분석 기능은 개인정보 보호에 중점을 둘 것이며, 크로스사이트 추적이나 광고용 쿠키는 사용하지 않을 것입니다.",
             "당사는 얼굴 인식이나 사람에 대한 자동 태깅 기능을 운영하지 않습니다. 또한 데이터를 판매하지 않습니다."
@@ -1419,18 +1419,18 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. 귀하의 권리 (GDPR)",
           "paragraphs": [
-            "열람, 정정, 삭제, 처리 제한, 이의 제기, 데이터 이동권. 여권 페이지에서 직접 여권을 삭제할 수 있습니다. 여러분의 ‘순간’은 익명 처리된 상태로 벽에 남아 있으며, 각 순간마다 별도의 삭제 링크가 제공됩니다. 그 외 문의 사항이 있으시면 privacy@onetribe.world으로 이메일을 보내주십시오. 또한 관할 지역 데이터 보호 당국에 불만을 제기할 수도 있습니다."
+            "열람, 정정, 삭제, 처리 제한, 이의 제기, 데이터 이동권. 여권 페이지에서 직접 여권을 삭제할 수 있습니다. 여러분의 ‘순간’은 익명 처리된 상태로 벽에 남아 있으며, 각 순간마다 별도의 삭제 링크가 제공됩니다. 그 외 문의 사항이 있으시면 privacy@onetribe.world로 이메일을 보내주십시오. 또한 관할 지역 데이터 보호 당국에 불만을 제기할 수도 있습니다."
           ]
         },
         {
-          "heading": "5. 저장 장치 및 프로세서",
+          "heading": "5. 저장 및 처리 업체",
           "paragraphs": [
-            "콘텐츠는 당사의 인프라 제공업체에 저장됩니다(데이터베이스/인증: Supabase; 미디어: Cloudflare R2; 번역: DeepL; 로그인 이메일: Resend). 자막은 기계 번역되며, 번역된 텍스트는 캐시에 저장됩니다. 데이터는 표준 보호 조치에 따라 EU 및 미국에서 처리될 수 있습니다.",
+            "콘텐츠는 당사의 인프라 제공업체에 저장됩니다(데이터베이스/인증: Supabase; 미디어: Cloudflare R2; 번역: DeepL; 로그인 이메일: Resend). 캡션은 기계 번역되며, 번역된 텍스트는 캐시에 저장됩니다. 데이터는 표준 보호 조치에 따라 EU 및 미국에서 처리될 수 있습니다.",
             "기부금은 Ko-fi와 GitHub Sponsors를 통해 외부에서 처리되며, 당사는 결제 정보를 전혀 수신하지 않습니다."
           ]
         },
         {
-          "heading": "6. 유지",
+          "heading": "6. 데이터 보관",
           "paragraphs": [
             "게시된 메모리는 사용자가 삭제하거나 유효한 요청에 의해 제거될 때까지 유지됩니다. 삭제된 콘텐츠는 30일 이내에 운영 중인 시스템에서 완전히 제거됩니다."
           ]
@@ -1460,15 +1460,15 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "사진에 찍혔는데, 그 사진에 나오고 싶지 않으신가요?",
           "paragraphs": [
-            "사진 링크를 privacy@onetribe.world으로 보내주세요. 48시간 이내에 아무런 질문 없이 삭제하거나 모자이크 처리해 드리겠습니다."
+            "사진 링크를 privacy@onetribe.world로 보내주세요. 48시간 이내에 아무런 질문 없이 삭제하거나 흐리게 처리해 드리겠습니다."
           ]
         },
         {
           "heading": "귀하는 저작권자입니다",
           "paragraphs": [
-            "(아티스트, 레이블, 페스티벌, 사진작가): (1) 콘텐츠 링크, (2) 소유권 정보, (3) 연락처를 기재하여 privacy@onetribe.world으로 이메일을 보내주십시오. 당사는 신속히 검토하여 정당한 청구 사항이 확인될 경우 해당 콘텐츠를 삭제합니다. 일반적으로 24~48시간 이내에 처리됩니다. 반복적으로 저작권을 침해하는 사용자의 경우 업로드가 차단됩니다.",
+            "(아티스트, 레이블, 페스티벌, 사진작가): (1) 콘텐츠 링크, (2) 소유권 정보, (3) 연락처를 기재하여 privacy@onetribe.world로 이메일을 보내주십시오. 당사는 신속히 검토하여 정당한 청구 사항이 확인될 경우 해당 콘텐츠를 삭제합니다. 일반적으로 24~48시간 이내에 처리됩니다. 반복적으로 저작권을 침해하는 사용자의 경우 업로드가 차단됩니다.",
             "반박 통지: 업로드한 콘텐츠가 삭제되었으나 이는 오류라고 생각되시면, 사유를 설명하여 회신해 주십시오. 검토 후 해당 콘텐츠를 복원해 드릴 수 있습니다.",
-            "우리는 적대자가 아니라 팬입니다. 마음에 들지 않는 내용이 있다면 알려주시면 바로 삭제하겠습니다."
+            "우리는 적대자가 아니라 팬입니다. 불편한 점이 있다면 알려주시면 바로 삭제하겠습니다."
           ]
         }
       ]
@@ -1483,7 +1483,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "솔직하게 행동해.",
+          "heading": "진짜 순간만.",
           "paragraphs": [
             "오직 실제 순간들만 — AI 생성 이미지나 공식 미디어 자료는 없습니다."
           ]
@@ -1503,13 +1503,1182 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "미성년자",
           "paragraphs": [
-            "아이들을 중심에 두지 마세요. 그렇지 않으면 우리가 흐릿해질 수도 있습니다."
+            "아이들을 주된 대상으로 삼지 마세요. 저희가 이미지를 흐리게 처리할 수 있습니다."
           ]
         },
         {
           "heading": "사진 속 누군가가 이의를 제기하나요?",
           "paragraphs": [
             "그들은 이긴다. 언제나."
+          ]
+        }
+      ]
+    }
+  },
+  "pl": {
+    "terms": {
+      "title": "Warunki korzystania z serwisu",
+      "sections": [
+        {
+          "heading": "1. Czym to jest",
+          "paragraphs": [
+            "One Tribe to nieoficjalny, niekomercyjny projekt fanowski — wspólne archiwum wspomnień dla społeczności miłośników muzyki hard-dance. Nie jest on powiązany z Q-dance, Defqon.1 ani żadnym festiwalem, artystą czy wytwórnią, nie jest przez nie wspierany ani z nimi powiązany."
+          ]
+        },
+        {
+          "heading": "2. Twoje treści",
+          "paragraphs": [
+            "Przesyłając zdjęcie lub plik GIF albo zamieszczając link do filmu („Wspomnienie”), potwierdzasz, że: sam je wykonałeś i posiadasz prawa do jego udostępniania; zostało ono zarejestrowane podczas wydarzenia muzycznego, w którym brałeś udział; udzielasz One Tribe niewyłącznej, ogólnoświatowej, bezpłatnej licencji na hostowanie, wyświetlanie, zmianę rozmiaru oraz tłumaczenie opisu, wyłącznie w celu prowadzenia tej strony.",
+            "Własność pozostaje po Twojej stronie. W każdej chwili możesz usunąć swoje Wspomnienie, korzystając z linku do usunięcia."
+          ]
+        },
+        {
+          "heading": "3. Czego nie wolno publikować",
+          "paragraphs": [
+            "Treści, których nie nagrałeś samodzielnie; pełne, nieprzerwane nagrania występów („set rips”); oficjalne materiały medialne (filmy podsumowujące, profesjonalne zdjęcia, zrzuty z transmisji); treści nieodpowiednie do wyświetlania w miejscu pracy (NSFW) lub o charakterze seksualnym; treści skupiające się na nieletnich; obrazy wygenerowane przez sztuczną inteligencję lub zmodyfikowane, przedstawiane jako rzeczywiste wydarzenia; spam lub reklamy; treści wyśmiewające lub poniżające osoby, które można zidentyfikować."
+          ]
+        },
+        {
+          "heading": "4. Moderacja",
+          "paragraphs": [
+            "Opublikowane treści pojawiają się na ścianie natychmiast. Po opublikowaniu sprawdzamy najnowsze treści oraz zgłoszenia i możemy według własnego uznania ukryć lub usunąć dowolną treść. Szybko reagujemy na wnioski właścicieli praw oraz prośby dotyczące prywatności (zobacz: usuwanie treści), a każde „Wspomnienie” zawiera link do zgłoszenia."
+          ]
+        },
+        {
+          "heading": "5. Brak gwarancji; ograniczenia",
+          "paragraphs": [
+            "Witryna jest udostępniana „tak jak jest”, bezpłatnie. Dobrowolne darowizny pokrywają wyłącznie koszty hostingu i nie zapewniają żadnych korzyści, dodatkowych funkcji ani pierwszeństwa. W maksymalnym zakresie dozwolonym przez prawo nie ponosimy odpowiedzialności za szkody wynikające z korzystania z witryny. Treści odzwierciedlają poglądy osób, które je zamieściły, a nie operatora."
+          ]
+        },
+        {
+          "heading": "6. Zmiany; kontakt",
+          "paragraphs": [
+            "Możemy aktualizować niniejsze warunki; dalsze korzystanie z serwisu oznacza ich akceptację. Kontakt: privacy@onetribe.world."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Polityka prywatności",
+      "sections": [
+        {
+          "heading": "1. Kim jesteśmy",
+          "paragraphs": [
+            "One Tribe (onetribe.world) to niekomercyjny projekt fanowski prowadzony z Korei Południowej. Kontakt: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "2. Jakie dane gromadzimy",
+          "paragraphs": [
+            "Wspomnienia: zamieszczane przez Ciebie zdjęcia/GIF-y oraz osadzone linki do filmów, opisy, wydarzenie/miasto/rok, opcjonalna nazwa wyświetlana oraz link do profilu w mediach społecznościowych. Publikowane natychmiast publicznie; mogą zostać ukryte lub usunięte w wyniku weryfikacji lub zgłoszenia.",
+            "Konto (opcjonalnie): identyfikator konta (domyślnie anonimowy), nazwa wyświetlana, kraj pochodzenia, rejestr uczestnictwa w festiwalach („Passport”) oraz — wyłącznie w przypadku, gdy zdecydujesz się je powiązać — Twój adres e-mail lub identyfikator konta Google.",
+            "Informacje techniczne: logi serwera niezbędne do działania i zapewnienia bezpieczeństwa usługi. Wszelkie dodawane przez nas narzędzia analityczne będą przyjazne dla prywatności — bez śledzenia międzywitrynowego, bez reklamowych plików cookie.",
+            "Nie stosujemy rozpoznawania twarzy ani automatycznego oznaczania osób. Nie sprzedajemy danych."
+          ]
+        },
+        {
+          "heading": "3. Osoby na zdjęciach przedstawiających tłum",
+          "paragraphs": [
+            "Na zdjęciach z festiwalu mogą widnieć inne osoby uczestniczące w wydarzeniu. Podstawą prawną ich publikacji jest nasz uzasadniony interes polegający na dokumentowaniu wydarzeń publicznych na rzecz społeczności, przy uwzględnieniu Twoich praw.",
+            "Jeśli pojawiasz się na zdjęciu i chcesz, aby zostało ono usunięte lub zamazane, daj nam znać — zajmiemy się tym w ciągu 48 godzin, bez zadawania żadnych pytań: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "4. Twoje prawa (RODO)",
+          "paragraphs": [
+            "Dostęp, sprostowanie, usunięcie, ograniczenie przetwarzania, sprzeciw, prawo do przenoszenia danych. Możesz samodzielnie usunąć swój paszport na stronie poświęconej paszportom — Twoje momenty pozostaną na ścianie w formie zanonimizowanej, a każdy z nich będzie miał własny link do usunięcia. W pozostałych sprawach prosimy o kontakt pod adresem privacy@onetribe.world. Możesz również złożyć skargę do lokalnego organu ochrony danych."
+          ]
+        },
+        {
+          "heading": "5. Przechowywanie i podmioty przetwarzające dane",
+          "paragraphs": [
+            "Treści są przechowywane u naszych dostawców infrastruktury (baza danych/uwierzytelnianie: Supabase; multimedia: Cloudflare R2; tłumaczenia: DeepL; wiadomości e-mail dotyczące logowania: Resend). Opisy są tłumaczone automatycznie; przetłumaczony tekst jest buforowany. Dane mogą być przetwarzane w UE i USA z zachowaniem standardowych zabezpieczeń.",
+            "Darowizny są przetwarzane poza naszą platformą przez serwisy Ko-fi i GitHub Sponsors; nie otrzymujemy żadnych danych dotyczących płatności."
+          ]
+        },
+        {
+          "heading": "6. Przechowywanie danych",
+          "paragraphs": [
+            "Opublikowane wspomnienia pozostają dostępne do momentu ich usunięcia przez użytkownika lub na skutek ważnego żądania o ich usunięcie. Usunięte treści są trwale usuwane z aktywnych systemów w ciągu 30 dni."
+          ]
+        },
+        {
+          "heading": "7. Osoby niepełnoletnie",
+          "paragraphs": [
+            "Witryna nie jest przeznaczona dla dzieci. Na prośbę użytkowników lub według własnego uznania zamazujemy lub usuwamy zdjęcia przedstawiające osoby niepełnoletnie."
+          ]
+        }
+      ]
+    },
+    "takedown": {
+      "title": "Prawa autorskie i usuwanie treści",
+      "sections": [
+        {
+          "paragraphs": [
+            "Wnioski o usunięcie — dbamy o to, by proces ten był prosty."
+          ]
+        },
+        {
+          "heading": "Wrzuciłeś to i chcesz to usunąć?",
+          "paragraphs": [
+            "Skorzystaj z otrzymanego linku do usunięcia lub napisz do nas — natychmiast usuniemy wpis."
+          ]
+        },
+        {
+          "heading": "Jesteś na zdjęciu, a nie chcesz na nim być?",
+          "paragraphs": [
+            "Wyślij e-mail na adres privacy@onetribe.world wraz z linkiem do zdjęcia. Zdjęcie zostanie usunięte lub zamazane w ciągu 48 godzin, bez zadawania pytań."
+          ]
+        },
+        {
+          "heading": "Jesteś posiadaczem praw",
+          "paragraphs": [
+            "(artysta, wytwórnia, festiwal, fotograf): wyślij wiadomość e-mail na adres privacy@onetribe.world, podając (1) link do treści, (2) informacje o tym, co jest Twoją własnością, oraz (3) swoje dane kontaktowe. Rozpatrujemy zgłoszenia niezwłocznie i usuwamy uzasadnione zgłoszenia — zazwyczaj w ciągu 24–48 godzin. Osoby wielokrotnie naruszające prawa autorskie mają zablokowaną możliwość przesyłania treści.",
+            "Odwołanie: jeśli Twoja treść została usunięta, a uważasz, że nastąpiło to przez pomyłkę, odpowiedz, podając wyjaśnienie; po rozpatrzeniu sprawy możemy ją przywrócić.",
+            "Jesteśmy fanami, a nie przeciwnikami. Jeśli coś ci przeszkadza, daj nam znać, a to zostanie usunięte."
+          ]
+        }
+      ]
+    },
+    "guidelines": {
+      "title": "Wytyczne dotyczące społeczności",
+      "sections": [
+        {
+          "heading": "Niech to pozostanie twoje.",
+          "paragraphs": [
+            "Przesyłaj wyłącznie materiały, które sam nagrałeś."
+          ]
+        },
+        {
+          "heading": "Bądź sobą.",
+          "paragraphs": [
+            "Wyłącznie prawdziwe ujęcia — żadnych obrazów generowanych przez sztuczną inteligencję ani oficjalnych materiałów z mediów."
+          ]
+        },
+        {
+          "heading": "Nie rozpisuj się.",
+          "paragraphs": [
+            "Zdjęcia i pliki GIF — zamieszczajcie linki do filmów zamiast je przesyłać. Żadnych nagrań całych występów — wspierajcie artystów."
+          ]
+        },
+        {
+          "heading": "Bądź miły.",
+          "paragraphs": [
+            "Żadnego wyśmiewania innych, żadnych treści nieodpowiednich do oglądania w pracy, żadnych symboli nienawiści. Jeśli w centrum Twojego ujęcia znajduje się nieznajomy, wyobraź sobie, jak on to odbierze."
+          ]
+        },
+        {
+          "heading": "Osoby niepełnoletnie",
+          "paragraphs": [
+            "Nie rób z dzieci głównego motywu; możemy zamazać zdjęcie."
+          ]
+        },
+        {
+          "heading": "Czy ktoś na zdjęciu zgłasza zastrzeżenia?",
+          "paragraphs": [
+            "Oni wygrywają. Zawsze."
+          ]
+        }
+      ]
+    }
+  },
+  "sv": {
+    "terms": {
+      "title": "Användarvillkor",
+      "sections": [
+        {
+          "heading": "1. Vad detta är",
+          "paragraphs": [
+            "One Tribe är ett inofficiellt, icke-kommersiellt fanprojekt – ett gemensamt minnesarkiv för hard-dance-gemenskapen. Det har ingen anknytning till, stöds inte av och har inga kopplingar till Q-dance, Defqon.1 eller någon festival, artist eller skivbolag."
+          ]
+        },
+        {
+          "heading": "2. Ditt innehåll",
+          "paragraphs": [
+            "När du laddar upp en bild eller en GIF, eller länkar till en video (”Minne”), bekräftar du att: du själv har tagit det och har rätt att dela det; det togs vid ett musikevenemang som du deltog i; du beviljar One Tribe en icke-exklusiv, världsomspännande och royaltyfri licens att lagra, visa, ändra storlek på och översätta bildtexten, enbart i syfte att driva denna webbplats.",
+            "Du behåller äganderätten. Du kan när som helst radera ditt minne med hjälp av raderingslänken."
+          ]
+        },
+        {
+          "heading": "3. Vad du inte får ladda upp",
+          "paragraphs": [
+            "Innehåll som du inte själv har skapat; sammanhängande inspelningar av hela låtar från framträdanden (”set rips”); officiellt material (efterfilmer, professionella foton, inspelningar från sändningar); NSFW-innehåll eller sexualiserat innehåll; innehåll som fokuserar på minderåriga; AI-genererade eller manipulerade bilder som presenteras som verkliga händelser; spam eller annonser; innehåll som hånar eller förnedrar identifierbara personer."
+          ]
+        },
+        {
+          "heading": "4. Moderering",
+          "paragraphs": [
+            "Uppladdningar visas omedelbart på väggen. Vi granskar de senaste uppladdningarna och anmälningarna efter publicering och kan efter eget gottfinnande dölja eller ta bort innehåll. Vi hanterar förfrågningar från rättighetsinnehavare och begäranden om integritetsskydd snabbt (se borttagning), och varje minne har en länk för anmälan."
+          ]
+        },
+        {
+          "heading": "5. Ingen garanti; ansvarsbegränsning",
+          "paragraphs": [
+            "Webbplatsen tillhandahålls ”i befintligt skick”, utan kostnad. Frivilliga donationer täcker endast kostnaderna för webbhotell och medför inga förmåner, funktioner eller prioritering. I den utsträckning som lagen tillåter tar vi inget ansvar för skador som uppstår till följd av användningen av webbplatsen. Innehållet återspeglar de som laddat upp det, inte webbplatsens operatör."
+          ]
+        },
+        {
+          "heading": "6. Ändringar; kontakt",
+          "paragraphs": [
+            "Vi kan komma att uppdatera dessa villkor; fortsatt användning innebär att du godkänner dem. Kontakt: privacy@onetribe.world."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Integritetspolicy",
+      "sections": [
+        {
+          "heading": "1. Vem vi är",
+          "paragraphs": [
+            "One Tribe (onetribe.world) är ett icke-kommersiellt fanprojekt som drivs från Sydkorea. Kontakt: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "2. Vilka uppgifter vi samlar in",
+          "paragraphs": [
+            "Minnen: foton/GIF-bilder som du laddar upp och videolänkar som du bäddar in, bildtexter, evenemang/stad/år, ett valfritt visningsnamn och en länk till sociala medier. Publiceras omedelbart för alla; kan döljas eller tas bort efter granskning eller anmälan.",
+            "Konto (valfritt): konto-ID (anonymt som standard), visningsnamn, hemland, logg över festivaldeltagande (”Passport”) och – endast om du väljer att koppla ihop dem – din e-postadress eller din Google-kontoidentitet.",
+            "Tekniskt: serverloggar krävs för att driva och säkra tjänsten. Alla analysverktyg som vi lägger till kommer att vara integritetsvänliga – ingen spårning mellan webbplatser, inga reklamcookies.",
+            "Vi använder varken ansiktsigenkänning eller automatisk märkning av personer. Vi säljer inte data."
+          ]
+        },
+        {
+          "heading": "3. Personer på publikbilder",
+          "paragraphs": [
+            "Festivalbilderna kan innehålla andra deltagare. Vår rättsliga grund för publiceringen är ett berättigat intresse av att dokumentera offentliga evenemang för gemenskapen, vilket vägs mot dina rättigheter.",
+            "Om du syns på en bild och vill att den ska tas bort eller suddas ut, hör av dig till oss – vi åtgärdar det inom 48 timmar, utan att ställa några frågor: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "4. Dina rättigheter (GDPR)",
+          "paragraphs": [
+            "Rätt till insyn, rättelse, radering, begränsning, invändning, dataportabilitet. Du kan själv radera ditt pass på passidan – dina minnen finns kvar på väggen, anonymiserade, och varje minne har en egen raderingslänk. Skicka ett e-postmeddelande till privacy@onetribe.world om du har några andra frågor. Du kan också lämna in ett klagomål till din lokala dataskyddsmyndighet."
+          ]
+        },
+        {
+          "heading": "5. Lagring och leverantörer",
+          "paragraphs": [
+            "Innehållet lagras hos våra infrastrukturleverantörer (databas/autentisering: Supabase; media: Cloudflare R2; översättning: DeepL; e-postmeddelanden för inloggning: Resend). Bildtexterna maskinöversätts och den översatta texten lagras i cache. Uppgifterna kan behandlas inom EU och USA i enlighet med standardiserade skyddsåtgärder.",
+            "Donationerna hanteras externt av Ko-fi och GitHub Sponsors; vi får inga betalningsuppgifter."
+          ]
+        },
+        {
+          "heading": "6. Kvarhållande",
+          "paragraphs": [
+            "Publicerade minnen sparas tills du raderar dem eller tills de tas bort genom en giltig begäran. Raderat innehåll raderas från aktiva system inom 30 dagar."
+          ]
+        },
+        {
+          "heading": "7. Minderåriga",
+          "paragraphs": [
+            "Webbplatsen riktar sig inte till barn. Vi suddar ut eller tar bort bilder där minderåriga syns på begäran eller efter eget gottfinnande."
+          ]
+        }
+      ]
+    },
+    "takedown": {
+      "title": "Upphovsrätt och borttagning",
+      "sections": [
+        {
+          "paragraphs": [
+            "Begäran om borttagning – vi gör det enkelt."
+          ]
+        },
+        {
+          "heading": "Har du laddat upp den och vill ta bort den?",
+          "paragraphs": [
+            "Använd den borttagningslänk du har fått, eller skicka ett e-postmeddelande till oss – så tas den bort omedelbart."
+          ]
+        },
+        {
+          "heading": "Finns du med på en bild och vill inte vara det?",
+          "paragraphs": [
+            "Skicka ett e-postmeddelande till privacy@onetribe.world med länken till bilden. Bilden tas bort eller suddas ut inom 48 timmar, utan ytterligare frågor."
+          ]
+        },
+        {
+          "heading": "Du är rättighetsinnehavare",
+          "paragraphs": [
+            "(artist, skivbolag, festival, fotograf): skicka ett e-postmeddelande till privacy@onetribe.world med (1) länken till innehållet, (2) vad du äger rättigheterna till, (3) dina kontaktuppgifter. Vi granskar ärendet omgående och tar bort giltiga anmälningar – vanligtvis inom 24–48 timmar. De som upprepade gånger begår intrång blockeras från att ladda upp innehåll.",
+            "Motanmälan: Om ditt uppladdade material har tagits bort och du anser att det var ett misstag, svara med en förklaring; vi kan återställa det efter granskning.",
+            "Vi är fans, inte motståndare. Om något stör dig, säg till oss så tar vi bort det."
+          ]
+        }
+      ]
+    },
+    "guidelines": {
+      "title": "Riktlinjer för gemenskapen",
+      "sections": [
+        {
+          "heading": "Behåll det för dig själv.",
+          "paragraphs": [
+            "Ladda endast upp bilder som du har tagit själv."
+          ]
+        },
+        {
+          "heading": "Var dig själv.",
+          "paragraphs": [
+            "Endast äkta ögonblick – inga AI-genererade bilder, inga bilder hämtade från officiella medier."
+          ]
+        },
+        {
+          "heading": "Håll det kort.",
+          "paragraphs": [
+            "Bilder och GIF:ar – länka till en video istället för att ladda upp den. Inga inspelningar av hela konserter – stöd artisterna."
+          ]
+        },
+        {
+          "heading": "Var vänlig.",
+          "paragraphs": [
+            "Inget hån mot andra, inget olämpligt innehåll, inga hatiska symboler. Om en främling är i fokus i din bild, tänk dig hur det skulle kännas för hen att se den."
+          ]
+        },
+        {
+          "heading": "Minderåriga",
+          "paragraphs": [
+            "Låt inte barn stå i centrum; vi kan komma att göra bilden suddig."
+          ]
+        },
+        {
+          "heading": "Är det någon på din bild som har invändningar?",
+          "paragraphs": [
+            "De vinner. Alltid."
+          ]
+        }
+      ]
+    }
+  },
+  "tr": {
+    "terms": {
+      "title": "Kullanım Koşulları",
+      "sections": [
+        {
+          "heading": "1. Bu nedir?",
+          "paragraphs": [
+            "One Tribe, gayri resmi ve ticari amaç gütmeyen bir hayran projesidir — hard-dance topluluğu için ortak bir anı arşividir. Q-dance, Defqon.1 veya herhangi bir festival, sanatçı ya da plak şirketiyle hiçbir bağlantısı yoktur, bunlar tarafından desteklenmemektedir ve bunlarla ilişkili değildir."
+          ]
+        },
+        {
+          "heading": "2. İçeriğiniz",
+          "paragraphs": [
+            "Bir fotoğraf veya GIF yüklediğinizde ya da bir videoya bağlantı verdiğinizde (“Anı”), şunları teyit etmiş olursunuz: bu içeriği kendiniz çekmişsiniz ve paylaşma haklarına sahipsiniz; içerik, katıldığınız bir müzik etkinliğinde çekilmiştir; One Tribe’a, yalnızca bu siteyi işletmek amacıyla, içeriği barındırma, görüntüleme, boyutunu değiştirme ve açıklamalarını çevirme konusunda münhasır olmayan, dünya çapında geçerli ve telifsiz bir lisans verdiğinizi.",
+            "Mülkiyet hakkı size aittir. Silme bağlantınızı kullanarak anınızı istediğiniz zaman silebilirsiniz."
+          ]
+        },
+        {
+          "heading": "3. Yükleyemeyeceğiniz içerikler",
+          "paragraphs": [
+            "Kaydetmediğiniz içerikler; performansların şarkı başından sonuna kadar kesintisiz kayıtları (“set rips”); resmi medya içerikleri (konser sonrası videoları, profesyonel fotoğraflar, yayın kayıtları); NSFW veya cinsel içerikli materyaller; reşit olmayanlara odaklanan içerikler; gerçek anlarmış gibi sunulan yapay zeka tarafından üretilmiş veya manipüle edilmiş görseller; spam veya reklamlar; kimliği tespit edilebilir kişileri alay konusu yapan veya küçük düşüren içerikler."
+          ]
+        },
+        {
+          "heading": "4. Denetim",
+          "paragraphs": [
+            "Yüklenen içerikler anında duvarda görünür. Yayınlandıktan sonra son yüklenen içerikleri ve bildirimleri inceleriz ve kendi takdirimize bağlı olarak herhangi bir içeriği gizleyebilir veya kaldırabiliriz. Hak sahiplerinin taleplerini ve gizlilik taleplerini hızlı bir şekilde yerine getiririz (bkz. içerik kaldırma) ve her anıda bir bildirim bağlantısı bulunur."
+          ]
+        },
+        {
+          "heading": "5. Garanti yok; sınırlama",
+          "paragraphs": [
+            "Bu site, \"olduğu gibi\" ve ücretsiz olarak sunulmaktadır. Gönüllü bağışlar yalnızca barındırma masraflarını karşılamak amacıyla toplanmaktadır ve herhangi bir avantaj, özellik veya öncelik sağlamamaktadır. Yasanın izin verdiği azami ölçüde, sitenin kullanımından kaynaklanan zararlardan hiçbir sorumluluk kabul etmiyoruz. İçerik, siteyi işleten kuruluşa değil, onu yükleyen kişilerin görüşlerini yansıtır."
+          ]
+        },
+        {
+          "heading": "6. Değişiklikler; iletişim",
+          "paragraphs": [
+            "Bu şartları güncelleyebiliriz; kullanmaya devam etmeniz, bu şartları kabul ettiğiniz anlamına gelir. İletişim: privacy@onetribe.world."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Gizlilik Politikası",
+      "sections": [
+        {
+          "heading": "1. Kim olduğumuz",
+          "paragraphs": [
+            "One Tribe (onetribe.world), Güney Kore'den yürütülen, ticari amaç gütmeyen bir hayran projesidir. İletişim: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "2. Topladığımız bilgiler",
+          "paragraphs": [
+            "Anılar: Yüklediğiniz fotoğraflar/GIF’ler ve eklediğiniz video bağlantıları, açıklamalar, etkinlik/şehir/yıl, isteğe bağlı bir görüntüleme adı ve sosyal medya bağlantısı. Hemen herkese açık olarak yayınlanır; inceleme veya bildirim üzerine gizlenebilir veya kaldırılabilir.",
+            "Hesap (isteğe bağlı): hesap kimliği (varsayılan olarak anonim), görüntüleme adı, ikamet ülkeniz, festival katılım kaydı (“Passport”) ve — yalnızca bunları bağlamayı seçerseniz — e-posta adresiniz veya Google hesap kimliğiniz.",
+            "Teknik: Hizmetin çalıştırılması ve güvenliğinin sağlanması için sunucu günlükleri gereklidir. Ekleyeceğimiz tüm analiz araçları gizlilik dostu olacaktır — siteler arası izleme ve reklam çerezleri kullanılmayacaktır.",
+            "Yüz tanıma veya kişilerin otomatik olarak etiketlenmesi gibi uygulamalar yapmıyoruz. Veri satmıyoruz."
+          ]
+        },
+        {
+          "heading": "3. Kalabalık fotoğraflardaki kişiler",
+          "paragraphs": [
+            "Festival fotoğraflarında diğer katılımcılar da görünebilir. Bu fotoğrafları yayınlamamızın hukuki dayanağı, kamuya açık etkinliklerin topluluk tarafından belgelenmesine yönelik meşru menfaat olup, bu menfaat sizin haklarınızla dengelenmektedir.",
+            "Bir fotoğrafta yer alıyorsanız ve bu fotoğrafın kaldırılmasını veya bulanıklaştırılmasını istiyorsanız, bize bildirin — 48 saat içinde harekete geçeceğiz, hiçbir soru sormadan: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "4. Haklarınız (GDPR)",
+          "paragraphs": [
+            "Erişim, düzeltme, silme, işleme kısıtlama, itiraz, veri taşınabilirliği. Pasaport sayfasından pasaportunuzu kendiniz silebilirsiniz — anlarınız, kimlik bilgileri gizlenmiş olarak duvarda kalır ve her birinin kendi silme bağlantısı bulunur. Diğer her türlü konuda privacy@onetribe.world adresine e-posta gönderebilirsiniz. Ayrıca, yerel veri koruma kurumuna da şikayette bulunabilirsiniz."
+          ]
+        },
+        {
+          "heading": "5. Depolama ve işlemciler",
+          "paragraphs": [
+            "İçerik, altyapı sağlayıcılarımızda depolanmaktadır (veritabanı/kimlik doğrulama: Supabase; medya: Cloudflare R2; çeviri: DeepL; oturum açma e-postaları: Resend). Açıklamalar makine çevirisiyle çevrilir; çevrilmiş metin önbelleğe alınır. Veriler, standart güvenlik önlemleri kapsamında AB ve ABD’de işlenebilir.",
+            "Bağışlar, Ko-fi ve GitHub Sponsors tarafından platform dışında işlenmektedir; bize herhangi bir ödeme bilgisi ulaşmamaktadır."
+          ]
+        },
+        {
+          "heading": "6. Veri saklama",
+          "paragraphs": [
+            "Yayınlanan Anılar, siz silene kadar veya geçerli bir talep üzerine kaldırılana kadar kalır. Silinen içerikler, 30 gün içinde aktif sistemlerden tamamen kaldırılır."
+          ]
+        },
+        {
+          "heading": "7. Reşit Olmayanlar",
+          "paragraphs": [
+            "Bu site çocuklara yönelik değildir. Talep üzerine veya kendi takdirimize bağlı olarak, reşit olmayan kişilerin odak noktası olduğu görselleri bulanıklaştırır veya kaldırırız."
+          ]
+        }
+      ]
+    },
+    "takedown": {
+      "title": "Telif Hakkı ve İçerik Kaldırma",
+      "sections": [
+        {
+          "paragraphs": [
+            "Kaldırma talepleri — bu konuyu basit tutuyoruz."
+          ]
+        },
+        {
+          "heading": "Onu yüklediniz ve artık silinmesini mi istiyorsunuz?",
+          "paragraphs": [
+            "Aldığınız silme bağlantısını kullanın ya da bize e-posta gönderin — derhal silinecektir."
+          ]
+        },
+        {
+          "heading": "Bir fotoğrafta yer alıyorsunuz ve orada olmak istemiyor musunuz?",
+          "paragraphs": [
+            "Fotoğrafın bağlantısını privacy@onetribe.world adresine e-posta ile gönderin. 48 saat içinde, herhangi bir soru sorulmaksızın kaldırılır veya bulanıklaştırılır."
+          ]
+        },
+        {
+          "heading": "Siz bir hak sahibisiniz",
+          "paragraphs": [
+            "(sanatçı, plak şirketi, festival, fotoğrafçı): privacy@onetribe.world adresine (1) içeriğin bağlantısını, (2) size ait olan kısmı ve (3) iletişim bilgilerinizi içeren bir e-posta gönderin. Talepleri derhal inceler ve geçerli olanları — genellikle 24–48 saat içinde — kaldırırız. Tekrar tekrar hak ihlali yapan kullanıcıların yükleme yapması engellenir.",
+            "Karşı bildirim: Yüklediğiniz içerik kaldırıldıysa ve bunun bir hata olduğunu düşünüyorsanız, bir açıklama ekleyerek yanıt verin; incelemenin ardından içeriği geri yükleyebiliriz.",
+            "Biz hayranız, düşman değiliz. Eğer bir şey sizi rahatsız ediyorsa, bize söyleyin, hemen kaldırılsın."
+          ]
+        }
+      ]
+    },
+    "guidelines": {
+      "title": "Topluluk Kuralları",
+      "sections": [
+        {
+          "heading": "Kendininki olsun.",
+          "paragraphs": [
+            "Yalnızca kendi çektiğiniz fotoğrafları yükleyin."
+          ]
+        },
+        {
+          "heading": "Gerçek olsun.",
+          "paragraphs": [
+            "Sadece gerçek anlar — yapay zeka ile oluşturulmuş görseller yok, resmi medya kaynaklarından alınmış görüntüler yok."
+          ]
+        },
+        {
+          "heading": "Kısa tut.",
+          "paragraphs": [
+            "Fotoğraflar ve GIF’ler — videoyu yüklemek yerine bağlantısını paylaşın. Konserin tamamını içeren kayıtlar yasaktır — sanatçıları destekleyin."
+          ]
+        },
+        {
+          "heading": "Nazik ol.",
+          "paragraphs": [
+            "İnsanlarla alay etmek yok, iş ortamına uygun olmayan içerik yok, nefret sembolleri yok. Fotoğrafınızın odak noktasında bir yabancı varsa, onun bu fotoğrafı gördüğünü hayal edin."
+          ]
+        },
+        {
+          "heading": "Reşit olmayanlar",
+          "paragraphs": [
+            "Çocukları odak noktası yapmayın; görüntüyü bulanıklaştırabiliriz."
+          ]
+        },
+        {
+          "heading": "Fotoğrafınızdaki biri itiraz mı ediyor?",
+          "paragraphs": [
+            "Onlar kazanır. Her zaman."
+          ]
+        }
+      ]
+    }
+  },
+  "zh": {
+    "terms": {
+      "title": "服务条款",
+      "sections": [
+        {
+          "heading": "1. 这是什么",
+          "paragraphs": [
+            "“One Tribe”是一个非官方、非商业性的粉丝项目——它是硬核舞曲社区的共享记忆档案库。该项目与Q-dance、Defqon.1或任何音乐节、艺人及厂牌均无隶属关系、未获其认可，也无任何关联。"
+          ]
+        },
+        {
+          "heading": "2. 您的内容",
+          "paragraphs": [
+            "当您上传照片或GIF，或分享视频链接（“回忆”）时，您确认：该内容由您亲自拍摄且拥有分享权；该内容拍摄于您参加的音乐活动； 您授予 One Tribe 一项非独占性、全球范围、免版税的许可，允许其托管、展示、调整尺寸并翻译相关文字说明，且该许可仅用于运营本网站。",
+            "您仍拥有所有权。您可以随时使用删除链接删除您的“回忆”。"
+          ]
+        },
+        {
+          "heading": "3. 禁止上传的内容",
+          "paragraphs": [
+            "未由您本人拍摄的内容；演出全曲连续录像（“整场录像”）；官方媒体资料（演出回顾视频、专业照片、转播截图）； 不适合工作场所（NSFW）或性化内容；以未成年人为重点的内容；伪装成真实场景的AI生成或修图图像；垃圾信息或广告；嘲讽或贬低可识别个人的内容。"
+          ]
+        },
+        {
+          "heading": "4. 审核",
+          "paragraphs": [
+            "上传的内容会立即显示在墙上。我们会在内容发布后审核近期上传的内容及举报信息，并有权自行决定隐藏或删除任何内容。我们会迅速响应权利人和隐私相关请求（参见“下架”），且每条“回忆”都配有举报链接。"
+          ]
+        },
+        {
+          "heading": "5. 不作任何保证；责任限制",
+          "paragraphs": [
+            "本网站按“原样”免费提供。自愿捐款仅用于支付托管费用，不会带来任何权益、功能或优先权。在法律允许的最大范围内，对于因使用本网站而造成的任何损害，我们概不承担责任。网站内容仅代表上传者观点，不代表运营方立场。"
+          ]
+        },
+        {
+          "heading": "6. 变更；联系方式",
+          "paragraphs": [
+            "我们可能会更新这些条款；继续使用即表示接受。联系方式：privacy@onetribe.world。"
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "隐私政策",
+      "sections": [
+        {
+          "heading": "1. 关于我们",
+          "paragraphs": [
+            "One Tribe（onetribe.world）是一个由韩国运营的非商业性粉丝项目。联系方式：privacy@onetribe.world。"
+          ]
+        },
+        {
+          "heading": "2. 我们收集的信息",
+          "paragraphs": [
+            "回忆：您上传的照片/GIF动图、嵌入的视频链接、配文、活动/城市/年份，以及可选的显示名称和社交媒体链接。内容将立即公开发布；经审核或举报后，可能会被隐藏或删除。",
+            "账户（可选）：账户 ID（默认匿名）、显示名称、所在国家/地区、音乐节参与记录（“Passport”），以及——仅当您选择关联时——您的电子邮件地址或 Google 账户身份。",
+            "技术方面：运行和保障服务安全需要服务器日志。我们添加的任何分析功能都将尊重用户隐私——不进行跨站点追踪，也不使用广告Cookie。",
+            "我们不进行人脸识别，也不对人员进行自动标记。我们不出售数据。"
+          ]
+        },
+        {
+          "heading": "3. 人群照片中的人",
+          "paragraphs": [
+            "音乐节的照片里可能会出现其他参与者。我们发布这些照片的法律依据是，出于对公共活动进行社区记录的合法利益，同时会权衡您的权利。",
+            "如果您出现在某张照片中，并希望将其删除或模糊处理，请告知我们——我们将在48小时内处理，不会询问任何原因：privacy@onetribe.world。"
+          ]
+        },
+        {
+          "heading": "4. 您的权利（《通用数据保护条例》（GDPR））",
+          "paragraphs": [
+            "访问、更正、删除、限制、异议、数据可携权。您可以在“护照”页面自行删除您的护照——您的瞬间仍会保留在墙上，并经过匿名处理，每个瞬间都配有专属的删除链接。如有其他问题，请发送电子邮件至 privacy@onetribe.world。您也可以向当地数据保护机构提出投诉。"
+          ]
+        },
+        {
+          "heading": "5. 存储与数据处理方",
+          "paragraphs": [
+            "内容存储于我们的基础设施提供商处（数据库/身份验证：Supabase；媒体：Cloudflare R2；翻译：DeepL；登录邮件：Resend）。配文采用机器翻译生成；翻译后的文本会被缓存。数据可能会在欧盟和美国境内，在标准保障措施下进行处理。",
+            "捐款由 Ko-fi 和 GitHub Sponsors 在站外处理；我们不会收到任何支付数据。"
+          ]
+        },
+        {
+          "heading": "6. 数据保留",
+          "paragraphs": [
+            "已发布的回忆将一直保留，直到您将其删除或收到有效的删除请求。已删除的内容将在30天内从运行中的系统中彻底清除。"
+          ]
+        },
+        {
+          "heading": "7. 未成年人",
+          "paragraphs": [
+            "本网站不面向儿童。根据要求或经我们自行判断，我们将对以未成年人为焦点的图片进行模糊处理或删除。"
+          ]
+        }
+      ]
+    },
+    "takedown": {
+      "title": "版权与内容删除",
+      "sections": [
+        {
+          "paragraphs": [
+            "删除请求——我们力求简便。"
+          ]
+        },
+        {
+          "heading": "您上传了它，现在又想删掉吗？",
+          "paragraphs": [
+            "请使用您收到的删除链接，或发送电子邮件给我们——我们将立即删除。"
+          ]
+        },
+        {
+          "heading": "您出现在一张照片里，但不想出现在里面？",
+          "paragraphs": [
+            "请将照片链接发送至 privacy@onetribe.world。我们会在48小时内删除或模糊处理该照片，不会询问任何原因。"
+          ]
+        },
+        {
+          "heading": "您是权利人",
+          "paragraphs": [
+            "（艺人、唱片公司、音乐节、摄影师）：请发送邮件至 privacy@onetribe.world，并附上（1）内容链接，（2）您拥有的权利，（3）您的联系方式。我们将及时审核并删除属实的内容——通常在24至48小时内完成。屡次侵权者将被禁止上传内容。",
+            "反通知：如果您的上传内容被删除，而您认为这是误删，请回复并说明情况；经审核后，我们可能会恢复该内容。",
+            "我们是粉丝，不是对手。如果有什么内容让您感到不适，请告诉我们，我们会将其下架。"
+          ]
+        }
+      ]
+    },
+    "guidelines": {
+      "title": "社区准则",
+      "sections": [
+        {
+          "heading": "只发你自己拍的。",
+          "paragraphs": [
+            "请仅上传您自己拍摄的内容。"
+          ]
+        },
+        {
+          "heading": "保持真实。",
+          "paragraphs": [
+            "仅限真实画面——不包含AI生成的图片，也不包含官方媒体截图。"
+          ]
+        },
+        {
+          "heading": "简明扼要。",
+          "paragraphs": [
+            "照片和GIF——请分享视频链接，不要直接上传视频。请勿上传完整演出录像——请支持艺术家。"
+          ]
+        },
+        {
+          "heading": "保持友善。",
+          "paragraphs": [
+            "不得嘲讽他人，不得发布不适合工作场所的内容，不得使用仇恨符号。如果照片的焦点是一位陌生人，请设身处地想想他们看到这张照片时的感受。"
+          ]
+        },
+        {
+          "heading": "未成年人",
+          "paragraphs": [
+            "不要让孩子成为焦点；我们可能会对图片进行模糊处理。"
+          ]
+        },
+        {
+          "heading": "照片里有人提出异议吗？",
+          "paragraphs": [
+            "他们赢了。总是如此。"
+          ]
+        }
+      ]
+    }
+  },
+  "id": {
+    "terms": {
+      "title": "Ketentuan Layanan",
+      "sections": [
+        {
+          "heading": "1. Apa ini",
+          "paragraphs": [
+            "One Tribe adalah proyek penggemar yang tidak resmi dan non-komersial — sebuah arsip kenangan bersama bagi komunitas hard-dance. Proyek ini tidak berafiliasi dengan, didukung oleh, atau terkait dengan Q-dance, Defqon.1, maupun festival, artis, atau label mana pun."
+          ]
+        },
+        {
+          "heading": "2. Konten Anda",
+          "paragraphs": [
+            "Saat Anda mengunggah foto atau GIF, atau menyertakan tautan video (“Memory”), Anda menyatakan bahwa: Anda sendiri yang mengambilnya dan memiliki hak untuk membagikannya; foto atau video tersebut diambil pada acara musik yang Anda hadiri; Anda memberikan lisensi non-eksklusif, berlaku di seluruh dunia, dan bebas royalti kepada One Tribe untuk menghosting, menampilkan, mengubah ukuran, dan menerjemahkan keterangan foto tersebut, semata-mata untuk mengoperasikan situs ini.",
+            "Anda tetap memegang hak kepemilikan. Anda dapat menghapus Memory Anda kapan saja menggunakan tautan penghapusan Anda."
+          ]
+        },
+        {
+          "heading": "3. Apa saja yang tidak boleh Anda unggah",
+          "paragraphs": [
+            "Konten yang tidak Anda rekam sendiri; rekaman pertunjukan secara utuh dan berkelanjutan (\"set rips\"); media resmi (video setelah acara, foto profesional, rekaman siaran); konten yang tidak pantas untuk ditonton di tempat kerja (NSFW) atau bermuatan seksual; konten yang berfokus pada anak di bawah umur; gambar yang dihasilkan atau dimanipulasi oleh AI yang disajikan sebagai momen nyata; spam atau iklan; konten yang mengejek atau merendahkan orang yang dapat diidentifikasi."
+          ]
+        },
+        {
+          "heading": "4. Moderasi",
+          "paragraphs": [
+            "Konten yang diunggah langsung muncul di dinding. Kami meninjau unggahan terbaru dan laporan setelah publikasi, dan berhak menyembunyikan atau menghapus konten apa pun sesuai pertimbangan kami. Kami menanggapi permintaan pemegang hak dan permintaan terkait privasi dengan cepat (lihat kebijakan penghapusan), dan setiap Memory dilengkapi dengan tautan laporan."
+          ]
+        },
+        {
+          "heading": "5. Tidak ada jaminan; batasan",
+          "paragraphs": [
+            "Situs ini disediakan \"apa adanya\", tanpa biaya. Sumbangan sukarela hanya digunakan untuk menutupi biaya hosting dan tidak memberikan keuntungan, fitur, atau prioritas apa pun. Sejauh yang diizinkan oleh hukum, kami tidak bertanggung jawab atas kerugian yang timbul akibat penggunaan situs ini. Konten yang terdapat di situs ini mencerminkan pandangan pengunggahnya, bukan operator situs."
+          ]
+        },
+        {
+          "heading": "6. Perubahan; kontak",
+          "paragraphs": [
+            "Kami mungkin akan memperbarui ketentuan ini; penggunaan yang terus-menerus berarti Anda menyetujuinya. Hubungi: privacy@onetribe.world."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Kebijakan Privasi",
+      "sections": [
+        {
+          "heading": "1. Siapa kami",
+          "paragraphs": [
+            "One Tribe (onetribe.world) adalah proyek penggemar non-komersial yang dikelola dari Korea Selatan. Kontak: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "2. Data yang kami kumpulkan",
+          "paragraphs": [
+            "Memory: foto/GIF yang Anda unggah dan tautan video yang Anda sematkan, keterangan, acara/kota/tahun, nama tampilan (opsional), serta tautan media sosial. Dipublikasikan secara terbuka seketika; dapat disembunyikan atau dihapus setelah ditinjau atau dilaporkan.",
+            "Akun (opsional): ID akun (secara default bersifat anonim), nama tampilan, negara asal, riwayat kehadiran festival (\"Passport\"), dan — hanya jika Anda memilih untuk menghubungkannya — alamat email atau identitas akun Google Anda.",
+            "Aspek teknis: Catatan server diperlukan untuk mengoperasikan dan mengamankan layanan ini. Setiap fitur analitik yang kami tambahkan akan ramah privasi — tanpa pelacakan lintas situs, tanpa cookie iklan.",
+            "Kami tidak menggunakan sistem pengenalan wajah maupun penandaan otomatis terhadap orang. Kami tidak menjual data."
+          ]
+        },
+        {
+          "heading": "3. Orang-orang dalam foto kerumunan",
+          "paragraphs": [
+            "Foto-foto festival mungkin menampilkan peserta lain. Dasar hukum kami dalam mempublikasikan foto-foto tersebut adalah kepentingan sah dalam mendokumentasikan acara publik bagi komunitas, yang dipertimbangkan secara seimbang dengan hak-hak Anda.",
+            "Jika Anda muncul dalam sebuah foto dan ingin foto tersebut dihapus atau diburamkan, silakan hubungi kami — kami akan menindaklanjutinya dalam waktu 48 jam, tanpa pertanyaan apa pun: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "4. Hak-hak Anda (GDPR)",
+          "paragraphs": [
+            "Akses, koreksi, penghapusan, pembatasan, keberatan, portabilitas. Anda dapat menghapus paspor Anda sendiri di halaman paspor — momen-momen Anda tetap tersimpan di dinding, dalam bentuk anonim, masing-masing dilengkapi tautan penghapusan tersendiri. Kirim email ke privacy@onetribe.world untuk hal-hal lain. Anda juga dapat mengajukan keluhan kepada otoritas perlindungan data setempat."
+          ]
+        },
+        {
+          "heading": "5. Penyimpanan & prosesor",
+          "paragraphs": [
+            "Konten disimpan di penyedia infrastruktur kami (basis data/otentikasi: Supabase; media: Cloudflare R2; terjemahan: DeepL; email untuk masuk: Resend). Keterangan gambar diterjemahkan secara otomatis; teks terjemahan disimpan dalam cache. Data mungkin diproses di Uni Eropa dan Amerika Serikat dengan mengikuti langkah-langkah perlindungan standar.",
+            "Donasi diproses di luar platform oleh Ko-fi dan GitHub Sponsors; kami tidak menerima data pembayaran apa pun."
+          ]
+        },
+        {
+          "heading": "6. Retensi",
+          "paragraphs": [
+            "Memory yang dipublikasikan akan tetap ada sampai Anda menghapusnya atau dihapus berdasarkan permintaan yang sah. Konten yang dihapus akan dibersihkan dari sistem yang aktif dalam waktu 30 hari."
+          ]
+        },
+        {
+          "heading": "7. Anak di bawah umur",
+          "paragraphs": [
+            "Situs ini tidak ditujukan untuk anak-anak. Kami akan mengaburkan atau menghapus gambar yang menampilkan anak di bawah umur atas permintaan atau atas pertimbangan kami sendiri."
+          ]
+        }
+      ]
+    },
+    "takedown": {
+      "title": "Hak Cipta & Penghapusan",
+      "sections": [
+        {
+          "paragraphs": [
+            "Permintaan penghapusan — kami menjadikannya sesederhana mungkin."
+          ]
+        },
+        {
+          "heading": "Anda mengunggahnya dan ingin menghapusnya?",
+          "paragraphs": [
+            "Gunakan tautan penghapusan yang telah Anda terima, atau kirimkan email kepada kami — konten akan segera kami hapus."
+          ]
+        },
+        {
+          "heading": "Anda ada di foto ini dan tidak ingin muncul?",
+          "paragraphs": [
+            "Kirim email ke privacy@onetribe.world beserta tautan fotonya. Foto akan dihapus atau dikaburkan dalam waktu 48 jam, tanpa pertanyaan apa pun."
+          ]
+        },
+        {
+          "heading": "Anda adalah pemegang hak",
+          "paragraphs": [
+            "(artis, label, festival, fotografer): kirim email ke privacy@onetribe.world dengan mencantumkan (1) tautan konten, (2) hak kepemilikan Anda, (3) informasi kontak Anda. Kami akan segera meninjau dan menghapus klaim yang sah — biasanya dalam waktu 24–48 jam. Pengguna yang berulang kali melanggar akan diblokir dari mengunggah konten.",
+            "Pemberitahuan balasan: jika unggahan Anda telah dihapus dan Anda yakin hal itu merupakan kesalahan, silakan balas dengan penjelasan; kami mungkin akan memulihkannya setelah dilakukan peninjauan.",
+            "Kami adalah penggemar, bukan lawan. Jika ada yang mengganggu Anda, beri tahu kami dan kami akan menghapusnya."
+          ]
+        }
+      ]
+    },
+    "guidelines": {
+      "title": "Pedoman Komunitas",
+      "sections": [
+        {
+          "heading": "Jadikan milik Anda sendiri.",
+          "paragraphs": [
+            "Hanya unggah foto atau video yang Anda ambil sendiri."
+          ]
+        },
+        {
+          "heading": "Tetaplah jujur.",
+          "paragraphs": [
+            "Hanya momen-momen asli — tanpa gambar hasil AI, tanpa cuplikan dari media resmi."
+          ]
+        },
+        {
+          "heading": "Jaga agar tetap singkat.",
+          "paragraphs": [
+            "Foto dan GIF — sertakan tautan video alih-alih mengunggahnya. Jangan unggah rekaman pertunjukan lengkap — dukung para artis."
+          ]
+        },
+        {
+          "heading": "Tetaplah bersikap baik.",
+          "paragraphs": [
+            "Dilarang mengejek orang lain, dilarang menampilkan konten yang tidak pantas untuk ditonton di tempat kerja (NSFW), dan dilarang menggunakan simbol-simbol kebencian. Jika ada orang asing yang menjadi subjek foto Anda, bayangkan bagaimana perasaannya jika melihat foto tersebut."
+          ]
+        },
+        {
+          "heading": "Anak di bawah umur",
+          "paragraphs": [
+            "Jangan jadikan anak-anak sebagai fokus; kami mungkin akan mengaburkannya."
+          ]
+        },
+        {
+          "heading": "Ada orang yang keberatan dengan foto Anda?",
+          "paragraphs": [
+            "Mereka menang. Selalu."
+          ]
+        }
+      ]
+    }
+  },
+  "th": {
+    "terms": {
+      "title": "เงื่อนไขการให้บริการ",
+      "sections": [
+        {
+          "heading": "1. นี่คืออะไร",
+          "paragraphs": [
+            "One Tribe เป็นโครงการแฟนคลับที่ไม่เป็นทางการและไม่มุ่งหวังผลกำไร — เป็นคลังเก็บความทรงจำร่วมกันสำหรับชุมชนฮาร์ดแดนซ์ โครงการนี้ไม่มีความเกี่ยวข้อง ไม่ได้รับการสนับสนุน และไม่มีความสัมพันธ์ใด ๆ กับ Q-dance, Defqon.1 หรือเทศกาลดนตรี ศิลปิน หรือค่ายเพลงใด ๆ"
+          ]
+        },
+        {
+          "heading": "2. เนื้อหาของคุณ",
+          "paragraphs": [
+            "เมื่อคุณอัปโหลดรูปภาพหรือ GIF หรือใส่ลิงก์วิดีโอ (“Memory”) คุณยืนยันว่า: คุณเป็นผู้ที่ถ่ายหรือสร้างมันขึ้นเองและถือสิทธิ์ในการแบ่งปัน; มันถูกถ่ายหรือสร้างขึ้นที่งานดนตรีที่คุณเข้าร่วม; คุณให้สิทธิ์แก่ One Tribe ในรูปแบบใบอนุญาตที่ไม่ผูกขาด ทั่วโลก และไม่ต้องจ่ายค่าลิขสิทธิ์ เพื่อจัดเก็บ แสดง ปรับขนาด และแปลคำอธิบายของเนื้อหาดังกล่าว โดยใช้เพื่อดำเนินการเว็บไซต์นี้เท่านั้น",
+            "คุณยังคงเป็นเจ้าของข้อมูลนั้น คุณสามารถลบ Memory ของคุณได้เมื่อใดก็ได้โดยใช้ลิงก์การลบ"
+          ]
+        },
+        {
+          "heading": "3. สิ่งที่ห้ามอัปโหลด",
+          "paragraphs": [
+            "เนื้อหาที่คุณไม่ได้บันทึกเอง; การบันทึกการแสดงแบบต่อเนื่องทั้งเพลง (\"set rips\"); สื่ออย่างเป็นทางการ (วิดีโอหลังการแสดง, ภาพถ่ายมืออาชีพ, ภาพจากรายการถ่ายทอดสด); เนื้อหา NSFW หรือเนื้อหาที่มีลักษณะทางเพศ; เนื้อหาที่เน้นไปที่เด็กและเยาวชน; ภาพที่สร้างหรือปรับแต่งด้วย AI และนำเสนอเป็นเหตุการณ์จริง; สแปมหรือโฆษณา; เนื้อหาที่ล้อเลียนหรือดูหมิ่นบุคคลที่สามารถระบุตัวตนได้"
+          ]
+        },
+        {
+          "heading": "4. การกลั่นกรองเนื้อหา",
+          "paragraphs": [
+            "เนื้อหาที่อัปโหลดจะปรากฏบนกำแพงทันที เราจะตรวจสอบเนื้อหาที่อัปโหลดล่าสุดและรายงานหลังจากเผยแพร่ และอาจซ่อนหรือลบเนื้อหาใด ๆ ตามดุลยพินิจของเรา เราจะดำเนินการตามคำขอจากผู้ถือสิทธิ์และคำขอเกี่ยวกับความเป็นส่วนตัวอย่างรวดเร็ว (ดูส่วนการลบเนื้อหา) และทุก Memory มีลิงก์สำหรับรายงาน"
+          ]
+        },
+        {
+          "heading": "5. ไม่มีการรับประกัน; ข้อจำกัด",
+          "paragraphs": [
+            "เว็บไซต์นี้ให้บริการ \"ตามสภาพที่มีอยู่\" โดยไม่คิดค่าใช้จ่าย การบริจาคโดยสมัครใจมีวัตถุประสงค์เพื่อครอบคลุมค่าใช้จ่ายในการโฮสต์เท่านั้น และไม่ก่อให้เกิดสิทธิประโยชน์ คุณสมบัติ หรือสิทธิพิเศษใดๆ ตามขอบเขตสูงสุดที่กฎหมายอนุญาต เราไม่รับผิดชอบต่อความเสียหายใดๆ ที่เกิดจากการใช้เว็บไซต์นี้ เนื้อหาในเว็บไซต์สะท้อนถึงผู้อัปโหลดเท่านั้น ไม่ใช่ผู้ดำเนินการ"
+          ]
+        },
+        {
+          "heading": "6. การเปลี่ยนแปลง; ติดต่อ",
+          "paragraphs": [
+            "เราอาจปรับปรุงเงื่อนไขเหล่านี้ได้; การใช้ต่อไปถือเป็นการยอมรับเงื่อนไขดังกล่าว ติดต่อ: privacy@onetribe.world."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "นโยบายความเป็นส่วนตัว",
+      "sections": [
+        {
+          "heading": "1. เราคือใคร",
+          "paragraphs": [
+            "One Tribe (onetribe.world) เป็นโครงการแฟนคลับที่ไม่แสวงหาผลกำไร ซึ่งดำเนินการจากประเทศเกาหลีใต้ ติดต่อ: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "2. ข้อมูลที่เราเก็บรวบรวม",
+          "paragraphs": [
+            "ความทรงจำ: รูปภาพ/GIF ที่คุณอัปโหลดและลิงก์วิดีโอที่คุณฝังไว้, คำบรรยาย, เหตุการณ์/เมือง/ปี, ชื่อแสดง (เลือกได้) และลิงก์โซเชียลมีเดีย. จะถูกเผยแพร่ให้สาธารณะทันที; อาจถูกซ่อนหรือลบออกหลังการตรวจสอบหรือการรายงาน",
+            "บัญชี (ไม่บังคับ): ID บัญชี (ตั้งเป็นแบบไม่ระบุตัวตนตามค่าเริ่มต้น), ชื่อที่แสดง, ประเทศที่พำนัก, บันทึกการเข้าร่วมเทศกาล (\"Passport\") และ — เฉพาะเมื่อคุณเลือกที่จะเชื่อมโยง — ที่อยู่อีเมลหรือข้อมูลบัญชี Google ของคุณ",
+            "ด้านเทคนิค: จำเป็นต้องใช้บันทึกเซิร์ฟเวอร์เพื่อดำเนินการและรักษาความปลอดภัยของบริการ การวิเคราะห์ข้อมูลใด ๆ ที่เราเพิ่มเข้าไปจะคำนึงถึงความเป็นส่วนตัว — ไม่มีการติดตามข้ามเว็บไซต์ และไม่มีคุกกี้โฆษณา",
+            "เราไม่ใช้ระบบจดจำใบหน้าหรือระบบติดแท็กบุคคลอัตโนมัติ และเราไม่ขายข้อมูล"
+          ]
+        },
+        {
+          "heading": "3. คนในภาพถ่ายที่มีผู้คนจำนวนมาก",
+          "paragraphs": [
+            "ภาพถ่ายจากงานเทศกาลอาจมีผู้เข้าร่วมงานอื่น ๆ ปรากฏอยู่ด้วย ฐานทางกฎหมายของเราในการเผยแพร่ภาพดังกล่าวคือผลประโยชน์ที่ชอบด้วยกฎหมายในการบันทึกกิจกรรมสาธารณะเพื่อประโยชน์ของชุมชน โดยคำนึงถึงสิทธิของคุณด้วย",
+            "หากคุณปรากฏในภาพถ่ายและต้องการให้ลบหรือทำให้ภาพเบลอ โปรดแจ้งให้เราทราบ — เราจะดำเนินการภายใน 48 ชั่วโมง โดยไม่ถามเหตุผลใดๆ: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "4. สิทธิของคุณ (GDPR)",
+          "paragraphs": [
+            "การเข้าถึงข้อมูล การแก้ไขข้อมูล การลบข้อมูล การจำกัดการประมวลผลข้อมูล การคัดค้าน และการโอนย้ายข้อมูล คุณสามารถลบข้อมูลพาสปอร์ตของคุณเองได้บนหน้าพาสปอร์ต — ช่วงเวลาของคุณจะยังคงอยู่บนกำแพงในรูปแบบที่ไม่ระบุตัวตน โดยแต่ละช่วงเวลาจะมีลิงก์ลบข้อมูลเป็นของตัวเอง หากมีเรื่องอื่น ๆ โปรดส่งอีเมลไปยัง privacy@onetribe.world คุณยังสามารถยื่นคำร้องต่อหน่วยงานคุ้มครองข้อมูลส่วนบุคคลในท้องถิ่นของคุณได้อีกด้วย"
+          ]
+        },
+        {
+          "heading": "5. การจัดเก็บและผู้ประมวลผลข้อมูล",
+          "paragraphs": [
+            "เนื้อหาถูกเก็บไว้กับผู้ให้บริการโครงสร้างพื้นฐานของเรา (ฐานข้อมูล/ระบบการยืนยันตัวตน: Supabase; สื่อ: Cloudflare R2; การแปล: DeepL; อีเมลสำหรับการเข้าสู่ระบบ: Resend) คำบรรยายถูกแปลโดยระบบอัตโนมัติ และข้อความที่แปลแล้วจะถูกเก็บไว้ในแคช ข้อมูลอาจถูกประมวลผลในสหภาพยุโรปและสหรัฐอเมริกาภายใต้มาตรการคุ้มครองมาตรฐาน",
+            "การบริจาคจะถูกดำเนินการโดย Ko-fi และ GitHub Sponsors นอกเว็บไซต์ของเรา; เราไม่ได้รับข้อมูลการชำระเงินใดๆ"
+          ]
+        },
+        {
+          "heading": "6. การเก็บรักษาข้อมูล",
+          "paragraphs": [
+            "ข้อมูลที่เผยแพร่จะยังคงอยู่จนกว่าคุณจะลบมันออก หรือจนกว่าจะมีคำขอที่ถูกต้องมาลบมันออก เนื้อหาที่ถูกลบจะถูกล้างออกจากระบบที่ใช้งานอยู่ภายใน 30 วัน"
+          ]
+        },
+        {
+          "heading": "7. ผู้เยาว์",
+          "paragraphs": [
+            "เว็บไซต์นี้ไม่ได้มุ่งเป้าไปที่เด็กๆ เราจะเบลอหรือลบภาพที่มีเด็กเป็นจุดเน้นตามคำขอหรือตามดุลยพินิจของเรา"
+          ]
+        }
+      ]
+    },
+    "takedown": {
+      "title": "ลิขสิทธิ์และการลบเนื้อหา",
+      "sections": [
+        {
+          "paragraphs": [
+            "คำขอให้ลบข้อมูล — เราทำให้กระบวนการนี้ง่ายๆ"
+          ]
+        },
+        {
+          "heading": "คุณได้อัปโหลดมันแล้ว แต่ต้องการลบมันออกใช่ไหม?",
+          "paragraphs": [
+            "ใช้ลิงก์การลบที่คุณได้รับ หรือส่งอีเมลให้เรา — เราจะลบข้อมูลทันที"
+          ]
+        },
+        {
+          "heading": "คุณอยู่ในรูปภาพ แต่ไม่ต้องการปรากฏในรูปนั้นใช่ไหม?",
+          "paragraphs": [
+            "ส่งอีเมลไปยัง privacy@onetribe.world พร้อมลิงก์รูปภาพ เราจะลบหรือเบลอรูปภาพภายใน 48 ชั่วโมง โดยไม่ถามเหตุผลใดๆ"
+          ]
+        },
+        {
+          "heading": "คุณเป็นเจ้าของสิทธิ์",
+          "paragraphs": [
+            "(ศิลปิน, ค่ายเพลง, เทศกาลดนตรี, ช่างภาพ): ส่งอีเมลไปยัง privacy@onetribe.world พร้อมด้วย (1) ลิงก์เนื้อหา, (2) สิ่งที่คุณเป็นเจ้าของ, (3) ข้อมูลติดต่อของคุณ เราจะตรวจสอบทันทีและลบเนื้อหาที่ได้รับการยืนยันว่าละเมิดลิขสิทธิ์ — โดยทั่วไปภายใน 24–48 ชั่วโมง ผู้ที่ละเมิดลิขสิทธิ์ซ้ำจะถูกบล็อกไม่ให้อัปโหลดเนื้อหาได้",
+            "คำชี้แจงตอบกลับ: หากเนื้อหาที่คุณอัปโหลดถูกลบไป และคุณคิดว่านั่นเป็นความผิดพลาด โปรดตอบกลับพร้อมคำอธิบาย; เราอาจนำเนื้อหาดังกล่าวกลับมาหลังจากตรวจสอบแล้ว",
+            "เราเป็นแฟน ไม่ใช่ศัตรู หากมีอะไรที่ทำให้คุณไม่สบายใจ โปรดแจ้งให้เราทราบ และเราจะลบมันลงทันที"
+          ]
+        }
+      ]
+    },
+    "guidelines": {
+      "title": "กฎเกณฑ์ของชุมชน",
+      "sections": [
+        {
+          "heading": "เก็บไว้เป็นของคุณเอง",
+          "paragraphs": [
+            "อัปโหลดเฉพาะภาพหรือวิดีโอที่คุณถ่ายเองเท่านั้น"
+          ]
+        },
+        {
+          "heading": "เป็นตัวจริงเถอะ",
+          "paragraphs": [
+            "ภาพจริงเท่านั้น — ไม่มีภาพจาก AI หรือภาพที่คัดลอกจากสื่ออย่างเป็นทางการ"
+          ]
+        },
+        {
+          "heading": "เอาสั้นๆ เข้าไว้",
+          "paragraphs": [
+            "รูปภาพและ GIF — ให้ใส่ลิงก์วิดีโอแทนการอัปโหลดวิดีโอเอง อย่าอัปโหลดวิดีโอทั้งชุด — ช่วยสนับสนุนศิลปิน"
+          ]
+        },
+        {
+          "heading": "ใจดีต่อกันหน่อย",
+          "paragraphs": [
+            "ห้ามล้อเลียนคนอื่น ห้ามเนื้อหาที่NSFW และห้ามใช้สัญลักษณ์แสดงความเกลียดชัง หากคนแปลกหน้าเป็นจุดเน้นในภาพของคุณ ให้ลองจินตนาการว่าพวกเขากำลังดูภาพนั้น"
+          ]
+        },
+        {
+          "heading": "ผู้เยาว์",
+          "paragraphs": [
+            "อย่าให้เด็กๆ เป็นจุดสนใจหลัก เราอาจเบลอภาพให้"
+          ]
+        },
+        {
+          "heading": "มีใครในรูปของคุณที่คัดค้านหรือไม่?",
+          "paragraphs": [
+            "พวกเขาชนะเสมอ"
+          ]
+        }
+      ]
+    }
+  },
+  "vi": {
+    "terms": {
+      "title": "Điều khoản dịch vụ",
+      "sections": [
+        {
+          "heading": "1. Đây là gì",
+          "paragraphs": [
+            "One Tribe là một dự án do người hâm mộ thực hiện, không chính thức và phi thương mại — một kho lưu trữ ký ức chung dành cho cộng đồng hard-dance. Dự án này không liên kết, không được bảo trợ hay có mối quan hệ nào với Q-dance, Defqon.1, cũng như bất kỳ lễ hội, nghệ sĩ hay hãng thu âm nào."
+          ]
+        },
+        {
+          "heading": "2. Nội dung của bạn",
+          "paragraphs": [
+            "Khi bạn tải lên một bức ảnh hoặc tệp GIF, hoặc chia sẻ liên kết video (“Ký ức”), bạn xác nhận rằng: chính bạn là người đã ghi lại nội dung đó và sở hữu quyền chia sẻ nó; nội dung đó được ghi lại tại một sự kiện âm nhạc mà bạn đã tham dự; bạn cấp cho One Tribe giấy phép không độc quyền, trên toàn thế giới, miễn phí bản quyền để lưu trữ, hiển thị, điều chỉnh kích thước và dịch chú thích của nội dung đó, chỉ nhằm mục đích vận hành trang web này.",
+            "Bạn vẫn giữ quyền sở hữu. Bạn có thể xóa Ký ức của mình bất cứ lúc nào bằng cách sử dụng liên kết xóa."
+          ]
+        },
+        {
+          "heading": "3. Những nội dung bạn không được phép tải lên",
+          "paragraphs": [
+            "Nội dung không phải do bạn ghi lại; các bản ghi âm liên tục toàn bộ bài hát trong các buổi biểu diễn (“set rips”); các tài liệu truyền thông chính thức (video tóm tắt sau sự kiện, ảnh chuyên nghiệp, bản ghi phát sóng); Nội dung không phù hợp với nơi làm việc (NSFW) hoặc có tính chất khiêu dâm; nội dung tập trung vào trẻ vị thành niên; hình ảnh do trí tuệ nhân tạo (AI) tạo ra hoặc đã qua chỉnh sửa nhưng được trình bày như những khoảnh khắc thực tế; spam hoặc quảng cáo; nội dung chế giễu hoặc hạ thấp danh dự của những người có thể nhận diện được."
+          ]
+        },
+        {
+          "heading": "4. Kiểm duyệt",
+          "paragraphs": [
+            "Các nội dung được tải lên sẽ xuất hiện ngay lập tức trên bức tường. Chúng tôi sẽ xem xét các nội dung được tải lên gần đây và các báo cáo sau khi đăng tải, đồng thời có thể ẩn hoặc xóa bất kỳ nội dung nào theo quyết định của mình. Chúng tôi xử lý nhanh chóng các yêu cầu từ chủ sở hữu quyền và các yêu cầu liên quan đến quyền riêng tư (xem phần gỡ bỏ nội dung), và mỗi Ký ức đều có liên kết báo cáo."
+          ]
+        },
+        {
+          "heading": "5. Không có bảo hành; giới hạn trách nhiệm",
+          "paragraphs": [
+            "Trang web này được cung cấp “nguyên trạng”, hoàn toàn miễn phí. Các khoản đóng góp tự nguyện chỉ dùng để trang trải chi phí lưu trữ và không mang lại bất kỳ lợi ích, tính năng hay ưu tiên nào. Trong phạm vi tối đa mà pháp luật cho phép, chúng tôi không chịu bất kỳ trách nhiệm pháp lý nào đối với các thiệt hại phát sinh từ việc sử dụng trang web này. Nội dung trên trang web phản ánh quan điểm của người đăng tải, không phải của đơn vị vận hành."
+          ]
+        },
+        {
+          "heading": "6. Thay đổi; liên hệ",
+          "paragraphs": [
+            "Chúng tôi có thể cập nhật các điều khoản này; việc tiếp tục sử dụng đồng nghĩa với việc bạn chấp nhận các điều khoản này. Liên hệ: privacy@onetribe.world."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Chính sách bảo mật",
+      "sections": [
+        {
+          "heading": "1. Chúng tôi là ai",
+          "paragraphs": [
+            "One Tribe (onetribe.world) là một dự án của người hâm mộ phi thương mại được điều hành từ Hàn Quốc. Liên hệ: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "2. Những thông tin chúng tôi thu thập",
+          "paragraphs": [
+            "Ký ức: ảnh/GIF mà bạn tải lên và các liên kết video mà bạn nhúng, chú thích, sự kiện/thành phố/năm, tên hiển thị (tùy chọn) và liên kết mạng xã hội. Được đăng công khai ngay lập tức; có thể bị ẩn hoặc xóa sau khi được kiểm duyệt hoặc khi có báo cáo.",
+            "Tài khoản (tùy chọn): ID tài khoản (mặc định là ẩn danh), tên hiển thị, quốc gia cư trú, nhật ký tham dự lễ hội (“Passport”) và — chỉ khi bạn chọn liên kết chúng — địa chỉ email hoặc thông tin tài khoản Google của bạn.",
+            "Về mặt kỹ thuật: các bản ghi máy chủ là cần thiết để vận hành và bảo mật dịch vụ. Mọi tính năng phân tích mà chúng tôi bổ sung đều sẽ tôn trọng quyền riêng tư — không theo dõi xuyên trang web, không sử dụng cookie quảng cáo.",
+            "Chúng tôi không sử dụng công nghệ nhận diện khuôn mặt hay gắn thẻ tự động cho người dùng. Chúng tôi không bán dữ liệu."
+          ]
+        },
+        {
+          "heading": "3. Những người trong các bức ảnh chụp đám đông",
+          "paragraphs": [
+            "Các bức ảnh tại lễ hội có thể ghi lại hình ảnh của những người tham dự khác. Cơ sở pháp lý để chúng tôi đăng tải những hình ảnh này là lợi ích hợp pháp trong việc ghi lại các sự kiện công cộng nhằm phục vụ cộng đồng, đồng thời đảm bảo sự cân bằng với các quyền của bạn.",
+            "Nếu bạn xuất hiện trong một bức ảnh và muốn bức ảnh đó bị xóa hoặc làm mờ, hãy thông báo cho chúng tôi — chúng tôi sẽ xử lý trong vòng 48 giờ, không cần giải thích lý do: privacy@onetribe.world."
+          ]
+        },
+        {
+          "heading": "4. Các quyền của bạn (GDPR)",
+          "paragraphs": [
+            "Quyền truy cập, chỉnh sửa, xóa, hạn chế, phản đối, di chuyển dữ liệu. Bạn có thể tự xóa thông tin hộ chiếu của mình trên trang hộ chiếu — các khoảnh khắc của bạn vẫn được giữ lại trên tường, dưới dạng ẩn danh, mỗi khoảnh khắc đều có liên kết xóa riêng. Vui lòng gửi email đến privacy@onetribe.world nếu có bất kỳ thắc mắc nào khác. Bạn cũng có thể gửi khiếu nại đến cơ quan bảo vệ dữ liệu tại địa phương."
+          ]
+        },
+        {
+          "heading": "5. Lưu trữ và bên xử lý dữ liệu",
+          "paragraphs": [
+            "Nội dung được lưu trữ tại các nhà cung cấp hạ tầng của chúng tôi (cơ sở dữ liệu/xác thực: Supabase; phương tiện truyền thông: Cloudflare R2; dịch thuật: DeepL; email đăng nhập: Resend). Chú thích được dịch bằng máy; văn bản đã dịch được lưu trong bộ nhớ đệm. Dữ liệu có thể được xử lý tại Liên minh Châu Âu (EU) và Hoa Kỳ theo các biện pháp bảo vệ tiêu chuẩn.",
+            "Các khoản đóng góp được xử lý bên ngoài nền tảng thông qua Ko-fi và GitHub Sponsors; chúng tôi không nhận được bất kỳ dữ liệu thanh toán nào."
+          ]
+        },
+        {
+          "heading": "6. Lưu giữ dữ liệu",
+          "paragraphs": [
+            "Các Ký ức đã được công bố sẽ được lưu giữ cho đến khi bạn xóa chúng hoặc có yêu cầu hợp lệ yêu cầu xóa chúng. Nội dung đã xóa sẽ được xóa vĩnh viễn khỏi các hệ thống đang hoạt động trong vòng 30 ngày."
+          ]
+        },
+        {
+          "heading": "7. Trẻ vị thành niên",
+          "paragraphs": [
+            "Trang web này không dành cho trẻ em. Chúng tôi sẽ làm mờ hoặc xóa các hình ảnh lấy trẻ vị thành niên làm tâm điểm theo yêu cầu hoặc theo quyết định của chúng tôi."
+          ]
+        }
+      ]
+    },
+    "takedown": {
+      "title": "Bản quyền & Xóa nội dung",
+      "sections": [
+        {
+          "paragraphs": [
+            "Yêu cầu gỡ bỏ — chúng tôi xử lý việc này một cách đơn giản."
+          ]
+        },
+        {
+          "heading": "Bạn đã tải lên rồi mà giờ lại muốn xóa nó đi à?",
+          "paragraphs": [
+            "Hãy sử dụng liên kết xóa mà bạn đã nhận được, hoặc gửi email cho chúng tôi — nội dung sẽ được xóa ngay lập tức."
+          ]
+        },
+        {
+          "heading": "Bạn đang xuất hiện trong một bức ảnh mà không muốn thế?",
+          "paragraphs": [
+            "Hãy gửi email đến địa chỉ privacy@onetribe.world kèm theo liên kết đến bức ảnh. Bức ảnh sẽ được gỡ bỏ hoặc làm mờ trong vòng 48 giờ, không cần giải thích."
+          ]
+        },
+        {
+          "heading": "Bạn là chủ sở hữu quyền",
+          "paragraphs": [
+            "(nghệ sĩ, hãng thu âm, lễ hội, nhiếp ảnh gia): vui lòng gửi email đến privacy@onetribe.world kèm theo (1) liên kết đến nội dung, (2) thông tin về quyền sở hữu của bạn, (3) thông tin liên hệ của bạn. Chúng tôi sẽ xem xét ngay lập tức và gỡ bỏ các khiếu nại hợp lệ — thường trong vòng 24–48 giờ. Những người vi phạm nhiều lần sẽ bị chặn không cho tải lên.",
+            "Thông báo phản đối: nếu nội dung bạn đã tải lên bị gỡ bỏ và bạn cho rằng đó là một sai sót, hãy gửi phản hồi kèm theo lời giải thích; chúng tôi có thể khôi phục nội dung sau khi xem xét.",
+            "Chúng tôi là những người hâm mộ, không phải kẻ thù. Nếu có điều gì làm bạn khó chịu, hãy cho chúng tôi biết và chúng tôi sẽ gỡ bỏ ngay."
+          ]
+        }
+      ]
+    },
+    "guidelines": {
+      "title": "Quy tắc cộng đồng",
+      "sections": [
+        {
+          "heading": "Hãy giữ nó cho riêng mình.",
+          "paragraphs": [
+            "Chỉ nên tải lên những nội dung do chính bạn quay hoặc chụp."
+          ]
+        },
+        {
+          "heading": "Hãy chân thực.",
+          "paragraphs": [
+            "Chỉ những khoảnh khắc thực tế — không có hình ảnh do AI tạo ra, không có hình ảnh trích xuất từ các nguồn truyền thông chính thức."
+          ]
+        },
+        {
+          "heading": "Hãy ngắn gọn thôi.",
+          "paragraphs": [
+            "Ảnh và GIF — hãy chèn liên kết video thay vì tải lên. Không đăng tải bản ghi hình toàn bộ — hãy ủng hộ các nghệ sĩ."
+          ]
+        },
+        {
+          "heading": "Hãy luôn tử tế.",
+          "paragraphs": [
+            "Không được chế giễu người khác, không được đăng nội dung không phù hợp với nơi làm việc (NSFW), không được sử dụng các biểu tượng kích động thù hận. Nếu một người lạ là nhân vật chính trong bức ảnh của bạn, hãy thử tưởng tượng họ sẽ nhìn thấy bức ảnh đó như thế nào."
+          ]
+        },
+        {
+          "heading": "Trẻ vị thành niên",
+          "paragraphs": [
+            "Đừng lấy trẻ em làm tâm điểm; chúng tôi có thể sẽ làm mờ ảnh."
+          ]
+        },
+        {
+          "heading": "Có ai trong bức ảnh của bạn phản đối không?",
+          "paragraphs": [
+            "Họ luôn thắng. Luôn luôn."
           ]
         }
       ]
@@ -1577,7 +2746,7 @@ export const ABOUT_I18N: Record<Locale, { title: string; paragraphs: string[] }>
     "title": "sobre",
     "paragraphs": [
       "O One Tribe foi criado por um fã da Coreia do Sul que viaja de avião para o Defqon.1 todos os anos — um «Weekend Warrior» com um longo voo de regresso a casa.",
-      "Quando o fim de semana de 2026 foi cancelado, milhares de nós ficámos com memórias que não sabíamos onde guardar. É por isso que esta parede existe: um lugar onde a comunidade dos estilos mais intensos guarda os momentos que levámos para casa — de forma permanente, visual e em todas as línguas que falamos.",
+      "Quando o fim de semana de 2026 foi cancelado, milhares de nós ficámos com memórias que não sabíamos onde guardar. É por isso que este mural existe: um lugar onde a comunidade dos estilos mais duros guarda os momentos que levámos para casa — de forma permanente, visual e em todas as línguas que falamos.",
       "Princípios: propriedade dos fãs, não comercial, sem anúncios, sem produtos promocionais. Os momentos pertencem às pessoas que os viveram. Se algo aqui te incomodar, avisa-nos e será removido — consulta a página de remoção.",
       "Não está de forma alguma associado à Q-dance nem à Defqon.1."
     ]
@@ -1585,7 +2754,7 @@ export const ABOUT_I18N: Record<Locale, { title: string; paragraphs: string[] }>
   "ja": {
     "title": "概要",
     "paragraphs": [
-      "「One Tribe」は、毎年Defqon.1に参加するために飛行機で韓国から駆けつけるファンによって運営されています。彼は、長い帰路を乗り越える「ウィークエンド・ウォリアー」なのです。",
+      "「One Tribe」は、毎年Defqon.1に参加するために飛行機で韓国から駆けつけるファンによって運営されています。長い帰路を乗り越える「ウィークエンド・ウォリアー」なのです。",
       "2026年の週末イベントが中止になったとき、私たち何千人もの人々は、どこにも置き場のない思い出を抱えたまま取り残されてしまいました。そこでこの壁が生まれたのです。ハードスタイル・コミュニティが、持ち帰った瞬間を、永続的かつ視覚的に、そして私たちが話すあらゆる言語で残す場所として。",
       "基本方針：ファン所有、非営利、広告なし、グッズ販売なし。ここに掲載されている瞬間は、それを体験した人々自身のものです。もしここに掲載されている内容に不快感を覚えるものがあれば、お知らせください。該当するコンテンツは削除いたします。削除に関するページをご覧ください。",
       "Q-dance および Defqon.1 とは一切関係がありません。"
@@ -1594,10 +2763,73 @@ export const ABOUT_I18N: Record<Locale, { title: string; paragraphs: string[] }>
   "ko": {
     "title": "소개",
     "paragraphs": [
-      "‘One Tribe’는 매년 Defqon.1에 비행기를 타고 찾아가는 한국의 한 팬이 만든 프로젝트로, 귀국길에 긴 비행 시간을 견뎌야 하는 ‘주말 전사’입니다.",
+      "‘One Tribe’는 매년 비행기를 타고 Defqon.1을 찾는 한국의 한 팬이 만들었습니다. 귀국길마다 긴 비행을 견디는 ‘주말 전사’죠.",
       "2026년 주말 행사가 취소되었을 때, 우리 수천 명은 어디에도 담을 곳 없는 추억만 안고 남게 되었습니다. 그래서 이 벽이 존재합니다. 하드스타일 커뮤니티가 집으로 가져온 순간들을 영구적이고 시각적인 형태로, 우리가 사용하는 모든 언어로 간직하는 공간입니다.",
       "원칙: 팬 소유, 비영리, 광고 없음, 굿즈 없음. 이 순간들은 그 순간을 직접 경험한 사람들에게 속합니다. 이곳의 콘텐츠 중 불편한 점이 있다면 알려주시면 해당 콘텐츠를 삭제하겠습니다 — 삭제 요청 페이지를 참고해 주세요.",
       "Q-dance 또는 Defqon.1과는 어떠한 관련도 없습니다."
+    ]
+  },
+  "pl": {
+    "title": "o",
+    "paragraphs": [
+      "Projekt „One Tribe” stworzył fan z Korei Południowej, który co roku leci na festiwal Defqon.1 — prawdziwy „Weekend Warrior”, przed którym czeka długa podróż powrotna do domu.",
+      "Kiedy odwołano weekend 2026, tysiące z nas pozostało ze wspomnieniami, których nie mieliśmy gdzie umieścić. Dlatego powstała ta ściana: miejsce, w którym społeczność fanów muzyki hard-style przechowuje chwile, które zabraliśmy ze sobą do domu — trwałe, widoczne i w każdym języku, którym się posługujemy.",
+      "Zasady: strona prowadzona przez fanów, niekomercyjna, bez reklam i gadżetów. Te chwile należą do osób, które je przeżyły. Jeśli coś tutaj Ci przeszkadza, daj nam znać, a zostanie to usunięte — zapoznaj się ze stroną dotyczącą usuwania treści.",
+      "Nie ma to żadnego związku z Q-dance ani Defqon.1."
+    ]
+  },
+  "sv": {
+    "title": "om",
+    "paragraphs": [
+      "One Tribe har skapats av ett fan från Sydkorea som varje år flyger till Defqon.1 – en ”Weekend Warrior” med en lång hemresa framför sig.",
+      "När helgen 2026 ställdes in stod tusentals av oss kvar med minnen som vi inte visste var vi skulle göra av. Därför finns den här väggen: en plats där gemenskapen kring de hårdare musikstilarna bevarar de minnen vi tog med oss hem – beständiga, visuella och på alla språk vi talar.",
+      "Principer: ägs av fans, icke-kommersiellt, inga annonser, inga fanartiklar. Dessa minnen tillhör de människor som upplevde dem. Om något här stör dig, meddela oss så tas det bort – se sidan om borttagning.",
+      "Har inget som helst samband med Q-dance eller Defqon.1."
+    ]
+  },
+  "tr": {
+    "title": "hakkında",
+    "paragraphs": [
+      "One Tribe, her yıl Defqon.1’e uçan Güney Koreli bir hayran tarafından kuruldu — eve dönüşü uzun bir uçuşla tamamlayan bir “Hafta Sonu Savaşçısı”.",
+      "2026 hafta sonu etkinliği iptal edildiğinde, binlerce kişi anılarımızı saklayacak bir yer bulamadan kalakaldık. İşte bu duvar da bu nedenle var: Hard-styles topluluğunun, eve götürdüğümüz anıları sakladığı bir yer — kalıcı, görsel ve konuştuğumuz her dilde.",
+      "İlkeler: hayranlara ait, ticari olmayan, reklamsız, ürün satışı yok. Bu anlar, onları yaşayan kişilere aittir. Buradaki herhangi bir şey sizi rahatsız ediyorsa, bize bildirin; ilgili içerik kaldırılacaktır — kaldırma sayfasına bakın.",
+      "Q-dance veya Defqon.1 ile hiçbir şekilde bağlantısı yoktur."
+    ]
+  },
+  "zh": {
+    "title": "关于",
+    "paragraphs": [
+      "“One Tribe”是由一位来自韩国的粉丝创建的，他每年都会专程飞往Defqon.1音乐节——这位“周末战士”回家的路程十分漫长。",
+      "当2026周末活动被取消时，我们中的成千上万人只能将那些无处安放的回忆珍藏于心。因此，这面墙应运而生：这里是硬核音乐圈的聚集地，我们在此珍藏带回家的那些瞬间——它们永恒、直观，并以我们所说的每种语言呈现。",
+      "原则：由粉丝拥有、非商业性质、无广告、无周边商品。这些瞬间属于亲历者。如果这里的内容让您感到不适，请告知我们，我们会将其下架——请参阅下架页面。",
+      "与Q-dance或Defqon.1没有任何关联。"
+    ]
+  },
+  "id": {
+    "title": "tentang",
+    "paragraphs": [
+      "One Tribe dibuat oleh seorang penggemar asal Korea Selatan yang setiap tahun terbang ke Defqon.1 — seorang “Weekend Warrior” yang harus menempuh penerbangan panjang untuk pulang.",
+      "Ketika acara akhir pekan 2026 dibatalkan, ribuan dari kita pun hanya bisa menyimpan kenangan tanpa tahu harus meletakkannya di mana. Maka, dinding ini pun hadir: sebuah tempat di mana komunitas pecinta musik bergenre keras menyimpan momen-momen yang kami bawa pulang — abadi, visual, dan dalam setiap bahasa yang kami gunakan.",
+      "Prinsip-prinsip: dimiliki oleh penggemar, non-komersial, tanpa iklan, tanpa merchandise. Momen-momen ini adalah milik orang-orang yang mengalaminya. Jika ada sesuatu di sini yang mengganggu Anda, beri tahu kami dan konten tersebut akan dihapus — lihat halaman penghapusan.",
+      "Tidak berafiliasi dengan Q-dance atau Defqon.1 dalam bentuk apa pun."
+    ]
+  },
+  "th": {
+    "title": "เกี่ยวกับ",
+    "paragraphs": [
+      "One Tribe ถูกสร้างขึ้นโดยแฟนเพลงจากเกาหลีใต้ที่บินไปงาน Defqon.1 ทุกปี — ผู้ที่เข้าร่วมงานในช่วงสุดสัปดาห์และต้องเดินทางกลับบ้านด้วยเที่ยวบินที่ยาวนาน",
+      "เมื่อสุดสัปดาห์ปี 2026 ถูกยกเลิก ผู้คนนับพันในหมู่เราจึงเหลือเพียงความทรงจำที่ไม่มีที่เก็บไว้ ดังนั้นกำแพงนี้จึงถูกสร้างขึ้น: เป็นสถานที่ที่ชุมชนผู้ชื่นชอบดนตรีแนวฮาร์ดสไตล์สามารถเก็บรักษาช่วงเวลาที่เรานำกลับบ้าน — ให้คงอยู่ตลอดไป ในรูปแบบที่มองเห็นได้ และในทุกภาษาที่เราใช้",
+      "หลักการ: เป็นของแฟนๆ, ไม่เพื่อการค้า, ไม่มีโฆษณา, ไม่มีสินค้าที่ระลึก ช่วงเวลาเหล่านี้เป็นของคนที่ได้สัมผัสประสบการณ์นั้นเอง หากมีเนื้อหาใดที่นี่ทำให้คุณรู้สึกไม่สบายใจ โปรดแจ้งให้เราทราบ และเราจะลบเนื้อหาดังกล่าว — ดูหน้าการลบเนื้อหา",
+      "ไม่มีความเกี่ยวข้องกับ Q-dance หรือ Defqon.1 ในรูปแบบใดก็ตาม"
+    ]
+  },
+  "vi": {
+    "title": "về",
+    "paragraphs": [
+      "One Tribe được xây dựng bởi một người hâm mộ đến từ Hàn Quốc, người hàng năm đều bay đến Defqon.1 — một “Weekend Warrior” phải trải qua chuyến bay dài để trở về nhà.",
+      "Khi sự kiện cuối tuần năm 2026 bị hủy bỏ, hàng nghìn người trong chúng ta chỉ còn lại những kỷ niệm mà không biết cất giữ ở đâu. Chính vì thế, bức tường này ra đời: một nơi mà cộng đồng yêu thích các thể loại nhạc mạnh lưu giữ những khoảnh khắc mà chúng ta mang về nhà — vĩnh viễn, sinh động và bằng mọi ngôn ngữ mà chúng ta sử dụng.",
+      "Các nguyên tắc: do người hâm mộ sở hữu, phi thương mại, không quảng cáo, không bán hàng lưu niệm. Những khoảnh khắc này thuộc về những người đã trải qua chúng. Nếu có nội dung nào ở đây khiến bạn cảm thấy khó chịu, hãy cho chúng tôi biết và nội dung đó sẽ bị gỡ xuống — xem trang hướng dẫn gỡ bỏ nội dung.",
+      "Không có bất kỳ mối liên hệ nào với Q-dance hay Defqon.1."
     ]
   }
 }

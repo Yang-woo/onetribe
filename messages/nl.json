@@ -4,7 +4,7 @@
     "subtitle": "Dus bouwen we het uit herinneringen.",
     "body": "Elke Defqon, elk podium, elke zonsopgang die we mee naar huis namen. Voeg de jouwe toe, in je eigen taal.",
     "cta": "deel jouw moment",
-    "liveBadge": "op dit moment wordt er in {countries} landen herinnerd",
+    "liveBadge": "op dit moment halen fans in {countries} landen herinneringen op",
     "browseWall": "blader door de muur ↓",
     "counterMoments": "{moments, plural, one { moment} other { momenten}}",
     "counterCountries": "{countries, plural, one { land} other { landen}}"
@@ -37,7 +37,7 @@
     "reasons": {
       "set-rip": "opname van volledige set",
       "nsfw": "NSFW-inhoud",
-      "minor": "kind in beeld",
+      "minor": "kind als onderwerp",
       "privacy": "dat ben ik — haal het weg",
       "spam": "spam of reclame",
       "other": "iets anders"
@@ -75,7 +75,7 @@
       "unsupported": "alleen foto's en GIF's — link video's in plaats daarvan",
       "tooLarge": "dat bestand is groter dan 10MB",
       "needFiles": "kies minstens één foto, of link een video",
-      "badEmbed": "dat lijkt geen YouTube-link",
+      "badEmbed": "dat lijkt niet op een YouTube-link",
       "needEvent": "kies een editie",
       "failed": "er ging iets mis — er is niets geplaatst. probeer opnieuw."
     }
@@ -134,7 +134,7 @@
     "signInHint": "log in met de e-mail of het google-account dat je hebt gekoppeld.",
     "switchWarning": "stempels op dit apparaat blijven achter — toch inloggen?",
     "deleteAccount": "verwijder mijn paspoort",
-    "deleteConfirm": "dit verwijdert je paspoort, stempels en koppeling permanent. gedeelde momenten blijven op de wall — geanonimiseerd, elk met een eigen verwijderlink. doorgaan?",
+    "deleteConfirm": "dit verwijdert je paspoort, stempels en koppeling permanent. gedeelde momenten blijven op de muur — geanonimiseerd, elk met een eigen verwijderlink. doorgaan?",
     "emailInUse": "die e-mail is al aan een ander paspoort gekoppeld",
     "googleInUse": "dat google-account is al aan een ander paspoort gekoppeld",
     "noPassport": "geen paspoort gevonden voor deze e-mail",

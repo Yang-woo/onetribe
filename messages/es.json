@@ -10,7 +10,7 @@
     "counterCountries": "{countries, plural, one { país} other { países}}"
   },
   "wall": {
-    "allEditions": "todo",
+    "allEditions": "todas",
     "lostEditionChip": "{year} — el fin de semana perdido",
     "emptyTitle": "el muro está despertando",
     "emptyBody": "sé de los primeros en dejar un momento aquí.",
@@ -38,7 +38,7 @@
       "set-rip": "grabación de un set completo",
       "nsfw": "contenido NSFW",
       "minor": "menor como protagonista",
-      "privacy": "soy yo — quítenlo",
+      "privacy": "soy yo — quítalo",
       "spam": "spam o publicidad",
       "other": "otra cosa"
     }
@@ -115,7 +115,7 @@
     "stampCanceled": "cancelada",
     "stampHint": "toca un sello para marcar las ediciones a las que fuiste · rojo = un año cancelado",
     "myMoments": "mis momentos ({count})",
-    "noMoments": "aún nada — tus subidas se reunirán aquí.",
+    "noMoments": "aún nada — tus subidas se irán juntando aquí.",
     "signOut": "dejar el pasaporte en este dispositivo",
     "keepTitle": "conserva este pasaporte",
     "keepHint": "conecta un correo o una cuenta de google — tu pasaporte se abre en cualquier dispositivo y sobrevive a este navegador.",

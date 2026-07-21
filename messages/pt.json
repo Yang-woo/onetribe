@@ -10,7 +10,7 @@
     "counterCountries": "{countries, plural, one { país} other { países}}"
   },
   "wall": {
-    "allEditions": "tudo",
+    "allEditions": "todas",
     "lostEditionChip": "{year} — o fim de semana perdido",
     "emptyTitle": "o mural está a acordar",
     "emptyBody": "sê dos primeiros a deixar um momento aqui.",
@@ -105,10 +105,10 @@
     "namePlaceholder": "o teu nome no mural",
     "start": "criar o meu passaporte",
     "journey": "a minha jornada",
-    "firstDefqon": "meu primeiro defqon",
+    "firstDefqon": "o meu primeiro defqon",
     "since": "desde {year} · {count} edições",
     "editionsHeading": "edições em que estive",
-    "addFirstMoment": "adiciona o teu primeiro momento",
+    "addFirstMoment": "acrescenta o teu primeiro momento",
     "addMoment": "acrescenta um momento",
     "noneChecked": "marca as edições em que estiveste.",
     "stampOrdinal": "{n}º",

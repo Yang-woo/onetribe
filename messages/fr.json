@@ -10,13 +10,13 @@
     "counterCountries": "{countries, plural, one { pays} other { pays}}"
   },
   "wall": {
-    "allEditions": "tout",
+    "allEditions": "toutes",
     "lostEditionChip": "{year} — le week-end perdu",
     "emptyTitle": "le mur se réveille",
     "emptyBody": "sois parmi les premiers à laisser un moment ici.",
     "loadMore": "plus de moments",
     "liveFeed": "{n, plural, one {# moment vient d’arriver} other {# moments viennent d’arriver}}",
-    "lostEditionSub": "le mur se souvient de l’édition qui n’a jamais ouvert",
+    "lostEditionSub": "le mur se souvient de l’édition qui n’a jamais ouvert ses portes",
     "anonymous": "anonyme"
   },
   "moment": {
@@ -38,7 +38,7 @@
       "set-rip": "enregistrement d’un set entier",
       "nsfw": "contenu NSFW",
       "minor": "enfant au premier plan",
-      "privacy": "c’est moi — retirez-le",
+      "privacy": "c’est moi — retire-le",
       "spam": "spam ou publicité",
       "other": "autre chose"
     }
@@ -72,8 +72,8 @@
     "toPassport": "enregistre-le dans ton passeport",
     "errors": {
       "tooMany": "5 fichiers maximum par moment",
-      "unsupported": "photos et GIF uniquement — les vidéos, en lien",
-      "tooLarge": "ce fichier dépasse 10MB",
+      "unsupported": "photos et GIF uniquement — pour les vidéos, mets un lien",
+      "tooLarge": "ce fichier dépasse 10 Mo",
       "needFiles": "choisis au moins une photo, ou mets un lien vidéo",
       "badEmbed": "ça ne ressemble pas à un lien YouTube",
       "needEvent": "choisis une édition",
@@ -115,7 +115,7 @@
     "stampCanceled": "annulée",
     "stampHint": "touche un tampon pour marquer les éditions où tu étais · rouge = une année annulée",
     "myMoments": "mes moments ({count})",
-    "noMoments": "rien encore — tes uploads se rassembleront ici.",
+    "noMoments": "rien encore — tes moments se rassembleront ici.",
     "signOut": "laisser le passeport sur cet appareil",
     "keepTitle": "garde ce passeport",
     "keepHint": "connecte un e-mail ou un compte google — ton passeport s'ouvre sur n'importe quel appareil et survit à ce navigateur.",
@@ -127,9 +127,9 @@
     "codePlaceholder": "code à 6 chiffres",
     "verifyCode": "confirmer",
     "codeSent": "on a envoyé un code à {email}",
-    "linkedAs": "connecté comme {email}",
+    "linkedAs": "connecté en tant que {email}",
     "linkedGoogle": "google connecté",
-    "otherDeviceHint": "ouvre ce passeport sur n'importe quel appareil — connecte-toi là-bas avec le même compte.",
+    "otherDeviceHint": "ouvre ce passeport sur n'importe quel appareil — connecte-toi avec le même compte.",
     "signInTitle": "j'ai déjà un passeport",
     "signInHint": "connecte-toi avec l'e-mail ou le compte google que tu as lié.",
     "switchWarning": "les tampons de cet appareil resteront ici — se connecter quand même ?",
@@ -140,7 +140,7 @@
     "noPassport": "aucun passeport trouvé pour cet e-mail",
     "badCode": "ce code n'a pas marché — vérifie-le et réessaie",
     "rateLimited": "trop d'e-mails — réessaie dans une minute",
-    "genericError": "quelque chose a raté — réessaie"
+    "genericError": "quelque chose a mal tourné — réessaie"
   },
   "policies": {
     "enNotice": "Le texte anglais fait foi."

@@ -29,6 +29,13 @@ const deepl = createDeeplProvider(key)
 const targets = LOCALES.filter((l) => l !== DEFAULT_LOCALE)
 const slugs = Object.keys(POLICIES) as PolicyDoc['slug'][]
 
+// `--only-missing`: keep already-translated locales verbatim and only DeepL the
+// ones missing (or structurally stale) in the committed file. Use this when
+// ADDING a locale, so the existing reviewed translations aren't re-machined
+// (and the Free quota isn't spent) needlessly. Default (no flag) = full regen,
+// the path to take after editing policy-content.ts.
+const onlyMissing = process.argv.includes('--only-missing')
+
 /** One translator per locale, memoized — identical strings (contact lines) hit once. */
 function makeTranslator(locale: string) {
   const cache = new Map<string, string>()
@@ -73,7 +80,33 @@ async function main() {
     [DEFAULT_LOCALE]: { title: ABOUT.title, paragraphs: [...ABOUT.paragraphs] },
   }
 
+  // For --only-missing, load the committed translations to reuse where complete.
+  let priorPolicy: Record<string, Record<string, LocalizedDoc>> = {}
+  let priorAbout: Record<string, { title: string; paragraphs: string[] }> = {}
+  if (onlyMissing) {
+    const mod = await import('../src/lib/policy-content-i18n')
+    priorPolicy = mod.POLICY_I18N as unknown as typeof priorPolicy
+    priorAbout = mod.ABOUT_I18N as unknown as typeof priorAbout
+  }
+
   for (const locale of targets) {
+    // Reuse an existing locale only if it carries every doc + about at the
+    // current section shape — a shape mismatch means policy-content.ts moved on
+    // and this locale must be re-translated even under --only-missing.
+    const pDocs = priorPolicy[locale]
+    const pAbout = priorAbout[locale]
+    const complete =
+      onlyMissing &&
+      pDocs &&
+      pAbout &&
+      slugs.every((s) => pDocs[s]?.sections?.length === POLICIES[s].sections.length) &&
+      pAbout.paragraphs?.length === ABOUT.paragraphs.length
+    if (complete) {
+      process.stderr.write(`keeping ${locale} (already translated)\n`)
+      policyOut[locale] = pDocs
+      aboutOut[locale] = pAbout
+      continue
+    }
     process.stderr.write(`translating ${locale}…\n`)
     const tr = makeTranslator(locale)
     const docs: Record<string, LocalizedDoc> = {}
