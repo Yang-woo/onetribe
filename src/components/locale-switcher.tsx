@@ -18,7 +18,8 @@ const LOCALE_LABELS: Record<Locale, string> = {
   id: 'ID',
   th: 'ไทย',
   vi: 'VI',
-  zh: '中文',
+  zh: '简体中文',
+  'zh-Hant': '繁體中文',
   ja: '日本語',
   ko: '한국어',
 }

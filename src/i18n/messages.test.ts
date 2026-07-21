@@ -12,6 +12,7 @@ import pl from '../../messages/pl.json'
 import sv from '../../messages/sv.json'
 import tr from '../../messages/tr.json'
 import zh from '../../messages/zh.json'
+import zhHant from '../../messages/zh-Hant.json'
 import id from '../../messages/id.json'
 import th from '../../messages/th.json'
 import vi from '../../messages/vi.json'
@@ -24,7 +25,7 @@ import { LOCALES } from '@/lib/locales'
  * render time).
  */
 
-const MESSAGES: Record<string, unknown> = { en, nl, de, es, fr, it, pt, pl, sv, tr, id, th, vi, zh, ja, ko }
+const MESSAGES: Record<string, unknown> = { en, nl, de, es, fr, it, pt, pl, sv, tr, id, th, vi, zh, 'zh-Hant': zhHant, ja, ko }
 
 function leafPaths(obj: unknown, prefix = ''): Map<string, string> {
   const paths = new Map<string, string>()

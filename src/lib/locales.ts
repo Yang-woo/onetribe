@@ -2,7 +2,8 @@
 // Ordered by region — English, Europe, Southeast Asia, then East Asia (zh/ja/ko).
 // This array is the single source of order for the header switcher and the
 // stacked policy/About language lists: reorder here and every list follows.
-export const LOCALES = ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'pl', 'sv', 'tr', 'id', 'th', 'vi', 'zh', 'ja', 'ko'] as const
+// zh = Simplified (Mainland); zh-Hant = Traditional (Taiwan/Hong Kong).
+export const LOCALES = ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'pl', 'sv', 'tr', 'id', 'th', 'vi', 'zh', 'zh-Hant', 'ja', 'ko'] as const
 export type Locale = (typeof LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = 'en'
 
@@ -26,7 +27,8 @@ export const LOCALE_NAMES: Record<Locale, string> = {
   id: 'Bahasa Indonesia',
   th: 'ไทย',
   vi: 'Tiếng Việt',
-  zh: '中文',
+  zh: '简体中文',
+  'zh-Hant': '繁體中文',
   ja: '日本語',
   ko: '한국어',
 }
