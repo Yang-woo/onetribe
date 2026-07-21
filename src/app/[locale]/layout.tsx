@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import { notFound } from 'next/navigation'
+import { CloudflareAnalytics } from '@/components/cloudflare-analytics'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { routing } from '@/i18n/routing'
@@ -41,6 +42,7 @@ export default async function LocaleLayout({
           {children}
           <SiteFooter />
         </NextIntlClientProvider>
+        <CloudflareAnalytics />
       </body>
     </html>
   )
