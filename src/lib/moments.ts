@@ -140,6 +140,12 @@ export async function fetchMoments(
   return (data ?? []) as unknown as Moment[]
 }
 
+// Upcoming editions we haven't surfaced yet. 2027 is announced (Jun 24–27) but
+// Defqon.1 isn't actively promoting it, so we keep its chip off the wall — and
+// out of the upload/passport pickers, since a future edition has no memories to
+// hold yet. Delete a year here to bring its chip back once we choose to reveal it.
+const HIDDEN_EDITION_YEARS = new Set<number>([2027])
+
 /** NL mainline editions for the chip row (docs/11 B: intl editions stay off the UI for MVP). */
 export async function fetchEditions(db: SupabaseClient): Promise<EditionChip[]> {
   const { data, error } = await db
@@ -148,7 +154,7 @@ export async function fetchEditions(db: SupabaseClient): Promise<EditionChip[]> 
     .eq('festival', 'Defqon.1')
     .order('year', { ascending: false })
   if (error) throw new Error(`fetchEditions failed: ${error.message}`)
-  return (data ?? []) as EditionChip[]
+  return (data ?? []).filter((e) => !HIDDEN_EDITION_YEARS.has(e.year)) as EditionChip[]
 }
 
 export async function fetchCounters(
