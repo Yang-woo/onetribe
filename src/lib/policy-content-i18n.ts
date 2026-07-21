@@ -1507,9 +1507,9 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           ]
         },
         {
-          "heading": "사진 속 누군가가 이의를 제기하나요?",
+          "heading": "사진 속 누군가가 원치 않는다면?",
           "paragraphs": [
-            "그들은 이긴다. 언제나."
+            "언제나 그 사람 편입니다. 원하면, 묻지 않고 내려드릴게요."
           ]
         }
       ]
