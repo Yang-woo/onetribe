@@ -56,7 +56,7 @@ test('locale routes serve translated copy with full hreflang alternates (T3.1)',
   page,
 }) => {
   await page.goto('/ko')
-  await expect(page.getByText('올해, 그 주말은 오지 않았다.')).toBeVisible()
+  await expect(page.getByText('올해, 그 주말은 끝내 오지 않았다.')).toBeVisible()
 
   const hreflangs = await page
     .locator('link[rel="alternate"][hreflang]')

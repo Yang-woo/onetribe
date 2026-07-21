@@ -196,9 +196,7 @@ describe('WallFilter', () => {
     renderFilter()
 
     await user.click(screen.getByRole('link', { name: '2026 — Sacred Oath' }))
-    expect(
-      await screen.findByRole('heading', { name: '2026 — Sacred Oath' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '2026 — Sacred Oath' })).toBeInTheDocument()
     expect(screen.getByText(/The Gathering happened/)).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: '2024' }))

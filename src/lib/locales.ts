@@ -3,7 +3,25 @@
 // This array is the single source of order for the header switcher and the
 // stacked policy/About language lists: reorder here and every list follows.
 // zh = Simplified (Mainland); zh-Hant = Traditional (Taiwan/Hong Kong).
-export const LOCALES = ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'pl', 'sv', 'tr', 'id', 'th', 'vi', 'zh', 'zh-Hant', 'ja', 'ko'] as const
+export const LOCALES = [
+  'en',
+  'nl',
+  'de',
+  'es',
+  'fr',
+  'it',
+  'pt',
+  'pl',
+  'sv',
+  'tr',
+  'id',
+  'th',
+  'vi',
+  'zh',
+  'zh-Hant',
+  'ja',
+  'ko',
+] as const
 export type Locale = (typeof LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = 'en'
 
