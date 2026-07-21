@@ -24,7 +24,7 @@ import { LOCALES } from '@/lib/locales'
  * render time).
  */
 
-const MESSAGES: Record<string, unknown> = { en, nl, de, es, fr, it, pt, ja, ko, pl, sv, tr, zh, id, th, vi }
+const MESSAGES: Record<string, unknown> = { en, nl, de, es, fr, it, pt, pl, sv, tr, id, th, vi, zh, ja, ko }
 
 function leafPaths(obj: unknown, prefix = ''): Map<string, string> {
   const paths = new Map<string, string>()

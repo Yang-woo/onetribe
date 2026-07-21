@@ -1,5 +1,8 @@
 // Locale set — docs/00 D9 P5 (matches the hero copy set in docs/08 B).
-export const LOCALES = ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'ja', 'ko', 'pl', 'sv', 'tr', 'zh', 'id', 'th', 'vi'] as const
+// Ordered by region — English, Europe, Southeast Asia, then East Asia (zh/ja/ko).
+// This array is the single source of order for the header switcher and the
+// stacked policy/About language lists: reorder here and every list follows.
+export const LOCALES = ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'pl', 'sv', 'tr', 'id', 'th', 'vi', 'zh', 'ja', 'ko'] as const
 export type Locale = (typeof LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = 'en'
 
@@ -17,13 +20,13 @@ export const LOCALE_NAMES: Record<Locale, string> = {
   fr: 'Français',
   it: 'Italiano',
   pt: 'Português',
-  ja: '日本語',
-  ko: '한국어',
   pl: 'Polski',
   sv: 'Svenska',
   tr: 'Türkçe',
-  zh: '中文',
   id: 'Bahasa Indonesia',
   th: 'ไทย',
   vi: 'Tiếng Việt',
+  zh: '中文',
+  ja: '日本語',
+  ko: '한국어',
 }
