@@ -130,8 +130,17 @@ export function MemoryWall({
         </h2>
         {canceled && (
           <p className="text-sm text-muted">
-            {filterEdition.edition && <span>{filterEdition.edition} · </span>}
-            {t('lostEditionSub')}
+            {/* 2026 is the one canceled edition that partly happened — The
+                Gathering ran Thursday before the weekend was called off — so it
+                gets its own note (turns "lost" into "you were there Thursday"). */}
+            {filterEdition.year === 2026 ? (
+              t('gathering2026Sub')
+            ) : (
+              <>
+                {filterEdition.edition && <span>{filterEdition.edition} · </span>}
+                {t('lostEditionSub')}
+              </>
+            )}
           </p>
         )}
       </div>

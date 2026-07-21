@@ -199,7 +199,7 @@ describe('WallFilter', () => {
     expect(
       await screen.findByRole('heading', { name: '2026 — Sacred Oath' }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/the wall remembers the edition that never opened/)).toBeInTheDocument()
+    expect(screen.getByText(/The Gathering happened/)).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: '2024' }))
     expect(

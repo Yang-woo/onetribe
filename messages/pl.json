@@ -16,6 +16,7 @@
     "loadMore": "więcej momentów",
     "liveFeed": "świeżo na ścianie: {n, plural, one {# moment} few {# momenty} many {# momentów} other {# momentu}}",
     "lostEditionSub": "ściana pamięta edycję, która nigdy się nie odbyła",
+    "gathering2026Sub": "The Gathering się odbył — ale weekend nigdy nie nadszedł. Jeśli masz zdjęcia z tego dnia, to jedyne 2026, jakie istnieje. Dodaj je do ściany.",
     "anonymous": "anonimowo"
   },
   "moment": {

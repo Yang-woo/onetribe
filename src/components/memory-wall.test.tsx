@@ -113,6 +113,20 @@ describe('MemoryWall', () => {
 
   // docs/15 §1 — filtered views get an edition header; the live signal counts
   // this session's inserts and only appears once something has landed.
+  test('a fully-canceled year with no anthem keeps the generic remembers-the-edition line', () => {
+    const covid: EditionChip = { id: 'e2021', year: 2021, edition: null, canceled: true }
+    renderWithIntl(
+      <MemoryWall
+        initialMoments={[]}
+        filterEdition={covid}
+        loadMoreImpl={noLoadMore}
+        subscribeImpl={noSubscribe}
+      />,
+    )
+    expect(screen.getByText(/the wall remembers the edition that never opened/)).toBeInTheDocument()
+    expect(screen.queryByText(/The Gathering happened/)).not.toBeInTheDocument()
+  })
+
   test('a canceled-year filter shows the anthem-title header and a live signal after an insert', () => {
     let emit: (m: Moment) => void = () => {}
     const subscribe = (onInsert: (m: Moment) => void) => {
@@ -131,7 +145,7 @@ describe('MemoryWall', () => {
     )
 
     expect(screen.getByRole('heading', { name: '2026 — Sacred Oath' })).toBeInTheDocument()
-    expect(screen.getByText(/the wall remembers the edition that never opened/)).toBeInTheDocument()
+    expect(screen.getByText(/The Gathering happened/)).toBeInTheDocument() // 2026 partly happened → Gathering note
     expect(screen.queryByText(/just landed/)).not.toBeInTheDocument()
 
     act(() => {
