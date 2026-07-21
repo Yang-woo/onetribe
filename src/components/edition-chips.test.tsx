@@ -5,8 +5,8 @@ import type { EditionChip } from '@/lib/moments'
 import { EditionChips } from './edition-chips'
 
 // Spec: docs/15 §1 — edition chips filter the wall; the filter lives in the
-// URL (?e=YYYY) and the canceled 2026 edition carries the "lost weekend"
-// label. Per docs/00 D13 the click is filtered in the browser (onSelect)
+// URL (?e=YYYY) and the canceled 2026 edition still shows its real anthem
+// title (Sacred Oath). Per docs/00 D13 the click is filtered in the browser (onSelect)
 // rather than navigating, so every render here wires onSelect the way the
 // only caller (WallFilter) does.
 
@@ -18,7 +18,7 @@ const renderChips = (overrides: Partial<Parameters<typeof EditionChips>[0]> = {}
   )
 
 const editions: EditionChip[] = [
-  { id: 'e2026', year: 2026, edition: null, canceled: true },
+  { id: 'e2026', year: 2026, edition: 'Sacred Oath', canceled: true },
   { id: 'e2025', year: 2025, edition: null, canceled: false },
   { id: 'e2019', year: 2019, edition: 'One Tribe', canceled: false },
 ]
@@ -31,9 +31,9 @@ describe('EditionChips', () => {
     expect(screen.getByRole('link', { name: '2019' })).toHaveAttribute('href', '/en?e=2019')
   })
 
-  test('2026 gets the lost-weekend label (launch hook)', () => {
+  test('the canceled 2026 edition shows its anthem title (launch hook)', () => {
     renderChips()
-    expect(screen.getByRole('link', { name: '2026 — the lost weekend' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '2026 — Sacred Oath' })).toBeInTheDocument()
   })
 
   test('the selected year is marked as current', () => {

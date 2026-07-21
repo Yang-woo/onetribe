@@ -191,13 +191,13 @@ describe('WallFilter', () => {
     await waitFor(() => expect(screen.getByText('caption-a-all')).toBeInTheDocument())
   })
 
-  test('the filter header follows the selection, including the lost weekend', async () => {
+  test('the filter header follows the selection, including the canceled edition', async () => {
     const user = userEvent.setup()
     renderFilter()
 
-    await user.click(screen.getByRole('link', { name: '2026 — the lost weekend' }))
+    await user.click(screen.getByRole('link', { name: '2026 — Sacred Oath' }))
     expect(
-      await screen.findByRole('heading', { name: '2026 — the lost weekend' }),
+      await screen.findByRole('heading', { name: '2026 — Sacred Oath' }),
     ).toBeInTheDocument()
     expect(screen.getByText(/the wall remembers the edition that never opened/)).toBeInTheDocument()
 

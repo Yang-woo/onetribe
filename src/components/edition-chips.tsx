@@ -10,8 +10,8 @@ export type ChipYear = number | 'all'
 
 /**
  * Horizontal edition filter — docs/15 §1. Canceled editions render in
- * Defqon Red (emotion role, docs/12 B); 2026 carries the "lost weekend"
- * label. Filter state lives in the URL (?e=2026) so views are shareable;
+ * Defqon Red (emotion role, docs/12 B) but keep their real anthem title
+ * (2026 — Sacred Oath). Filter state lives in the URL (?e=2026) so views are shareable;
  * WallFilter drives it from `onSelect` (docs/00 D13).
  *
  * The row scrolls sideways. Touch and trackpad already swipe it. On desktop
@@ -142,9 +142,11 @@ export function EditionChips({
       </Link>
       {editions.map((edition) => {
         const isActive = selectedYear === edition.year
+        // Canceled editions with a real anthem (e.g. 2026 — Sacred Oath) show
+        // their title; the `lost` styling below still marks them as canceled.
         const label =
-          edition.year === 2026
-            ? t('lostEditionChip', { year: edition.year })
+          edition.canceled && edition.edition
+            ? `${edition.year} — ${edition.edition}`
             : String(edition.year)
         return (
           <Link

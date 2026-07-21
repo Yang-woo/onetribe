@@ -17,7 +17,7 @@ const LOST_WEEKEND_SUB = /the wall remembers the edition that never opened/
 
 test('a deep link arrives already filtered by the server', async ({ page }) => {
   await page.goto('/en?e=2026')
-  await expect(page.getByRole('heading', { name: /the lost weekend/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Sacred Oath/ })).toBeVisible()
   await expect(page.getByText(LOST_WEEKEND_SUB)).toBeVisible()
   await expect(page.getByRole('link', { name: /2026/ })).toHaveAttribute('aria-current', 'page')
 })

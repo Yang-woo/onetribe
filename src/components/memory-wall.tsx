@@ -106,12 +106,12 @@ export function MemoryWall({
   }, [exhausted, loading, loadMore])
 
   const canceled = filterEdition?.canceled ?? false
+  // A canceled edition keeps its real anthem title (2026 — Sacred Oath); the
+  // red styling and the sub-line below carry the "never opened" meaning.
   const headerTitle = filterEdition
-    ? canceled
-      ? t('lostEditionChip', { year: filterEdition.year })
-      : filterEdition.edition
-        ? `${filterEdition.year} — ${filterEdition.edition}`
-        : String(filterEdition.year)
+    ? filterEdition.edition
+      ? `${filterEdition.year} — ${filterEdition.edition}`
+      : String(filterEdition.year)
     : null
 
   // Rendered above both the grid and the empty state so a filtered-but-empty

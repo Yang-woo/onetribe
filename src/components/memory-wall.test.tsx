@@ -113,7 +113,7 @@ describe('MemoryWall', () => {
 
   // docs/15 §1 — filtered views get an edition header; the live signal counts
   // this session's inserts and only appears once something has landed.
-  test('a canceled-year filter shows the lost-weekend header and a live signal after an insert', () => {
+  test('a canceled-year filter shows the anthem-title header and a live signal after an insert', () => {
     let emit: (m: Moment) => void = () => {}
     const subscribe = (onInsert: (m: Moment) => void) => {
       emit = onInsert
@@ -130,7 +130,7 @@ describe('MemoryWall', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { name: '2026 — the lost weekend' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '2026 — Sacred Oath' })).toBeInTheDocument()
     expect(screen.getByText(/the wall remembers the edition that never opened/)).toBeInTheDocument()
     expect(screen.queryByText(/just landed/)).not.toBeInTheDocument()
 
