@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import type { EditionChip } from './moments'
-import { parseEditionYear, wallFilterFor } from './moments'
+import type { EditionChip, Moment } from './moments'
+import { momentImageSrc, parseEditionYear, wallFilterFor } from './moments'
 
 // Spec: docs/15 §1 — the wall's filter state lives in the URL (?e=YYYY).
 // Both readers (the server page's searchParams and the client filter's
@@ -53,5 +53,41 @@ describe('wallFilterFor', () => {
     const { editionById } = wallFilterFor(editions, 2025)
     expect(editionById.get('e2024')).toEqual(editions[2])
     expect(editionById.size).toBe(3)
+  })
+})
+
+// The wall shows the small thumbnail (docs/00 D21) while the lightbox/OG want
+// the full media — this one selector decides which, so its branches are the
+// contract the thumbnail pipeline exists to feed.
+describe('momentImageSrc', () => {
+  const base: Pick<Moment, 'media_kind' | 'media_url' | 'thumb_url' | 'embed_url'> = {
+    media_kind: 'image',
+    media_url: 'https://media.test/full.jpg',
+    thumb_url: 'https://media.test/full_t.webp',
+    embed_url: null,
+  }
+
+  test('preferThumb uses the thumbnail when present (the wall grid)', () => {
+    expect(momentImageSrc(base, { preferThumb: true })).toBe('https://media.test/full_t.webp')
+  })
+
+  test('preferThumb falls back to full media when there is no thumbnail', () => {
+    expect(momentImageSrc({ ...base, thumb_url: null }, { preferThumb: true })).toBe(
+      'https://media.test/full.jpg',
+    )
+  })
+
+  test('without preferThumb it returns the full media even if a thumb exists (lightbox/OG)', () => {
+    expect(momentImageSrc(base)).toBe('https://media.test/full.jpg')
+  })
+
+  test('a clip resolves to its YouTube thumbnail, ignoring the absent thumb_url', () => {
+    const clip: Pick<Moment, 'media_kind' | 'media_url' | 'thumb_url' | 'embed_url'> = {
+      media_kind: 'clip',
+      media_url: null,
+      thumb_url: null,
+      embed_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    }
+    expect(momentImageSrc(clip)).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
   })
 })

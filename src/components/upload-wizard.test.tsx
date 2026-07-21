@@ -18,6 +18,22 @@ const editions: EditionChip[] = [
 ]
 
 const passthroughPrepare = async (file: File) => file
+// Thumbnail seam: canvas re-encode can't run in jsdom, so tests inject a stub
+// (mirrors prepareImpl). Passthrough keeps the file; the thumb-path test below
+// supplies its own stub to assert the WebP thumbnail wiring.
+const passthroughThumb = async (file: File) => file
+
+// Every test renders with both canvas seams stubbed (they can't run in jsdom);
+// a test needing a real thumbnail overrides prepareThumbImpl.
+const renderWizard = (overrides: Partial<Parameters<typeof UploadWizard>[0]> = {}) =>
+  renderWithIntl(
+    <UploadWizard
+      editions={editions}
+      prepareImpl={passthroughPrepare}
+      prepareThumbImpl={passthroughThumb}
+      {...overrides}
+    />,
+  )
 
 function gifFile(name: string): File {
   return new File([new Uint8Array([0x47, 0x49, 0x46])], name, { type: 'image/gif' })
@@ -37,7 +53,7 @@ afterEach(() => {
 describe('UploadWizard', () => {
   test('rejects more than 5 files inline and blocks advancing', async () => {
     const user = userEvent.setup()
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await user.upload(
       screen.getByLabelText('photos'),
       Array.from({ length: 6 }, (_, i) => gifFile(`f${i}.gif`)),
@@ -49,7 +65,7 @@ describe('UploadWizard', () => {
 
   test('selecting more files appends instead of replacing', async () => {
     const user = userEvent.setup()
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif'), gifFile('b.gif')])
     expect(screen.getAllByRole('button', { name: 'remove photo' })).toHaveLength(2)
     await user.upload(screen.getByLabelText('photos'), [gifFile('c.gif')])
@@ -59,7 +75,7 @@ describe('UploadWizard', () => {
 
   test('removing a photo drops just that tile', async () => {
     const user = userEvent.setup()
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif'), gifFile('b.gif')])
     await user.click(screen.getAllByRole('button', { name: 'remove photo' })[0])
     expect(screen.getAllByRole('button', { name: 'remove photo' })).toHaveLength(1)
@@ -67,7 +83,7 @@ describe('UploadWizard', () => {
 
   test('the mode segment switches between photos and a video link', async () => {
     const user = userEvent.setup()
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     // photos is the default mode
     expect(screen.getByLabelText('photos')).toBeInTheDocument()
     expect(screen.queryByLabelText('youtube link')).not.toBeInTheDocument()
@@ -82,7 +98,7 @@ describe('UploadWizard', () => {
 
   test('an edition chip toggles aria-checked and blocks advancing until picked', async () => {
     const user = userEvent.setup()
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif')])
     // no edition yet → next is blocked with the needEvent error
     await user.click(screen.getByRole('button', { name: 'next' }))
@@ -99,7 +115,7 @@ describe('UploadWizard', () => {
 
   test('back preserves earlier selections', async () => {
     const user = userEvent.setup()
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await fillToStep2(user)
     await user.click(screen.getByRole('button', { name: 'back' }))
     // the photo tile and the edition selection both survived the round trip
@@ -109,7 +125,7 @@ describe('UploadWizard', () => {
 
   test('submit is disabled until the rights checkbox is ticked (legal gate)', async () => {
     const user = userEvent.setup()
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await fillToStep2(user)
 
     const submit = screen.getByRole('button', { name: 'share my moment' })
@@ -145,7 +161,7 @@ describe('UploadWizard', () => {
     })
     vi.stubGlobal('fetch', fetchStub)
 
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await fillToStep2(user)
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))
@@ -162,6 +178,146 @@ describe('UploadWizard', () => {
     expect(payload.media).toEqual([{ key: 'm/2026/k1.gif', contentType: 'image/gif' }])
   })
 
+  test('generates a thumbnail: presigns it, PUTs it, and sends thumbKey (D21)', async () => {
+    const user = userEvent.setup()
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    const thumbStub = async () =>
+      new File([new Uint8Array([1, 2, 3])], 't.webp', { type: 'image/webp' })
+    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const href = String(url)
+      calls.push({ url: href, init })
+      if (href.endsWith('/api/upload/presign')) {
+        return Response.json({
+          uploads: [
+            {
+              key: 'm/2026/k1.gif',
+              uploadUrl: 'https://put.test/k1',
+              headers: {},
+              thumb: { key: 'm/2026/k1_t.webp', uploadUrl: 'https://put.test/k1t', headers: {} },
+            },
+          ],
+          session: 'sess-token',
+        })
+      }
+      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+      if (href.endsWith('/api/memories')) {
+        return Response.json(
+          { moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] },
+          { status: 201 },
+        )
+      }
+      throw new Error(`unexpected fetch ${href}`)
+    })
+    vi.stubGlobal('fetch', fetchStub)
+
+    renderWizard({ prepareThumbImpl: thumbStub })
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: 'share my moment' }))
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+
+    // the presign request declares the thumbnail descriptor
+    const presignCall = calls.find((c) => c.url.endsWith('/api/upload/presign'))!
+    const presignBody = JSON.parse(String(presignCall.init?.body))
+    expect(presignBody.files[0].thumb).toEqual({ contentType: 'image/webp', size: 3 })
+
+    // the thumbnail object is actually uploaded
+    expect(calls.some((c) => c.url === 'https://put.test/k1t')).toBe(true)
+
+    // and memories carries the thumbKey so the server can derive thumb_url
+    const memoriesCall = calls.find((c) => c.url.endsWith('/api/memories'))!
+    const payload = JSON.parse(String(memoriesCall.init?.body))
+    expect(payload.media).toEqual([
+      { key: 'm/2026/k1.gif', thumbKey: 'm/2026/k1_t.webp', contentType: 'image/gif' },
+    ])
+  })
+
+  test('a failed thumbnail PUT does not fail the upload and omits thumbKey (D21 best-effort)', async () => {
+    const user = userEvent.setup()
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    const thumbStub = async () =>
+      new File([new Uint8Array([1, 2, 3])], 't.webp', { type: 'image/webp' })
+    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const href = String(url)
+      calls.push({ url: href, init })
+      if (href.endsWith('/api/upload/presign')) {
+        return Response.json({
+          uploads: [
+            {
+              key: 'm/2026/k1.gif',
+              uploadUrl: 'https://put.test/k1',
+              headers: {},
+              thumb: { key: 'm/2026/k1_t.webp', uploadUrl: 'https://put.test/k1t', headers: {} },
+            },
+          ],
+          session: 'sess-token',
+        })
+      }
+      // main object PUT succeeds; the thumbnail PUT fails
+      if (href === 'https://put.test/k1') return new Response(null, { status: 200 })
+      if (href === 'https://put.test/k1t') return new Response(null, { status: 500 })
+      if (href.endsWith('/api/memories')) {
+        return Response.json(
+          { moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] },
+          { status: 201 },
+        )
+      }
+      throw new Error(`unexpected fetch ${href}`)
+    })
+    vi.stubGlobal('fetch', fetchStub)
+
+    renderWizard({ prepareThumbImpl: thumbStub })
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: 'share my moment' }))
+
+    // the moment still publishes despite the thumbnail PUT failing
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+    // and no thumbKey is sent — thumb_url must not point at an object that never landed
+    const memoriesCall = calls.find((c) => c.url.endsWith('/api/memories'))!
+    const payload = JSON.parse(String(memoriesCall.init?.body))
+    expect(payload.media).toEqual([{ key: 'm/2026/k1.gif', contentType: 'image/gif' }])
+  })
+
+  test('a non-WebP thumbnail is dropped, never sent to presign or PUT (D21)', async () => {
+    const user = userEvent.setup()
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    // a browser without WebP canvas support falls back to PNG
+    const pngThumb = async () =>
+      new File([new Uint8Array([1, 2, 3])], 't.png', { type: 'image/png' })
+    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const href = String(url)
+      calls.push({ url: href, init })
+      if (href.endsWith('/api/upload/presign')) {
+        return Response.json({
+          uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+          session: 'sess-token',
+        })
+      }
+      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+      if (href.endsWith('/api/memories')) {
+        return Response.json(
+          { moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] },
+          { status: 201 },
+        )
+      }
+      throw new Error(`unexpected fetch ${href}`)
+    })
+    vi.stubGlobal('fetch', fetchStub)
+
+    renderWizard({ prepareThumbImpl: pngThumb })
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: 'share my moment' }))
+
+    // the upload still succeeds, just without a thumbnail
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+    const presignCall = calls.find((c) => c.url.endsWith('/api/upload/presign'))!
+    const presignBody = JSON.parse(String(presignCall.init?.body))
+    expect(presignBody.files[0].thumb).toBeUndefined() // non-WebP filtered out client-side
+    expect(calls.some((c) => c.url === 'https://put.test/k1t')).toBe(false) // no thumb PUT
+  })
+
   test('embed mode submits a YouTube link without a presign round-trip', async () => {
     const user = userEvent.setup()
     const calls: string[] = []
@@ -176,7 +332,7 @@ describe('UploadWizard', () => {
       }),
     )
 
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await user.click(screen.getByRole('tab', { name: 'video link' }))
     await user.type(screen.getByLabelText('youtube link'), 'https://youtu.be/dQw4w9WgXcQ')
     await user.click(screen.getByRole('radio', { name: '2025' }))
@@ -194,7 +350,7 @@ describe('UploadWizard', () => {
       'fetch',
       vi.fn(async () => new Response(null, { status: 500 })),
     )
-    renderWithIntl(<UploadWizard editions={editions} prepareImpl={passthroughPrepare} />)
+    renderWizard()
     await fillToStep2(user)
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))

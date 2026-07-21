@@ -15,6 +15,8 @@ import {
   MAX_UPLOAD_BYTES,
   REPORT_REASONS,
   REPORTS_PER_HOUR,
+  THUMB_MAX_UPLOAD_BYTES,
+  THUMB_MIME,
   UPLOAD_SESSION_TTL_MS,
   UPLOADS_PER_HOUR,
   type AllowedMime,
@@ -101,15 +103,25 @@ export function normalizeInstagramLink(raw: string): string | null {
 
 // ── POST /api/upload/presign ────────────────────────────────────────────────
 
+// A file may carry a thumbnail descriptor: the client generates a small static
+// variant (docs/00 D21) and we presign a second object for it in the same grant.
+const fileDescriptor = z.object({
+  contentType: z.enum(mimeValues),
+  size: z.number().int().positive().max(MAX_UPLOAD_BYTES),
+})
+
+// The client always generates a small static WebP thumbnail (docs/00 D21) — pin
+// the MIME and a tight size ceiling so a heavy or non-WebP object can't ride in
+// under the "thumb" name and defeat the point of the smaller variant.
+const thumbDescriptor = fileDescriptor.extend({
+  contentType: z.literal(THUMB_MIME),
+  size: z.number().int().positive().max(THUMB_MAX_UPLOAD_BYTES),
+})
+
 const presignSchema = z.object({
   turnstileToken: z.string().min(1).optional(),
   files: z
-    .array(
-      z.object({
-        contentType: z.enum(mimeValues),
-        size: z.number().int().positive().max(MAX_UPLOAD_BYTES),
-      }),
-    )
+    .array(fileDescriptor.extend({ thumb: thumbDescriptor.optional() }))
     .min(1)
     .max(MAX_FILES_PER_MOMENT),
 })
@@ -130,16 +142,32 @@ export function createPresignHandler(deps: UploadDeps) {
 
     const year = new Date().getUTCFullYear()
     const uploads = await Promise.all(
-      parsed.data.files.map((file) =>
-        deps.storage.presignUpload({
-          key: `m/${year}/${randomUUID()}.${ALLOWED_MIME[file.contentType]}`,
+      parsed.data.files.map(async (file) => {
+        // Main object and its thumbnail share the upload uuid (…/{uuid}.ext and
+        // …/{uuid}_t.webp) so the pair is obvious in the bucket; admin delete
+        // still finds the thumb via the stored thumb_url (D9-c), not the name.
+        const uuid = randomUUID()
+        const main = await deps.storage.presignUpload({
+          key: `m/${year}/${uuid}.${ALLOWED_MIME[file.contentType]}`,
           contentType: file.contentType,
           contentLength: file.size,
-        }),
-      ),
+        })
+        const thumb = file.thumb
+          ? await deps.storage.presignUpload({
+              key: `m/${year}/${uuid}_t.${ALLOWED_MIME[file.thumb.contentType]}`,
+              contentType: file.thumb.contentType,
+              contentLength: file.thumb.size,
+            })
+          : undefined
+        // Uniform shape (thumb always present, possibly undefined) so the grant
+        // builder below stays a plain `u.thumb ?` — no union narrowing needed.
+        return { ...main, thumb }
+      }),
     )
+    // Both keys of every pair go into the grant so /api/memories can accept the
+    // thumbKey too — an unlisted thumbKey is rejected there (403).
     const session = createUploadSession(
-      uploads.map((u) => u.key),
+      uploads.flatMap((u) => (u.thumb ? [u.key, u.thumb.key] : [u.key])),
       UPLOAD_SESSION_TTL_MS,
       deps.sessionSecret,
     )
@@ -165,7 +193,13 @@ const memoriesSchema = z
     // the legal gate — anything but literal true is a 400 (docs/05)
     rightsConfirmed: z.literal(true),
     media: z
-      .array(z.object({ key: z.string().min(1), contentType: z.enum(mimeValues) }))
+      .array(
+        z.object({
+          key: z.string().min(1),
+          thumbKey: z.string().min(1).optional(),
+          contentType: z.enum(mimeValues),
+        }),
+      )
       .min(1)
       .max(MAX_FILES_PER_MOMENT)
       .optional(),
@@ -196,7 +230,10 @@ export function createMemoriesHandler(deps: UploadDeps) {
       const session = input.session ? verifyUploadSession(input.session, deps.sessionSecret) : null
       if (!session) return json(403, { error: 'invalid or expired upload session' })
       const allowed = new Set(session.keys)
-      if (!input.media.every((m) => allowed.has(m.key))) {
+      // Both the media key AND its thumbKey must be in the grant — otherwise a
+      // caller could point thumb_url at an arbitrary bucket object.
+      const claimed = input.media.flatMap((m) => (m.thumbKey ? [m.key, m.thumbKey] : [m.key]))
+      if (!claimed.every((key) => allowed.has(key))) {
         return json(403, { error: 'unknown upload key' })
       }
     } else if (!(await deps.verifyTurnstile(input.turnstileToken, ip))) {
@@ -250,6 +287,7 @@ export function createMemoriesHandler(deps: UploadDeps) {
     type MemoryInsertRow = typeof shared & {
       media_kind: 'image' | 'gif' | 'clip'
       media_url?: string
+      thumb_url?: string | null
       embed_url?: string
       clip_start?: number | null
       clip_length?: number | null
@@ -260,7 +298,9 @@ export function createMemoriesHandler(deps: UploadDeps) {
       rows = input.media.map((m) => ({
         ...shared,
         media_kind: m.contentType === 'image/gif' ? ('gif' as const) : ('image' as const),
-        media_url: deps.storage.publicUrl(m.key), // derived from key — client URLs are never trusted
+        // Both URLs are derived from server-held keys — client URLs are never trusted.
+        media_url: deps.storage.publicUrl(m.key),
+        thumb_url: m.thumbKey ? deps.storage.publicUrl(m.thumbKey) : null,
       }))
     } else {
       const embedUrl = normalizeYoutubeUrl(input.embed!.url)

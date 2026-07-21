@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { hashIp } from '@/lib/server/request-meta'
+import { THUMB_MAX_UPLOAD_BYTES } from '@/lib/upload/constants'
 import type { StorageAdapter } from '@/lib/storage'
 import {
   createMemoriesHandler,
@@ -65,8 +66,12 @@ function post(body: unknown, headers: Record<string, string> = {}): Request {
 let eventId: string
 
 async function presignFiles(
-  files: Array<{ contentType: string; size: number }>,
-): Promise<{ uploads: Array<{ key: string }>; session: string }> {
+  files: Array<{
+    contentType: string
+    size: number
+    thumb?: { contentType: string; size: number }
+  }>,
+): Promise<{ uploads: Array<{ key: string; thumb?: { key: string } }>; session: string }> {
   const res = await createPresignHandler(deps())(post({ turnstileToken: 't', files }))
   expect(res.status).toBe(200)
   return res.json()
@@ -141,6 +146,44 @@ describe('POST /api/upload/presign', () => {
     expect(uploads[1].key).toMatch(/\.gif$/)
     expect(new Set(uploads.map((u) => u.key)).size).toBe(2)
     expect(session.length).toBeGreaterThan(20)
+  })
+
+  test('a file with a thumbnail gets a paired thumb upload sharing the uuid (D21)', async () => {
+    const { uploads } = await presignFiles([
+      { contentType: 'image/jpeg', size: 1000, thumb: { contentType: 'image/webp', size: 200 } },
+    ])
+    expect(uploads).toHaveLength(1)
+    expect(uploads[0].key).toMatch(/\.jpg$/)
+    // thumb key is the main key with the _t.webp suffix (same upload uuid)
+    expect(uploads[0].thumb!.key).toBe(uploads[0].key.replace(/\.jpg$/, '_t.webp'))
+  })
+
+  test('a non-WebP thumbnail descriptor → 400 (D21 — thumbs are pinned to WebP)', async () => {
+    const res = await createPresignHandler(deps())(
+      post({
+        turnstileToken: 't',
+        files: [
+          { contentType: 'image/jpeg', size: 1000, thumb: { contentType: 'image/png', size: 500 } },
+        ],
+      }),
+    )
+    expect(res.status).toBe(400)
+  })
+
+  test('a thumbnail over the thumb size ceiling → 400 (D21)', async () => {
+    const res = await createPresignHandler(deps())(
+      post({
+        turnstileToken: 't',
+        files: [
+          {
+            contentType: 'image/jpeg',
+            size: 1000,
+            thumb: { contentType: 'image/webp', size: THUMB_MAX_UPLOAD_BYTES + 1 },
+          },
+        ],
+      }),
+    )
+    expect(res.status).toBe(400)
   })
 })
 
@@ -249,7 +292,7 @@ describe('POST /api/memories — file flow', () => {
 
     const { data: rows } = await db
       .from('memories')
-      .select('media_kind, media_url, status, origin_country, author_link, author_name')
+      .select('media_kind, media_url, thumb_url, status, origin_country, author_link, author_name')
       .eq('caption', `${MARKER}-happy`)
     expect(rows).toHaveLength(2)
     // enum columns sort by definition order, so compare as a set
@@ -257,10 +300,91 @@ describe('POST /api/memories — file flow', () => {
     for (const row of rows!) {
       expect(row.status).toBe('live')
       expect(row.media_url).toMatch(/^https:\/\/media\.test\/m\/\d{4}\//)
+      expect(row.thumb_url).toBeNull() // no thumbKey sent → wall falls back to media_url
       expect(row.origin_country).toBe('KR')
       expect(row.author_link).toBe('https://instagram.com/onetribe.world')
       expect(row.author_name).toBe('tester')
     }
+  })
+
+  test('a media item with a thumbKey stores a derived thumb_url (D21)', async () => {
+    const { uploads, session } = await presignFiles([
+      { contentType: 'image/jpeg', size: 1000, thumb: { contentType: 'image/webp', size: 200 } },
+    ])
+    const res = await createMemoriesHandler(deps())(
+      post({
+        session,
+        eventId,
+        caption: `${MARKER}-thumb`,
+        rightsConfirmed: true,
+        media: [
+          { key: uploads[0].key, thumbKey: uploads[0].thumb!.key, contentType: 'image/jpeg' },
+        ],
+      }),
+    )
+    expect(res.status).toBe(201)
+    const { data: row } = await db
+      .from('memories')
+      .select('media_url, thumb_url')
+      .eq('caption', `${MARKER}-thumb`)
+      .single()
+    // both URLs are derived from server-held keys, never client-supplied
+    expect(row!.media_url).toBe(`https://media.test/${uploads[0].key}`)
+    expect(row!.thumb_url).toBe(`https://media.test/${uploads[0].thumb!.key}`)
+  })
+
+  test('mixed batch: only the file carrying a thumbKey gets a thumb_url (D21)', async () => {
+    // File 0 has a thumbnail, file 1 does not — the wall must fall back for 1
+    // while 0 gets its thumb. Guards the per-row key→thumb mapping (index drift).
+    const { uploads, session } = await presignFiles([
+      { contentType: 'image/jpeg', size: 1000, thumb: { contentType: 'image/webp', size: 200 } },
+      { contentType: 'image/jpeg', size: 1500 },
+    ])
+    expect(uploads[1].thumb).toBeUndefined()
+    const res = await createMemoriesHandler(deps())(
+      post({
+        session,
+        eventId,
+        caption: `${MARKER}-mixed`,
+        rightsConfirmed: true,
+        media: [
+          { key: uploads[0].key, thumbKey: uploads[0].thumb!.key, contentType: 'image/jpeg' },
+          { key: uploads[1].key, contentType: 'image/jpeg' },
+        ],
+      }),
+    )
+    expect(res.status).toBe(201)
+    const { data: rows } = await db
+      .from('memories')
+      .select('media_url, thumb_url')
+      .eq('caption', `${MARKER}-mixed`)
+    // match rows by their media_url so the assertion never depends on row order
+    const withThumb = rows!.find((r) => r.media_url === `https://media.test/${uploads[0].key}`)!
+    const without = rows!.find((r) => r.media_url === `https://media.test/${uploads[1].key}`)!
+    expect(withThumb.thumb_url).toBe(`https://media.test/${uploads[0].thumb!.key}`)
+    expect(without.thumb_url).toBeNull()
+  })
+
+  test('a thumbKey outside the session grant → 403 (D21)', async () => {
+    // presign without a thumb: the grant holds only the main key
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const res = await createMemoriesHandler(deps())(
+      post({
+        session,
+        eventId,
+        caption: `${MARKER}-forged-thumb`,
+        rightsConfirmed: true,
+        media: [
+          { key: uploads[0].key, thumbKey: 'm/2026/forged_t.webp', contentType: 'image/jpeg' },
+        ],
+      }),
+    )
+    expect(res.status).toBe(403)
+    const { count } = await db
+      .from('memories')
+      .select('*', { count: 'exact', head: true })
+      .eq('caption', `${MARKER}-forged-thumb`)
+    expect(count).toBe(0) // rejected before insert
   })
 })
 

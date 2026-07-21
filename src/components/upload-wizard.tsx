@@ -5,12 +5,14 @@ import { Link } from '@/i18n/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
-import { prepareForUpload, validateFiles } from '@/lib/upload/client-image'
+import { prepareForUpload, prepareThumb, validateFiles } from '@/lib/upload/client-image'
 import {
   ALLOWED_MIME,
   MAX_AUTHOR_NAME_LENGTH,
   MAX_CAPTION_LENGTH,
   MAX_FILES_PER_MOMENT,
+  THUMB_MAX_UPLOAD_BYTES,
+  THUMB_MIME,
 } from '@/lib/upload/constants'
 import { isTurnstileEnabled, Turnstile } from './turnstile'
 import { inputClass } from './ui'
@@ -35,6 +37,9 @@ interface Picked {
   url: string
   /** compression starts at selection so it overlaps step 2 (form filling) */
   prepare: Promise<File>
+  /** wall thumbnail (docs/00 D21), chained off `prepare` at selection so it
+   *  overlaps step 2 too. Best-effort — resolves null if generation fails. */
+  prepareThumb: Promise<File | null>
 }
 
 interface DoneMoment {
@@ -54,10 +59,13 @@ function editionLabel(edition: EditionChip): string {
 export function UploadWizard({
   editions,
   prepareImpl = prepareForUpload,
+  prepareThumbImpl = prepareThumb,
 }: {
   editions: EditionChip[]
   /** test seam — canvas compression can't run in jsdom */
   prepareImpl?: (file: File) => Promise<File>
+  /** test seam — thumbnail canvas re-encode can't run in jsdom either */
+  prepareThumbImpl?: (file: File) => Promise<File>
 }) {
   const t = useTranslations('upload')
   const [step, setStep] = useState<Step>(1)
@@ -115,7 +123,10 @@ export function UploadWizard({
       // mark handled so a decode failure never unhandled-rejects before submit
       // attaches its own handler
       prepare.catch(() => {})
-      return { file, url: URL.createObjectURL(file), prepare }
+      // Thumbnail from the compressed output, kicked off now so its canvas work
+      // overlaps step 2 instead of blocking submit. Never rejects (best-effort).
+      const prepareThumb = prepare.then((f) => prepareThumbImpl(f)).catch(() => null)
+      return { file, url: URL.createObjectURL(file), prepare, prepareThumb }
     })
     setPicked((prev) => [...prev, ...entries])
   }
@@ -171,43 +182,103 @@ export function UploadWizard({
 
       let payload: Record<string, unknown>
       if (mode === 'files') {
-        // Retry recompresses from scratch: a cached rejected prepare promise
-        // would otherwise re-await the same failure forever.
+        // Both compression and thumbnails were kicked off at selection so they
+        // overlap step 2; here we just await. thumbs never reject (docs/00 D21).
         let prepared: File[]
+        let thumbs: (File | null)[]
         try {
           prepared = await Promise.all(picked.map((p) => p.prepare))
+          thumbs = await Promise.all(picked.map((p) => p.prepareThumb))
         } catch {
+          // A prepare rejected — recompress from scratch, then regenerate the
+          // thumbs from the fresh output (the eager ones chained off the failed
+          // prepare are gone). A failed thumb just uploads without one.
           prepared = await Promise.all(picked.map((p) => prepareImpl(p.file)))
+          thumbs = await Promise.all(
+            prepared.map((file) => prepareThumbImpl(file).catch(() => null)),
+          )
         }
+        // Only offer a thumbnail the server will accept: the presign schema pins
+        // thumbs to a small WebP (docs/00 D21), so a non-WebP re-encode (e.g. a
+        // browser without WebP canvas support) or an oversized one is dropped
+        // here — the upload proceeds without a thumb instead of failing.
+        const usableThumbs = thumbs.map((t) =>
+          t && t.type === THUMB_MIME && t.size <= THUMB_MAX_UPLOAD_BYTES ? t : null,
+        )
         const presignRes = await fetch('/api/upload/presign', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             turnstileToken: turnstileToken ?? undefined,
-            files: prepared.map((file) => ({ contentType: file.type, size: file.size })),
+            files: prepared.map((file, i) => {
+              const thumb = usableThumbs[i]
+              return {
+                contentType: file.type,
+                size: file.size,
+                ...(thumb ? { thumb: { contentType: thumb.type, size: thumb.size } } : {}),
+              }
+            }),
           }),
         })
         if (!presignRes.ok) throw new Error('presign failed')
         const { uploads, session } = (await presignRes.json()) as {
-          uploads: Array<{ key: string; uploadUrl: string; headers: Record<string, string> }>
+          uploads: Array<{
+            key: string
+            uploadUrl: string
+            headers: Record<string, string>
+            thumb?: { key: string; uploadUrl: string; headers: Record<string, string> }
+          }>
           session: string
         }
+        // Pair each presign slot with its file + thumb once, up front, so the PUT
+        // and payload steps never re-derive the pairing by bare index. presign
+        // returns uploads in request order; a length drift means the response
+        // desynced — fail loudly rather than mis-pair objects.
+        if (uploads.length !== prepared.length) throw new Error('presign response mismatch')
+        const items = uploads.map((upload, i) => ({
+          upload,
+          file: prepared[i],
+          thumb: usableThumbs[i],
+        }))
+
+        const put = async (
+          target: { uploadUrl: string; headers: Record<string, string> },
+          body: File,
+        ) => {
+          const res = await fetch(target.uploadUrl, {
+            method: 'PUT',
+            headers: target.headers,
+            body,
+          })
+          if (!res.ok) throw new Error('upload failed')
+        }
+        // Main objects must all succeed; the thumbnail is best-effort — a failed
+        // thumb PUT is swallowed so it never fails the upload, and its key is
+        // omitted below so thumb_url can't point at a missing object.
+        const thumbUploaded = items.map(() => false)
         await Promise.all(
-          uploads.map(async (upload, i) => {
-            const put = await fetch(upload.uploadUrl, {
-              method: 'PUT',
-              headers: upload.headers,
-              body: prepared[i],
-            })
-            if (!put.ok) throw new Error('upload failed')
+          items.flatMap((it, i) => {
+            const jobs = [put(it.upload, it.file)]
+            if (it.upload.thumb && it.thumb) {
+              jobs.push(
+                put(it.upload.thumb, it.thumb).then(
+                  () => {
+                    thumbUploaded[i] = true
+                  },
+                  () => {},
+                ),
+              )
+            }
+            return jobs
           }),
         )
         payload = {
           ...shared,
           session,
-          media: uploads.map((upload, i) => ({
-            key: upload.key,
-            contentType: prepared[i].type,
+          media: items.map((it, i) => ({
+            key: it.upload.key,
+            ...(thumbUploaded[i] && it.upload.thumb ? { thumbKey: it.upload.thumb.key } : {}),
+            contentType: it.file.type,
           })),
         }
       } else {
