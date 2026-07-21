@@ -1,21 +1,21 @@
 {
   "hero": {
     "title": "올해, 그 주말은 끝내 오지 않았다.",
-    "subtitle": "그래서 우리는, 기억으로 벽을 짓는다.",
+    "subtitle": "그래서 우리는, 기억으로 담벼락을 쌓는다.",
     "body": "우리가 안고 돌아온 모든 데프콘, 모든 스테이지, 함께 맞은 모든 일출로. 이제 당신의 순간을, 당신의 언어로 남겨주세요.",
     "cta": "내 순간 남기기",
     "liveBadge": "지금 {countries}개 나라에서 기억하는 중",
-    "browseWall": "벽 구경하기 ↓",
+    "browseWall": "담벼락 구경하기 ↓",
     "counterMoments": "{moments, plural, other {개의 순간}}",
     "counterCountries": "{countries, plural, other {개 나라}}"
   },
   "wall": {
     "allEditions": "전체",
-    "emptyTitle": "벽이 깨어나는 중",
+    "emptyTitle": "담벼락이 깨어나는 중",
     "emptyBody": "이곳에 순간을 남기는 첫 사람이 되어주세요.",
     "loadMore": "더 보기",
     "liveFeed": "방금 {n, plural, other {#개}}의 순간이 올라왔어요",
-    "lostEditionSub": "열리지 못한 에디션을 위해 벽이 대신 기억합니다",
+    "lostEditionSub": "끝까지 함께하지 못한 그 주말을, 담벼락이 기억합니다",
     "anonymous": "익명"
   },
   "moment": {
@@ -24,7 +24,7 @@
     "previous": "이전",
     "next": "다음",
     "watchOnYoutube": "YouTube에서 보기 ↗",
-    "backToWall": "← 벽으로 돌아가기",
+    "backToWall": "← 담벼락으로 돌아가기",
     "takedownLink": "삭제 요청",
     "showOriginal": "원문 보기",
     "showTranslation": "번역 보기"
@@ -63,11 +63,11 @@
     "next": "다음",
     "submit": "내 순간 공유하기",
     "submitting": "공유하는 중…",
-    "doneTitle": "벽에 올라갔어요",
+    "doneTitle": "담벼락에 올라갔어요",
     "doneBody": "이 순간은 당신의 것 — 아래 비공개 링크만 있으면 언제든 내릴 수 있어요.",
     "copyLink": "삭제 링크 복사",
     "copied": "복사됨",
-    "toWall": "벽에서 보기",
+    "toWall": "담벼락에서 보기",
     "toPassport": "여권에 저장하기",
     "errors": {
       "tooMany": "한 번에 최대 5장까지예요",
@@ -81,9 +81,9 @@
   },
   "takedown": {
     "confirmTitle": "이 순간을 내릴까요?",
-    "confirmBody": "벽에서 즉시 사라집니다. 여기서는 되돌릴 수 없어요.",
+    "confirmBody": "담벼락에서 즉시 사라집니다. 여기서는 되돌릴 수 없어요.",
     "confirm": "네, 내려주세요",
-    "done": "내려갔어요. 벽의 일부가 되어주셔서 고마워요.",
+    "done": "내려갔어요. 담벼락의 일부가 되어주셔서 고마워요.",
     "invalid": "유효하지 않은 링크예요 — 이미 내려간 순간일 수 있어요."
   },
   "footer": {
@@ -101,7 +101,7 @@
     "nav": "여권",
     "title": "페스티벌 여권",
     "startTitle": "익명으로 시작 — 이름만 지어주세요",
-    "namePlaceholder": "벽에 남길 이름",
+    "namePlaceholder": "담벼락에 남길 이름",
     "start": "여권 만들기",
     "journey": "나의 여정",
     "firstDefqon": "나의 첫 데프콘",
@@ -133,7 +133,7 @@
     "signInHint": "연결해 둔 이메일이나 구글 계정으로 로그인하세요.",
     "switchWarning": "이 기기에서 찍은 스탬프는 남겨집니다 — 그래도 로그인할까요?",
     "deleteAccount": "여권 삭제",
-    "deleteConfirm": "여권·스탬프·연결이 영구 삭제됩니다. 공유한 순간들은 익명화되어 벽에 남습니다(각각 삭제 링크 있음). 계속할까요?",
+    "deleteConfirm": "여권·스탬프·연결이 영구 삭제됩니다. 공유한 순간들은 익명화되어 담벼락에 남습니다(각각 삭제 링크 있음). 계속할까요?",
     "emailInUse": "이미 다른 여권에 연결된 이메일이에요",
     "googleInUse": "이미 다른 여권에 연결된 구글 계정이에요",
     "noPassport": "이 이메일로 만든 여권이 없어요",
