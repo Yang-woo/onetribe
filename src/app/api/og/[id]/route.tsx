@@ -1,6 +1,5 @@
 import { ImageResponse } from 'next/og'
-import { readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+import { LogoMark } from '@/components/logo'
 import {
   EVENT_LINE_COLUMNS,
   eventLine,
@@ -9,29 +8,13 @@ import {
   type MomentEvent,
 } from '@/lib/moments'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
+import { loadOgFonts } from '../fonts'
 
 /**
  * Moment Card OG image — docs/12 G: fullbleed photo, bottom gradient to
- * True Warm Black, `city · year · festival`, small wordmark with the
- * orange pulse. This endpoint is why /m/[id] exists (share loop).
+ * True Warm Black, `city · year · festival`, small beam-mark lockup
+ * (docs/00 D24). This endpoint is why /m/[id] exists (share loop).
  */
-
-// Bundled Space Grotesk (OFL) — no CDN fetch on serverless cold starts,
-// where link-unfurler traffic concentrates.
-let fontData: Buffer | null | undefined
-
-async function loadFont(): Promise<Buffer | null> {
-  if (fontData !== undefined) return fontData
-  try {
-    // ../ — the font lives one level up (src/app/api/og/), shared with the
-    // site card. The old './' reference pointed at a path that never existed,
-    // so the card silently rendered without any text (docs/00 D23).
-    fontData = await readFile(fileURLToPath(new URL('../space-grotesk-500.ttf', import.meta.url)))
-  } catch {
-    fontData = null
-  }
-  return fontData
-}
 
 export async function GET(
   _req: Request,
@@ -60,7 +43,7 @@ export async function GET(
   const src = rawSrc && /\.(jpe?g|png)(\?|$)/i.test(rawSrc) ? rawSrc : null
 
   const line = eventLine(moment.events)
-  const font = await loadFont()
+  const fonts = await loadOgFonts()
 
   return new ImageResponse(
     <div
@@ -99,13 +82,14 @@ export async function GET(
           backgroundImage: 'linear-gradient(to top, #0B0908 0%, rgba(11,9,8,0) 45%)',
         }}
       >
-        {font && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {fonts.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {line && <div style={{ color: '#F2EDE6', fontSize: 40 }}>{line}</div>}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ color: '#A39A90', fontSize: 28 }}>one</div>
-              <div style={{ width: 10, height: 26, background: '#FF6A00', borderRadius: 3 }} />
-              <div style={{ color: '#A39A90', fontSize: 28 }}>tribe</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <LogoMark width={45} height={30} />
+              <div style={{ color: '#F2EDE6', fontSize: 22, fontWeight: 700, letterSpacing: 4 }}>
+                ONE TRIBE
+              </div>
             </div>
           </div>
         )}
@@ -114,9 +98,7 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: font
-        ? [{ name: 'Space Grotesk', data: font, style: 'normal' as const, weight: 500 as const }]
-        : undefined,
+      fonts: fonts.length ? fonts : undefined,
     },
   )
 }

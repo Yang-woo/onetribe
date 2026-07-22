@@ -1,0 +1,11 @@
+<!-- Favicon (SVG) — searchlight beam mark on True Warm Black (docs/12-brand C, docs/00 D24).
+     Symbol enlarged to 75% width for small-size legibility; geometry itself is the
+     fixed handoff spec (viewBox 0 0 96 64) scaled 0.5 and centered. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#0b0908"/>
+  <g transform="translate(8 16) scale(0.5)">
+    <polygon points="44,64 4,0 16,0 52,64" fill="rgba(255,106,0,.35)"/>
+    <polygon points="52,64 40,0 52,0 60,64" fill="rgba(255,106,0,.7)"/>
+    <polygon points="60,64 80,0 92,0 68,64" fill="#ff6a00"/>
+  </g>
+</svg>

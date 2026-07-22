@@ -1,29 +1,16 @@
 import { ImageResponse } from 'next/og'
-import { readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+import { LogoMark } from '@/components/logo'
+import { loadOgFonts } from '../fonts'
 
 /**
  * Site-wide OG card (docs/00 D23) — the face of every home/link share:
- * True Warm Black, the hero's orange glow, the wordmark with the pulse bar.
+ * True Warm Black, the hero's orange glow, the primary vertical lockup
+ * (searchlight beam mark + ONE TRIBE wordmark, docs/00 D24).
  * Static English brand line — locale-agnostic like the wordmark itself.
  */
 
-// Bundled Space Grotesk (OFL), shared with the moment card — no CDN fetch
-// on serverless cold starts, where link-unfurler traffic concentrates.
-let fontData: Buffer | null | undefined
-
-async function loadFont(): Promise<Buffer | null> {
-  if (fontData !== undefined) return fontData
-  try {
-    fontData = await readFile(fileURLToPath(new URL('../space-grotesk-500.ttf', import.meta.url)))
-  } catch {
-    fontData = null
-  }
-  return fontData
-}
-
 export async function GET(): Promise<Response> {
-  const font = await loadFont()
+  const fonts = await loadOgFonts()
 
   return new ImageResponse(
     <div
@@ -54,24 +41,30 @@ export async function GET(): Promise<Response> {
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
-          gap: 28,
+          gap: 26,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 26 }}>
-          <div style={{ color: '#F2EDE6', fontSize: 108 }}>one</div>
-          <div style={{ width: 30, height: 88, background: '#FF6A00', borderRadius: 8 }} />
-          <div style={{ color: '#F2EDE6', fontSize: 108 }}>tribe</div>
+        <LogoMark width={195} height={130} />
+        <div
+          style={{
+            color: '#F2EDE6',
+            fontSize: 72,
+            fontWeight: 700,
+            letterSpacing: 13,
+            // letter-spacing trails the last glyph — offset to keep optical center
+            paddingLeft: 13,
+          }}
+        >
+          ONE TRIBE
         </div>
         <div style={{ color: '#A39A90', fontSize: 38 }}>The moments we took home.</div>
-        <div style={{ color: '#FF6A00', fontSize: 27, marginTop: 10 }}>onetribe.world</div>
+        <div style={{ color: '#FF6A00', fontSize: 27, marginTop: 6 }}>onetribe.world</div>
       </div>
     </div>,
     {
       width: 1200,
       height: 630,
-      fonts: font
-        ? [{ name: 'Space Grotesk', data: font, style: 'normal' as const, weight: 500 as const }]
-        : undefined,
+      fonts: fonts.length ? fonts : undefined,
       headers: { 'Cache-Control': 'public, max-age=86400' },
     },
   )
