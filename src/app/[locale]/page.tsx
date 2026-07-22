@@ -6,10 +6,12 @@ import { MemoryWall } from '@/components/memory-wall'
 import { PulseDot } from '@/components/pulse-dot'
 import { WallFilter } from '@/components/wall-filter'
 import { WallSkeleton } from '@/components/wall-skeleton'
+import { JsonLd } from '@/components/json-ld'
 import { Link } from '@/i18n/navigation'
+import { isLocale } from '@/lib/locales'
 import { fetchMoments, parseEditionYear, wallFilterFor, type EditionChip } from '@/lib/moments'
 import { getCachedCounters, getCachedEditions } from '@/lib/moments-cache'
-import { localeAlternates } from '@/lib/seo'
+import { localeAlternates, websiteJsonLd } from '@/lib/seo'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 // Landing + wall in one page — the wall must feel alive on first paint
@@ -21,8 +23,14 @@ import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 // (docs/00 D12, D13).
 export const dynamic = 'force-dynamic'
 
-export async function generateMetadata(): Promise<Metadata> {
-  return { alternates: localeAlternates('/') }
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+  return { alternates: localeAlternates('/', locale) }
 }
 
 /** Dynamic part — the filtered moments. Streams in behind <Suspense>. */
@@ -60,6 +68,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
 
   return (
     <main className="flex-1">
+      <JsonLd data={websiteJsonLd(t('body'))} />
       <section className="relative isolate mx-auto flex max-w-[960px] flex-col items-center gap-7 px-6 pb-[72px] pt-[88px] text-center">
         <div
           aria-hidden="true"

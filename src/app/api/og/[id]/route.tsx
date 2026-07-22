@@ -23,7 +23,10 @@ let fontData: Buffer | null | undefined
 async function loadFont(): Promise<Buffer | null> {
   if (fontData !== undefined) return fontData
   try {
-    fontData = await readFile(fileURLToPath(new URL('./space-grotesk-500.ttf', import.meta.url)))
+    // ../ — the font lives one level up (src/app/api/og/), shared with the
+    // site card. The old './' reference pointed at a path that never existed,
+    // so the card silently rendered without any text (docs/00 D23).
+    fontData = await readFile(fileURLToPath(new URL('../space-grotesk-500.ttf', import.meta.url)))
   } catch {
     fontData = null
   }
@@ -82,7 +85,13 @@ export async function GET(
       <div
         style={{
           position: 'absolute',
-          inset: 0,
+          // explicit sides — satori does not expand the `inset` shorthand,
+          // so this whole overlay (gradient + event line + wordmark) was
+          // zero-sized and never rendered (docs/00 D23 og card fix)
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',

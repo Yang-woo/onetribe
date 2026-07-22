@@ -1,11 +1,13 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { CloudflareAnalytics } from '@/components/cloudflare-analytics'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { routing } from '@/i18n/routing'
+import { siteUrl } from '@/lib/site-url'
 import '../globals.css'
 
 const inter = Inter({
@@ -18,11 +20,34 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
 })
 
-export const metadata: Metadata = {
-  title: 'one tribe',
-  description:
-    'The moments we took home — a multilingual memory wall for the hard-dance community.',
+// Meta description reuses the QA'd hero body (docs/00 D19 native pass) —
+// the search snippet speaks the searcher's language without introducing a
+// second, unreviewed translation layer (docs/00 D23).
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!hasLocale(routing.locales, locale)) return {}
+  const t = await getTranslations({ locale, namespace: 'hero' })
+  const base = siteUrl()
+  return {
+    metadataBase: new URL(base),
+    title: { default: 'one tribe', template: '%s — one tribe' },
+    description: t('body'),
+    openGraph: {
+      siteName: 'one tribe',
+      type: 'website',
+      title: 'one tribe',
+      description: t('body'),
+      images: [{ url: `${base}/api/og/site`, width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image' },
+  }
 }
+
+export const viewport: Viewport = { themeColor: '#0B0908' }
 
 export default async function LocaleLayout({
   children,

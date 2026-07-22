@@ -61,7 +61,27 @@ test('locale routes serve translated copy with full hreflang alternates (T3.1)',
   const hreflangs = await page
     .locator('link[rel="alternate"][hreflang]')
     .evaluateAll((links) => links.map((l) => l.getAttribute('hreflang')))
-  for (const locale of ['en', 'nl', 'de', 'es', 'fr', 'it', 'pt', 'ja', 'ko', 'x-default']) {
+  // Full locale set (docs/00 D19/D20) — 17 locales + x-default.
+  for (const locale of [
+    'en',
+    'nl',
+    'de',
+    'es',
+    'fr',
+    'it',
+    'pt',
+    'pl',
+    'sv',
+    'tr',
+    'id',
+    'th',
+    'vi',
+    'zh',
+    'zh-Hant',
+    'ja',
+    'ko',
+    'x-default',
+  ]) {
     expect(hreflangs).toContain(locale)
   }
 })

@@ -1,10 +1,24 @@
+import type { Metadata } from 'next'
 import { MultilingualArticle, type LocalizedContent } from '@/components/multilingual-article'
 import { ABOUT_SUPPORT } from '@/lib/policy-content'
 import { ABOUT_I18N } from '@/lib/policy-content-i18n'
 import { SUPPORT_LINKS, hasSupportLinks } from '@/lib/support'
-import { LOCALES, type Locale } from '@/lib/locales'
+import { isLocale, LOCALES, type Locale } from '@/lib/locales'
+import { localeAlternates } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
+
+// Reviewed per-locale title (docs/00 D18/D19) + the hreflang cluster the
+// policy pages were missing (docs/00 D23, docs/07 backlog item).
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  if (!isLocale(locale)) return {}
+  return { title: ABOUT_I18N[locale].title, alternates: localeAlternates('/about', locale) }
+}
 
 const supportButtonClass =
   'rounded-full border border-line px-5 py-2 text-sm font-medium text-paper transition-colors hover:border-orange hover:text-orange'

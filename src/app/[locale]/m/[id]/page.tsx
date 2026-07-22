@@ -3,8 +3,10 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { CaptionToggle } from '@/components/caption-toggle'
+import { JsonLd } from '@/components/json-ld'
 import { ReportButton } from '@/components/report-button'
 import { Link } from '@/i18n/navigation'
+import { DEFAULT_LOCALE, isLocale } from '@/lib/locales'
 import {
   EVENT_LINE_COLUMNS,
   eventLine,
@@ -14,7 +16,7 @@ import {
   type Moment,
   type MomentEvent,
 } from '@/lib/moments'
-import { localeAlternates } from '@/lib/seo'
+import { localeAlternates, momentJsonLd } from '@/lib/seo'
 import { siteUrl } from '@/lib/site-url'
 import { createServiceRoleClient } from '@/lib/server/supabase'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
@@ -46,16 +48,19 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; id: string }>
 }): Promise<Metadata> {
-  const { id } = await params
+  const { locale, id } = await params
   const moment = await fetchMoment(id)
   if (!moment) return {}
   const base = siteUrl()
   const title = eventLine(moment.events) ?? 'a moment'
   return {
-    title: `${title} — one tribe`,
+    // The layout template appends the brand — plain title here avoids
+    // "… — one tribe — one tribe".
+    title,
     description: moment.caption ?? undefined,
-    alternates: localeAlternates(`/m/${id}`),
+    alternates: localeAlternates(`/m/${id}`, isLocale(locale) ? locale : DEFAULT_LOCALE),
     openGraph: {
+      siteName: 'one tribe',
       title: `${title} — one tribe`,
       description: moment.caption ?? undefined,
       images: [{ url: `${base}/api/og/${id}`, width: 1200, height: 630 }],
@@ -116,9 +121,11 @@ export default async function MomentPage({
   const nextId = nextRows?.[0]?.id as string | undefined
 
   const src = momentImageSrc(moment) ?? undefined
+  const jsonLd = momentJsonLd(moment, isLocale(locale) ? locale : DEFAULT_LOCALE)
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-8">
+      {jsonLd && <JsonLd data={jsonLd} />}
       {moment.media_kind === 'clip' && moment.embed_url ? (
         <a href={moment.embed_url} target="_blank" rel="noopener noreferrer">
           {/* eslint-disable-next-line @next/next/no-img-element */}

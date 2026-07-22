@@ -1,0 +1,32 @@
+# one tribe
+
+> A multilingual memory wall where the global hard-dance / Defqon.1 community
+> shares festival memories — photos, GIFs and video links, with captions
+> translated across 17 languages. A non-profit fan project. Not affiliated
+> with, endorsed by or connected to Q-dance, ID&T or Defqon.1.
+
+Key facts:
+
+- Content: user-submitted festival memories ("moments"), each living at
+  https://onetribe.world/en/m/{id} — photos and GIFs are hosted, videos are
+  external links (YouTube) only.
+- Languages: the same content is served per-locale at
+  https://onetribe.world/{locale}/ for en, nl, de, es, fr, it, pt, pl, sv,
+  tr, id, th, vi, zh, zh-Hant, ja and ko.
+- Non-profit: no ads, no merchandise, no paid features. Voluntary
+  server-cost donations only, with no perks attached.
+- Moderation: post-moderation with community reporting and a takedown
+  process for anyone appearing in a photo.
+
+## Pages
+
+- [The wall](https://onetribe.world/en): the shared memory wall, newest first
+- [About](https://onetribe.world/en/about): what one tribe is and who runs it
+- [Community guidelines](https://onetribe.world/en/guidelines)
+- [Privacy policy](https://onetribe.world/en/privacy)
+- [Terms](https://onetribe.world/en/terms)
+- [Takedown](https://onetribe.world/en/takedown): removal requests
+
+## Contact
+
+- privacy@onetribe.world

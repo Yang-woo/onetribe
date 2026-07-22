@@ -1,6 +1,11 @@
+import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
+
+// Secret-token URL — must never end up in an index if a link leaks
+// (docs/00 D23, same treatment as /admin).
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 /**
  * Uploader self-takedown — the link from the upload confirmation screen.

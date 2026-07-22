@@ -8,4 +8,9 @@ export const routing = defineRouting({
   locales: LOCALES,
   defaultLocale: DEFAULT_LOCALE,
   localePrefix: 'always',
+  // hreflang lives in the HTML metadata (src/lib/seo.ts) as the single
+  // source of truth — the middleware's host-derived Link headers advertised
+  // whatever host was hit (wrong cluster on www/vercel.app) and disagreed
+  // with the tags on x-default (docs/00 D23).
+  alternateLinks: false,
 })
