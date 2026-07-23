@@ -58,6 +58,8 @@
     "captionLabel": "sag etwas dazu (optional)",
     "nameLabel": "Anzeigename",
     "igLabel": "Instagram (optional)",
+    "igInvalid": "nur Buchstaben, Zahlen, Punkte und Unterstriche",
+    "igNotProfile": "das ist ein Beitragslink — füge stattdessen deine Profil-URL ein",
     "rightsLabel": "Ich habe das selbst aufgenommen und darf es teilen",
     "back": "zurück",
     "next": "weiter",

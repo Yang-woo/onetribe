@@ -58,6 +58,8 @@
     "captionLabel": "say something (optional)",
     "nameLabel": "display name",
     "igLabel": "instagram (optional)",
+    "igInvalid": "letters, numbers, dots and underscores only",
+    "igNotProfile": "that’s a post link — paste your profile URL instead",
     "rightsLabel": "I captured this myself and have the right to share it",
     "back": "back",
     "next": "next",

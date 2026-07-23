@@ -58,6 +58,8 @@
     "captionLabel": "한마디 남기기 (선택)",
     "nameLabel": "표시 이름",
     "igLabel": "인스타그램 (선택)",
+    "igInvalid": "영문·숫자·마침표·밑줄만 쓸 수 있어요",
+    "igNotProfile": "게시물 링크예요 — 프로필 주소를 붙여넣어 주세요",
     "rightsLabel": "내가 직접 촬영했고 공유할 권리가 있습니다",
     "back": "뒤로",
     "next": "다음",

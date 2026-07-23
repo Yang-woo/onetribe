@@ -58,6 +58,8 @@
     "captionLabel": "säg något (valfritt)",
     "nameLabel": "visningsnamn",
     "igLabel": "instagram (valfritt)",
+    "igInvalid": "endast bokstäver, siffror, punkter och understreck",
+    "igNotProfile": "det är en inläggslänk — klistra in din profil-URL istället",
     "rightsLabel": "jag har tagit det här själv och har rätt att dela det",
     "back": "tillbaka",
     "next": "nästa",

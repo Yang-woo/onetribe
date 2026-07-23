@@ -58,6 +58,8 @@
     "captionLabel": "bir şeyler yaz (isteğe bağlı)",
     "nameLabel": "görünen ad",
     "igLabel": "instagram (isteğe bağlı)",
+    "igInvalid": "yalnızca harf, rakam, nokta ve alt çizgi",
+    "igNotProfile": "bu bir gönderi bağlantısı — bunun yerine profil URL’ni yapıştır",
     "rightsLabel": "bunu kendim çektim ve paylaşma hakkım var",
     "back": "geri",
     "next": "ileri",

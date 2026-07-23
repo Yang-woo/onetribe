@@ -138,6 +138,80 @@ describe('UploadWizard', () => {
     expect(submit).toBeDisabled()
   })
 
+  // The instagram field has a fixed "@" prefix — the input holds a bare
+  // handle. Typed @s and pasted profile URLs collapse live; anything else
+  // surfaces the invalid hint instead of silently mangling.
+  test('instagram field strips a typed @ and shows the derived profile link', async () => {
+    const user = userEvent.setup()
+    renderWizard()
+    await fillToStep2(user)
+
+    const ig = screen.getByLabelText<HTMLInputElement>('instagram (optional)')
+    await user.type(ig, '@qdance')
+    expect(ig.value).toBe('qdance')
+    expect(screen.getByText('instagram.com/qdance', { exact: false })).toBeInTheDocument()
+  })
+
+  test('pasting a profile URL collapses to the handle', async () => {
+    const user = userEvent.setup()
+    renderWizard()
+    await fillToStep2(user)
+
+    const ig = screen.getByLabelText<HTMLInputElement>('instagram (optional)')
+    await user.click(ig)
+    await user.paste('https://www.instagram.com/defqon1/')
+    expect(ig.value).toBe('defqon1')
+    expect(screen.getByText('instagram.com/defqon1', { exact: false })).toBeInTheDocument()
+  })
+
+  test('an invalid handle shows the red hint, not a derived link', async () => {
+    const user = userEvent.setup()
+    renderWizard()
+    await fillToStep2(user)
+
+    const ig = screen.getByLabelText<HTMLInputElement>('instagram (optional)')
+    await user.type(ig, 'bad handle!')
+    expect(screen.getByText('letters, numbers, dots and underscores only')).toBeInTheDocument()
+    expect(screen.queryByText('instagram.com/', { exact: false })).not.toBeInTheDocument()
+  })
+
+  test('a pasted post URL gets the profile-URL hint, not "invalid characters"', async () => {
+    const user = userEvent.setup()
+    renderWizard()
+    await fillToStep2(user)
+
+    const ig = screen.getByLabelText<HTMLInputElement>('instagram (optional)')
+    await user.click(ig)
+    await user.paste('https://instagram.com/p/Cxyz123')
+    // deliberately not collapsed (a wrong handle would be worse) — the hint
+    // names the actual problem instead
+    expect(ig.value).toBe('https://instagram.com/p/Cxyz123')
+    expect(
+      screen.getByText('that’s a post link — paste your profile URL instead'),
+    ).toBeInTheDocument()
+  })
+
+  // Submitting a visibly-invalid handle would burn a presign + R2 PUT before
+  // /api/memories 400s (orphan object) — the wizard gates instead.
+  test('an invalid handle disables submit until fixed or cleared', async () => {
+    const user = userEvent.setup()
+    renderWizard()
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+
+    const submit = screen.getByRole('button', { name: 'share my moment' })
+    const ig = screen.getByLabelText<HTMLInputElement>('instagram (optional)')
+
+    await user.type(ig, 'bad handle!')
+    expect(submit).toBeDisabled()
+
+    await user.clear(ig)
+    expect(submit).toBeEnabled()
+
+    await user.type(ig, 'qdance')
+    expect(submit).toBeEnabled()
+  })
+
   test('happy path posts presign → PUT → memories and shows the delete link screen', async () => {
     const user = userEvent.setup()
     const calls: Array<{ url: string; init?: RequestInit }> = []
@@ -163,6 +237,7 @@ describe('UploadWizard', () => {
 
     renderWizard()
     await fillToStep2(user)
+    await user.type(screen.getByLabelText('instagram (optional)'), '@qdance')
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: 'share my moment' }))
 
@@ -176,6 +251,8 @@ describe('UploadWizard', () => {
     expect(payload.session).toBe('sess-token')
     expect(payload.eventId).toBe('e2023')
     expect(payload.media).toEqual([{ key: 'm/2026/k1.gif', contentType: 'image/gif' }])
+    // the wizard sends the bare handle the "@" prefix UI leaves in the field
+    expect(payload.authorLink).toBe('qdance')
   })
 
   test('generates a thumbnail: presigns it, PUTs it, and sends thumbKey (D21)', async () => {

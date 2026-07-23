@@ -58,6 +58,8 @@
     "captionLabel": "nói gì đó (không bắt buộc)",
     "nameLabel": "tên hiển thị",
     "igLabel": "instagram (không bắt buộc)",
+    "igInvalid": "chỉ dùng chữ cái, số, dấu chấm và gạch dưới",
+    "igNotProfile": "đây là liên kết bài viết — hãy dán URL trang cá nhân của bạn",
     "rightsLabel": "mình tự chụp/quay cái này và có quyền chia sẻ nó",
     "back": "quay lại",
     "next": "tiếp",

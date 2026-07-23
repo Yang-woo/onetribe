@@ -58,6 +58,8 @@
     "captionLabel": "zeg er iets bij (optioneel)",
     "nameLabel": "weergavenaam",
     "igLabel": "instagram (optioneel)",
+    "igInvalid": "alleen letters, cijfers, punten en underscores",
+    "igNotProfile": "dat is een post-link — plak in plaats daarvan je profiel-URL",
     "rightsLabel": "Ik heb dit zelf vastgelegd en mag het delen",
     "back": "terug",
     "next": "verder",

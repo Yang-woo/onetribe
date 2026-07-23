@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { prepareForUpload, prepareThumb, validateFiles } from '@/lib/upload/client-image'
@@ -14,6 +14,7 @@ import {
   THUMB_MAX_UPLOAD_BYTES,
   THUMB_MIME,
 } from '@/lib/upload/constants'
+import { IG_HANDLE_RE, isIgUrl, normalizeIgInput } from '@/lib/upload/instagram-input'
 import { isTurnstileEnabled, Turnstile } from './turnstile'
 import { inputClass } from './ui'
 
@@ -78,6 +79,12 @@ export function UploadWizard({
   const [caption, setCaption] = useState('')
   const [authorName, setAuthorName] = useState('')
   const [authorLink, setAuthorLink] = useState('')
+  const igFieldId = useId()
+  const igHintId = `${igFieldId}-hint`
+  const igHandle = authorLink.trim()
+  // Gate submit on a visibly-invalid handle: letting it through would burn a
+  // presign + R2 PUT before /api/memories 400s (orphan object, D9-c ①).
+  const igInvalid = igHandle !== '' && !IG_HANDLE_RE.test(igHandle)
   const [rights, setRights] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -158,7 +165,9 @@ export function UploadWizard({
   }
 
   async function submit() {
-    if (!rights || submitting) return
+    // igInvalid is enforced here too (not just the button's disabled attr) so
+    // any future non-button path into submit keeps the orphan-object gate.
+    if (!rights || submitting || igInvalid) return
     setSubmitting(true)
     setError(null)
     try {
@@ -503,15 +512,71 @@ export function UploadWizard({
               className={inputClass}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm text-muted">
-            {t('igLabel')}
-            <input
-              value={authorLink}
-              placeholder="@yourhandle"
-              onChange={(e) => setAuthorLink(e.target.value)}
-              className={inputClass}
-            />
-          </label>
+          <div className="flex flex-col gap-1 text-sm text-muted">
+            {/* Explicit htmlFor: the visual "@" prefix must not leak into the
+                accessible name, so no wrapping label here. */}
+            <label htmlFor={igFieldId}>{t('igLabel')}</label>
+            {/* Segmented "@" prefix: the field holds a bare handle — a typed @
+                or a pasted profile URL collapses live (normalizeIgInput); the
+                server still re-normalizes (D9 P1: client input is untrusted). */}
+            <span className="group flex items-stretch overflow-hidden rounded-lg border border-line bg-surface transition-colors focus-within:border-[rgba(255,106,0,.5)]">
+              <span
+                aria-hidden="true"
+                className={`grid place-items-center border-r border-line bg-surface-raised px-3 transition-colors group-focus-within:text-orange ${
+                  authorLink ? 'text-orange' : 'text-muted'
+                }`}
+              >
+                @
+              </span>
+              <input
+                id={igFieldId}
+                value={authorLink}
+                // Deliberately not localized (D25 English-common precedent):
+                // handles are ASCII-only, so a translated placeholder would
+                // demo an invalid input. No maxLength — it would truncate a
+                // pasted profile URL before normalizeIgInput sees it; overlong
+                // input is caught by the hint + submit gate instead.
+                placeholder="yourhandle"
+                aria-invalid={igInvalid || undefined}
+                aria-describedby={igHintId}
+                onChange={(e) => {
+                  const el = e.target
+                  const raw = el.value
+                  const caret = el.selectionStart ?? raw.length
+                  const normalized = normalizeIgInput(raw)
+                  setAuthorLink(normalized)
+                  // When the collapse shortened the value, React rewrites the
+                  // DOM value and the caret snaps to the end — restore it,
+                  // shifted by what was removed (e.g. a leading "@" typed at
+                  // position 0 must leave the caret at 0, not after "qdance").
+                  if (normalized !== raw) {
+                    const pos = Math.max(0, caret - (raw.length - normalized.length))
+                    requestAnimationFrame(() => el.setSelectionRange(pos, pos))
+                  }
+                }}
+                className="min-w-0 flex-1 bg-transparent px-3 py-2 text-paper placeholder:text-muted focus:outline-none"
+              />
+            </span>
+            {/* Derived-link hint: instant "yes, that's my profile" feedback.
+                Height reserved so the rights card below never jumps. Mono is
+                for the URL only — the error is prose (Space Mono is latin-only,
+                12-brand C). A non-profile instagram URL (post/reel) gets its
+                own message — "invalid characters" would describe the wrong
+                problem. */}
+            <span id={igHintId} className="min-h-[1.125rem] text-xs" aria-live="polite">
+              {igHandle !== '' &&
+                (igInvalid ? (
+                  <span className="text-red">
+                    {isIgUrl(igHandle) ? t('igNotProfile') : t('igInvalid')}
+                  </span>
+                ) : (
+                  <span className="font-mono">
+                    <span className="text-orange">→ </span>
+                    instagram.com/{igHandle}
+                  </span>
+                ))}
+            </span>
+          </div>
           {/* rights confirmation card — the checkbox is real (sr-only) so tests
               and form a11y keep working; the server double-checks rightsConfirmed */}
           <label
@@ -569,7 +634,9 @@ export function UploadWizard({
           <button
             type="button"
             onClick={() => void submit()}
-            disabled={!rights || submitting || (isTurnstileEnabled() && !turnstileToken)}
+            disabled={
+              !rights || submitting || igInvalid || (isTurnstileEnabled() && !turnstileToken)
+            }
             className="rounded-full bg-orange px-7 py-2.5 font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             {submitting ? t('submitting') : t('submit')}

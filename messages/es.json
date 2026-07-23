@@ -58,6 +58,8 @@
     "captionLabel": "di algo (opcional)",
     "nameLabel": "nombre visible",
     "igLabel": "instagram (opcional)",
+    "igInvalid": "solo letras, números, puntos y guiones bajos",
+    "igNotProfile": "eso es un enlace a una publicación — pega la URL de tu perfil",
     "rightsLabel": "Lo capturé yo y tengo derecho a compartirlo",
     "back": "atrás",
     "next": "siguiente",

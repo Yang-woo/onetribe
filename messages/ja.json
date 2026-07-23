@@ -58,6 +58,8 @@
     "captionLabel": "ひとこと添える（任意）",
     "nameLabel": "表示名",
     "igLabel": "Instagram（任意）",
+    "igInvalid": "英数字・ピリオド・アンダースコアのみ使えます",
+    "igNotProfile": "これは投稿のリンクです — プロフィールのURLを貼り付けてください",
     "rightsLabel": "自分で撮影したもので、共有する権利があります",
     "back": "戻る",
     "next": "次へ",

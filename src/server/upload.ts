@@ -21,6 +21,7 @@ import {
   UPLOADS_PER_HOUR,
   type AllowedMime,
 } from '@/lib/upload/constants'
+import { IG_HANDLE_RE } from '@/lib/upload/instagram-input'
 
 /**
  * Upload pipeline handlers — docs/17 T2.1, structure per docs/00 D9 P1.
@@ -88,13 +89,14 @@ export function normalizeYoutubeUrl(raw: string): string | null {
 /** Accepts "@handle" or an instagram.com URL, returns a profile URL — or null. */
 export function normalizeInstagramLink(raw: string): string | null {
   const handle = raw.trim().replace(/^@/, '')
-  if (/^[A-Za-z0-9._]{1,30}$/.test(handle)) return `https://instagram.com/${handle}`
+  // IG_HANDLE_RE is shared with the wizard's live hint — one regex, no drift.
+  if (IG_HANDLE_RE.test(handle)) return `https://instagram.com/${handle}`
   try {
     const url = new URL(raw)
     const host = url.hostname.replace(/^www\./, '')
     if (host !== 'instagram.com') return null
     const path = url.pathname.replace(/\/+$/, '')
-    if (!/^\/[A-Za-z0-9._]{1,30}$/.test(path)) return null
+    if (!path.startsWith('/') || !IG_HANDLE_RE.test(path.slice(1))) return null
     return `https://instagram.com${path}`
   } catch {
     return null

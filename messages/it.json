@@ -58,6 +58,8 @@
     "captionLabel": "di’ qualcosa (facoltativo)",
     "nameLabel": "nome visibile",
     "igLabel": "instagram (facoltativo)",
+    "igInvalid": "solo lettere, numeri, punti e trattini bassi",
+    "igNotProfile": "questo è il link di un post — incolla invece l’URL del tuo profilo",
     "rightsLabel": "L’ho realizzato io e ho il diritto di condividerlo",
     "back": "indietro",
     "next": "avanti",
