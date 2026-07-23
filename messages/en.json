@@ -2,7 +2,7 @@
   "hero": {
     "title": "This year, the weekend never happened.",
     "subtitle": "So we’re building it from memory.",
-    "body": "Every Defqon, every stage, every sunrise we ever took home. Add yours, in your own language.",
+    "body": "Every Defqon, every stage, every moment we ever took home. Add yours, in your own language.",
     "cta": "add your moment",
     "browseWall": "browse the wall ↓",
     "counterMoments": "{moments, plural, one { moment} other { moments}}",

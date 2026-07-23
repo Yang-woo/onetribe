@@ -2,7 +2,7 @@
   "hero": {
     "title": "Este año no hubo fin de semana.",
     "subtitle": "Así que lo estamos construyendo con recuerdos.",
-    "body": "Cada Defqon, cada escenario, cada amanecer que nos llevamos a casa. Añade el tuyo, en tu idioma.",
+    "body": "Cada Defqon, cada escenario, cada momento que nos llevamos a casa. Añade el tuyo, en tu idioma.",
     "cta": "añade tu momento",
     "browseWall": "explora el muro ↓",
     "counterMoments": "{moments, plural, one { momento} other { momentos}}",
