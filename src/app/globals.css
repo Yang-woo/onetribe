@@ -21,6 +21,7 @@
 
   --font-display: var(--font-space-grotesk), var(--font-inter), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
 
 /* Fire gradient — used in exactly one hero accent, nowhere else. */
@@ -28,8 +29,8 @@
   background-image: linear-gradient(92deg, var(--color-orange), var(--color-red));
 }
 
-/* Pulse dot — live-signal accent, used only by the hero badge and the wall
- * live feed (see PulseDot). Applied via animate-[pulse-dot_…]; the
+/* Pulse dot — live-signal accent, used only by the wall live feed
+ * (see PulseDot). Applied via animate-[pulse-dot_…]; the
  * motion-reduce variant turns it off for reduced-motion users. */
 @keyframes pulse-dot {
   0%,

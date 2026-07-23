@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
-import { Inter, Space_Grotesk } from 'next/font/google'
+import { Inter, Space_Grotesk, Space_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { CloudflareAnalytics } from '@/components/cloudflare-analytics'
 import { SiteFooter } from '@/components/site-footer'
@@ -17,6 +17,13 @@ const inter = Inter({
 
 const spaceGrotesk = Space_Grotesk({
   variable: '--font-space-grotesk',
+  subsets: ['latin'],
+})
+
+// Editorial mono — the hero dateline and small technical labels only.
+const spaceMono = Space_Mono({
+  variable: '--font-space-mono',
+  weight: '400',
   subsets: ['latin'],
 })
 
@@ -60,7 +67,10 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound()
 
   return (
-    <html lang={locale} className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
+    <html
+      lang={locale}
+      className={`${inter.variable} ${spaceGrotesk.variable} ${spaceMono.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col font-sans">
         <NextIntlClientProvider>
           <SiteHeader />

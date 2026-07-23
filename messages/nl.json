@@ -4,7 +4,8 @@
     "subtitle": "Dus bouwen we het uit herinneringen.",
     "body": "Elke Defqon, elk podium, elke zonsopgang die we mee naar huis namen. Voeg de jouwe toe, in je eigen taal.",
     "cta": "deel jouw moment",
-    "liveBadge": "op dit moment halen fans in {countries} landen herinneringen op",
+    "dateline": "live herinneringsmuur",
+    "datelineScope": "wereldwijd",
     "browseWall": "blader door de muur ↓",
     "counterMoments": "{moments, plural, one { moment} other { momenten}}",
     "counterCountries": "{countries, plural, one { land} other { landen}}"

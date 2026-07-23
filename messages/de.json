@@ -4,7 +4,8 @@
     "subtitle": "Also bauen wir es aus Erinnerungen.",
     "body": "Jedes Defqon, jede Stage, jeder Sonnenaufgang, den wir mit nach Hause nahmen. Füg deinen hinzu, in deiner Sprache.",
     "cta": "teile deinen Moment",
-    "liveBadge": "gerade erinnern sich Fans in {countries} Ländern",
+    "dateline": "Live-Erinnerungswand",
+    "datelineScope": "weltweit",
     "browseWall": "die Wand durchstöbern ↓",
     "counterMoments": "{moments, plural, one { Moment} other { Momente}}",
     "counterCountries": "{countries, plural, one { Land} other { Länder}}"

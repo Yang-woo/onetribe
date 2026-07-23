@@ -4,7 +4,8 @@
     "subtitle": "เราเลยกำลังสร้างมันขึ้นใหม่จากความทรงจำ",
     "body": "ทุก Defqon ทุกเวที ทุกแสงอรุณที่เราหอบกลับบ้าน มาเพิ่มของคุณ ในภาษาของคุณเอง",
     "cta": "เพิ่มช่วงเวลาของคุณ",
-    "liveBadge": "ตอนนี้กำลังรำลึกกันอยู่ใน {countries} ประเทศ",
+    "dateline": "กำแพงความทรงจำสด",
+    "datelineScope": "ทั่วโลก",
     "browseWall": "เลื่อนดูกำแพง ↓",
     "counterMoments": "{moments, plural, other { ช่วงเวลา}}",
     "counterCountries": "{countries, plural, other { ประเทศ}}"

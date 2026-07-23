@@ -1,5 +1,5 @@
 /**
- * Live-signal dot — the hero live badge and the wall live feed only
+ * Live-signal dot — the wall live feed only
  * (docs/12 accent discipline). The pulse-dot keyframe lives in globals.css;
  * motion-reduce disables it. Decorative: aria-hidden, meaning comes from the
  * text beside it.

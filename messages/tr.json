@@ -4,7 +4,8 @@
     "subtitle": "o yüzden onu anılardan kuruyoruz.",
     "body": "her defqon, her sahne, eve götürdüğümüz her gün doğumu. seninkini ekle, kendi dilinde.",
     "cta": "anını ekle",
-    "liveBadge": "şu anda {countries} ülkede hatırlanıyor",
+    "dateline": "canlı anı duvarı",
+    "datelineScope": "tüm dünya",
     "browseWall": "duvara göz at ↓",
     "counterMoments": "{moments, plural, other { an}}",
     "counterCountries": "{countries, plural, other { ülke}}"

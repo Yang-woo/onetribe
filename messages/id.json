@@ -4,7 +4,8 @@
     "subtitle": "jadi kita bangun kembali dari ingatan.",
     "body": "setiap Defqon, setiap panggung, setiap matahari terbit yang pernah kita bawa pulang. tambahkan milikmu, dalam bahasamu sendiri.",
     "cta": "bagikan momenmu",
-    "liveBadge": "sedang dikenang di {countries} negara saat ini",
+    "dateline": "dinding kenangan live",
+    "datelineScope": "seluruh dunia",
     "browseWall": "jelajahi dinding ↓",
     "counterMoments": "{moments, plural, other { momen}}",
     "counterCountries": "{countries, plural, other { negara}}"

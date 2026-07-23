@@ -4,7 +4,8 @@
     "subtitle": "だから思い出でつくる。",
     "body": "持ち帰ったすべてのDefqon、すべてのステージ、すべての朝日。あなたの瞬間を、あなたの言葉で。",
     "cta": "瞬間を残す",
-    "liveBadge": "いま{countries}か国で思い出している",
+    "dateline": "思い出の壁・ライブ",
+    "datelineScope": "世界中",
     "browseWall": "壁を見てみる ↓",
     "counterMoments": "{moments, plural, other {件の瞬間}}",
     "counterCountries": "{countries, plural, other {か国}}"

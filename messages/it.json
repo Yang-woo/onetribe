@@ -4,7 +4,8 @@
     "subtitle": "Così lo ricostruiamo con i ricordi.",
     "body": "Ogni Defqon, ogni palco, ogni alba che ci siamo portati a casa. Aggiungi il tuo, nella tua lingua.",
     "cta": "aggiungi il tuo momento",
-    "liveBadge": "in {countries} paesi si sta ricordando in questo momento",
+    "dateline": "muro dei ricordi in diretta",
+    "datelineScope": "tutto il mondo",
     "browseWall": "sfoglia il muro ↓",
     "counterMoments": "{moments, plural, one { momento} other { momenti}}",
     "counterCountries": "{countries, plural, one { paese} other { paesi}}"

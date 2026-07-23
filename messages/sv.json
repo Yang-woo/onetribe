@@ -4,7 +4,8 @@
     "subtitle": "så vi bygger den av minnen.",
     "body": "varje Defqon, varje scen, varje soluppgång vi tog med oss hem. lägg till din, på ditt eget språk.",
     "cta": "dela ditt minne",
-    "liveBadge": "just nu minns vi i {countries} länder",
+    "dateline": "minnesväggen live",
+    "datelineScope": "hela världen",
     "browseWall": "bläddra i väggen ↓",
     "counterMoments": "{moments, plural, one { minne} other { minnen}}",
     "counterCountries": "{countries, plural, one { land} other { länder}}"

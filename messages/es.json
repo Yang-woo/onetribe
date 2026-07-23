@@ -4,7 +4,8 @@
     "subtitle": "Así que lo estamos construyendo con recuerdos.",
     "body": "Cada Defqon, cada escenario, cada amanecer que nos llevamos a casa. Añade el tuyo, en tu idioma.",
     "cta": "añade tu momento",
-    "liveBadge": "recordando ahora mismo en {countries} países",
+    "dateline": "muro de recuerdos en vivo",
+    "datelineScope": "todo el mundo",
     "browseWall": "explora el muro ↓",
     "counterMoments": "{moments, plural, one { momento} other { momentos}}",
     "counterCountries": "{countries, plural, one { país} other { países}}"

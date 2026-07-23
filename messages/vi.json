@@ -4,7 +4,8 @@
     "subtitle": "vậy nên tụi mình dựng lại nó bằng ký ức.",
     "body": "mỗi Defqon, mỗi sân khấu, mỗi bình minh mà tụi mình từng mang về nhà. thêm khoảnh khắc của bạn, bằng chính ngôn ngữ của bạn.",
     "cta": "thêm khoảnh khắc của bạn",
-    "liveBadge": "đang cùng nhớ lại ở {countries} quốc gia ngay lúc này",
+    "dateline": "bức tường ký ức trực tiếp",
+    "datelineScope": "toàn thế giới",
     "browseWall": "lướt bức tường ↓",
     "counterMoments": "{moments, plural, other { khoảnh khắc}}",
     "counterCountries": "{countries, plural, other { quốc gia}}"

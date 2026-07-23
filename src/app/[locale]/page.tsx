@@ -3,7 +3,6 @@ import { Suspense } from 'react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { BrowseWallButton } from '@/components/browse-wall-button'
 import { MemoryWall } from '@/components/memory-wall'
-import { PulseDot } from '@/components/pulse-dot'
 import { WallFilter } from '@/components/wall-filter'
 import { WallSkeleton } from '@/components/wall-skeleton'
 import { JsonLd } from '@/components/json-ld'
@@ -79,9 +78,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           }}
         />
 
-        <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(255,106,0,0.35)] px-3.5 py-1.5 text-[13px] text-flame">
-          <PulseDot />
-          {t('liveBadge', { countries: counters.countries })}
+        {/* Magazine dateline — an editorial kicker, not a status pill: no
+            container, no pulse, no count dependency (design 2026-07-23). */}
+        <span className="inline-flex items-center gap-3.5 font-mono text-[11.5px] uppercase tracking-[0.28em] text-muted">
+          {t('dateline')}
+          <span aria-hidden="true" className="h-px w-[22px] bg-[rgba(163,154,144,0.4)]" />
+          <span className="text-paper">{t('datelineScope')}</span>
         </span>
 
         <h1 className="text-balance font-display text-[clamp(44px,7vw,84px)] font-bold leading-[1.04] tracking-[-0.035em]">
