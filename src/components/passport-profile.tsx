@@ -76,9 +76,10 @@ export function PassportProfile({
     <div className="flex flex-col gap-3 rounded-lg border border-line p-4">
       <label className="flex flex-col gap-1 text-sm text-muted">
         {t('namePlaceholder')}
+        {/* wrapping <label> already names the field — no aria-label (it would
+            override the visible label and duplicate the string) */}
         <input
           value={name}
-          aria-label={t('namePlaceholder')}
           placeholder={t('namePlaceholder')}
           // bound the direct-to-DB write to match the upload wizard's name
           // field (rls-security review 2026-07-24, informational hardening)

@@ -270,24 +270,16 @@ export function createMemoriesHandler(deps: UploadDeps) {
     const authorLink = input.authorLink ? normalizeInstagramLink(input.authorLink) : null
     if (input.authorLink && !authorLink) return json(400, { error: 'invalid instagram link' })
 
-    // Register the reusable identity so the next upload pre-fills it (docs/00
-    // D30) — and ensure the profile row exists for the author_id FK. Only
-    // provided (non-empty) fields are written, so a field left blank this time
-    // keeps whatever was saved before; a changed field updates it. Default
-    // merge upsert (not ignoreDuplicates) — an {id}-only object is a harmless
-    // no-op update on an existing row. The handle is stored bare (the field and
-    // passport editor hold a bare handle); the memory row keeps the full URL.
+    // Ensure the profile row exists for the author_id FK before inserting the
+    // memory. The reusable identity (display_name/instagram, docs/00 D30) is
+    // written only AFTER a successful insert (below) so a failed insert can't
+    // mutate the saved identity — the two writes aren't atomic (code review
+    // 2026-07-24).
     if (authorId) {
-      const profile: { id: string; display_name?: string; instagram?: string } = { id: authorId }
-      const name = input.authorName?.trim()
-      if (name) profile.display_name = name
-      if (authorLink) profile.instagram = new URL(authorLink).pathname.replace(/^\/+/, '')
-      const { error: profileError } = await deps.db
+      const { error: rowError } = await deps.db
         .from('profiles')
-        .upsert(profile, { onConflict: 'id' })
-      // The row must exist for the FK; a genuine failure here would 500 the
-      // memories insert below anyway, so surface it now.
-      if (profileError) return json(500, { error: 'could not save your moment' })
+        .upsert({ id: authorId }, { onConflict: 'id', ignoreDuplicates: true })
+      if (rowError) return json(500, { error: 'could not save your moment' })
     }
 
     const caption = input.caption?.trim() || null
@@ -340,6 +332,34 @@ export function createMemoriesHandler(deps: UploadDeps) {
       .insert(rows)
       .select('id, takedown_token')
     if (error || !inserted) return json(500, { error: 'could not save your moment' })
+
+    // Register the reusable identity so the next upload — and the passport —
+    // pre-fill it (docs/00 D30). Runs only now that the moment is safely
+    // stored, and best-effort: a failure here must not fail an upload that
+    // already succeeded. FILL-EMPTY ONLY (docs/00 D30, code review 2026-07-24):
+    // the FIRST upload registers a name/handle into a field that has none;
+    // once set, editing the pre-filled field on a later upload credits just
+    // that moment (author_name/author_link on the row) and never overwrites the
+    // saved identity — the passport editor is the one place that changes it.
+    // Each field fills independently. Handle stored bare (the field/editor hold
+    // a bare handle; the memory row keeps the full URL).
+    if (authorId) {
+      const name = input.authorName?.trim()
+      const handle = authorLink ? new URL(authorLink).pathname.replace(/^\/+/, '') : undefined
+      if (name || handle) {
+        const { data: current } = await deps.db
+          .from('profiles')
+          .select('display_name, instagram')
+          .eq('id', authorId)
+          .single()
+        const identity: { display_name?: string; instagram?: string } = {}
+        if (name && !current?.display_name) identity.display_name = name
+        if (handle && !current?.instagram) identity.instagram = handle
+        if (identity.display_name !== undefined || identity.instagram !== undefined) {
+          await deps.db.from('profiles').update(identity).eq('id', authorId)
+        }
+      }
+    }
 
     // File uploads were already counted at presign; only the embed flow (no
     // presign) records its rate event here — otherwise a file upload would

@@ -29,6 +29,10 @@ const REPORT_IP_BASE = `10.21.${runId}`
 
 const MARKER = `upload-api-${randomUUID().slice(0, 8)}`
 
+// Anon users minted by the passport-attribution tests — torn down in afterAll
+// so a failing assertion mid-test can't leak an auth user + profile row.
+const createdUserIds: string[] = []
+
 const fakeStorage: StorageAdapter = {
   async presignUpload({ key, contentType, contentLength }) {
     return {
@@ -98,6 +102,7 @@ afterEach(async () => {
 
 afterAll(async () => {
   await db.from('memories').delete().like('caption', `%${MARKER}%`)
+  for (const uid of createdUserIds) await db.auth.admin.deleteUser(uid)
   await db
     .from('upload_events')
     .delete()
@@ -508,6 +513,7 @@ describe('passport attribution (T4.1)', () => {
   test('registers a trimmed display name and bare instagram handle on the profile', async () => {
     const { data: auth } = await createAnonClient().auth.signInAnonymously()
     const uid = auth.user!.id
+    createdUserIds.push(uid)
     const token = auth.session!.access_token
 
     const res = await createMemoriesHandler(deps())(
@@ -531,13 +537,12 @@ describe('passport attribution (T4.1)', () => {
       .single()
     expect(profile!.display_name).toBe('Neo') // trimmed
     expect(profile!.instagram).toBe('neo_raver') // bare handle — no "@", no URL
-
-    await db.auth.admin.deleteUser(uid)
   })
 
-  test('a field left blank on a later upload keeps its saved value; a changed field updates', async () => {
+  test('once registered, a later upload credits just that moment — it never overwrites the saved identity', async () => {
     const { data: auth } = await createAnonClient().auth.signInAnonymously()
     const uid = auth.user!.id
+    createdUserIds.push(uid)
     const token = auth.session!.access_token
     const call = (body: Record<string, unknown>) =>
       createMemoriesHandler(deps())(
@@ -555,18 +560,61 @@ describe('passport attribution (T4.1)', () => {
     expect(
       (await call({ caption: `${MARKER}-r1`, authorName: 'first', authorLink: 'first_ig' })).status,
     ).toBe(201)
-    // second upload: name omitted (kept), handle changed (updated)
-    expect((await call({ caption: `${MARKER}-r2`, authorLink: 'second_ig' })).status).toBe(201)
+    // second upload edits BOTH (e.g. crediting a guest) — the profile must NOT
+    // change, but the moment carries the edited credit (fill-empty, docs/00 D30)
+    expect(
+      (await call({ caption: `${MARKER}-r2`, authorName: 'guest', authorLink: 'guest_ig' })).status,
+    ).toBe(201)
 
     const { data: profile } = await db
       .from('profiles')
       .select('display_name, instagram')
       .eq('id', uid)
       .single()
-    expect(profile!.display_name).toBe('first') // blank this time → prior value kept
-    expect(profile!.instagram).toBe('second_ig') // provided → refreshed
+    expect(profile!.display_name).toBe('first') // already set → not overwritten
+    expect(profile!.instagram).toBe('first_ig') // already set → not overwritten
 
-    await db.auth.admin.deleteUser(uid)
+    const { data: moment } = await db
+      .from('memories')
+      .select('author_name, author_link')
+      .eq('caption', `${MARKER}-r2`)
+      .single()
+    expect(moment!.author_name).toBe('guest') // the edit still credits this post
+    expect(moment!.author_link).toBe('https://instagram.com/guest_ig')
+  })
+
+  test('fills each field independently — a later upload registers a handle even after the name was set', async () => {
+    const { data: auth } = await createAnonClient().auth.signInAnonymously()
+    const uid = auth.user!.id
+    createdUserIds.push(uid)
+    const token = auth.session!.access_token
+    const call = (body: Record<string, unknown>) =>
+      createMemoriesHandler(deps())(
+        post({
+          turnstileToken: 't',
+          authToken: token,
+          eventId,
+          rightsConfirmed: true,
+          embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
+          ...body,
+        }),
+      )
+
+    // first upload sets only the name (no handle yet)
+    expect((await call({ caption: `${MARKER}-n1`, authorName: 'onlyname' })).status).toBe(201)
+    // later upload adds a handle — name stays (already set), handle fills (was empty)
+    expect(
+      (await call({ caption: `${MARKER}-n2`, authorName: 'ignored', authorLink: 'late_ig' }))
+        .status,
+    ).toBe(201)
+
+    const { data: profile } = await db
+      .from('profiles')
+      .select('display_name, instagram')
+      .eq('id', uid)
+      .single()
+    expect(profile!.display_name).toBe('onlyname') // already set → kept, not 'ignored'
+    expect(profile!.instagram).toBe('late_ig') // was empty → registered
   })
 })
 

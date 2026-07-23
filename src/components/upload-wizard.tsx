@@ -126,11 +126,15 @@ export function UploadWizard({
   // after a fast typist started must never overwrite what they've entered.
   useEffect(() => {
     let alive = true
-    void loadDefaultsImpl().then((defaults) => {
-      if (!alive || !defaults) return
-      setAuthorName((cur) => cur || defaults.displayName)
-      setAuthorLink((cur) => cur || defaults.instagram)
-    })
+    void loadDefaultsImpl()
+      .then((defaults) => {
+        if (!alive || !defaults) return
+        setAuthorName((cur) => cur || defaults.displayName)
+        setAuthorLink((cur) => cur || defaults.instagram)
+      })
+      // Pre-fill is a convenience — a rejecting impl falls back to empty fields,
+      // never an unhandled rejection (the prod default already returns null).
+      .catch(() => {})
     return () => {
       alive = false
     }
