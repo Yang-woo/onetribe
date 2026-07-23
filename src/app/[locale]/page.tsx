@@ -79,11 +79,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         />
 
         {/* Magazine dateline — an editorial kicker, not a status pill: no
-            container, no pulse, no count dependency (design 2026-07-23). */}
-        <span className="inline-flex items-center gap-3.5 font-mono text-[11.5px] uppercase tracking-[0.28em] text-muted">
-          {t('dateline')}
-          <span aria-hidden="true" className="h-px w-[22px] bg-[rgba(163,154,144,0.4)]" />
-          <span className="text-paper">{t('datelineScope')}</span>
+            container, no pulse, no count dependency (design 2026-07-23).
+            English across all locales by owner decision (D25 follow-up) —
+            a brand element like the wordmark and anthem titles, not UI copy;
+            hence hardcoded, lowercase source, CSS uppercase. */}
+        <span
+          lang="en"
+          className="inline-flex items-center gap-3.5 font-mono text-[13px] uppercase tracking-[0.28em] text-muted"
+        >
+          live memory wall
+          <span aria-hidden="true" className="h-px w-[26px] bg-[rgba(163,154,144,0.4)]" />
+          <span className="text-paper">worldwide</span>
         </span>
 
         <h1 className="text-balance font-display text-[clamp(44px,7vw,84px)] font-bold leading-[1.04] tracking-[-0.035em]">

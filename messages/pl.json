@@ -4,8 +4,6 @@
     "subtitle": "Więc budujemy go z pamięci.",
     "body": "Każdy Defqon, każda scena, każdy wschód słońca — wszystko, co zabraliśmy do domu. Dodaj swój, we własnym języku.",
     "cta": "dodaj swój moment",
-    "dateline": "ściana wspomnień na żywo",
-    "datelineScope": "cały świat",
     "browseWall": "przeglądaj ścianę ↓",
     "counterMoments": "{moments, plural, one { moment} few { momenty} many { momentów} other { momentu}}",
     "counterCountries": "{countries, plural, one { kraj} few { kraje} many { krajów} other { kraju}}"

@@ -4,8 +4,6 @@
     "subtitle": "Alors on le reconstruit avec nos souvenirs.",
     "body": "Chaque Defqon, chaque scène, chaque lever de soleil qu’on a ramené à la maison. Ajoute le tien, dans ta langue.",
     "cta": "ajoute ton moment",
-    "dateline": "mur de souvenirs en direct",
-    "datelineScope": "monde entier",
     "browseWall": "parcourir le mur ↓",
     "counterMoments": "{moments, plural, one { moment} other { moments}}",
     "counterCountries": "{countries, plural, one { pays} other { pays}}"
