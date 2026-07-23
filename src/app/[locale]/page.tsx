@@ -96,7 +96,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           {t('title')}
         </h1>
 
-        <p className="bg-fire bg-clip-text font-display text-[28px] font-medium leading-[1.3] tracking-[-0.01em] text-transparent">
+        {/* pre-line honors deliberate \n breaks in a locale's copy (ko splits
+            its two clauses so mobile never wraps mid-word — D26). */}
+        <p className="whitespace-pre-line bg-fire bg-clip-text font-display text-[28px] font-medium leading-[1.3] tracking-[-0.01em] text-transparent">
           {t('subtitle')}
         </p>
 

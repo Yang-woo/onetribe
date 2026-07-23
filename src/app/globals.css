@@ -47,3 +47,12 @@ body {
   background: var(--color-black);
   color: var(--color-paper);
 }
+
+/* Korean line-breaking — break between words (어절), never inside one
+ * ("담벼락" must not split into 담벼/락). Standard Korean web typography;
+ * overflow-wrap stays as the escape hatch for over-long tokens (URLs).
+ * ko only: ja/zh have no inter-word spaces, keep-all would block wrapping. */
+:lang(ko) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
