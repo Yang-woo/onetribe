@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { IG_HANDLE_RE, isIgUrl, normalizeIgInput } from './instagram-input'
+import { IG_HANDLE_RE, isIgHandleInvalid, isIgUrl, normalizeIgInput } from './instagram-input'
 
 /**
  * The segmented "@" prefix means the field holds a bare handle; anything a
@@ -79,6 +79,25 @@ describe('IG_HANDLE_RE', () => {
     expect(IG_HANDLE_RE.test('.qdance')).toBe(false)
     expect(IG_HANDLE_RE.test('qdance.')).toBe(false)
     expect(IG_HANDLE_RE.test('q..dance')).toBe(false)
+  })
+})
+
+// The one rule the upload wizard and the passport editor both gate submit on
+// (docs/00 D30) — empty is allowed (the field is optional), a bad handle is not.
+describe('isIgHandleInvalid', () => {
+  test('an empty field is not invalid — instagram is optional', () => {
+    expect(isIgHandleInvalid('')).toBe(false)
+    expect(isIgHandleInvalid('   ')).toBe(false)
+  })
+
+  test('a valid bare handle is not invalid', () => {
+    expect(isIgHandleInvalid('onetribe_world')).toBe(false)
+  })
+
+  test('flags a handle Instagram itself forbids', () => {
+    expect(isIgHandleInvalid('bad handle!')).toBe(true)
+    expect(isIgHandleInvalid('qdance.')).toBe(true)
+    expect(isIgHandleInvalid('a'.repeat(31))).toBe(true)
   })
 })
 

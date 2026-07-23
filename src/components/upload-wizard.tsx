@@ -2,8 +2,9 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
+import { createSupabasePassportBackend, type ProfileDefaults } from '@/lib/passport/backend'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { prepareForUpload, prepareThumb, validateFiles } from '@/lib/upload/client-image'
 import {
@@ -14,7 +15,8 @@ import {
   THUMB_MAX_UPLOAD_BYTES,
   THUMB_MIME,
 } from '@/lib/upload/constants'
-import { IG_HANDLE_RE, isIgUrl, normalizeIgInput } from '@/lib/upload/instagram-input'
+import { isIgHandleInvalid } from '@/lib/upload/instagram-input'
+import { InstagramField } from './instagram-field'
 import { isTurnstileEnabled, Turnstile } from './turnstile'
 import { inputClass } from './ui'
 
@@ -57,16 +59,32 @@ function editionLabel(edition: EditionChip): string {
   }`
 }
 
+/**
+ * Pre-fill the name/instagram fields from the passport profile (docs/00 D30).
+ * Never throws — no session or no Supabase env (tests) simply means empty
+ * fields, exactly as before.
+ */
+async function loadUploadDefaults(): Promise<ProfileDefaults | null> {
+  try {
+    return await createSupabasePassportBackend().loadProfileDefaults()
+  } catch {
+    return null
+  }
+}
+
 export function UploadWizard({
   editions,
   prepareImpl = prepareForUpload,
   prepareThumbImpl = prepareThumb,
+  loadDefaultsImpl = loadUploadDefaults,
 }: {
   editions: EditionChip[]
   /** test seam — canvas compression can't run in jsdom */
   prepareImpl?: (file: File) => Promise<File>
   /** test seam — thumbnail canvas re-encode can't run in jsdom either */
   prepareThumbImpl?: (file: File) => Promise<File>
+  /** test seam — passport pre-fill needs Supabase env at runtime */
+  loadDefaultsImpl?: () => Promise<ProfileDefaults | null>
 }) {
   const t = useTranslations('upload')
   const [step, setStep] = useState<Step>(1)
@@ -79,12 +97,10 @@ export function UploadWizard({
   const [caption, setCaption] = useState('')
   const [authorName, setAuthorName] = useState('')
   const [authorLink, setAuthorLink] = useState('')
-  const igFieldId = useId()
-  const igHintId = `${igFieldId}-hint`
-  const igHandle = authorLink.trim()
   // Gate submit on a visibly-invalid handle: letting it through would burn a
-  // presign + R2 PUT before /api/memories 400s (orphan object, D9-c ①).
-  const igInvalid = igHandle !== '' && !IG_HANDLE_RE.test(igHandle)
+  // presign + R2 PUT before /api/memories 400s (orphan object, D9-c ①). Same
+  // rule InstagramField renders its red hint from — no drift.
+  const igInvalid = isIgHandleInvalid(authorLink)
   const [rights, setRights] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -104,6 +120,21 @@ export function UploadWizard({
     },
     [],
   )
+
+  // Pre-fill name/instagram from the passport so a returning uploader never
+  // re-types them (docs/00 D30). Seed empty fields only — a fetch that resolves
+  // after a fast typist started must never overwrite what they've entered.
+  useEffect(() => {
+    let alive = true
+    void loadDefaultsImpl().then((defaults) => {
+      if (!alive || !defaults) return
+      setAuthorName((cur) => cur || defaults.displayName)
+      setAuthorLink((cur) => cur || defaults.instagram)
+    })
+    return () => {
+      alive = false
+    }
+  }, [loadDefaultsImpl])
 
   const files = picked.map((p) => p.file)
   const invalidFiles = validateFiles(files)
@@ -512,76 +543,10 @@ export function UploadWizard({
               className={inputClass}
             />
           </label>
-          <div className="flex flex-col gap-1 text-sm text-muted">
-            {/* Explicit htmlFor: the visual "@" prefix must not leak into the
-                accessible name, so no wrapping label here. */}
-            <label htmlFor={igFieldId}>{t('igLabel')}</label>
-            {/* Segmented "@" prefix: the field holds a bare handle — a typed @
-                or a pasted profile URL collapses live (normalizeIgInput); the
-                server still re-normalizes (D9 P1: client input is untrusted). */}
-            <span className="group flex items-stretch overflow-hidden rounded-lg border border-line bg-surface transition-colors focus-within:border-[rgba(255,106,0,.5)]">
-              <span
-                aria-hidden="true"
-                className={`grid place-items-center border-r border-line bg-surface-raised px-3 transition-colors group-focus-within:text-orange ${
-                  authorLink ? 'text-orange' : 'text-muted'
-                }`}
-              >
-                @
-              </span>
-              <input
-                id={igFieldId}
-                value={authorLink}
-                // Deliberately not localized (D25 English-common precedent):
-                // handles are ASCII-only, so a translated placeholder would
-                // demo an invalid input. No maxLength — it would truncate a
-                // pasted profile URL before normalizeIgInput sees it; overlong
-                // input is caught by the hint + submit gate instead.
-                placeholder="yourhandle"
-                aria-invalid={igInvalid || undefined}
-                aria-describedby={igHintId}
-                onChange={(e) => {
-                  const el = e.target
-                  const raw = el.value
-                  const normalized = normalizeIgInput(raw)
-                  // When the collapse shortens the value, React's rewrite
-                  // snaps the caret to the end — restore it synchronously,
-                  // shifted by what was removed (a leading "@" typed at
-                  // position 0 must leave the caret at 0). Sync only: writing
-                  // el.value now means the later render sees a matching DOM
-                  // value and leaves the caret alone. (An async restore —
-                  // rAF/setTimeout — races fast typing and scrambles input;
-                  // caught by CI.)
-                  if (normalized !== raw) {
-                    const caret = el.selectionStart ?? raw.length
-                    const pos = Math.max(0, caret - (raw.length - normalized.length))
-                    el.value = normalized
-                    el.setSelectionRange(pos, pos)
-                  }
-                  setAuthorLink(normalized)
-                }}
-                className="min-w-0 flex-1 bg-transparent px-3 py-2 text-paper placeholder:text-muted focus:outline-none"
-              />
-            </span>
-            {/* Derived-link hint: instant "yes, that's my profile" feedback.
-                Height reserved so the rights card below never jumps. Mono is
-                for the URL only — the error is prose (Space Mono is latin-only,
-                12-brand C). A non-profile instagram URL (post/reel) gets its
-                own message — "invalid characters" would describe the wrong
-                problem. */}
-            <span id={igHintId} className="min-h-[1.125rem] text-xs" aria-live="polite">
-              {igHandle !== '' &&
-                (igInvalid ? (
-                  <span className="text-red">
-                    {isIgUrl(igHandle) ? t('igNotProfile') : t('igInvalid')}
-                  </span>
-                ) : (
-                  <span className="font-mono">
-                    <span className="text-orange">→ </span>
-                    instagram.com/{igHandle}
-                  </span>
-                ))}
-            </span>
-          </div>
+          {/* Shared with the passport profile editor (D30) — the field holds a
+              bare handle; the server still re-normalizes (D9 P1: client input
+              is untrusted). */}
+          <InstagramField value={authorLink} onChange={setAuthorLink} />
           {/* rights confirmation card — the checkbox is real (sr-only) so tests
               and form a11y keep working; the server double-checks rightsConfirmed */}
           <label

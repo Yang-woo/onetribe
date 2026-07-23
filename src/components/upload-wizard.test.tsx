@@ -433,4 +433,44 @@ describe('UploadWizard', () => {
     await user.click(screen.getByRole('button', { name: 'share my moment' }))
     expect(await screen.findByRole('alert')).toHaveTextContent(/nothing was posted/)
   })
+
+  // Passport pre-fill (docs/00 D30): a returning uploader never re-types their
+  // name/handle — the wizard seeds both from the saved profile.
+  describe('passport pre-fill (D30)', () => {
+    test('seeds the name and instagram fields from the saved profile', async () => {
+      const user = userEvent.setup()
+      renderWizard({
+        loadDefaultsImpl: async () => ({ displayName: 'Neo', instagram: 'neo_raver' }),
+      })
+      await fillToStep2(user)
+
+      expect(await screen.findByLabelText<HTMLInputElement>('display name')).toHaveValue('Neo')
+      expect(screen.getByLabelText<HTMLInputElement>('instagram (optional)')).toHaveValue(
+        'neo_raver',
+      )
+      // the seeded handle is treated as valid — the derived-link hint shows
+      expect(screen.getByText('instagram.com/neo_raver', { exact: false })).toBeInTheDocument()
+    })
+
+    test('a pre-fill that resolves late never clobbers what the user typed', async () => {
+      const user = userEvent.setup()
+      let resolveDefaults!: (v: { displayName: string; instagram: string }) => void
+      renderWizard({
+        loadDefaultsImpl: () => new Promise((r) => (resolveDefaults = r)),
+      })
+      await fillToStep2(user)
+
+      const name = await screen.findByLabelText<HTMLInputElement>('display name')
+      await user.type(name, 'my chosen name')
+      // the profile fetch only now resolves — seeding must skip the filled field
+      resolveDefaults({ displayName: 'stale name', instagram: 'stale_ig' })
+      await new Promise((r) => setTimeout(r, 0))
+
+      expect(name).toHaveValue('my chosen name')
+      // the untouched instagram field still accepts the late seed
+      expect(screen.getByLabelText<HTMLInputElement>('instagram (optional)')).toHaveValue(
+        'stale_ig',
+      )
+    })
+  })
 })

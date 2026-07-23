@@ -171,18 +171,20 @@ describe('profiles & attendance — own rows only (anonymous auth)', () => {
     const uidB = authB.user!.id
     createdUserIds.push(uidA, uidB)
 
-    // A creates and updates own profile
+    // A creates and updates own profile — including the instagram handle the
+    // upload form pre-fills from (docs/00 D30)
     const { error: insertOwn } = await userA
       .from('profiles')
       .insert({ id: uidA, display_name: 'tester-a' })
     expect(insertOwn).toBeNull()
     const { data: updated, error: updateOwn } = await userA
       .from('profiles')
-      .update({ display_name: 'tester-a2' })
+      .update({ display_name: 'tester-a2', instagram: 'tester_a_ig' })
       .eq('id', uidA)
-      .select('display_name')
+      .select('display_name, instagram')
     expect(updateOwn).toBeNull()
     expect(updated?.[0]?.display_name).toBe('tester-a2')
+    expect(updated?.[0]?.instagram).toBe('tester_a_ig')
 
     // B cannot see or modify A's profile
     const { data: peek } = await userB.from('profiles').select('id').eq('id', uidA)

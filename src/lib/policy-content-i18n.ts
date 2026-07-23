@@ -68,7 +68,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. What we collect",
           "paragraphs": [
             "Memories: photos/GIFs you upload and video links you embed, captions, event/city/year, an optional display name and social link. Published publicly immediately; may be hidden or removed on review or report.",
-            "Account (optional): account ID (anonymous by default), display name, home country, festival attendance log (\"Passport\"), and — only if you choose to link them — your email address or Google account identity.",
+            "Account (optional): account ID (anonymous by default), display name, an optional Instagram handle (saved so your uploads can pre-fill it), home country, festival attendance log (\"Passport\"), and — only if you choose to link them — your email address or Google account identity.",
             "Technical: server logs needed to run and secure the service. Any analytics we add will be privacy-friendly — no cross-site tracking, no ad cookies.",
             "We do not run facial recognition or automatic tagging of people. We do not sell data."
           ]
@@ -235,7 +235,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Welke gegevens we verzamelen",
           "paragraphs": [
             "Herinneringen: foto’s/GIF’s die je uploadt en videolinks die je insluit, bijschriften, evenement/stad/jaar, een optionele weergavenaam en een link naar sociale media. Worden onmiddellijk openbaar gepubliceerd; kunnen na beoordeling of na een melding worden verborgen of verwijderd.",
-            "Account (optioneel): account-ID (standaard anoniem), weergavenaam, land van herkomst, festivalbezoeklogboek („Passport”) en — alleen als je ervoor kiest om deze te koppelen — je e-mailadres of Google-account.",
+            "Account (optioneel): account-ID (standaard anoniem), weergavenaam, een optionele Instagram-gebruikersnaam (die wordt opgeslagen zodat deze automatisch wordt ingevuld bij het uploaden), land van herkomst, festivalbezoeklogboek („Passport”) en — alleen als je ervoor kiest om deze te koppelen — je e-mailadres of Google-account.",
             "Technisch: serverlogbestanden zijn nodig om de dienst te laten draaien en te beveiligen. Eventuele analysefuncties die we toevoegen, zullen privacyvriendelijk zijn — geen cross-site tracking, geen advertentiecookies.",
             "Wij maken geen gebruik van gezichtsherkenning of het automatisch taggen van personen. Wij verkopen geen gegevens."
           ]
@@ -402,7 +402,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Welche Daten wir erheben",
           "paragraphs": [
             "Erinnerungen: Fotos/GIFs, die Sie hochladen, sowie eingebettete Videolinks, Bildunterschriften, Veranstaltung/Stadt/Jahr, ein optionaler Anzeigename und ein Link zu sozialen Netzwerken. Werden sofort öffentlich veröffentlicht; können nach Überprüfung oder aufgrund einer Meldung ausgeblendet oder entfernt werden.",
-            "Konto (optional): Konto-ID (standardmäßig anonym), Anzeigename, Heimatland, Festivalbesuchsprotokoll („Passport“) und – nur, wenn Sie sich dafür entscheiden, diese zu verknüpfen – Ihre E-Mail-Adresse oder Ihre Google-Konto-ID.",
+            "Konto (optional): Konto-ID (standardmäßig anonym), Anzeigename, ein optionaler Instagram-Nutzername (wird gespeichert, damit er bei Ihren Uploads automatisch ausgefüllt wird), Heimatland, Festivalbesuchsprotokoll („Passport“) und – nur, wenn Sie sich dafür entscheiden, diese zu verknüpfen – Ihre E-Mail-Adresse oder Ihre Google-Konto-ID.",
             "Technische Hinweise: Für den Betrieb und die Sicherheit des Dienstes sind Serverprotokolle erforderlich. Alle von uns hinzugefügten Analysefunktionen sind datenschutzfreundlich – kein standortübergreifendes Tracking, keine Werbe-Cookies.",
             "Wir führen weder Gesichtserkennung noch automatische Personenmarkierung durch. Wir verkaufen keine Daten."
           ]
@@ -569,7 +569,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Qué datos recopilamos",
           "paragraphs": [
             "Recuerdos: fotos o GIF que subas y enlaces a vídeos que incrustes, pies de foto, evento, ciudad y año, un nombre de usuario opcional y un enlace a redes sociales. Se publican de forma pública de inmediato; pueden ocultarse o eliminarse tras una revisión o una denuncia.",
-            "Cuenta (opcional): ID de cuenta (anónima por defecto), nombre de usuario, país de origen, registro de asistencia a festivales («Passport») y —solo si decides vincularlos— tu dirección de correo electrónico o tu cuenta de Google.",
+            "Cuenta (opcional): ID de cuenta (anónima por defecto), nombre de usuario, nombre de usuario de Instagram opcional (que se guarda para que se rellene automáticamente al subir contenido), país de origen, registro de asistencia a festivales («Passport») y —solo si decides vincularlos— tu dirección de correo electrónico o la identidad de tu cuenta de Google.",
             "Aspectos técnicos: se necesitan los registros del servidor para el funcionamiento y la seguridad del servicio. Cualquier herramienta de análisis que incorporemos respetará la privacidad: sin seguimiento entre sitios web ni cookies publicitarias.",
             "No utilizamos el reconocimiento facial ni el etiquetado automático de personas. No vendemos datos."
           ]
@@ -736,7 +736,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Les données que nous collectons",
           "paragraphs": [
             "Souvenirs : photos/GIF que vous publiez et liens vers des vidéos que vous intégrez, légendes, événement/ville/année, nom d'affichage facultatif et lien vers les réseaux sociaux. Publiés immédiatement ; peuvent être masqués ou supprimés à la suite d'un examen ou d'un signalement.",
-            "Compte (facultatif) : identifiant du compte (anonyme par défaut), nom d'affichage, pays d'origine, historique de participation aux festivals (« Passport ») et — uniquement si vous choisissez de les associer — votre adresse e-mail ou votre identifiant Google.",
+            "Compte (facultatif) : identifiant du compte (anonyme par défaut), nom d'affichage, pseudo Instagram facultatif (enregistré pour que vos publications puissent le remplir automatiquement), pays d'origine, historique de participation aux festivals (« Passport ») et — uniquement si vous choisissez de les associer — votre adresse e-mail ou votre identifiant Google.",
             "Aspect technique : les journaux du serveur sont nécessaires au fonctionnement et à la sécurité du service. Les outils d'analyse que nous ajouterons respecteront la vie privée : pas de suivi intersite, pas de cookies publicitaires.",
             "Nous n'utilisons ni la reconnaissance faciale ni le marquage automatique des personnes. Nous ne vendons pas de données."
           ]
@@ -903,7 +903,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Quali dati raccogliamo",
           "paragraphs": [
             "Ricordi: foto/GIF caricate e link a video incorporati, didascalie, evento/città/anno, un nome visualizzato facoltativo e un link ai social. Pubblicati immediatamente in modo pubblico; possono essere nascosti o rimossi a seguito di revisione o segnalazione.",
-            "Account (facoltativo): ID account (anonimo per impostazione predefinita), nome visualizzato, paese di residenza, registro delle partecipazioni ai festival (“Passport”) e — solo se si sceglie di collegarli — l’indirizzo e-mail o l’identificativo dell’account Google.",
+            "Account (facoltativo): ID account (anonimo per impostazione predefinita), nome visualizzato, nome utente Instagram facoltativo (salvato in modo che possa essere precompilato nei tuoi caricamenti), paese di residenza, registro delle partecipazioni ai festival (“Passport”) e — solo se scegli di collegarli — il tuo indirizzo e-mail o l’identità del tuo account Google.",
             "Aspetti tecnici: i log del server sono necessari per il funzionamento e la sicurezza del servizio. Eventuali strumenti di analisi che aggiungeremo rispetteranno la privacy: nessun tracciamento tra siti, nessun cookie pubblicitario.",
             "Non utilizziamo sistemi di riconoscimento facciale né di tagging automatico delle persone. Non vendiamo dati."
           ]
@@ -1070,7 +1070,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. O que recolhemos",
           "paragraphs": [
             "Memórias: fotografias/GIFs que carregas e links de vídeo que incorporas, legendas, evento/cidade/ano, um nome de exibição opcional e um link para redes sociais. Publicadas publicamente de imediato; podem ser ocultadas ou removidas após revisão ou denúncia.",
-            "Conta (opcional): ID da conta (anónima por predefinição), nome de exibição, país de origem, registo de participação em festivais («Passaporte») e — apenas se optar por as associar — o seu endereço de e-mail ou a identidade da sua conta Google.",
+            "Conta (opcional): ID da conta (anónima por predefinição), nome de exibição, um nome de utilizador opcional do Instagram (guardado para que as suas publicações possam preenchê-lo automaticamente), país de origem, registo de participação em festivais («Passaporte») e — apenas se optar por associá-los — o seu endereço de e-mail ou a identidade da sua conta Google.",
             "Aspetos técnicos: são necessários registos do servidor para o funcionamento e a segurança do serviço. Quaisquer ferramentas de análise que adicionarmos respeitarão a privacidade — sem rastreio entre sites, sem cookies publicitários.",
             "Não utilizamos reconhecimento facial nem a identificação automática de pessoas. Não vendemos dados."
           ]
@@ -1237,7 +1237,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. 収集する情報",
           "paragraphs": [
             "思い出：アップロードした写真やGIF、埋め込んだ動画リンク、キャプション、イベント・都市・年、任意の表示名およびソーシャルメディアへのリンク。公開されるとすぐに誰でも閲覧可能になりますが、審査や通報により非表示にされたり削除されたりする場合があります。",
-            "アカウント（任意）：アカウントID（デフォルトでは匿名）、表示名、居住国、フェスティバル参加履歴（「パスポート」）、および（連携を選択した場合のみ）メールアドレスまたはGoogleアカウントのID。",
+            "アカウント（任意）：アカウントID（デフォルトでは匿名）、表示名、任意のInstagramユーザー名（アップロード時に自動入力されるよう保存されます）、居住国、フェスティバル参加履歴（「パスポート」）、および（連携を選択した場合のみ）メールアドレスまたはGoogleアカウントのID。",
             "技術面：サービスの運用およびセキュリティ確保のためにサーバーログが必要です。追加する分析機能はすべてプライバシーに配慮したものであり、クロスサイト追跡や広告用クッキーは一切使用しません。",
             "当社では、顔認識や人物の自動タグ付けは行っていません。また、データの販売も行っていません。"
           ]
@@ -1404,7 +1404,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. 수집하는 정보",
           "paragraphs": [
             "메모리: 사용자가 업로드한 사진/GIF, 삽입한 동영상 링크, 캡션, 이벤트/도시/연도, 선택 사항인 표시 이름 및 소셜 링크. 게시 즉시 공개되며, 검토 또는 신고를 통해 숨겨지거나 삭제될 수 있습니다.",
-            "계정 (선택 사항): 계정 ID(기본적으로 익명), 표시 이름, 거주 국가, 축제 참가 기록(“Passport”), 그리고 — 연동을 선택한 경우에만 — 이메일 주소 또는 Google 계정 ID.",
+            "계정 (선택 사항): 계정 ID(기본적으로 익명), 표시 이름, 선택 사항인 인스타그램 핸들(업로드 시 자동으로 입력되도록 저장됨), 거주 국가, 축제 참가 기록(“Passport”), 그리고 — 연동을 선택한 경우에만 — 이메일 주소 또는 Google 계정 ID.",
             "기술적 사항: 서비스 운영 및 보안을 위해 서버 로그가 필요합니다. 향후 추가될 모든 분석 기능은 개인정보 보호에 중점을 둘 것이며, 크로스사이트 추적이나 광고용 쿠키는 사용하지 않을 것입니다.",
             "당사는 얼굴 인식이나 사람에 대한 자동 태깅 기능을 운영하지 않습니다. 또한 데이터를 판매하지 않습니다."
           ]
@@ -1571,7 +1571,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Jakie dane gromadzimy",
           "paragraphs": [
             "Wspomnienia: zamieszczane przez Ciebie zdjęcia/GIF-y oraz osadzone linki do filmów, opisy, wydarzenie/miasto/rok, opcjonalna nazwa wyświetlana oraz link do profilu w mediach społecznościowych. Publikowane natychmiast publicznie; mogą zostać ukryte lub usunięte w wyniku weryfikacji lub zgłoszenia.",
-            "Konto (opcjonalnie): identyfikator konta (domyślnie anonimowy), nazwa wyświetlana, kraj pochodzenia, rejestr uczestnictwa w festiwalach („Passport”) oraz — wyłącznie w przypadku, gdy zdecydujesz się je powiązać — Twój adres e-mail lub identyfikator konta Google.",
+            "Konto (opcjonalnie): identyfikator konta (domyślnie anonimowy), nazwa wyświetlana, opcjonalna nazwa użytkownika na Instagramie (zapisywana w celu automatycznego wypełniania jej podczas przesyłania treści), kraj pochodzenia, rejestr uczestnictwa w festiwalach („Passport”) oraz — wyłącznie w przypadku, gdy zdecydujesz się je powiązać — Twój adres e-mail lub identyfikator konta Google.",
             "Informacje techniczne: logi serwera niezbędne do działania i zapewnienia bezpieczeństwa usługi. Wszelkie dodawane przez nas narzędzia analityczne będą przyjazne dla prywatności — bez śledzenia międzywitrynowego, bez reklamowych plików cookie.",
             "Nie stosujemy rozpoznawania twarzy ani automatycznego oznaczania osób. Nie sprzedajemy danych."
           ]
@@ -1738,7 +1738,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Vilka uppgifter vi samlar in",
           "paragraphs": [
             "Minnen: foton/GIF-bilder som du laddar upp och videolänkar som du bäddar in, bildtexter, evenemang/stad/år, ett valfritt visningsnamn och en länk till sociala medier. Publiceras omedelbart för alla; kan döljas eller tas bort efter granskning eller anmälan.",
-            "Konto (valfritt): konto-ID (anonymt som standard), visningsnamn, hemland, logg över festivaldeltagande (”Passport”) och – endast om du väljer att koppla ihop dem – din e-postadress eller din Google-kontoidentitet.",
+            "Konto (valfritt): konto-ID (anonymt som standard), visningsnamn, ett valfritt Instagram-användarnamn (sparas så att det kan fyllas i automatiskt vid uppladdningar), hemland, logg över festivaldeltagande (”Passport”) samt – endast om du väljer att koppla ihop dem – din e-postadress eller din Google-kontoidentitet.",
             "Tekniskt: serverloggar krävs för att driva och säkra tjänsten. Alla analysverktyg som vi lägger till kommer att vara integritetsvänliga – ingen spårning mellan webbplatser, inga reklamcookies.",
             "Vi använder varken ansiktsigenkänning eller automatisk märkning av personer. Vi säljer inte data."
           ]
@@ -1905,7 +1905,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Topladığımız bilgiler",
           "paragraphs": [
             "Anılar: Yüklediğiniz fotoğraflar/GIF’ler ve eklediğiniz video bağlantıları, açıklamalar, etkinlik/şehir/yıl, isteğe bağlı bir görüntüleme adı ve sosyal medya bağlantısı. Hemen herkese açık olarak yayınlanır; inceleme veya bildirim üzerine gizlenebilir veya kaldırılabilir.",
-            "Hesap (isteğe bağlı): hesap kimliği (varsayılan olarak anonim), görüntüleme adı, ikamet ülkeniz, festival katılım kaydı (“Passport”) ve — yalnızca bunları bağlamayı seçerseniz — e-posta adresiniz veya Google hesap kimliğiniz.",
+            "Hesap (isteğe bağlı): hesap kimliği (varsayılan olarak anonim), görüntüleme adı, isteğe bağlı bir Instagram kullanıcı adı (yüklemelerinizde bu adın otomatik olarak doldurulması için kaydedilir), ikamet ettiğiniz ülke, festival katılım kaydı (“Passport”) ve — yalnızca bunları bağlamayı seçerseniz — e-posta adresiniz veya Google hesap kimliğiniz.",
             "Teknik: Hizmetin çalıştırılması ve güvenliğinin sağlanması için sunucu günlükleri gereklidir. Ekleyeceğimiz tüm analiz araçları gizlilik dostu olacaktır — siteler arası izleme ve reklam çerezleri kullanılmayacaktır.",
             "Yüz tanıma veya kişilerin otomatik olarak etiketlenmesi gibi uygulamalar yapmıyoruz. Veri satmıyoruz."
           ]
@@ -2072,7 +2072,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. 我们收集的信息",
           "paragraphs": [
             "回忆：您上传的照片/GIF动图、嵌入的视频链接、配文、活动/城市/年份，以及可选的显示名称和社交媒体链接。内容将立即公开发布；经审核或举报后，可能会被隐藏或删除。",
-            "账户（可选）：账户 ID（默认匿名）、显示名称、所在国家/地区、音乐节参与记录（“Passport”），以及——仅当您选择关联时——您的电子邮件地址或 Google 账户身份。",
+            "账户（可选）：账户 ID（默认匿名）、显示名称、可选的 Instagram 用户名（会保存下来以便上传时自动填充）、所在国家/地区、音乐节参与记录（“Passport”），以及——仅当您选择关联时——您的电子邮件地址或 Google 账户身份。",
             "技术方面：运行和保障服务安全需要服务器日志。我们添加的任何分析功能都将尊重用户隐私——不进行跨站点追踪，也不使用广告Cookie。",
             "我们不进行人脸识别，也不对人员进行自动标记。我们不出售数据。"
           ]
@@ -2239,7 +2239,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. 我們收集的資訊",
           "paragraphs": [
             "回憶：您上傳的照片／GIF 動圖、嵌入的影片連結、配文、活動／城市／年份，以及選填的顯示名稱與社群媒體連結。內容會立即公開發佈；經審核或檢舉後，可能會被隱藏或刪除。",
-            "帳號（選填）：帳號 ID（預設匿名）、顯示名稱、所在國家／地區、音樂節參與紀錄（「Passport」），以及——僅當您選擇連結時——您的電子郵件地址或 Google 帳號身分。",
+            "帳號（選填）：帳號 ID（預設匿名）、顯示名稱、選填的 Instagram 使用者名稱（會儲存下來，以便上傳時自動填入）、所在國家／地區、音樂節參與紀錄（「Passport」），以及——僅當您選擇連結時——您的電子郵件地址或 Google 帳號身分。",
             "技術方面：營運與確保服務安全需要伺服器日誌。我們日後加入的任何分析功能都會尊重使用者隱私——不進行跨網站追蹤，也不使用廣告 Cookie。",
             "我們不進行人臉辨識，也不對人員進行自動標記。我們不出售資料。"
           ]
@@ -2406,7 +2406,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Data yang kami kumpulkan",
           "paragraphs": [
             "Memory: foto/GIF yang Anda unggah dan tautan video yang Anda sematkan, keterangan, acara/kota/tahun, nama tampilan (opsional), serta tautan media sosial. Dipublikasikan secara terbuka seketika; dapat disembunyikan atau dihapus setelah ditinjau atau dilaporkan.",
-            "Akun (opsional): ID akun (secara default bersifat anonim), nama tampilan, negara asal, riwayat kehadiran festival (\"Passport\"), dan — hanya jika Anda memilih untuk menghubungkannya — alamat email atau identitas akun Google Anda.",
+            "Akun (opsional): ID akun (secara default bersifat anonim), nama tampilan, nama pengguna Instagram (opsional; disimpan agar dapat diisi otomatis saat Anda mengunggah), negara asal, riwayat kehadiran festival (“Passport”), dan — hanya jika Anda memilih untuk menghubungkannya — alamat email atau identitas akun Google Anda.",
             "Aspek teknis: Catatan server diperlukan untuk mengoperasikan dan mengamankan layanan ini. Setiap fitur analitik yang kami tambahkan akan ramah privasi — tanpa pelacakan lintas situs, tanpa cookie iklan.",
             "Kami tidak menggunakan sistem pengenalan wajah maupun penandaan otomatis terhadap orang. Kami tidak menjual data."
           ]
@@ -2573,7 +2573,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. ข้อมูลที่เราเก็บรวบรวม",
           "paragraphs": [
             "ความทรงจำ: รูปภาพ/GIF ที่คุณอัปโหลดและลิงก์วิดีโอที่คุณฝังไว้, คำบรรยาย, เหตุการณ์/เมือง/ปี, ชื่อแสดง (เลือกได้) และลิงก์โซเชียลมีเดีย. จะถูกเผยแพร่ให้สาธารณะทันที; อาจถูกซ่อนหรือลบออกหลังการตรวจสอบหรือการรายงาน",
-            "บัญชี (ไม่บังคับ): ID บัญชี (ตั้งเป็นแบบไม่ระบุตัวตนตามค่าเริ่มต้น), ชื่อที่แสดง, ประเทศที่พำนัก, บันทึกการเข้าร่วมเทศกาล (\"Passport\") และ — เฉพาะเมื่อคุณเลือกที่จะเชื่อมโยง — ที่อยู่อีเมลหรือข้อมูลบัญชี Google ของคุณ",
+            "บัญชี (ไม่บังคับ): ID บัญชี (ตั้งค่าเป็นแบบไม่ระบุตัวตนตามค่าเริ่มต้น), ชื่อที่แสดง, ชื่อผู้ใช้ Instagram (ไม่บังคับ; จะถูกบันทึกไว้เพื่อให้ระบบสามารถกรอกอัตโนมัติเมื่ออัปโหลด), ประเทศที่พำนัก, บันทึกการเข้าร่วมเทศกาล (\"Passport\"), และ — เฉพาะเมื่อคุณเลือกที่จะเชื่อมโยง — ที่อยู่อีเมลหรือข้อมูลบัญชี Google ของคุณ",
             "ด้านเทคนิค: จำเป็นต้องใช้บันทึกเซิร์ฟเวอร์เพื่อดำเนินการและรักษาความปลอดภัยของบริการ การวิเคราะห์ข้อมูลใด ๆ ที่เราเพิ่มเข้าไปจะคำนึงถึงความเป็นส่วนตัว — ไม่มีการติดตามข้ามเว็บไซต์ และไม่มีคุกกี้โฆษณา",
             "เราไม่ใช้ระบบจดจำใบหน้าหรือระบบติดแท็กบุคคลอัตโนมัติ และเราไม่ขายข้อมูล"
           ]
@@ -2740,7 +2740,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Những thông tin chúng tôi thu thập",
           "paragraphs": [
             "Ký ức: ảnh/GIF mà bạn tải lên và các liên kết video mà bạn nhúng, chú thích, sự kiện/thành phố/năm, tên hiển thị (tùy chọn) và liên kết mạng xã hội. Được đăng công khai ngay lập tức; có thể bị ẩn hoặc xóa sau khi được kiểm duyệt hoặc khi có báo cáo.",
-            "Tài khoản (tùy chọn): ID tài khoản (mặc định là ẩn danh), tên hiển thị, quốc gia cư trú, nhật ký tham dự lễ hội (“Passport”) và — chỉ khi bạn chọn liên kết chúng — địa chỉ email hoặc thông tin tài khoản Google của bạn.",
+            "Tài khoản (tùy chọn): ID tài khoản (mặc định là ẩn danh), tên hiển thị, tên người dùng Instagram (tùy chọn, được lưu lại để tự động điền khi bạn tải lên), quốc gia cư trú, nhật ký tham dự lễ hội (“Passport”), và — chỉ khi bạn chọn liên kết chúng — địa chỉ email hoặc thông tin tài khoản Google của bạn.",
             "Về mặt kỹ thuật: các bản ghi máy chủ là cần thiết để vận hành và bảo mật dịch vụ. Mọi tính năng phân tích mà chúng tôi bổ sung đều sẽ tôn trọng quyền riêng tư — không theo dõi xuyên trang web, không sử dụng cookie quảng cáo.",
             "Chúng tôi không sử dụng công nghệ nhận diện khuôn mặt hay gắn thẻ tự động cho người dùng. Chúng tôi không bán dữ liệu."
           ]

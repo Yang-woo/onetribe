@@ -16,6 +16,7 @@ import { Link } from '@/i18n/navigation'
 import { EmailOtpForm } from './email-otp-form'
 import { MomentThumb } from './moment-thumb'
 import { PassportAccount } from './passport-account'
+import { PassportProfile } from './passport-profile'
 import { inputClass, secondaryButtonClass } from './ui'
 
 // Deterministic "hand-stamped" tilt per edition id (§4-1) — stable across
@@ -164,9 +165,16 @@ export function Passport({
 
   return (
     <section className="flex flex-col gap-8">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-1.5">
         <h2 className="font-display text-xl lowercase">{t('journey')}</h2>
-        {state.displayName && <p className="text-sm text-muted">@{state.displayName}</p>}
+        {/* editable identity uploads pre-fill (docs/00 D30) — replaces the old
+            static "@name" line */}
+        <PassportProfile
+          displayName={state.displayName}
+          instagram={state.instagram}
+          api={api}
+          onSaved={(next) => setState((s) => (s ? { ...s, ...next } : s))}
+        />
         {identity && <p className="text-sm text-muted">{identity}</p>}
       </header>
 

@@ -502,6 +502,72 @@ describe('passport attribution (T4.1)', () => {
     )
     expect(res.status).toBe(401)
   })
+
+  // Identity reuse (docs/00 D30): an upload registers its name + handle on the
+  // author's profile so the next upload — and the passport — pre-fill them.
+  test('registers a trimmed display name and bare instagram handle on the profile', async () => {
+    const { data: auth } = await createAnonClient().auth.signInAnonymously()
+    const uid = auth.user!.id
+    const token = auth.session!.access_token
+
+    const res = await createMemoriesHandler(deps())(
+      post({
+        turnstileToken: 't',
+        authToken: token,
+        eventId,
+        caption: `${MARKER}-register`,
+        authorName: '  Neo  ',
+        authorLink: '@neo_raver',
+        rightsConfirmed: true,
+        embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
+      }),
+    )
+    expect(res.status).toBe(201)
+
+    const { data: profile } = await db
+      .from('profiles')
+      .select('display_name, instagram')
+      .eq('id', uid)
+      .single()
+    expect(profile!.display_name).toBe('Neo') // trimmed
+    expect(profile!.instagram).toBe('neo_raver') // bare handle — no "@", no URL
+
+    await db.auth.admin.deleteUser(uid)
+  })
+
+  test('a field left blank on a later upload keeps its saved value; a changed field updates', async () => {
+    const { data: auth } = await createAnonClient().auth.signInAnonymously()
+    const uid = auth.user!.id
+    const token = auth.session!.access_token
+    const call = (body: Record<string, unknown>) =>
+      createMemoriesHandler(deps())(
+        post({
+          turnstileToken: 't',
+          authToken: token,
+          eventId,
+          rightsConfirmed: true,
+          embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
+          ...body,
+        }),
+      )
+
+    // first upload registers both fields
+    expect(
+      (await call({ caption: `${MARKER}-r1`, authorName: 'first', authorLink: 'first_ig' })).status,
+    ).toBe(201)
+    // second upload: name omitted (kept), handle changed (updated)
+    expect((await call({ caption: `${MARKER}-r2`, authorLink: 'second_ig' })).status).toBe(201)
+
+    const { data: profile } = await db
+      .from('profiles')
+      .select('display_name, instagram')
+      .eq('id', uid)
+      .single()
+    expect(profile!.display_name).toBe('first') // blank this time → prior value kept
+    expect(profile!.instagram).toBe('second_ig') // provided → refreshed
+
+    await db.auth.admin.deleteUser(uid)
+  })
 })
 
 describe('rate limiting (D9 P4)', () => {

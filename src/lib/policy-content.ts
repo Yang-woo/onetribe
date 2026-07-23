@@ -86,7 +86,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
         heading: '2. What we collect',
         paragraphs: [
           'Memories: photos/GIFs you upload and video links you embed, captions, event/city/year, an optional display name and social link. Published publicly immediately; may be hidden or removed on review or report.',
-          'Account (optional): account ID (anonymous by default), display name, home country, festival attendance log ("Passport"), and — only if you choose to link them — your email address or Google account identity.',
+          'Account (optional): account ID (anonymous by default), display name, an optional Instagram handle (saved so your uploads can pre-fill it), home country, festival attendance log ("Passport"), and — only if you choose to link them — your email address or Google account identity.',
           'Technical: server logs needed to run and secure the service. Any analytics we add will be privacy-friendly — no cross-site tracking, no ad cookies.',
           'We do not run facial recognition or automatic tagging of people. We do not sell data.',
         ],

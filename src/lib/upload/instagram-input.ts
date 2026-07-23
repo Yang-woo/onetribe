@@ -26,6 +26,17 @@ const IG_PROFILE_URL_RE =
  *  not a post" hint when a non-profile URL refuses to collapse. */
 const IG_URL_RE = /^(?:https?:\/\/)?(?:www\.)?instagram\.com\//i
 
+/**
+ * A visibly-invalid handle — non-empty but not a valid Instagram handle. The
+ * single rule both the upload wizard and the passport editor gate their submit
+ * on (and InstagramField renders its red hint from), so client hint and submit
+ * gating cannot drift from IG_HANDLE_RE.
+ */
+export function isIgHandleInvalid(value: string): boolean {
+  const handle = value.trim()
+  return handle !== '' && !IG_HANDLE_RE.test(handle)
+}
+
 /** Collapses "@handle" or a pasted profile URL to the bare handle. */
 export function normalizeIgInput(raw: string): string {
   let value = raw.trimStart()

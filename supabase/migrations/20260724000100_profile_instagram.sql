@@ -1,0 +1,11 @@
+-- Passport identity reuse (docs/00 D30): an optional Instagram handle on the
+-- profile so the upload form can pre-fill it and the passport can edit it —
+-- "type it once, remembered next time". Stores the BARE handle (e.g.
+-- "onetribe_world"), never a URL: the upload field and passport edit both hold
+-- a bare handle, while each memory row keeps the full profile URL in
+-- author_link (derived server-side).
+--
+-- profiles already grants select/insert/update to `authenticated` with
+-- owner-scoped RLS (20260712000100_init_schema), and RLS is row-level, so this
+-- new column needs no extra grant or policy — the owner writes it, no one else.
+alter table profiles add column if not exists instagram text;

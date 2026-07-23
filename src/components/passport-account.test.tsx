@@ -17,6 +17,7 @@ const LINKED: PassportIdentity = { email: 'raver@example.com', providers: [], is
 const SIGNED_IN_STATE: PassportState = {
   userId: 'u-linked',
   displayName: 'returning warrior',
+  instagram: null,
   attendedEventIds: [],
   moments: [],
   identity: LINKED,
@@ -26,6 +27,8 @@ function fakeApi(overrides: Partial<PassportBackend> = {}): PassportBackend {
   return {
     load: vi.fn(),
     start: vi.fn(),
+    loadProfileDefaults: vi.fn().mockResolvedValue(null),
+    updateProfile: vi.fn().mockResolvedValue({ displayName: null, instagram: null }),
     setAttendance: vi.fn(),
     linkEmailStart: vi.fn().mockResolvedValue(undefined),
     linkEmailVerify: vi.fn().mockResolvedValue(LINKED),

@@ -24,9 +24,20 @@ export interface PassportIdentity {
 export interface PassportState {
   userId: string
   displayName: string | null
+  /** Bare Instagram handle (no "@"), reused to pre-fill uploads (docs/00 D30). */
+  instagram: string | null
   attendedEventIds: string[]
   moments: Moment[]
   identity: PassportIdentity
+}
+
+/**
+ * The reusable identity the upload form pre-fills from (docs/00 D30) — empty
+ * strings (not null) so they seed input state directly. null = no session.
+ */
+export interface ProfileDefaults {
+  displayName: string
+  instagram: string
 }
 
 /**
@@ -90,6 +101,12 @@ export function consumeOauthReturnError(): PassportAuthErrorCode | null {
 export interface PassportBackend {
   load(): Promise<PassportState | null>
   start(displayName: string): Promise<PassportState>
+  /** Light read for pre-filling the upload form — null if no session (docs/00 D30). */
+  loadProfileDefaults(): Promise<ProfileDefaults | null>
+  /** Edit the reusable identity from the passport; returns the saved values (docs/00 D30). */
+  updateProfile(
+    next: ProfileDefaults,
+  ): Promise<{ displayName: string | null; instagram: string | null }>
   setAttendance(eventId: string, attended: boolean): Promise<void>
   // ── upgrade: keeps the current user id, data carries over ──
   linkEmailStart(email: string): Promise<void>
@@ -117,7 +134,7 @@ function identityOf(user: User): PassportIdentity {
 async function stateFor(client: SupabaseClient, user: User): Promise<PassportState> {
   const userId = user.id
   const [{ data: profile }, { data: attendance }, { data: moments }] = await Promise.all([
-    client.from('profiles').select('display_name').eq('id', userId).maybeSingle(),
+    client.from('profiles').select('display_name, instagram').eq('id', userId).maybeSingle(),
     client.from('attendance').select('event_id').eq('profile_id', userId),
     client
       .from('memories')
@@ -128,6 +145,7 @@ async function stateFor(client: SupabaseClient, user: User): Promise<PassportSta
   return {
     userId,
     displayName: profile?.display_name ?? null,
+    instagram: profile?.instagram ?? null,
     attendedEventIds: (attendance ?? []).map((row) => row.event_id),
     moments: (moments ?? []) as unknown as Moment[],
     identity: identityOf(user),
@@ -159,6 +177,36 @@ export function createSupabasePassportBackend(
         .upsert({ id: data.user.id, display_name: displayName.trim() || null })
       if (profileError) throw new Error(`profile create failed: ${profileError.message}`)
       return stateFor(client, data.user)
+    },
+
+    async loadProfileDefaults() {
+      const user = await currentUser()
+      if (!user) return null
+      const { data } = await client
+        .from('profiles')
+        .select('display_name, instagram')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (!data) return null
+      return { displayName: data.display_name ?? '', instagram: data.instagram ?? '' }
+    },
+
+    async updateProfile({ displayName, instagram }) {
+      const user = await currentUser()
+      if (!user) throw new Error('no passport session')
+      // Blank clears the stored value (null), so a user can remove a saved
+      // name/handle from the passport, not just change it.
+      const saved = {
+        displayName: displayName.trim() || null,
+        instagram: instagram.trim() || null,
+      }
+      // upsert (not update): an anonymous passport that only ever uploaded may
+      // have no profile row yet if it skipped the "start" name step.
+      const { error } = await client
+        .from('profiles')
+        .upsert({ id: user.id, display_name: saved.displayName, instagram: saved.instagram })
+      if (error) throw new Error(error.message)
+      return saved
     },
 
     async setAttendance(eventId, attended) {

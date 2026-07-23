@@ -2,7 +2,12 @@ import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
-import type { PassportBackend, PassportIdentity, PassportState } from '@/lib/passport/backend'
+import type {
+  PassportBackend,
+  PassportIdentity,
+  PassportState,
+  ProfileDefaults,
+} from '@/lib/passport/backend'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { Passport } from './passport'
 
@@ -32,11 +37,21 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
       state = {
         userId: 'u1',
         displayName,
+        instagram: null,
         attendedEventIds: [],
         moments: [],
         identity: ANON_IDENTITY,
       }
       return state
+    },
+    async loadProfileDefaults() {
+      if (!state) return null
+      return { displayName: state.displayName ?? '', instagram: state.instagram ?? '' }
+    },
+    async updateProfile({ displayName, instagram }: ProfileDefaults) {
+      const saved = { displayName: displayName.trim() || null, instagram: instagram.trim() || null }
+      if (state) state = { ...state, ...saved }
+      return saved
     },
     async setAttendance(eventId: string, attended: boolean) {
       backend.toggles.push(`${eventId}:${attended}`)
@@ -53,6 +68,7 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
       state = {
         userId: 'u-linked',
         displayName: 'returning warrior',
+        instagram: null,
         attendedEventIds: [],
         moments: [],
         identity: { email, providers: [], isAnonymous: false },
@@ -94,6 +110,7 @@ describe('Passport', () => {
     const backend = fakeBackend({
       userId: 'u1',
       displayName: 'tester',
+      instagram: null,
       attendedEventIds: ['e2024'],
       moments: [],
       identity: ANON_IDENTITY,
@@ -128,6 +145,7 @@ describe('Passport', () => {
     const backend = fakeBackend({
       userId: 'u1',
       displayName: null,
+      instagram: null,
       attendedEventIds: [],
       moments: [momentFixture('m1', { caption: 'my own moment', author_name: 'tester' })],
       identity: ANON_IDENTITY,
@@ -145,6 +163,7 @@ describe('Passport', () => {
     const backend = fakeBackend({
       userId: 'u1',
       displayName: 'tester',
+      instagram: null,
       attendedEventIds: [],
       moments: [],
       identity: ANON_IDENTITY,
