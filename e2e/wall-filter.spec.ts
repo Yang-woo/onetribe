@@ -53,10 +53,13 @@ test('a chip click filters in the browser — no request to the app server', asy
   page.on('request', (r) => {
     const url = r.url()
     if (!url.startsWith('http://localhost:3000')) return
-    // In production Next prefetches in-viewport footer <Link>s (RSC requests to
-    // /en/about, /en/guidelines, …) — filtering to 2026 shortens the wall and
-    // pulls the footer into view. Those aren't the wall navigation D13 kills;
-    // only a full document load or an RSC re-render of the wall route counts.
+    // In production Next prefetches in-viewport <Link>s — footer RSC requests
+    // (/en/about, /en/guidelines, …) and even sibling chips (/en?e=2022 …)
+    // when a layout shift pulls them into view. Those aren't the wall
+    // navigation D13 kills — Next marks them with the Next-Router-Prefetch
+    // header, so drop them; only a full document load or a non-prefetch RSC
+    // re-render of the wall route counts.
+    if (r.headers()['next-router-prefetch'] !== undefined) return
     const path = new URL(url).pathname
     if (r.resourceType() === 'document') roundTrips.push(`document ${url}`)
     else if (url.includes('_rsc=') && path === '/en') roundTrips.push(`rsc ${url}`)
