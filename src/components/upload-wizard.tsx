@@ -542,17 +542,22 @@ export function UploadWizard({
                 onChange={(e) => {
                   const el = e.target
                   const raw = el.value
-                  const caret = el.selectionStart ?? raw.length
                   const normalized = normalizeIgInput(raw)
-                  setAuthorLink(normalized)
-                  // When the collapse shortened the value, React rewrites the
-                  // DOM value and the caret snaps to the end — restore it,
-                  // shifted by what was removed (e.g. a leading "@" typed at
-                  // position 0 must leave the caret at 0, not after "qdance").
+                  // When the collapse shortens the value, React's rewrite
+                  // snaps the caret to the end — restore it synchronously,
+                  // shifted by what was removed (a leading "@" typed at
+                  // position 0 must leave the caret at 0). Sync only: writing
+                  // el.value now means the later render sees a matching DOM
+                  // value and leaves the caret alone. (An async restore —
+                  // rAF/setTimeout — races fast typing and scrambles input;
+                  // caught by CI.)
                   if (normalized !== raw) {
+                    const caret = el.selectionStart ?? raw.length
                     const pos = Math.max(0, caret - (raw.length - normalized.length))
-                    requestAnimationFrame(() => el.setSelectionRange(pos, pos))
+                    el.value = normalized
+                    el.setSelectionRange(pos, pos)
                   }
+                  setAuthorLink(normalized)
                 }}
                 className="min-w-0 flex-1 bg-transparent px-3 py-2 text-paper placeholder:text-muted focus:outline-none"
               />
