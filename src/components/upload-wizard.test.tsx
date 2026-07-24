@@ -255,6 +255,53 @@ describe('UploadWizard', () => {
     expect(payload.authorLink).toBe('qdance')
   })
 
+  // docs/00 D32: the aspect ratio must be measured from the COMPRESSED output,
+  // not the original — browser-image-compression bakes EXIF orientation into the
+  // pixels, so a rotated phone photo's uploaded ratio is the inverse of its raw
+  // ratio. Measuring the source would reserve a transposed box and squish the card.
+  test('measures the aspect ratio from the compressed output and sends it (D32)', async () => {
+    const user = userEvent.setup()
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    // prepare returns a DISTINCT file so we can prove which one aspect is read from
+    const compress = async (file: File) =>
+      new File([new Uint8Array([9, 9, 9])], `compressed-${file.name}`, { type: file.type })
+    const aspectSeen: string[] = []
+    const aspectImpl = vi.fn(async (f: File) => {
+      aspectSeen.push(f.name)
+      return 0.75
+    })
+    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const href = String(url)
+      calls.push({ url: href, init })
+      if (href.endsWith('/api/upload/presign')) {
+        return Response.json({
+          uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+          session: 'sess-token',
+        })
+      }
+      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+      if (href.endsWith('/api/memories')) {
+        return Response.json({ moments: [{ id: 'm', takedownToken: 't' }] }, { status: 201 })
+      }
+      throw new Error(`unexpected fetch ${href}`)
+    })
+    vi.stubGlobal('fetch', fetchStub)
+
+    renderWizard({ prepareImpl: compress, aspectImpl })
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: 'share my moment' }))
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+
+    // measured from the compressed file (EXIF baked), never the source 'a.gif'
+    expect(aspectSeen).toEqual(['compressed-a.gif'])
+    const memoriesCall = calls.find((c) => c.url.endsWith('/api/memories'))!
+    const payload = JSON.parse(String(memoriesCall.init?.body))
+    expect(payload.media).toEqual([
+      { key: 'm/2026/k1.gif', aspectRatio: 0.75, contentType: 'image/gif' },
+    ])
+  })
+
   test('generates a thumbnail: presigns it, PUTs it, and sends thumbKey (D21)', async () => {
     const user = userEvent.setup()
     const calls: Array<{ url: string; init?: RequestInit }> = []

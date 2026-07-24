@@ -49,8 +49,9 @@ interface Picked {
   /** wall thumbnail (docs/00 D21), chained off `prepare` at selection so it
    *  overlaps step 2 too. Best-effort — resolves null if generation fails. */
   prepareThumb: Promise<File | null>
-  /** media aspect ratio for zero-shift skeletons (docs/00 D32). Best-effort —
-   *  resolves null if the source can't be decoded. */
+  /** media aspect ratio for zero-shift skeletons, measured from the compressed
+   *  (EXIF-baked, upright) output so it matches what's displayed (docs/00 D32).
+   *  Best-effort — resolves null if prepare/decoding fails. */
   aspect: Promise<number | null>
 }
 
@@ -192,9 +193,13 @@ export function UploadWizard({
       // Thumbnail from the compressed output, kicked off now so its canvas work
       // overlaps step 2 instead of blocking submit. Never rejects (best-effort).
       const prepareThumb = prepare.then((f) => prepareThumbImpl(f)).catch(() => null)
-      // Aspect ratio from the source (canvas preserves it) — best-effort, kicked
-      // off now so it's ready by submit (docs/00 D32).
-      const aspect = aspectImpl(file).catch(() => null)
+      // Aspect ratio from the COMPRESSED output, not the original: prepareForUpload
+      // (browser-image-compression) bakes EXIF orientation into the pixels and
+      // strips EXIF, so a rotated phone photo's uploaded/displayed ratio can be the
+      // inverse of its raw ratio. Measuring the source would then reserve a
+      // transposed box and squish the card (docs/00 D32). Chained off prepare so it
+      // still overlaps step 2; null on a prepare failure (best-effort).
+      const aspect = prepare.then((f) => aspectImpl(f)).catch(() => null)
       return { file, url: URL.createObjectURL(file), prepare, prepareThumb, aspect }
     })
     setPicked((prev) => [...prev, ...entries])
@@ -277,8 +282,9 @@ export function UploadWizard({
         const usableThumbs = thumbs.map((t) =>
           t && t.type === THUMB_MIME && t.size <= THUMB_MAX_UPLOAD_BYTES ? t : null,
         )
-        // Aspect ratios are computed from the source, independent of prepare, so
-        // they never need the recompute path above (docs/00 D32).
+        // Aspect ratios are measured from the compressed (EXIF-baked) output so
+        // they match the uploaded image; a prepare failure leaves them null, and
+        // the fallback recompute above simply publishes without a ratio (docs/00 D32).
         const aspects = await Promise.all(picked.map((p) => p.aspect))
         const presignRes = await fetch('/api/upload/presign', {
           method: 'POST',
