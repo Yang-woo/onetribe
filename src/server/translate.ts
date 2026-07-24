@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { json, parseBody } from '@/lib/server/http'
 import { isLocale } from '@/lib/locales'
 import { isMomentId } from '@/lib/moments'
-import { translateWithCache, type TranslationProvider } from '@/lib/translate'
+import { translateCaption, type TranslationProvider } from '@/lib/translate'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
@@ -44,17 +44,9 @@ export function createTranslateHandler(deps: TranslateDeps) {
     const caption = data?.caption?.trim()
     if (!caption) return json(200, { text: null })
 
-    // No provider (env unset) or same language → return the original, never blank
-    // (docs/16 D). Same contract the moment page relies on.
-    if (!deps.provider || data!.source_lang === locale) return json(200, { text: caption })
-
-    const outcome = await translateWithCache(
-      deps.db,
-      deps.provider,
-      caption,
-      locale,
-      data!.source_lang,
-    )
-    return json(200, { text: outcome.text })
+    // Shared caption rule (no provider / same language → original, never blank)
+    // lives in translateCaption so this route and the moment page can't drift.
+    const text = await translateCaption(deps.db, deps.provider, caption, locale, data!.source_lang)
+    return json(200, { text })
   }
 }

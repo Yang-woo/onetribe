@@ -1,10 +1,8 @@
 'use client'
 
-import { useLocale, useTranslations } from 'next-intl'
-import { countryFlag, countryName } from '@/lib/country'
-import { relativeTime } from '@/lib/format'
+import { useTranslations } from 'next-intl'
 import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
-import { AuthorTag } from './author-tag'
+import { MomentMeta } from './moment-meta'
 import { SkeletonImage } from './skeleton-image'
 
 /** Anthem → initials, each word's first letter, ≤4: "Power of the Tribe" → "POTT". */
@@ -42,17 +40,11 @@ export function MomentThumb({
   onOpen?: () => void
 }) {
   const tm = useTranslations('moment')
-  const locale = useLocale()
   const src = momentImageSrc(moment, { preferThumb: true })
   if (!src) return null
 
   const initials = edition ? anthemInitials(edition.edition) : null
   const tag = edition ? (initials ? `${edition.year} ${initials}` : String(edition.year)) : null
-  const sep = (
-    <span aria-hidden="true" className="text-[#6e655c]">
-      ·
-    </span>
-  )
 
   const alt = moment.caption ?? 'festival moment'
   const tagEl = tag && (
@@ -122,25 +114,9 @@ export function MomentThumb({
       )}
       <figcaption className="flex flex-col gap-0.5 px-3 py-2">
         {moment.caption && <span className="text-sm text-paper">{moment.caption}</span>}
-        <span className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
-          {/* Display name (or @handle) — links to Instagram when the uploader
-              gave one; a separate hit area from the image so the wall reaches it
-              without opening the modal (docs/00 D30). */}
-          <AuthorTag moment={moment} />
-          {moment.origin_country && (
-            <>
-              {sep}
-              {/* flag emoji (docs/00 D31); title carries the localized name for
-                  hover + assistive tech. Falls back to the code if the flag
-                  can't be derived. */}
-              <span title={countryName(moment.origin_country, locale)}>
-                {countryFlag(moment.origin_country) || moment.origin_country}
-              </span>
-            </>
-          )}
-          {sep}
-          <span suppressHydrationWarning>{relativeTime(moment.created_at, locale)}</span>
-        </span>
+        {/* author (or @handle) · country · time — shared with the modal so the
+            wall card and the moment modal can't drift (docs/00 D30). */}
+        <MomentMeta moment={moment} />
       </figcaption>
     </figure>
   )

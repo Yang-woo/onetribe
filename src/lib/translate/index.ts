@@ -60,6 +60,23 @@ export async function translateWithCache(
   }
 }
 
+/**
+ * The on-view caption rule shared by the moment page and the /api/translate
+ * route (docs/16): no provider or same language → the original, never blank;
+ * otherwise the cached translation. One place so the two callers — and the
+ * DeepL cost / never-blank guarantee — can't drift.
+ */
+export async function translateCaption(
+  db: SupabaseClient, // service role — cache writes only
+  provider: TranslationProvider | null,
+  caption: string | null,
+  targetLocale: string,
+  sourceLang: string | null,
+): Promise<string | null> {
+  if (!caption || !provider || sourceLang === targetLocale) return caption
+  return (await translateWithCache(db, provider, caption, targetLocale, sourceLang)).text
+}
+
 /** Default provider from env — null when unconfigured (dev without keys). */
 export function createDefaultProvider(): TranslationProvider | null {
   const key = process.env.DEEPL_API_KEY

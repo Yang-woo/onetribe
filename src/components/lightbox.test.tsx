@@ -40,7 +40,8 @@ describe('Lightbox (moment modal)', () => {
   })
 
   test('shows the caption translated in the modal teaser (D32)', async () => {
-    open(0, [momentFixture('a', { source_lang: 'en' })], {
+    // source_lang differs from the viewer locale (en) → it translates
+    open(0, [momentFixture('a', { source_lang: 'nl' })], {
       translateImpl: async () => '번역된 캡션',
     })
     // the translation arrives asynchronously and replaces the original
@@ -53,10 +54,19 @@ describe('Lightbox (moment modal)', () => {
   })
 
   test('falls back to the original caption when translation is unavailable', async () => {
-    open(0, [momentFixture('a', { source_lang: 'en' })], {
+    open(0, [momentFixture('a', { source_lang: 'nl' })], {
       translateImpl: async () => null,
     })
     await Promise.resolve()
+    expect(screen.getByText('caption-a')).toBeInTheDocument()
+  })
+
+  test('skips the translate round-trip when the caption is already in the viewer language', async () => {
+    const translateImpl = vi.fn(async () => '번역됨')
+    // the test provider renders under locale 'en'; source_lang 'en' → no fetch
+    open(0, [momentFixture('a', { source_lang: 'en' })], { translateImpl })
+    await Promise.resolve()
+    expect(translateImpl).not.toHaveBeenCalled()
     expect(screen.getByText('caption-a')).toBeInTheDocument()
   })
 

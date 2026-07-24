@@ -4,10 +4,10 @@ import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { CaptionToggle } from '@/components/caption-toggle'
 import { JsonLd } from '@/components/json-ld'
+import { CountryLabel, MetaSep } from '@/components/moment-meta'
 import { ReportButton } from '@/components/report-button'
 import { SkeletonImage } from '@/components/skeleton-image'
 import { Link } from '@/i18n/navigation'
-import { countryFlag, countryName } from '@/lib/country'
 import { instagramHandle } from '@/lib/format'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/locales'
 import {
@@ -23,7 +23,7 @@ import { localeAlternates, momentJsonLd } from '@/lib/seo'
 import { siteUrl } from '@/lib/site-url'
 import { createServiceRoleClient } from '@/lib/server/supabase'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
-import { createDefaultProvider, translateWithCache } from '@/lib/translate'
+import { createDefaultProvider, translateCaption } from '@/lib/translate'
 
 /**
  * Moment Card — docs/17 T3.4, docs/15 §3. The shareable unit of the whole
@@ -84,17 +84,13 @@ export default async function MomentPage({
   // On-view caption translation (docs/16) runs concurrently with the
   // independent prev/next lookups — a translation-cache miss must not
   // delay neighbor navigation.
-  const provider = createDefaultProvider()
-  const translationPromise =
-    moment.caption && provider && moment.source_lang !== locale
-      ? translateWithCache(
-          createServiceRoleClient(),
-          provider,
-          moment.caption,
-          locale,
-          moment.source_lang,
-        ).then((outcome) => outcome.text)
-      : Promise.resolve(moment.caption)
+  const translationPromise = translateCaption(
+    createServiceRoleClient(),
+    createDefaultProvider(),
+    moment.caption,
+    locale,
+    moment.source_lang,
+  )
 
   // Keyset neighbors: (created_at, id) so batch siblings (same timestamp) are
   // reachable via ←/→ instead of being skipped.
@@ -171,10 +167,7 @@ export default async function MomentPage({
           // the origin country (docs/00 D31), which the wall card shows but this
           // page was dropping.
           const handle = instagramHandle(moment.author_link)
-          const flag = moment.origin_country ? countryFlag(moment.origin_country) : ''
-          const country = moment.origin_country ? countryName(moment.origin_country, locale) : null
-          if (!moment.author_name && !handle && !country) return null
-          const sep = <span className="text-[#6e655c]">·</span>
+          if (!moment.author_name && !handle && !moment.origin_country) return null
           const parts: ReactNode[] = []
           if (moment.author_name)
             parts.push(<span className="text-paper">{moment.author_name}</span>)
@@ -189,18 +182,13 @@ export default async function MomentPage({
                 @{handle}
               </a>,
             )
-          if (country)
-            parts.push(
-              <span title={country}>
-                {flag ? `${flag} ` : ''}
-                {country}
-              </span>,
-            )
+          if (moment.origin_country)
+            parts.push(<CountryLabel code={moment.origin_country} locale={locale} withName />)
           return (
             <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted">
               {parts.map((part, i) => (
                 <span key={i} className="flex items-center gap-1.5">
-                  {i > 0 && sep}
+                  {i > 0 && <MetaSep />}
                   {part}
                 </span>
               ))}

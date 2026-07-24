@@ -19,7 +19,6 @@ export function SkeletonImage({
   className = '',
   wrapperClassName = '',
   loading,
-  draggable,
   onClick,
   aspectRatio,
   defaultAspectRatio = '4 / 5',
@@ -31,7 +30,6 @@ export function SkeletonImage({
   /** classes for the wrapper (rounding to clip; the shimmer inherits it) */
   wrapperClassName?: string
   loading?: 'lazy' | 'eager'
-  draggable?: boolean
   onClick?: (e: React.MouseEvent<HTMLImageElement>) => void
   /** The media's real width/height (docs/00 D32). When known, it's applied for
    *  the whole lifetime so the box is reserved exactly — zero reflow on load. */
@@ -43,12 +41,10 @@ export function SkeletonImage({
   const knownRatio =
     aspectRatio && Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : null
   // Known ratio → reserve the exact box always (no shift). Unknown → a
-  // placeholder ratio holds space only until the image supplies its own.
-  const aspectStyle = knownRatio
-    ? { aspectRatio: String(knownRatio) }
-    : loaded
-      ? undefined
-      : { aspectRatio: defaultAspectRatio }
+  // placeholder ratio holds space only until the image supplies its own (released
+  // on load).
+  const reserved = knownRatio ? String(knownRatio) : loaded ? undefined : defaultAspectRatio
+  const aspectStyle = reserved ? { aspectRatio: reserved } : undefined
 
   return (
     <span className={`relative block ${wrapperClassName}`}>
@@ -63,7 +59,6 @@ export function SkeletonImage({
         src={src}
         alt={alt}
         loading={loading}
-        draggable={draggable}
         onClick={onClick}
         onLoad={() => setLoaded(true)}
         // A broken image should still clear the shimmer (no permanent pulse).

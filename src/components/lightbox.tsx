@@ -3,10 +3,9 @@
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { countryFlag, countryName } from '@/lib/country'
-import { editionLine, relativeTime } from '@/lib/format'
+import { editionLine } from '@/lib/format'
 import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
-import { AuthorTag } from './author-tag'
+import { MomentMeta } from './moment-meta'
 import { SkeletonImage } from './skeleton-image'
 
 /** On-open caption translation via /api/translate (docs/00 D32). Best-effort:
@@ -78,11 +77,6 @@ export function Lightbox({
 
   const src = momentImageSrc(moment) ?? undefined
   const edition = editionById?.get(moment.event_id)
-  const sep = (
-    <span aria-hidden="true" className="text-[#6e655c]">
-      ·
-    </span>
-  )
   // Stops a click on the content panel from bubbling to the backdrop (close).
   const keepOpen = (e: React.MouseEvent) => e.stopPropagation()
 
@@ -173,23 +167,12 @@ export function Lightbox({
               key={`${moment.id}-${locale}`}
               memoryId={moment.id}
               original={moment.caption}
+              sourceLang={moment.source_lang}
               locale={locale}
               translateImpl={translateImpl}
             />
           )}
-          <span className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-muted">
-            <AuthorTag moment={moment} />
-            {moment.origin_country && (
-              <>
-                {sep}
-                <span title={countryName(moment.origin_country, locale)}>
-                  {countryFlag(moment.origin_country) || moment.origin_country}
-                </span>
-              </>
-            )}
-            {sep}
-            <span suppressHydrationWarning>{relativeTime(moment.created_at, locale)}</span>
-          </span>
+          <MomentMeta moment={moment} center />
         </div>
       </div>
     </div>
@@ -207,11 +190,13 @@ export function Lightbox({
 function ModalCaption({
   memoryId,
   original,
+  sourceLang,
   locale,
   translateImpl,
 }: {
   memoryId: string
   original: string
+  sourceLang: string | null
   locale: string
   translateImpl: TranslateImpl
 }) {
@@ -219,7 +204,10 @@ function ModalCaption({
 
   useEffect(() => {
     const trimmed = original.trim()
-    if (!trimmed) return
+    // Skip the round-trip when the caption is already in the viewer's language —
+    // the server would just echo the original (docs/00 D32 efficiency). null
+    // source_lang (undetected) still fetches.
+    if (!trimmed || sourceLang === locale) return
     let alive = true
     void translateImpl(memoryId, locale).then((text) => {
       // Only surface a genuine translation — an echo of the original changes nothing.
@@ -228,7 +216,7 @@ function ModalCaption({
     return () => {
       alive = false
     }
-  }, [memoryId, original, locale, translateImpl])
+  }, [memoryId, original, sourceLang, locale, translateImpl])
 
   return <p className="line-clamp-3 text-sm text-paper">{translated ?? original}</p>
 }

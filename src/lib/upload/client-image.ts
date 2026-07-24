@@ -77,8 +77,9 @@ export async function prepareThumb(file: File): Promise<File> {
  * exact box before the photo decodes (docs/00 D32). Best-effort: any decode
  * failure (unsupported type, no createImageBitmap, jsdom) resolves null and the
  * upload proceeds without a ratio — the server clamps whatever we send anyway.
- * Read from the source file: canvas re-encoding preserves the ratio, so we
- * don't wait on prepare/prepareThumb.
+ * Callers pass the COMPRESSED (prepareForUpload) output, not the original:
+ * browser-image-compression bakes EXIF orientation into the pixels, so a rotated
+ * photo's raw ratio would be transposed relative to what's displayed.
  */
 export async function imageAspectRatio(file: File): Promise<number | null> {
   if (typeof createImageBitmap !== 'function') return null
