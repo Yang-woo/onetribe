@@ -52,7 +52,11 @@ export function MemoryWall({
   const [moments, setMoments] = useState(initialMoments)
   const [exhausted, setExhausted] = useState(initialMoments.length < WALL_PAGE_SIZE)
   const [loading, setLoading] = useState(false)
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  // Track the open lightbox by moment id, not index: a live insert prepends to
+  // `moments`, which would shift an index-based pointer onto a different card
+  // mid-view. The index is derived per render, so a prepend just re-finds the
+  // same moment (and a moment that vanishes closes the lightbox gracefully).
+  const [openId, setOpenId] = useState<string | null>(null)
   // moments that landed live this session (past the active filter) — the
   // "just landed" signal. Resets per filter view (page re-keys on year).
   const [liveCount, setLiveCount] = useState(0)
@@ -104,6 +108,9 @@ export function MemoryWall({
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [exhausted, loading, loadMore])
+
+  // Derived each render so a prepend/removal re-points to the same open moment.
+  const openIndex = openId === null ? -1 : moments.findIndex((m) => m.id === openId)
 
   const canceled = filterEdition?.canceled ?? false
   // A canceled edition keeps its real anthem title (2026 — Sacred Oath); the
@@ -170,22 +177,23 @@ export function MemoryWall({
       {filterHeader}
 
       <div className="columns-2 gap-3 md:columns-3 lg:columns-4">
-        {moments.map((moment, index) => (
+        {moments.map((moment) => (
           <MomentThumb
             key={moment.id}
             moment={moment}
             edition={editionById?.get(moment.event_id)}
-            onOpen={() => setLightboxIndex(index)}
+            onOpen={() => setOpenId(moment.id)}
           />
         ))}
       </div>
-      {lightboxIndex !== null && (
+      {openIndex >= 0 && (
         <Lightbox
           moments={moments}
-          index={lightboxIndex}
+          index={openIndex}
           editionById={editionById}
-          onClose={() => setLightboxIndex(null)}
-          onNavigate={setLightboxIndex}
+          onClose={() => setOpenId(null)}
+          // map the index the lightbox reports back to a stable id
+          onNavigate={(i) => setOpenId(moments[i]?.id ?? null)}
         />
       )}
       {!exhausted && (

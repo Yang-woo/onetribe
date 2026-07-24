@@ -1,4 +1,5 @@
-import { act, screen } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { beforeAll, describe, expect, test, vi } from 'vitest'
 import type { EditionChip, Moment } from '@/lib/moments'
@@ -68,6 +69,55 @@ describe('MemoryWall', () => {
 
     const captions = screen.getAllByText(/^caption-/).map((el) => el.textContent)
     expect(captions).toEqual(['caption-fresh', 'caption-old'])
+  })
+
+  // The lightbox tracks the open moment by id, not index: a live insert prepends
+  // to the wall, which would slide an index-based pointer onto a different card.
+  test('a live insert while the lightbox is open keeps it on the same moment', async () => {
+    const user = userEvent.setup()
+    let emit: (m: Moment) => void = () => {}
+    const subscribe = (onInsert: (m: Moment) => void) => {
+      emit = onInsert
+      return () => {}
+    }
+    renderWithIntl(
+      <MemoryWall
+        initialMoments={[moment('a'), moment('b')]}
+        loadMoreImpl={noLoadMore}
+        subscribeImpl={subscribe}
+      />,
+    )
+
+    // open the moment 'a' (its card button is named by the caption)
+    await user.click(screen.getByRole('button', { name: 'caption-a' }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('caption-a')).toBeInTheDocument()
+
+    // a live insert prepends 'fresh' → an index-based lightbox would jump to it
+    act(() => emit(moment('fresh')))
+
+    expect(within(dialog).getByText('caption-a')).toBeInTheDocument()
+    expect(within(dialog).queryByText('caption-fresh')).not.toBeInTheDocument()
+  })
+
+  test('lightbox next/prev navigates by id mapping', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(
+      <MemoryWall
+        initialMoments={[moment('a'), moment('b')]}
+        loadMoreImpl={noLoadMore}
+        subscribeImpl={noSubscribe}
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: 'caption-a' }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('caption-a')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'next' }))
+    expect(within(dialog).getByText('caption-b')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'previous' }))
+    expect(within(dialog).getByText('caption-a')).toBeInTheDocument()
   })
 
   test('realtime inserts for other editions are ignored when filtered', () => {
