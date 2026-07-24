@@ -1,6 +1,7 @@
 'use client'
 
 import type { SupabaseClient, User } from '@supabase/supabase-js'
+import { normalizeCountry } from '@/lib/country'
 import { PUBLIC_MEMORY_COLUMNS, type Moment } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 
@@ -26,6 +27,8 @@ export interface PassportState {
   displayName: string | null
   /** Bare Instagram handle (no "@"), reused to pre-fill uploads (docs/00 D30). */
   instagram: string | null
+  /** ISO 3166-1 alpha-2 home country, reused to pre-fill uploads (docs/00 D31). */
+  homeCountry: string | null
   attendedEventIds: string[]
   moments: Moment[]
   identity: PassportIdentity
@@ -38,6 +41,8 @@ export interface PassportState {
 export interface ProfileDefaults {
   displayName: string
   instagram: string
+  /** ISO 3166-1 alpha-2 code, or '' — pre-fills the upload picker (docs/00 D31). */
+  country: string
 }
 
 /**
@@ -103,10 +108,10 @@ export interface PassportBackend {
   start(displayName: string): Promise<PassportState>
   /** Light read for pre-filling the upload form — null if no session (docs/00 D30). */
   loadProfileDefaults(): Promise<ProfileDefaults | null>
-  /** Edit the reusable identity from the passport; returns the saved values (docs/00 D30). */
+  /** Edit the reusable identity from the passport; returns the saved values (docs/00 D30, D31). */
   updateProfile(
     next: ProfileDefaults,
-  ): Promise<{ displayName: string | null; instagram: string | null }>
+  ): Promise<{ displayName: string | null; instagram: string | null; homeCountry: string | null }>
   setAttendance(eventId: string, attended: boolean): Promise<void>
   // ── upgrade: keeps the current user id, data carries over ──
   linkEmailStart(email: string): Promise<void>
@@ -134,7 +139,11 @@ function identityOf(user: User): PassportIdentity {
 async function stateFor(client: SupabaseClient, user: User): Promise<PassportState> {
   const userId = user.id
   const [{ data: profile }, { data: attendance }, { data: moments }] = await Promise.all([
-    client.from('profiles').select('display_name, instagram').eq('id', userId).maybeSingle(),
+    client
+      .from('profiles')
+      .select('display_name, instagram, home_country')
+      .eq('id', userId)
+      .maybeSingle(),
     client.from('attendance').select('event_id').eq('profile_id', userId),
     client
       .from('memories')
@@ -146,6 +155,7 @@ async function stateFor(client: SupabaseClient, user: User): Promise<PassportSta
     userId,
     displayName: profile?.display_name ?? null,
     instagram: profile?.instagram ?? null,
+    homeCountry: profile?.home_country ?? null,
     attendedEventIds: (attendance ?? []).map((row) => row.event_id),
     moments: (moments ?? []) as unknown as Moment[],
     identity: identityOf(user),
@@ -184,27 +194,37 @@ export function createSupabasePassportBackend(
       if (!user) return null
       const { data } = await client
         .from('profiles')
-        .select('display_name, instagram')
+        .select('display_name, instagram, home_country')
         .eq('id', user.id)
         .maybeSingle()
       if (!data) return null
-      return { displayName: data.display_name ?? '', instagram: data.instagram ?? '' }
+      return {
+        displayName: data.display_name ?? '',
+        instagram: data.instagram ?? '',
+        country: data.home_country ?? '',
+      }
     },
 
-    async updateProfile({ displayName, instagram }) {
+    async updateProfile({ displayName, instagram, country }) {
       const user = await currentUser()
       if (!user) throw new Error('no passport session')
       // Blank clears the stored value (null), so a user can remove a saved
-      // name/handle from the passport, not just change it.
+      // name/handle/country from the passport, not just change it. The country
+      // is validated to an ISO code (invalid → cleared) so home_country never
+      // holds junk (docs/00 D31).
       const saved = {
         displayName: displayName.trim() || null,
         instagram: instagram.trim() || null,
+        homeCountry: normalizeCountry(country),
       }
       // upsert (not update): an anonymous passport that only ever uploaded may
       // have no profile row yet if it skipped the "start" name step.
-      const { error } = await client
-        .from('profiles')
-        .upsert({ id: user.id, display_name: saved.displayName, instagram: saved.instagram })
+      const { error } = await client.from('profiles').upsert({
+        id: user.id,
+        display_name: saved.displayName,
+        instagram: saved.instagram,
+        home_country: saved.homeCountry,
+      })
       if (error) throw new Error(error.message)
       return saved
     },

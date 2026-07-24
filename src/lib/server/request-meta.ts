@@ -16,13 +16,25 @@ export function clientIp(req: Request): string | null {
   return first || null
 }
 
-/** Request country for the "M countries" counter (D9 P9). Never trusted for auth. */
-export function originCountry(req: Request): string | null {
-  const country = req.headers.get('x-vercel-ip-country') ?? req.headers.get('cf-ipcountry')
+/**
+ * Edge-set geo country from request headers — a 2-letter upper-case code, or
+ * null. Powers the IP fallback for a memory's origin country and pre-fills the
+ * upload picker (docs/00 D31). Never trusted for auth. Shape check only;
+ * membership in the ISO set is enforced where it matters (normalizeCountry).
+ * Accepts any header bag with `.get()` — a Request's headers or Next's
+ * `headers()` in a server component.
+ */
+export function countryFromHeaders(headers: { get(name: string): string | null }): string | null {
+  const country = headers.get('x-vercel-ip-country') ?? headers.get('cf-ipcountry')
   if (country && /^[A-Za-z]{2}$/.test(country) && country.toUpperCase() !== 'XX') {
     return country.toUpperCase()
   }
   return null
+}
+
+/** Request country for the "M countries" counter (D9 P9). Never trusted for auth. */
+export function originCountry(req: Request): string | null {
+  return countryFromHeaders(req.headers)
 }
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { normalizeInstagramLink, normalizeYoutubeUrl } from './upload'
+import { fillEmptyIdentity, normalizeInstagramLink, normalizeYoutubeUrl } from './upload'
 
 // Pure link normalization — expectations derived from docs/00 D9 P7
 // (YouTube only) and docs/15 §2 (optional IG link).
@@ -51,5 +51,43 @@ describe('normalizeInstagramLink', () => {
     expect(normalizeInstagramLink('https://evil.com/onetribe')).toBeNull()
     expect(normalizeInstagramLink('https://instagram.com/a/b/c')).toBeNull()
     expect(normalizeInstagramLink('<script>')).toBeNull()
+  })
+})
+
+// The passport "fill-empty" identity write-back (docs/00 D30, D31): a field is
+// registered only when the upload supplies it AND the profile has none yet.
+describe('fillEmptyIdentity', () => {
+  const empty = { display_name: null, instagram: null, home_country: null }
+
+  test('the first upload fills every empty field', () => {
+    expect(fillEmptyIdentity(empty, { name: 'Neo', handle: 'neo', country: 'NL' })).toEqual({
+      display_name: 'Neo',
+      instagram: 'neo',
+      home_country: 'NL',
+    })
+    // no profile row yet behaves like an all-empty profile
+    expect(fillEmptyIdentity(null, { name: 'Neo', country: 'KR' })).toEqual({
+      display_name: 'Neo',
+      home_country: 'KR',
+    })
+  })
+
+  test('never overwrites a field the profile already has', () => {
+    const current = { display_name: 'Set', instagram: 'set_ig', home_country: 'DE' }
+    expect(fillEmptyIdentity(current, { name: 'New', handle: 'new_ig', country: 'NL' })).toEqual({})
+  })
+
+  test('fills each field independently — only the empty ones', () => {
+    const current = { display_name: 'Set', instagram: null, home_country: null }
+    expect(fillEmptyIdentity(current, { name: 'New', handle: 'new_ig', country: 'NL' })).toEqual({
+      instagram: 'new_ig',
+      home_country: 'NL',
+    })
+  })
+
+  test('an absent upload value contributes nothing (no null writes)', () => {
+    expect(fillEmptyIdentity(empty, { country: 'NL' })).toEqual({ home_country: 'NL' })
+    expect(fillEmptyIdentity(empty, {})).toEqual({})
+    expect(fillEmptyIdentity(empty, { name: '', handle: '', country: null })).toEqual({})
   })
 })

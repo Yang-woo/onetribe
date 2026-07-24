@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { normalizeCountry } from '@/lib/country'
 import { json, parseBody } from '@/lib/server/http'
-import { clientIp, hashIp, originCountry } from '@/lib/server/request-meta'
+import { clientIp, hashIp } from '@/lib/server/request-meta'
 import { detectCaptionLocale } from '@/lib/translate/detect'
 import type { TurnstileVerifier } from '@/lib/server/turnstile'
 import { createUploadSession, verifyUploadSession } from '@/lib/server/upload-session'
@@ -192,6 +193,11 @@ const memoriesSchema = z
     caption: z.string().max(MAX_CAPTION_LENGTH).optional(),
     authorName: z.string().max(MAX_AUTHOR_NAME_LENGTH).optional(),
     authorLink: z.string().max(200).optional(),
+    // Country code from the picker — a well-formed non-ISO value is nulled by
+    // normalizeCountry in the handler (not 400'd here), so a stale/unknown code
+    // never fails an otherwise-valid upload (docs/00 D31). A code is 2 chars;
+    // the cap only bounds the payload against abuse.
+    country: z.string().max(8).optional(),
     // the legal gate — anything but literal true is a 400 (docs/05)
     rightsConfirmed: z.literal(true),
     media: z
@@ -216,6 +222,29 @@ const memoriesSchema = z
   .refine((v) => Boolean(v.media) !== Boolean(v.embed), {
     message: 'exactly one of media or embed is required',
   })
+
+/**
+ * The passport "fill-empty" identity write-back (docs/00 D30, D31): a field is
+ * registered only when the upload supplies it AND the profile has none yet.
+ * Once set, a later upload credits just that row (author_name/link + the row's
+ * origin_country) and never overwrites the saved identity — the passport editor
+ * is the one place that changes it. Each field fills independently. Pure, so the
+ * rule is unit-tested without a database.
+ */
+export function fillEmptyIdentity(
+  current: {
+    display_name: string | null
+    instagram: string | null
+    home_country: string | null
+  } | null,
+  next: { name?: string; handle?: string; country?: string | null },
+): { display_name?: string; instagram?: string; home_country?: string } {
+  const identity: { display_name?: string; instagram?: string; home_country?: string } = {}
+  if (next.name && !current?.display_name) identity.display_name = next.name
+  if (next.handle && !current?.instagram) identity.instagram = next.handle
+  if (next.country && !current?.home_country) identity.home_country = next.country
+  return identity
+}
 
 export function createMemoriesHandler(deps: UploadDeps) {
   return async (req: Request): Promise<Response> => {
@@ -270,6 +299,14 @@ export function createMemoriesHandler(deps: UploadDeps) {
     const authorLink = input.authorLink ? normalizeInstagramLink(input.authorLink) : null
     if (input.authorLink && !authorLink) return json(400, { error: 'invalid instagram link' })
 
+    // Country: only what the picker actually holds, validated to an ISO code
+    // (docs/00 D31). NO IP fallback at post time — an empty picker publishes no
+    // country, so the "(optional)" label is honest and we never publish an
+    // undisclosed IP-inferred location (brand-legal 2026-07-24). The picker is
+    // still IP-prefilled client-side, so IP stays a visible default, not a
+    // silent one. Non-sensitive — drives display + "M countries", never auth.
+    const country = normalizeCountry(input.country)
+
     // Ensure the profile row exists for the author_id FK before inserting the
     // memory. The reusable identity (display_name/instagram, docs/00 D30) is
     // written only AFTER a successful insert (below) so a failed insert can't
@@ -290,7 +327,7 @@ export function createMemoriesHandler(deps: UploadDeps) {
       author_name: input.authorName?.trim() || null,
       author_link: authorLink,
       author_id: authorId,
-      origin_country: originCountry(req),
+      origin_country: country,
       rights_confirmed: true,
       status: 'live' as const,
     }
@@ -333,29 +370,24 @@ export function createMemoriesHandler(deps: UploadDeps) {
       .select('id, takedown_token')
     if (error || !inserted) return json(500, { error: 'could not save your moment' })
 
-    // Register the reusable identity so the next upload — and the passport —
-    // pre-fill it (docs/00 D30). Runs only now that the moment is safely
-    // stored, and best-effort: a failure here must not fail an upload that
-    // already succeeded. FILL-EMPTY ONLY (docs/00 D30, code review 2026-07-24):
-    // the FIRST upload registers a name/handle into a field that has none;
-    // once set, editing the pre-filled field on a later upload credits just
-    // that moment (author_name/author_link on the row) and never overwrites the
-    // saved identity — the passport editor is the one place that changes it.
-    // Each field fills independently. Handle stored bare (the field/editor hold
-    // a bare handle; the memory row keeps the full URL).
+    // Register the reusable identity (name / handle / home country) so the next
+    // upload — and the passport — pre-fill it (docs/00 D30, D31). Runs only now
+    // that the moment is safely stored, and best-effort: a failure here must not
+    // fail an upload that already succeeded. The fill-empty rule (first upload
+    // registers an empty field; a later edit credits just that row, never the
+    // saved identity) lives in fillEmptyIdentity. Handle stored bare (the
+    // field/editor hold a bare handle; the memory row keeps the full URL).
     if (authorId) {
       const name = input.authorName?.trim()
       const handle = authorLink ? new URL(authorLink).pathname.replace(/^\/+/, '') : undefined
-      if (name || handle) {
+      if (name || handle || country) {
         const { data: current } = await deps.db
           .from('profiles')
-          .select('display_name, instagram')
+          .select('display_name, instagram, home_country')
           .eq('id', authorId)
           .single()
-        const identity: { display_name?: string; instagram?: string } = {}
-        if (name && !current?.display_name) identity.display_name = name
-        if (handle && !current?.instagram) identity.instagram = handle
-        if (identity.display_name !== undefined || identity.instagram !== undefined) {
+        const identity = fillEmptyIdentity(current, { name, handle, country })
+        if (Object.keys(identity).length > 0) {
           await deps.db.from('profiles').update(identity).eq('id', authorId)
         }
       }

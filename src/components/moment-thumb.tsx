@@ -1,6 +1,7 @@
 'use client'
 
 import { useLocale, useTranslations } from 'next-intl'
+import { countryFlag, countryName } from '@/lib/country'
 import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
 
 /** Anthem → initials, each word's first letter, ≤4: "Power of the Tribe" → "POTT". */
@@ -73,7 +74,12 @@ export function MomentThumb({ moment, edition }: { moment: Moment; edition?: Edi
           {moment.origin_country && (
             <>
               {sep}
-              <span>{moment.origin_country}</span>
+              {/* flag emoji (docs/00 D31); title carries the localized name for
+                  hover + assistive tech. Falls back to the code if the flag
+                  can't be derived. */}
+              <span title={countryName(moment.origin_country, locale)}>
+                {countryFlag(moment.origin_country) || moment.origin_country}
+              </span>
             </>
           )}
           {sep}

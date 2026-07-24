@@ -38,6 +38,7 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
         userId: 'u1',
         displayName,
         instagram: null,
+        homeCountry: null,
         attendedEventIds: [],
         moments: [],
         identity: ANON_IDENTITY,
@@ -46,10 +47,18 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
     },
     async loadProfileDefaults() {
       if (!state) return null
-      return { displayName: state.displayName ?? '', instagram: state.instagram ?? '' }
+      return {
+        displayName: state.displayName ?? '',
+        instagram: state.instagram ?? '',
+        country: state.homeCountry ?? '',
+      }
     },
-    async updateProfile({ displayName, instagram }: ProfileDefaults) {
-      const saved = { displayName: displayName.trim() || null, instagram: instagram.trim() || null }
+    async updateProfile({ displayName, instagram, country }: ProfileDefaults) {
+      const saved = {
+        displayName: displayName.trim() || null,
+        instagram: instagram.trim() || null,
+        homeCountry: country.trim() ? country.trim().toUpperCase() : null,
+      }
       if (state) state = { ...state, ...saved }
       return saved
     },
@@ -69,6 +78,7 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
         userId: 'u-linked',
         displayName: 'returning warrior',
         instagram: null,
+        homeCountry: null,
         attendedEventIds: [],
         moments: [],
         identity: { email, providers: [], isAnonymous: false },
@@ -111,6 +121,7 @@ describe('Passport', () => {
       userId: 'u1',
       displayName: 'tester',
       instagram: null,
+      homeCountry: null,
       attendedEventIds: ['e2024'],
       moments: [],
       identity: ANON_IDENTITY,
@@ -146,6 +157,7 @@ describe('Passport', () => {
       userId: 'u1',
       displayName: null,
       instagram: null,
+      homeCountry: null,
       attendedEventIds: [],
       moments: [momentFixture('m1', { caption: 'my own moment', author_name: 'tester' })],
       identity: ANON_IDENTITY,
@@ -164,6 +176,7 @@ describe('Passport', () => {
       userId: 'u1',
       displayName: 'tester',
       instagram: null,
+      homeCountry: null,
       attendedEventIds: [],
       moments: [],
       identity: ANON_IDENTITY,

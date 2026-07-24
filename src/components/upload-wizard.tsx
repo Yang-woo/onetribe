@@ -16,6 +16,7 @@ import {
   THUMB_MIME,
 } from '@/lib/upload/constants'
 import { isIgHandleInvalid } from '@/lib/upload/instagram-input'
+import { CountryField } from './country-field'
 import { InstagramField } from './instagram-field'
 import { isTurnstileEnabled, Turnstile } from './turnstile'
 import { inputClass } from './ui'
@@ -74,11 +75,15 @@ async function loadUploadDefaults(): Promise<ProfileDefaults | null> {
 
 export function UploadWizard({
   editions,
+  ipCountry = '',
   prepareImpl = prepareForUpload,
   prepareThumbImpl = prepareThumb,
   loadDefaultsImpl = loadUploadDefaults,
 }: {
   editions: EditionChip[]
+  /** Server-derived IP country (docs/00 D31) — the picker's first guess before
+   *  the passport home country loads. '' when geo is unknown. */
+  ipCountry?: string
   /** test seam — canvas compression can't run in jsdom */
   prepareImpl?: (file: File) => Promise<File>
   /** test seam — thumbnail canvas re-encode can't run in jsdom either */
@@ -97,6 +102,11 @@ export function UploadWizard({
   const [caption, setCaption] = useState('')
   const [authorName, setAuthorName] = useState('')
   const [authorLink, setAuthorLink] = useState('')
+  // Country pre-fills from the passport home country, falling back to the IP
+  // guess the server passed in (docs/00 D31). A ref tracks a manual change so a
+  // late passport fetch never clobbers a country the user just picked.
+  const [country, setCountry] = useState(ipCountry)
+  const countryTouched = useRef(false)
   // Gate submit on a visibly-invalid handle: letting it through would burn a
   // presign + R2 PUT before /api/memories 400s (orphan object, D9-c ①). Same
   // rule InstagramField renders its red hint from — no drift.
@@ -131,6 +141,9 @@ export function UploadWizard({
         if (!alive || !defaults) return
         setAuthorName((cur) => cur || defaults.displayName)
         setAuthorLink((cur) => cur || defaults.instagram)
+        // Home country wins over the IP guess (it's the saved identity), but
+        // never overrides a country the user already picked by hand.
+        if (defaults.country && !countryTouched.current) setCountry(defaults.country)
       })
       // Pre-fill is a convenience — a rejecting impl falls back to empty fields,
       // never an unhandled rejection (the prod default already returns null).
@@ -221,6 +234,7 @@ export function UploadWizard({
         caption: caption.trim() || undefined,
         authorName: authorName.trim() || undefined,
         authorLink: authorLink.trim() || undefined,
+        country: country || undefined,
         rightsConfirmed: true as const,
       }
 
@@ -551,6 +565,14 @@ export function UploadWizard({
               bare handle; the server still re-normalizes (D9 P1: client input
               is untrusted). */}
           <InstagramField value={authorLink} onChange={setAuthorLink} />
+          {/* home country — pre-filled from passport/IP, editable (docs/00 D31) */}
+          <CountryField
+            value={country}
+            onChange={(code) => {
+              countryTouched.current = true
+              setCountry(code)
+            }}
+          />
           {/* rights confirmation card — the checkbox is real (sr-only) so tests
               and form a11y keep working; the server double-checks rightsConfirmed */}
           <label

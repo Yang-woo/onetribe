@@ -265,7 +265,7 @@ describe('POST /api/memories — file flow', () => {
     expect(res.status).toBe(400)
   })
 
-  test('happy path: batch of 2 → 2 live rows, derived URLs, geo country, IG link normalized', async () => {
+  test('happy path: batch of 2 → 2 live rows, derived URLs, picked country stored, IG link normalized', async () => {
     const { uploads, session } = await presignFiles([
       { contentType: 'image/jpeg', size: 1000 },
       { contentType: 'image/gif', size: 2000 },
@@ -278,12 +278,15 @@ describe('POST /api/memories — file flow', () => {
           caption: `${MARKER}-happy`,
           authorName: 'tester',
           authorLink: '@onetribe.world',
+          country: 'nl',
           rightsConfirmed: true,
           media: [
             { key: uploads[0].key, contentType: 'image/jpeg' },
             { key: uploads[1].key, contentType: 'image/gif' },
           ],
         },
+        // the geo header is present but must be IGNORED at post — origin_country
+        // comes from the picker's value, never an IP fallback (docs/00 D31)
         { 'x-vercel-ip-country': 'KR' },
       ),
     )
@@ -306,10 +309,56 @@ describe('POST /api/memories — file flow', () => {
       expect(row.status).toBe('live')
       expect(row.media_url).toMatch(/^https:\/\/media\.test\/m\/\d{4}\//)
       expect(row.thumb_url).toBeNull() // no thumbKey sent → wall falls back to media_url
-      expect(row.origin_country).toBe('KR')
+      expect(row.origin_country).toBe('NL') // the picked country (normalized), not the 'KR' geo header
       expect(row.author_link).toBe('https://instagram.com/onetribe.world')
       expect(row.author_name).toBe('tester')
     }
+  })
+
+  test('the picked country is validated: an unassigned code is dropped, not stored (D31)', async () => {
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const res = await createMemoriesHandler(deps())(
+      post({
+        session,
+        eventId,
+        caption: `${MARKER}-badcountry`,
+        country: 'zz', // well-formed but not an assigned ISO code → nulled, not 400'd
+        rightsConfirmed: true,
+        media: [{ key: uploads[0].key, contentType: 'image/jpeg' }],
+      }),
+    )
+    expect(res.status).toBe(201)
+    const { data: row } = await db
+      .from('memories')
+      .select('origin_country')
+      .eq('caption', `${MARKER}-badcountry`)
+      .single()
+    expect(row!.origin_country).toBeNull()
+  })
+
+  test('an empty picker publishes no country — the geo header is never a fallback (opt-out, D31)', async () => {
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const res = await createMemoriesHandler(deps())(
+      post(
+        {
+          session,
+          eventId,
+          caption: `${MARKER}-nocountry`,
+          rightsConfirmed: true,
+          media: [{ key: uploads[0].key, contentType: 'image/jpeg' }],
+        },
+        // geo header present, but the user picked nothing → origin_country stays
+        // null; we never backfill an undisclosed IP-inferred location (D31)
+        { 'x-vercel-ip-country': 'KR' },
+      ),
+    )
+    expect(res.status).toBe(201)
+    const { data: row } = await db
+      .from('memories')
+      .select('origin_country')
+      .eq('caption', `${MARKER}-nocountry`)
+      .single()
+    expect(row!.origin_country).toBeNull()
   })
 
   test('a media item with a thumbKey stores a derived thumb_url (D21)', async () => {
@@ -508,9 +557,10 @@ describe('passport attribution (T4.1)', () => {
     expect(res.status).toBe(401)
   })
 
-  // Identity reuse (docs/00 D30): an upload registers its name + handle on the
-  // author's profile so the next upload — and the passport — pre-fill them.
-  test('registers a trimmed display name and bare instagram handle on the profile', async () => {
+  // Identity reuse (docs/00 D30, D31): an upload registers its name + handle +
+  // home country on the author's profile so the next upload — and the passport
+  // — pre-fill them.
+  test('registers a trimmed display name, bare instagram handle, and home country on the profile', async () => {
     const { data: auth } = await createAnonClient().auth.signInAnonymously()
     const uid = auth.user!.id
     createdUserIds.push(uid)
@@ -524,6 +574,7 @@ describe('passport attribution (T4.1)', () => {
         caption: `${MARKER}-register`,
         authorName: '  Neo  ',
         authorLink: '@neo_raver',
+        country: 'nl',
         rightsConfirmed: true,
         embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
       }),
@@ -532,11 +583,12 @@ describe('passport attribution (T4.1)', () => {
 
     const { data: profile } = await db
       .from('profiles')
-      .select('display_name, instagram')
+      .select('display_name, instagram, home_country')
       .eq('id', uid)
       .single()
     expect(profile!.display_name).toBe('Neo') // trimmed
     expect(profile!.instagram).toBe('neo_raver') // bare handle — no "@", no URL
+    expect(profile!.home_country).toBe('NL') // normalized ISO code (D31)
   })
 
   test('once registered, a later upload credits just that moment — it never overwrites the saved identity', async () => {
@@ -556,31 +608,47 @@ describe('passport attribution (T4.1)', () => {
         }),
       )
 
-    // first upload registers both fields
+    // first upload registers all fields
     expect(
-      (await call({ caption: `${MARKER}-r1`, authorName: 'first', authorLink: 'first_ig' })).status,
+      (
+        await call({
+          caption: `${MARKER}-r1`,
+          authorName: 'first',
+          authorLink: 'first_ig',
+          country: 'nl',
+        })
+      ).status,
     ).toBe(201)
-    // second upload edits BOTH (e.g. crediting a guest) — the profile must NOT
-    // change, but the moment carries the edited credit (fill-empty, docs/00 D30)
+    // second upload edits all (e.g. crediting a guest) — the profile must NOT
+    // change, but the moment carries the edited credit (fill-empty, docs/00 D30/D31)
     expect(
-      (await call({ caption: `${MARKER}-r2`, authorName: 'guest', authorLink: 'guest_ig' })).status,
+      (
+        await call({
+          caption: `${MARKER}-r2`,
+          authorName: 'guest',
+          authorLink: 'guest_ig',
+          country: 'de',
+        })
+      ).status,
     ).toBe(201)
 
     const { data: profile } = await db
       .from('profiles')
-      .select('display_name, instagram')
+      .select('display_name, instagram, home_country')
       .eq('id', uid)
       .single()
     expect(profile!.display_name).toBe('first') // already set → not overwritten
     expect(profile!.instagram).toBe('first_ig') // already set → not overwritten
+    expect(profile!.home_country).toBe('NL') // already set → 'de' ignored
 
     const { data: moment } = await db
       .from('memories')
-      .select('author_name, author_link')
+      .select('author_name, author_link, origin_country')
       .eq('caption', `${MARKER}-r2`)
       .single()
     expect(moment!.author_name).toBe('guest') // the edit still credits this post
     expect(moment!.author_link).toBe('https://instagram.com/guest_ig')
+    expect(moment!.origin_country).toBe('DE') // per-post country, even though the profile kept 'NL'
   })
 
   test('fills each field independently — a later upload registers a handle even after the name was set', async () => {

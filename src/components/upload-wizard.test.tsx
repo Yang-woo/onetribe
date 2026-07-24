@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { renderWithIntl } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
@@ -440,7 +440,7 @@ describe('UploadWizard', () => {
     test('seeds the name and instagram fields from the saved profile', async () => {
       const user = userEvent.setup()
       renderWizard({
-        loadDefaultsImpl: async () => ({ displayName: 'Neo', instagram: 'neo_raver' }),
+        loadDefaultsImpl: async () => ({ displayName: 'Neo', instagram: 'neo_raver', country: '' }),
       })
       await fillToStep2(user)
 
@@ -454,7 +454,7 @@ describe('UploadWizard', () => {
 
     test('a pre-fill that resolves late never clobbers what the user typed', async () => {
       const user = userEvent.setup()
-      let resolveDefaults!: (v: { displayName: string; instagram: string }) => void
+      let resolveDefaults!: (v: { displayName: string; instagram: string; country: string }) => void
       renderWizard({
         loadDefaultsImpl: () => new Promise((r) => (resolveDefaults = r)),
       })
@@ -463,7 +463,7 @@ describe('UploadWizard', () => {
       const name = await screen.findByLabelText<HTMLInputElement>('display name')
       await user.type(name, 'my chosen name')
       // the profile fetch only now resolves — seeding must skip the filled field
-      resolveDefaults({ displayName: 'stale name', instagram: 'stale_ig' })
+      resolveDefaults({ displayName: 'stale name', instagram: 'stale_ig', country: '' })
       await new Promise((r) => setTimeout(r, 0))
 
       expect(name).toHaveValue('my chosen name')
@@ -471,6 +471,83 @@ describe('UploadWizard', () => {
       expect(screen.getByLabelText<HTMLInputElement>('instagram (optional)')).toHaveValue(
         'stale_ig',
       )
+    })
+  })
+
+  // Home country (docs/00 D31): pre-filled from passport → IP, editable, and
+  // sent to the server as an ISO code.
+  describe('home country (D31)', () => {
+    test('the picker starts at the IP guess; the passport home country overrides it', async () => {
+      const user = userEvent.setup()
+      renderWizard({
+        ipCountry: 'US',
+        loadDefaultsImpl: async () => ({ displayName: '', instagram: '', country: 'KR' }),
+      })
+      await fillToStep2(user)
+      const picker = screen.getByRole('combobox') as HTMLInputElement
+      // home country (KR, from the passport) wins over the IP guess (US)
+      await waitFor(() => expect(picker.value).toContain('South Korea'))
+    })
+
+    test('sends the picked country as an ISO code in the memories payload', async () => {
+      const user = userEvent.setup()
+      const calls: Array<{ url: string; init?: RequestInit }> = []
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+          const href = String(url)
+          calls.push({ url: href, init })
+          if (href.endsWith('/api/upload/presign')) {
+            return Response.json({
+              uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+              session: 'sess-token',
+            })
+          }
+          if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+          if (href.endsWith('/api/memories')) {
+            return Response.json({ moments: [{ id: 'm', takedownToken: 't' }] }, { status: 201 })
+          }
+          throw new Error(`unexpected fetch ${href}`)
+        }),
+      )
+
+      renderWizard({ ipCountry: '' })
+      await fillToStep2(user)
+      const picker = screen.getByRole('combobox')
+      await user.click(picker)
+      await user.type(picker, 'netherlands')
+      await user.click(await screen.findByRole('option', { name: 'Netherlands' }))
+      await user.click(screen.getByRole('checkbox'))
+      await user.click(screen.getByRole('button', { name: 'share my moment' }))
+
+      expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+      const memoriesCall = calls.find((c) => c.url.endsWith('/api/memories'))!
+      const payload = JSON.parse(String(memoriesCall.init?.body))
+      expect(payload.country).toBe('NL')
+    })
+
+    test('a late passport home country never clobbers a country the user already picked', async () => {
+      const user = userEvent.setup()
+      let resolveDefaults!: (v: { displayName: string; instagram: string; country: string }) => void
+      renderWizard({
+        ipCountry: '',
+        loadDefaultsImpl: () => new Promise((r) => (resolveDefaults = r)),
+      })
+      await fillToStep2(user)
+
+      // the user picks Netherlands by hand
+      const picker = screen.getByRole('combobox')
+      await user.click(picker)
+      await user.type(picker, 'netherlands')
+      await user.click(await screen.findByRole('option', { name: 'Netherlands' }))
+
+      // the profile fetch only now resolves with a DIFFERENT home country — the
+      // countryTouched guard must keep the hand-picked value (mirrors the
+      // name/instagram late-clobber test above)
+      resolveDefaults({ displayName: '', instagram: '', country: 'KR' })
+      await new Promise((r) => setTimeout(r, 0))
+
+      expect((picker as HTMLInputElement).value).toContain('Netherlands')
     })
   })
 })

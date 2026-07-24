@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { countryFlag } from '@/lib/country'
 import { momentImageSrc } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { inputClass } from './ui'
@@ -202,7 +203,9 @@ export function AdminPanel() {
                 <p className="text-xs text-muted">
                   {memory.status}
                   {memory.author_name ? ` · @${memory.author_name}` : ''}
-                  {memory.origin_country ? ` · ${memory.origin_country}` : ''}
+                  {memory.origin_country
+                    ? ` · ${countryFlag(memory.origin_country)} ${memory.origin_country}`
+                    : ''}
                 </p>
                 {memory.embed_url && (
                   <a

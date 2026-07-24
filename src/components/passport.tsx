@@ -172,6 +172,7 @@ export function Passport({
         <PassportProfile
           displayName={state.displayName}
           instagram={state.instagram}
+          homeCountry={state.homeCountry}
           api={api}
           onSaved={(next) => setState((s) => (s ? { ...s, ...next } : s))}
         />
