@@ -23,6 +23,7 @@ function open(index: number, moments = [momentFixture('a'), momentFixture('b')],
       editionById={editionById}
       onClose={onClose}
       onNavigate={onNavigate}
+      translateImpl={async () => null}
       {...extra}
     />,
   )
@@ -36,6 +37,33 @@ describe('Lightbox (moment modal)', () => {
     expect(screen.getByText('caption-a')).toBeInTheDocument()
     // the permalink to the full moment page is prominent (was an easy-to-miss link)
     expect(screen.getByRole('link', { name: /view details/ })).toHaveAttribute('href', '/en/m/a')
+  })
+
+  test('shows the caption translated in the modal teaser (D32)', async () => {
+    open(0, [momentFixture('a', { source_lang: 'en' })], {
+      translateImpl: async () => '번역된 캡션',
+    })
+    // the translation arrives asynchronously and replaces the original
+    expect(await screen.findByText('번역된 캡션')).toBeInTheDocument()
+    // the teaser has no original toggle — that (and the full text) lives on the
+    // page behind "자세히 보기"
+    expect(
+      screen.queryByRole('button', { name: /show original|show translation/ }),
+    ).not.toBeInTheDocument()
+  })
+
+  test('falls back to the original caption when translation is unavailable', async () => {
+    open(0, [momentFixture('a', { source_lang: 'en' })], {
+      translateImpl: async () => null,
+    })
+    await Promise.resolve()
+    expect(screen.getByText('caption-a')).toBeInTheDocument()
+  })
+
+  test('the caption is clamped to a teaser, not shown in full', () => {
+    open(0, [momentFixture('a')])
+    // line-clamp keeps the modal a preview; the full text is on /m/[id]
+    expect(screen.getByText('caption-a').className).toContain('line-clamp-3')
   })
 
   test('links the uploader Instagram handle when present', () => {

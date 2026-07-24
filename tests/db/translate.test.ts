@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto'
-import { afterAll, describe, expect, test } from 'vitest'
+import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { createDeeplProvider } from '@/lib/translate/deepl'
 import { captionHash, translateWithCache, type TranslationProvider } from '@/lib/translate'
-import { createServiceClient } from './helpers'
+import { createTranslateHandler } from '@/server/translate'
+import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
 /**
  * Translation cache rules straight from docs/16 D:
@@ -33,9 +34,21 @@ function fakeProvider(name = 'fake'): TranslationProvider & { calls: number } {
   return provider
 }
 
+const anon = createAnonClient()
+const memIds: string[] = []
+
 afterAll(async () => {
   await db.from('translations').delete().in('source_hash', hashes)
+  if (memIds.length) await db.from('memories').delete().in('id', memIds)
 })
+
+function post(body: unknown): Request {
+  return new Request('http://localhost/api/translate', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
 
 describe('translateWithCache', () => {
   test('miss calls the provider once and caches with the provider name', async () => {
@@ -112,6 +125,67 @@ describe('translateWithCache', () => {
     const viaB = await translateWithCache(db, b, text, 'it')
     expect(viaB.cached).toBe(true)
     expect(b.calls).toBe(0)
+  })
+})
+
+// The modal's on-open translation endpoint (docs/00 D32). memoryId in, never
+// arbitrary text — the caption is read with the ANON client, so only live rows
+// translate. Real Postgres + anon RLS, fake provider (external boundary).
+describe('createTranslateHandler', () => {
+  let eventId: string
+  beforeAll(async () => {
+    eventId = await eventIdByYear(db, 2023)
+  })
+  const deps = (provider: TranslationProvider | null = fakeProvider('deepl-fake')) => ({
+    db,
+    anonDb: anon,
+    provider,
+  })
+
+  async function seed(overrides: Record<string, unknown>): Promise<string> {
+    const id = await seedMemory(db, { event_id: eventId, ...overrides } as never)
+    memIds.push(id)
+    return id
+  }
+
+  test('translates a live caption into the viewer locale', async () => {
+    const caption = trackedText('the red circle at sunset')
+    const id = await seed({ caption, source_lang: 'en' })
+    const res = await createTranslateHandler(deps())(post({ memoryId: id, locale: 'ko' }))
+    expect(res.status).toBe(200)
+    expect((await res.json()).text).toBe(`[deepl-fake:ko] ${caption}`)
+  })
+
+  test('same source and target language returns the original (no provider call)', async () => {
+    const provider = fakeProvider('deepl-fake')
+    const caption = trackedText('same lang')
+    const id = await seed({ caption, source_lang: 'ko' })
+    const res = await createTranslateHandler(deps(provider))(post({ memoryId: id, locale: 'ko' }))
+    expect((await res.json()).text).toBe(caption)
+    expect(provider.calls).toBe(0)
+  })
+
+  test('no provider configured returns the original, never a blank', async () => {
+    const caption = trackedText('no engine')
+    const id = await seed({ caption, source_lang: 'en' })
+    const res = await createTranslateHandler(deps(null))(post({ memoryId: id, locale: 'ko' }))
+    expect((await res.json()).text).toBe(caption)
+  })
+
+  test('a hidden moment is invisible to anon — nothing to translate', async () => {
+    const caption = trackedText('hidden caption')
+    const id = await seed({ caption, source_lang: 'en', status: 'hidden' })
+    const res = await createTranslateHandler(deps())(post({ memoryId: id, locale: 'ko' }))
+    expect(res.status).toBe(200)
+    expect((await res.json()).text).toBeNull()
+  })
+
+  test('invalid memoryId or unknown locale is a 400', async () => {
+    const bad = await createTranslateHandler(deps())(post({ memoryId: 'not-a-uuid', locale: 'ko' }))
+    expect(bad.status).toBe(400)
+    const id = await seed({ caption: trackedText('loc'), source_lang: 'en' })
+    const badLoc = await createTranslateHandler(deps())(post({ memoryId: id, locale: 'xx' }))
+    expect(badLoc.status).toBe(400)
   })
 })
 

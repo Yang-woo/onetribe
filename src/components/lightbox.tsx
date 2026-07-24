@@ -2,11 +2,30 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { countryFlag, countryName } from '@/lib/country'
 import { editionLine, relativeTime } from '@/lib/format'
 import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
 import { SkeletonImage } from './skeleton-image'
+
+/** On-open caption translation via /api/translate (docs/00 D32). Best-effort:
+ *  any failure resolves null and the modal keeps the original caption. */
+export type TranslateImpl = (memoryId: string, locale: string) => Promise<string | null>
+
+const defaultTranslate: TranslateImpl = async (memoryId, locale) => {
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ memoryId, locale }),
+    })
+    if (!res.ok) return null
+    const data = (await res.json()) as { text?: string | null }
+    return typeof data.text === 'string' ? data.text : null
+  } catch {
+    return null
+  }
+}
 
 /**
  * Wall moment modal — docs/15 §1, docs/00 (wall UX pass). Tapping a card opens
@@ -21,6 +40,7 @@ export function Lightbox({
   editionById,
   onClose,
   onNavigate,
+  translateImpl = defaultTranslate,
 }: {
   moments: Moment[]
   index: number
@@ -28,6 +48,8 @@ export function Lightbox({
   editionById?: Map<string, EditionChip>
   onClose: () => void
   onNavigate: (index: number) => void
+  /** test seam — the real impl hits /api/translate */
+  translateImpl?: TranslateImpl
 }) {
   const t = useTranslations('moment')
   const tw = useTranslations('wall')
@@ -146,7 +168,17 @@ export function Lightbox({
               {editionLine(edition)}
             </p>
           )}
-          {moment.caption && <p className="text-sm text-paper">{moment.caption}</p>}
+          {moment.caption && (
+            // Keyed on moment+locale so navigating remounts it with fresh
+            // translation state (no synchronous reset in an effect).
+            <ModalCaption
+              key={`${moment.id}-${locale}`}
+              memoryId={moment.id}
+              original={moment.caption}
+              locale={locale}
+              translateImpl={translateImpl}
+            />
+          )}
           <span className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-muted">
             {igLink ? (
               <a
@@ -176,4 +208,41 @@ export function Lightbox({
       </div>
     </div>
   )
+}
+
+/**
+ * The modal caption is a TEASER (docs/00 D32): the viewer-language caption,
+ * clamped to 3 lines. Translated on open so the glance is already localized,
+ * but the full text, the original toggle, sharing and report all live on
+ * /m/[id] — that's what the "자세히 보기 ↗" permalink is for. Mounted with a
+ * moment+locale key so each moment gets fresh translation state; the fetch is
+ * best-effort and the original shows until (and unless) a real translation lands.
+ */
+function ModalCaption({
+  memoryId,
+  original,
+  locale,
+  translateImpl,
+}: {
+  memoryId: string
+  original: string
+  locale: string
+  translateImpl: TranslateImpl
+}) {
+  const [translated, setTranslated] = useState<string | null>(null)
+
+  useEffect(() => {
+    const trimmed = original.trim()
+    if (!trimmed) return
+    let alive = true
+    void translateImpl(memoryId, locale).then((text) => {
+      // Only surface a genuine translation — an echo of the original changes nothing.
+      if (alive && text && text.trim() !== trimmed) setTranslated(text)
+    })
+    return () => {
+      alive = false
+    }
+  }, [memoryId, original, locale, translateImpl])
+
+  return <p className="line-clamp-3 text-sm text-paper">{translated ?? original}</p>
 }
