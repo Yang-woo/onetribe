@@ -20,6 +20,7 @@
   },
   "moment": {
     "openMoment": "open moment",
+    "viewDetails": "view details",
     "close": "close",
     "previous": "previous",
     "next": "next",

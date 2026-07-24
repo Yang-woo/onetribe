@@ -20,6 +20,7 @@
   },
   "moment": {
     "openMoment": "moment openen",
+    "viewDetails": "details bekijken",
     "close": "sluiten",
     "previous": "vorige",
     "next": "volgende",

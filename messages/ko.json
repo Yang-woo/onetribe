@@ -20,6 +20,7 @@
   },
   "moment": {
     "openMoment": "순간 열기",
+    "viewDetails": "자세히 보기",
     "close": "닫기",
     "previous": "이전",
     "next": "다음",

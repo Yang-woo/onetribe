@@ -20,6 +20,7 @@
   },
   "moment": {
     "openMoment": "otwórz moment",
+    "viewDetails": "zobacz szczegóły",
     "close": "zamknij",
     "previous": "poprzedni",
     "next": "następny",

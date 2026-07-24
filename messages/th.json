@@ -20,6 +20,7 @@
   },
   "moment": {
     "openMoment": "เปิดช่วงเวลา",
+    "viewDetails": "ดูรายละเอียด",
     "close": "ปิด",
     "previous": "ก่อนหน้า",
     "next": "ถัดไป",

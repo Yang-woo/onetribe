@@ -127,7 +127,7 @@ export function Lightbox({
             href={`/m/${moment.id}`}
             className="rounded-full border border-line px-4 py-1.5 text-sm text-flame hover:border-orange hover:text-orange"
           >
-            {t('openMoment')} ↗
+            {t('viewDetails')} ↗
           </Link>
           <button
             type="button"

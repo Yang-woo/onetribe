@@ -6,7 +6,7 @@ import { momentFixture, renderWithIntl } from '@/test-utils'
 import { Lightbox } from './lightbox'
 
 // Spec: docs/15 §1 + wall UX pass — tapping a card opens the moment IN the
-// modal (caption, edition, Instagram) with a clear "open moment ↗" permalink;
+// modal (caption, edition, Instagram) with a clear "view details ↗" permalink;
 // Esc / backdrop close, a click on the content panel does not.
 
 const editionById = new Map<string, EditionChip>([
@@ -35,7 +35,7 @@ describe('Lightbox (moment modal)', () => {
     expect(screen.getByText('2024 — Power of the Tribe')).toBeInTheDocument()
     expect(screen.getByText('caption-a')).toBeInTheDocument()
     // the permalink to the full moment page is prominent (was an easy-to-miss link)
-    expect(screen.getByRole('link', { name: /open moment/ })).toHaveAttribute('href', '/en/m/a')
+    expect(screen.getByRole('link', { name: /view details/ })).toHaveAttribute('href', '/en/m/a')
   })
 
   test('links the uploader Instagram handle when present', () => {
