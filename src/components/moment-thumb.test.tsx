@@ -26,7 +26,7 @@ describe('MomentThumb', () => {
     expect(onOpen).toHaveBeenCalledTimes(1)
   })
 
-  test('the @handle is a separate Instagram link — not inside the open trigger', () => {
+  test('the display name is a separate Instagram link — not inside the open trigger', () => {
     renderWithIntl(
       <MomentThumb
         moment={momentFixture('a', {
@@ -37,16 +37,19 @@ describe('MomentThumb', () => {
       />,
     )
 
+    // the name is shown (no @ on the display name); the @ lives on the handle in
+    // the link's accessible name (docs/00 D30)
     const link = screen.getByRole('link', { name: /Instagram @raver/ })
     expect(link).toHaveAttribute('href', 'https://instagram.com/raver')
     expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveTextContent('@raver')
+    expect(link).toHaveTextContent('raver')
+    expect(link).not.toHaveTextContent('@raver')
     // distinct hit area: the link must not be nested in the open button (an <a>
     // inside a <button> would be invalid and would swallow the Instagram click).
     expect(screen.getByRole('button', { name: 'caption-a' }).contains(link)).toBe(false)
   })
 
-  test('no Instagram link when the uploader gave no handle', () => {
+  test('the display name is plain text when the uploader gave no handle', () => {
     renderWithIntl(
       <MomentThumb
         moment={momentFixture('a', { author_name: 'raver', author_link: null })}
@@ -54,7 +57,7 @@ describe('MomentThumb', () => {
       />,
     )
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
-    expect(screen.getByText('@raver')).toBeInTheDocument()
+    expect(screen.getByText('raver')).toBeInTheDocument()
   })
 
   test('carries the edition tag (year + anthem initials)', () => {

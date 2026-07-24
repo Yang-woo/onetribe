@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { countryFlag, countryName } from '@/lib/country'
 import { relativeTime } from '@/lib/format'
 import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
+import { AuthorTag } from './author-tag'
 import { SkeletonImage } from './skeleton-image'
 
 /** Anthem → initials, each word's first letter, ≤4: "Power of the Tribe" → "POTT". */
@@ -40,7 +41,6 @@ export function MomentThumb({
   /** Opens the moment modal for this card; omitted where the thumb is inert. */
   onOpen?: () => void
 }) {
-  const t = useTranslations('wall')
   const tm = useTranslations('moment')
   const locale = useLocale()
   const src = momentImageSrc(moment, { preferThumb: true })
@@ -48,8 +48,6 @@ export function MomentThumb({
 
   const initials = edition ? anthemInitials(edition.edition) : null
   const tag = edition ? (initials ? `${edition.year} ${initials}` : String(edition.year)) : null
-  const author = moment.author_name ? `@${moment.author_name}` : t('anonymous')
-  const igLink = moment.author_name ? moment.author_link : null
   const sep = (
     <span aria-hidden="true" className="text-[#6e655c]">
       ·
@@ -125,22 +123,10 @@ export function MomentThumb({
       <figcaption className="flex flex-col gap-0.5 px-3 py-2">
         {moment.caption && <span className="text-sm text-paper">{moment.caption}</span>}
         <span className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
-          {/* @handle links straight to Instagram when the uploader gave one —
-              a separate hit area from the image so the wall can reach it without
-              opening the modal. */}
-          {igLink ? (
-            <a
-              href={igLink}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              aria-label={`Instagram ${author}`}
-              className="text-flame hover:underline"
-            >
-              {author}
-            </a>
-          ) : (
-            <span>{author}</span>
-          )}
+          {/* Display name (or @handle) — links to Instagram when the uploader
+              gave one; a separate hit area from the image so the wall reaches it
+              without opening the modal (docs/00 D30). */}
+          <AuthorTag moment={moment} />
           {moment.origin_country && (
             <>
               {sep}

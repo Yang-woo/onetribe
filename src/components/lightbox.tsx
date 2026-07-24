@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { countryFlag, countryName } from '@/lib/country'
 import { editionLine, relativeTime } from '@/lib/format'
 import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
+import { AuthorTag } from './author-tag'
 import { SkeletonImage } from './skeleton-image'
 
 /** On-open caption translation via /api/translate (docs/00 D32). Best-effort:
@@ -52,7 +53,6 @@ export function Lightbox({
   translateImpl?: TranslateImpl
 }) {
   const t = useTranslations('moment')
-  const tw = useTranslations('wall')
   const locale = useLocale()
   const moment = moments[index]
   const touchStartX = useRef<number | null>(null)
@@ -78,8 +78,6 @@ export function Lightbox({
 
   const src = momentImageSrc(moment) ?? undefined
   const edition = editionById?.get(moment.event_id)
-  const author = moment.author_name ? `@${moment.author_name}` : tw('anonymous')
-  const igLink = moment.author_name ? moment.author_link : null
   const sep = (
     <span aria-hidden="true" className="text-[#6e655c]">
       ·
@@ -180,19 +178,7 @@ export function Lightbox({
             />
           )}
           <span className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-muted">
-            {igLink ? (
-              <a
-                href={igLink}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                aria-label={`Instagram ${author}`}
-                className="text-flame hover:underline"
-              >
-                {author}
-              </a>
-            ) : (
-              <span>{author}</span>
-            )}
+            <AuthorTag moment={moment} />
             {moment.origin_country && (
               <>
                 {sep}
