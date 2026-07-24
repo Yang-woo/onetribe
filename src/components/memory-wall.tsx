@@ -171,21 +171,19 @@ export function MemoryWall({
 
       <div className="columns-2 gap-3 md:columns-3 lg:columns-4">
         {moments.map((moment, index) => (
-          <button
+          <MomentThumb
             key={moment.id}
-            type="button"
-            onClick={() => setLightboxIndex(index)}
-            className="block w-full text-left"
-            aria-label={moment.caption ?? 'open moment'}
-          >
-            <MomentThumb moment={moment} edition={editionById?.get(moment.event_id)} />
-          </button>
+            moment={moment}
+            edition={editionById?.get(moment.event_id)}
+            onOpen={() => setLightboxIndex(index)}
+          />
         ))}
       </div>
       {lightboxIndex !== null && (
         <Lightbox
           moments={moments}
           index={lightboxIndex}
+          editionById={editionById}
           onClose={() => setLightboxIndex(null)}
           onNavigate={setLightboxIndex}
         />

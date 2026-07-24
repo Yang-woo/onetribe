@@ -87,6 +87,18 @@ export function normalizeYoutubeUrl(raw: string): string | null {
   return `https://www.youtube.com/watch?v=${id}`
 }
 
+/**
+ * Media aspect ratio (width / height) for zero-shift skeletons (docs/00 D32).
+ * Clamps to a sane portrait..landscape band and rounds to 3 dp; anything
+ * outside (or absent / non-finite) is nulled so a bad client value can never
+ * distort a card — the skeleton just falls back to a placeholder ratio.
+ */
+export function clampAspect(value: number | undefined): number | null {
+  if (value == null || !Number.isFinite(value)) return null
+  if (value < 0.2 || value > 5) return null
+  return Math.round(value * 1000) / 1000
+}
+
 /** Accepts "@handle" or an instagram.com URL, returns a profile URL — or null. */
 export function normalizeInstagramLink(raw: string): string | null {
   const handle = raw.trim().replace(/^@/, '')
@@ -205,6 +217,11 @@ const memoriesSchema = z
         z.object({
           key: z.string().min(1),
           thumbKey: z.string().min(1).optional(),
+          // Client-captured media ratio (docs/00 D32) — clamped by clampAspect
+          // in the handler, never trusted as-is. An out-of-range value is nulled
+          // (falls back to a placeholder), not 400'd, so a quirky decode never
+          // fails an otherwise-valid upload.
+          aspectRatio: z.number().finite().positive().optional(),
           contentType: z.enum(mimeValues),
         }),
       )
@@ -336,6 +353,7 @@ export function createMemoriesHandler(deps: UploadDeps) {
       media_kind: 'image' | 'gif' | 'clip'
       media_url?: string
       thumb_url?: string | null
+      aspect_ratio?: number | null
       embed_url?: string
       clip_start?: number | null
       clip_length?: number | null
@@ -349,6 +367,7 @@ export function createMemoriesHandler(deps: UploadDeps) {
         // Both URLs are derived from server-held keys — client URLs are never trusted.
         media_url: deps.storage.publicUrl(m.key),
         thumb_url: m.thumbKey ? deps.storage.publicUrl(m.thumbKey) : null,
+        aspect_ratio: clampAspect(m.aspectRatio),
       }))
     } else {
       const embedUrl = normalizeYoutubeUrl(input.embed!.url)

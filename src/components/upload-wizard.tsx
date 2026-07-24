@@ -6,7 +6,12 @@ import { useEffect, useRef, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import { createSupabasePassportBackend, type ProfileDefaults } from '@/lib/passport/backend'
 import { supabaseBrowser } from '@/lib/supabase/browser'
-import { prepareForUpload, prepareThumb, validateFiles } from '@/lib/upload/client-image'
+import {
+  imageAspectRatio,
+  prepareForUpload,
+  prepareThumb,
+  validateFiles,
+} from '@/lib/upload/client-image'
 import {
   ALLOWED_MIME,
   MAX_AUTHOR_NAME_LENGTH,
@@ -44,6 +49,9 @@ interface Picked {
   /** wall thumbnail (docs/00 D21), chained off `prepare` at selection so it
    *  overlaps step 2 too. Best-effort — resolves null if generation fails. */
   prepareThumb: Promise<File | null>
+  /** media aspect ratio for zero-shift skeletons (docs/00 D32). Best-effort —
+   *  resolves null if the source can't be decoded. */
+  aspect: Promise<number | null>
 }
 
 interface DoneMoment {
@@ -78,6 +86,7 @@ export function UploadWizard({
   ipCountry = '',
   prepareImpl = prepareForUpload,
   prepareThumbImpl = prepareThumb,
+  aspectImpl = imageAspectRatio,
   loadDefaultsImpl = loadUploadDefaults,
 }: {
   editions: EditionChip[]
@@ -88,6 +97,8 @@ export function UploadWizard({
   prepareImpl?: (file: File) => Promise<File>
   /** test seam — thumbnail canvas re-encode can't run in jsdom either */
   prepareThumbImpl?: (file: File) => Promise<File>
+  /** test seam — createImageBitmap can't run in jsdom */
+  aspectImpl?: (file: File) => Promise<number | null>
   /** test seam — passport pre-fill needs Supabase env at runtime */
   loadDefaultsImpl?: () => Promise<ProfileDefaults | null>
 }) {
@@ -181,7 +192,10 @@ export function UploadWizard({
       // Thumbnail from the compressed output, kicked off now so its canvas work
       // overlaps step 2 instead of blocking submit. Never rejects (best-effort).
       const prepareThumb = prepare.then((f) => prepareThumbImpl(f)).catch(() => null)
-      return { file, url: URL.createObjectURL(file), prepare, prepareThumb }
+      // Aspect ratio from the source (canvas preserves it) — best-effort, kicked
+      // off now so it's ready by submit (docs/00 D32).
+      const aspect = aspectImpl(file).catch(() => null)
+      return { file, url: URL.createObjectURL(file), prepare, prepareThumb, aspect }
     })
     setPicked((prev) => [...prev, ...entries])
   }
@@ -263,6 +277,9 @@ export function UploadWizard({
         const usableThumbs = thumbs.map((t) =>
           t && t.type === THUMB_MIME && t.size <= THUMB_MAX_UPLOAD_BYTES ? t : null,
         )
+        // Aspect ratios are computed from the source, independent of prepare, so
+        // they never need the recompute path above (docs/00 D32).
+        const aspects = await Promise.all(picked.map((p) => p.aspect))
         const presignRes = await fetch('/api/upload/presign', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -336,6 +353,7 @@ export function UploadWizard({
           media: items.map((it, i) => ({
             key: it.upload.key,
             ...(thumbUploaded[i] && it.upload.thumb ? { thumbKey: it.upload.thumb.key } : {}),
+            ...(aspects[i] != null ? { aspectRatio: aspects[i] } : {}),
             contentType: it.file.type,
           })),
         }

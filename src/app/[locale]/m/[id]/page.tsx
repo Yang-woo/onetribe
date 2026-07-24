@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { CaptionToggle } from '@/components/caption-toggle'
 import { JsonLd } from '@/components/json-ld'
 import { ReportButton } from '@/components/report-button'
+import { SkeletonImage } from '@/components/skeleton-image'
 import { Link } from '@/i18n/navigation'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/locales'
 import {
@@ -128,13 +129,30 @@ export default async function MomentPage({
       {jsonLd && <JsonLd data={jsonLd} />}
       {moment.media_kind === 'clip' && moment.embed_url ? (
         <a href={moment.embed_url} target="_blank" rel="noopener noreferrer">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {src && <img src={src} alt={moment.caption ?? 'moment'} className="w-full rounded-lg" />}
+          {src && (
+            <SkeletonImage
+              src={src}
+              alt={moment.caption ?? 'moment'}
+              loading="eager"
+              defaultAspectRatio="16 / 9"
+              wrapperClassName="w-full"
+              className="w-full rounded-lg"
+            />
+          )}
           <span className="mt-2 block text-sm text-flame">{t('watchOnYoutube')}</span>
         </a>
       ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        src && <img src={src} alt={moment.caption ?? 'moment'} className="w-full rounded-lg" />
+        src && (
+          <SkeletonImage
+            src={src}
+            alt={moment.caption ?? 'moment'}
+            loading="eager"
+            aspectRatio={moment.aspect_ratio}
+            defaultAspectRatio="3 / 2"
+            wrapperClassName="w-full"
+            className="w-full rounded-lg"
+          />
+        )
       )}
 
       <div className="flex flex-col gap-1">
@@ -150,7 +168,7 @@ export default async function MomentPage({
             <a
               href={moment.author_link}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener noreferrer nofollow"
               className="text-sm text-flame hover:underline"
             >
               @{moment.author_name}

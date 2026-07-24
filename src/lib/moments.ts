@@ -9,7 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 // Single literal on purpose — concatenation breaks supabase-js type inference.
 // This is the SSOT for anon-readable columns; the RLS grant test imports it.
 export const PUBLIC_MEMORY_COLUMNS =
-  'id, event_id, media_url, thumb_url, media_kind, embed_url, clip_start, clip_length, caption, source_lang, author_name, author_link, author_id, origin_country, status, created_at'
+  'id, event_id, media_url, thumb_url, media_kind, embed_url, clip_start, clip_length, caption, source_lang, author_name, author_link, author_id, origin_country, aspect_ratio, status, created_at'
 
 export interface Moment {
   id: string
@@ -26,6 +26,9 @@ export interface Moment {
   author_link: string | null
   author_id: string | null
   origin_country: string | null
+  /** media width / height, for zero-shift skeletons (docs/00 D32). null =
+   *  unknown (embeds, legacy rows) → the skeleton uses a placeholder ratio. */
+  aspect_ratio: number | null
   status: string
   created_at: string
 }

@@ -29,6 +29,7 @@ export function momentFixture(id: string, overrides: Partial<Moment> = {}): Mome
     author_link: null,
     author_id: null,
     origin_country: null,
+    aspect_ratio: null,
     status: 'live',
     created_at: '2026-07-12T00:00:00Z',
     ...overrides,

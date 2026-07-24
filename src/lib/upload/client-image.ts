@@ -71,3 +71,23 @@ export async function prepareThumb(file: File): Promise<File> {
     fileType: THUMB_MIME,
   })
 }
+
+/**
+ * The media's aspect ratio (width / height) so the wall skeleton reserves the
+ * exact box before the photo decodes (docs/00 D32). Best-effort: any decode
+ * failure (unsupported type, no createImageBitmap, jsdom) resolves null and the
+ * upload proceeds without a ratio — the server clamps whatever we send anyway.
+ * Read from the source file: canvas re-encoding preserves the ratio, so we
+ * don't wait on prepare/prepareThumb.
+ */
+export async function imageAspectRatio(file: File): Promise<number | null> {
+  if (typeof createImageBitmap !== 'function') return null
+  try {
+    const bitmap = await createImageBitmap(file)
+    const ratio = bitmap.width / bitmap.height
+    bitmap.close()
+    return Number.isFinite(ratio) && ratio > 0 ? ratio : null
+  } catch {
+    return null
+  }
+}

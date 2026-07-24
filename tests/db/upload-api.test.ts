@@ -315,6 +315,35 @@ describe('POST /api/memories — file flow', () => {
     }
   })
 
+  test('media aspect_ratio round-trips; an out-of-range value is nulled (D32)', async () => {
+    const { uploads, session } = await presignFiles([
+      { contentType: 'image/jpeg', size: 1000 },
+      { contentType: 'image/gif', size: 2000 },
+    ])
+    const res = await createMemoriesHandler(deps())(
+      post({
+        session,
+        eventId,
+        caption: `${MARKER}-aspect`,
+        rightsConfirmed: true,
+        media: [
+          { key: uploads[0].key, contentType: 'image/jpeg', aspectRatio: 1.5 }, // valid
+          { key: uploads[1].key, contentType: 'image/gif', aspectRatio: 99 }, // out of range
+        ],
+      }),
+    )
+    expect(res.status).toBe(201)
+
+    // anon reads it (it's in PUBLIC_MEMORY_COLUMNS) — the wall's real path
+    const { data: rows } = await anon
+      .from('memories')
+      .select('media_kind, aspect_ratio')
+      .eq('caption', `${MARKER}-aspect`)
+    const byKind = Object.fromEntries(rows!.map((r) => [r.media_kind, r.aspect_ratio]))
+    expect(byKind.image).toBe(1.5)
+    expect(byKind.gif).toBeNull() // 99 is out of the sane band → placeholder fallback
+  })
+
   test('the picked country is validated: an unassigned code is dropped, not stored (D31)', async () => {
     const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
     const res = await createMemoriesHandler(deps())(

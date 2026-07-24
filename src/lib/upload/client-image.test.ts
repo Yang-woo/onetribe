@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest'
-import { prepareForUpload, validateFiles } from './client-image'
+import { afterEach, describe, expect, test, vi } from 'vitest'
+import { imageAspectRatio, prepareForUpload, validateFiles } from './client-image'
 import { MAX_FILES_PER_MOMENT, MAX_UPLOAD_BYTES } from './constants'
 
 // Validation rules from docs/15 §2 (≤5 files) and docs/17 T2.1 (MIME/size).
@@ -47,5 +47,36 @@ describe('prepareForUpload', () => {
     })
     const prepared = await prepareForUpload(gif)
     expect(prepared).toBe(gif)
+  })
+})
+
+describe('imageAspectRatio (docs/00 D32, best-effort)', () => {
+  const file = new File([new Uint8Array([1])], 'x.jpg', { type: 'image/jpeg' })
+  const globalRef = globalThis as { createImageBitmap?: unknown }
+
+  afterEach(() => {
+    delete globalRef.createImageBitmap
+    vi.restoreAllMocks()
+  })
+
+  test('returns width / height from the decoded bitmap', async () => {
+    const close = vi.fn()
+    globalRef.createImageBitmap = vi.fn(async () => ({ width: 1200, height: 800, close }))
+    expect(await imageAspectRatio(file)).toBe(1.5)
+    expect(close).toHaveBeenCalled() // no bitmap leak
+  })
+
+  test('null when the environment has no createImageBitmap (jsdom, older browsers)', async () => {
+    expect(await imageAspectRatio(file)).toBeNull()
+  })
+
+  test('null when decoding throws or yields a degenerate size', async () => {
+    globalRef.createImageBitmap = vi.fn(async () => {
+      throw new Error('decode failed')
+    })
+    expect(await imageAspectRatio(file)).toBeNull()
+
+    globalRef.createImageBitmap = vi.fn(async () => ({ width: 0, height: 0, close: vi.fn() }))
+    expect(await imageAspectRatio(file)).toBeNull()
   })
 })

@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'vitest'
-import { fillEmptyIdentity, normalizeInstagramLink, normalizeYoutubeUrl } from './upload'
+import {
+  clampAspect,
+  fillEmptyIdentity,
+  normalizeInstagramLink,
+  normalizeYoutubeUrl,
+} from './upload'
 
 // Pure link normalization — expectations derived from docs/00 D9 P7
 // (YouTube only) and docs/15 §2 (optional IG link).
@@ -51,6 +56,27 @@ describe('normalizeInstagramLink', () => {
     expect(normalizeInstagramLink('https://evil.com/onetribe')).toBeNull()
     expect(normalizeInstagramLink('https://instagram.com/a/b/c')).toBeNull()
     expect(normalizeInstagramLink('<script>')).toBeNull()
+  })
+})
+
+// Media aspect ratio (docs/00 D32) — clamped to a sane band, never trusted.
+describe('clampAspect', () => {
+  test('keeps an in-range ratio, rounded to 3 dp (docs/00 D32)', () => {
+    expect(clampAspect(1.3333333)).toBe(1.333)
+    expect(clampAspect(0.75)).toBe(0.75)
+    expect(clampAspect(1)).toBe(1)
+  })
+  test('nulls out-of-range, absent and non-finite values (never distort a card)', () => {
+    expect(clampAspect(undefined)).toBeNull()
+    expect(clampAspect(0)).toBeNull()
+    expect(clampAspect(0.1)).toBeNull() // below the portrait floor
+    expect(clampAspect(6)).toBeNull() // above the landscape ceiling
+    expect(clampAspect(Number.NaN)).toBeNull()
+    expect(clampAspect(Number.POSITIVE_INFINITY)).toBeNull()
+  })
+  test('accepts the exact boundaries', () => {
+    expect(clampAspect(0.2)).toBe(0.2)
+    expect(clampAspect(5)).toBe(5)
   })
 })
 
