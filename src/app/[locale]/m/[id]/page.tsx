@@ -1,4 +1,4 @@
-import { cache } from 'react'
+import { cache, type ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -7,6 +7,8 @@ import { JsonLd } from '@/components/json-ld'
 import { ReportButton } from '@/components/report-button'
 import { SkeletonImage } from '@/components/skeleton-image'
 import { Link } from '@/i18n/navigation'
+import { countryFlag, countryName } from '@/lib/country'
+import { instagramHandle } from '@/lib/format'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/locales'
 import {
   EVENT_LINE_COLUMNS,
@@ -163,19 +165,48 @@ export default async function MomentPage({
             translated={translatedCaption ?? moment.caption}
           />
         )}
-        {moment.author_name &&
-          (moment.author_link ? (
-            <a
-              href={moment.author_link}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              className="text-sm text-flame hover:underline"
-            >
-              @{moment.author_name}
-            </a>
-          ) : (
-            <p className="text-sm text-muted">@{moment.author_name}</p>
-          ))}
+        {(() => {
+          // Attribution: display name and Instagram handle are DISTINCT fields
+          // (docs/00 D30) — the name is a name, the @ belongs on the handle. Plus
+          // the origin country (docs/00 D31), which the wall card shows but this
+          // page was dropping.
+          const handle = instagramHandle(moment.author_link)
+          const flag = moment.origin_country ? countryFlag(moment.origin_country) : ''
+          const country = moment.origin_country ? countryName(moment.origin_country, locale) : null
+          if (!moment.author_name && !handle && !country) return null
+          const sep = <span className="text-[#6e655c]">·</span>
+          const parts: ReactNode[] = []
+          if (moment.author_name)
+            parts.push(<span className="text-paper">{moment.author_name}</span>)
+          if (handle)
+            parts.push(
+              <a
+                href={moment.author_link!}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="text-flame hover:underline"
+              >
+                @{handle}
+              </a>,
+            )
+          if (country)
+            parts.push(
+              <span title={country}>
+                {flag ? `${flag} ` : ''}
+                {country}
+              </span>,
+            )
+          return (
+            <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted">
+              {parts.map((part, i) => (
+                <span key={i} className="flex items-center gap-1.5">
+                  {i > 0 && sep}
+                  {part}
+                </span>
+              ))}
+            </div>
+          )
+        })()}
       </div>
 
       <div className="flex items-center justify-between">

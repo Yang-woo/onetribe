@@ -19,3 +19,19 @@ export function relativeTime(iso: string, locale: string): string {
 export function editionLine(edition: { year: number; edition: string | null }): string {
   return edition.edition ? `${edition.year} — ${edition.edition}` : String(edition.year)
 }
+
+/**
+ * The bare Instagram handle from a stored `author_link`
+ * (`https://instagram.com/lee_yangwoo` → `lee_yangwoo`). The `@` prefix belongs
+ * on the handle, never on the display name (author_name) — the two are distinct
+ * fields (docs/00 D30). Returns null when there's no link or it doesn't parse.
+ */
+export function instagramHandle(authorLink: string | null | undefined): string | null {
+  if (!authorLink) return null
+  try {
+    const path = new URL(authorLink).pathname.replace(/^\/+|\/+$/g, '')
+    return path || null
+  } catch {
+    return null
+  }
+}
