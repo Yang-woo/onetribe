@@ -11,7 +11,8 @@ import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from
  */
 
 const service = createServiceClient()
-const handler = createAccountDeleteHandler({ db: service })
+const ADMIN_EMAIL = `operator-${randomUUID().slice(0, 8)}@onetribe.world`
+const handler = createAccountDeleteHandler({ db: service, adminEmails: [ADMIN_EMAIL] })
 
 let eventId: string
 const fixtureIds: string[] = []
@@ -44,6 +45,45 @@ describe('account delete route', () => {
   test('garbage token → 401', async () => {
     const res = await handler(deleteRequest('not-a-jwt'))
     expect(res.status).toBe(401)
+  })
+
+  test('an ADMIN_EMAILS account is refused (403) and survives', async () => {
+    const password = `guard-${randomUUID()}`
+    const { data, error } = await service.auth.admin.createUser({
+      email: ADMIN_EMAIL,
+      password,
+      email_confirm: true,
+    })
+    if (error || !data.user) throw new Error(`operator fixture: ${error?.message}`)
+    userIds.push(data.user.id)
+    // an operator-authored moment — a refused delete must not touch it either
+    // (author_id FK needs the profile row, same as the app's upload path)
+    await service.from('profiles').upsert({ id: data.user.id, display_name: 'operator' })
+    const opMemoryId = await seedMemory(service, {
+      event_id: eventId,
+      caption: `operator-${randomUUID().slice(0, 8)}`,
+      author_id: data.user.id,
+      author_name: 'operator',
+      author_link: 'https://instagram.com/operator',
+    })
+    fixtureIds.push(opMemoryId)
+    const client = createAnonClient()
+    const { data: auth } = await client.auth.signInWithPassword({ email: ADMIN_EMAIL, password })
+
+    const res = await handler(deleteRequest(auth.session!.access_token))
+    expect(res.status).toBe(403)
+
+    // the account must still exist — the whole point of the guard
+    const { data: alive } = await service.auth.admin.getUserById(data.user.id)
+    expect(alive.user?.email).toBe(ADMIN_EMAIL)
+    // and the refusal ran zero side effects — author credit untouched
+    const { data: moment } = await service
+      .from('memories')
+      .select('author_name, author_link')
+      .eq('id', opMemoryId)
+      .single()
+    expect(moment?.author_name).toBe('operator')
+    expect(moment?.author_link).toBe('https://instagram.com/operator')
   })
 
   test('a signed-in user deletes themselves: cascade + anonymized moments', async () => {

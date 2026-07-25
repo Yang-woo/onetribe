@@ -6,10 +6,14 @@ import { json, requireBearerUser } from '@/lib/server/http'
  * token is the gate — a user can only destroy themselves. Moments stay on
  * the wall (each has its own takedown link) but are anonymized first:
  * author_name/author_link are personal data, author_id nulls via FK.
+ * Operator accounts are refused: the passport's delete button acts on
+ * whatever session is signed in, admin included (docs/00 D16 review
+ * warning — and it happened for real on 2026-07-25).
  */
 
 export interface AccountDeps {
   db: SupabaseClient // service role
+  adminEmails: string[] // lowercase — these accounts must outlive the button
 }
 
 export function createAccountDeleteHandler(deps: AccountDeps) {
@@ -17,6 +21,11 @@ export function createAccountDeleteHandler(deps: AccountDeps) {
     const auth = await requireBearerUser(deps.db, req)
     if (auth.denied) return auth.denied
     const userId = auth.user.id
+
+    const email = auth.user.email?.toLowerCase()
+    if (email && deps.adminEmails.includes(email)) {
+      return json(403, { error: 'operator accounts cannot self-delete' })
+    }
 
     // Anonymize before deleteUser — after it, author_id is already null
     // (FK set null) and these rows can no longer be found.
