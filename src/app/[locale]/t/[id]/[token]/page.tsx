@@ -28,11 +28,17 @@ export default async function TakedownPage({
 
   if (done === '1') return <Message text={t('done')} />
   if (done === '0') return <Message text={t('invalid')} />
+  if (done === 'error') return <Message text={t('error')} />
 
   async function takedown() {
     'use server'
     const db = supabaseServerAnon()
-    const { data } = await db.rpc('takedown_memory', { p_memory_id: id, p_token: token })
+    const { data, error } = await db.rpc('takedown_memory', { p_memory_id: id, p_token: token })
+    // A transient RPC failure is not an invalid link — route to a retry message,
+    // not "invalid" (which reads as "your link is broken, give up"). With the
+    // idempotent RPC (migration 20260725000300) a matching token yields true even
+    // if the moment was already hidden, so `false` means a genuinely bad token.
+    if (error) redirect(`/${locale}/t/${id}/${token}?done=error`)
     redirect(`/${locale}/t/${id}/${token}?done=${data === true ? '1' : '0'}`)
   }
 

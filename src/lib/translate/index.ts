@@ -22,6 +22,10 @@ export interface TranslateOutcome {
   text: string
   cached: boolean
   failed: boolean
+  /** DeepL's detected source language, lower-cased — set only on a live
+   *  provider call (null on a cache hit, same-language skip, or failure). Lets
+   *  the caller back-fill an unknown memories.source_lang (docs/04). */
+  detectedSourceLang: string | null
 }
 
 export async function translateWithCache(
@@ -33,7 +37,7 @@ export async function translateWithCache(
 ): Promise<TranslateOutcome> {
   const trimmed = text.trim()
   if (!trimmed || (sourceLang && sourceLang === targetLang)) {
-    return { text: trimmed, cached: false, failed: false }
+    return { text: trimmed, cached: false, failed: false, detectedSourceLang: null }
   }
 
   const hash = captionHash(trimmed)
@@ -43,20 +47,30 @@ export async function translateWithCache(
     .eq('source_hash', hash)
     .eq('target_lang', targetLang)
     .maybeSingle()
-  if (hit) return { text: hit.text, cached: true, failed: false }
+  if (hit) return { text: hit.text, cached: true, failed: false, detectedSourceLang: null }
 
   try {
     const result = await provider.translate(trimmed, targetLang, sourceLang)
-    await db.from('translations').upsert({
+    const { error: cacheError } = await db.from('translations').upsert({
       source_hash: hash,
       target_lang: targetLang,
       text: result.text,
       provider: provider.name,
     })
-    return { text: result.text, cached: false, failed: false }
+    // A cache-write failure must not fail the translation (the text is in hand),
+    // but it means we silently re-bought it — so surface it. This is exactly the
+    // path that hid every zh-Hant miss before target_lang was widened to text
+    // (a char(2) column rejected the 7-char code with 22001 — docs/16).
+    if (cacheError) console.error('[translate] cache write failed:', cacheError.message)
+    return {
+      text: result.text,
+      cached: false,
+      failed: false,
+      detectedSourceLang: result.detectedSourceLang,
+    }
   } catch {
     // Original first, blank never (docs/16 D). Not cached: retry on next view.
-    return { text: trimmed, cached: false, failed: true }
+    return { text: trimmed, cached: false, failed: true, detectedSourceLang: null }
   }
 }
 

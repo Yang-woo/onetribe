@@ -311,6 +311,9 @@ export function createMemoriesHandler(deps: UploadDeps) {
       authorId = authUser.data.user.id
     }
 
+    // A DB error here isn't a bad eventId — masking it as 400 "unknown event"
+    // tells the client to fix valid input instead of retrying a transient fault.
+    if (event.error) return json(500, { error: 'could not save your moment' })
     if (!event.data) return json(400, { error: 'unknown event' })
 
     const authorLink = input.authorLink ? normalizeInstagramLink(input.authorLink) : null
@@ -400,14 +403,19 @@ export function createMemoriesHandler(deps: UploadDeps) {
       const name = input.authorName?.trim()
       const handle = authorLink ? new URL(authorLink).pathname.replace(/^\/+/, '') : undefined
       if (name || handle || country) {
-        const { data: current } = await deps.db
+        const { data: current, error: readError } = await deps.db
           .from('profiles')
           .select('display_name, instagram, home_country')
           .eq('id', authorId)
           .single()
-        const identity = fillEmptyIdentity(current, { name, handle, country })
-        if (Object.keys(identity).length > 0) {
-          await deps.db.from('profiles').update(identity).eq('id', authorId)
+        // A read failure must NOT let fillEmptyIdentity see an "empty" profile and
+        // overwrite a saved identity (docs/00 D30: uploads never overwrite). Skip
+        // the best-effort write-back rather than risk clobbering it.
+        if (!readError) {
+          const identity = fillEmptyIdentity(current, { name, handle, country })
+          if (Object.keys(identity).length > 0) {
+            await deps.db.from('profiles').update(identity).eq('id', authorId)
+          }
         }
       }
     }

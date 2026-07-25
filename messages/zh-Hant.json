@@ -28,7 +28,8 @@
     "backToWall": "← 回到牆上",
     "takedownLink": "申請移除",
     "showOriginal": "顯示原文",
-    "showTranslation": "顯示翻譯"
+    "showTranslation": "顯示翻譯",
+    "imageAlt": "一個音樂節瞬間"
   },
   "report": {
     "button": "檢舉",
@@ -90,7 +91,8 @@
     "confirmBody": "它會立刻從牆上消失。這裡無法復原這個操作。",
     "confirm": "是的，撤下它",
     "done": "已經撤下了。謝謝你曾是這面牆的一部分。",
-    "invalid": "這個連結無效 — 這個瞬間可能已經不在了。"
+    "invalid": "這個連結無效 — 這個瞬間可能已經不在了。",
+    "error": "出了點問題 — 請重試。"
   },
   "footer": {
     "disclaimer": "非官方粉絲專案 — 與 Q-dance / Defqon.1 沒有任何隸屬、授權或關聯關係。",

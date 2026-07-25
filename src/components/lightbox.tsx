@@ -55,6 +55,7 @@ export function Lightbox({
   const locale = useLocale()
   const moment = moments[index]
   const touchStartX = useRef<number | null>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   const prev = useCallback(() => {
     if (index > 0) onNavigate(index - 1)
@@ -66,12 +67,37 @@ export function Lightbox({
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
-      if (event.key === 'ArrowLeft') prev()
-      if (event.key === 'ArrowRight') next()
+      else if (event.key === 'ArrowLeft') prev()
+      else if (event.key === 'ArrowRight') next()
+      else if (event.key === 'Tab') {
+        // Keep Tab inside the dialog so focus never lands on the wall cards
+        // hidden behind the overlay (docs/15 a11y).
+        const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled])',
+        )
+        if (!focusables || focusables.length === 0) return
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        const active = document.activeElement
+        if (event.shiftKey && (active === first || active === dialogRef.current)) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose, prev, next])
+
+  // Move focus into the dialog on open, restore it to the trigger on close.
+  useEffect(() => {
+    const restoreTo = document.activeElement as HTMLElement | null
+    dialogRef.current?.focus()
+    return () => restoreTo?.focus?.()
+  }, [])
 
   if (!moment) return null
 
@@ -82,10 +108,12 @@ export function Lightbox({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label={moment.caption ?? 'moment'}
-      className="fixed inset-0 z-50 flex flex-col bg-black/95"
+      tabIndex={-1}
+      aria-label={moment.caption ?? t('imageAlt')}
+      className="fixed inset-0 z-50 flex flex-col bg-black/95 focus:outline-none"
       onClick={onClose}
       onTouchStart={(e) => {
         touchStartX.current = e.touches[0]?.clientX ?? null
@@ -114,7 +142,7 @@ export function Lightbox({
         {src && (
           <SkeletonImage
             src={src}
-            alt={moment.caption ?? 'festival moment'}
+            alt={moment.caption ?? t('imageAlt')}
             loading="eager"
             aspectRatio={moment.aspect_ratio}
             defaultAspectRatio="3 / 2"

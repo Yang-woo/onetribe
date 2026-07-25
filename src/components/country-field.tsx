@@ -144,6 +144,10 @@ export function CountryField({
             // A short delay lets an option click (which preventDefaults its
             // mousedown to keep focus) commit before the list closes.
             blurTimer.current = setTimeout(() => {
+              // Empty input on blur = intent to clear (docs/00 D31 opt-out): a
+              // pre-filled country must be removable, not just re-selectable, so
+              // an emptied field publishes no country instead of snapping back.
+              if (focused && query.trim() === '' && value) onChange('')
               setOpen(false)
               setFocused(false)
               setActive(-1)

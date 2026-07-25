@@ -107,7 +107,7 @@ describe('Passport', () => {
     await user.click(screen.getByRole('button', { name: 'create my passport' }))
 
     expect(await screen.findByText('my journey')).toBeInTheDocument()
-    expect(screen.getByText('@weekend warrior')).toBeInTheDocument()
+    expect(screen.getByText('weekend warrior')).toBeInTheDocument()
     expect(screen.getByText(/tap the editions/)).toBeInTheDocument() // n=0
     expect(screen.getByText(/tap a stamp/)).toBeInTheDocument() // stamp help line
     // empty passport nudges the first upload — and shows no "+ add" tile
@@ -150,6 +150,37 @@ describe('Passport', () => {
     })
     await waitFor(() => expect(screen.getByText('my first defqon')).toBeInTheDocument())
     expect(backend.toggles).toContain('e2024:false')
+  })
+
+  test('a failed attendance toggle rolls back the stamp and shows an error', async () => {
+    const user = userEvent.setup()
+    const backend = fakeBackend({
+      userId: 'u1',
+      displayName: 'tester',
+      instagram: null,
+      homeCountry: null,
+      attendedEventIds: [],
+      moments: [],
+      identity: ANON_IDENTITY,
+    })
+    backend.setAttendance = async () => {
+      throw new Error('network down')
+    }
+    renderWithIntl(<Passport editions={editions} backend={backend} />)
+
+    const stamp = await screen.findByRole('button', { name: '2025' })
+    expect(stamp).toHaveAttribute('aria-pressed', 'false')
+
+    await act(async () => {
+      await user.click(stamp)
+    })
+
+    // the optimistic check rolls back (the save failed) and an error surfaces —
+    // never a UI that claims a save that didn't happen (a refresh would drop it).
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: '2025' })).toHaveAttribute('aria-pressed', 'false'),
+    )
+    expect(screen.getByRole('alert')).toBeInTheDocument()
   })
 
   test('own moments render under my moments with the live count', async () => {
@@ -200,7 +231,7 @@ describe('Passport', () => {
 
     // signed in → journey view with the linked identity
     expect(await screen.findByText('my journey')).toBeInTheDocument()
-    expect(screen.getByText('@returning warrior')).toBeInTheDocument()
+    expect(screen.getByText('returning warrior')).toBeInTheDocument()
     expect(screen.getByText('connected as raver@example.com')).toBeInTheDocument()
   })
 })

@@ -302,6 +302,41 @@ describe('UploadWizard', () => {
     ])
   })
 
+  test('a blocked clipboard falls back to selecting the takedown link (in-app webview)', async () => {
+    const user = userEvent.setup()
+    const fetchStub = vi.fn(async (url: string | URL | Request) => {
+      const href = String(url)
+      if (href.endsWith('/api/upload/presign')) {
+        return Response.json({
+          uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+          session: 'sess-token',
+        })
+      }
+      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+      if (href.endsWith('/api/memories')) {
+        return Response.json({ moments: [{ id: 'm', takedownToken: 't' }] }, { status: 201 })
+      }
+      throw new Error(`unexpected fetch ${href}`)
+    })
+    vi.stubGlobal('fetch', fetchStub)
+    // async clipboard blocked, as it is in IG/FB in-app webviews
+    const writeText = vi.fn().mockRejectedValue(new Error('blocked'))
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    const getSelection = vi.spyOn(window, 'getSelection')
+
+    renderWizard()
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: 'share my moment' }))
+    await screen.findByRole('heading', { name: /on the wall/ })
+
+    await user.click(screen.getByRole('button', { name: /copy/i }))
+    // it tried the async API, then fell back to selecting the link span so the
+    // user can still copy manually — never a silent no-op on their only takedown handle.
+    await waitFor(() => expect(writeText).toHaveBeenCalled())
+    expect(getSelection).toHaveBeenCalled()
+  })
+
   test('generates a thumbnail: presigns it, PUTs it, and sends thumbKey (D21)', async () => {
     const user = userEvent.setup()
     const calls: Array<{ url: string; init?: RequestInit }> = []

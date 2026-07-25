@@ -46,7 +46,7 @@ export function MomentThumb({
   const initials = edition ? anthemInitials(edition.edition) : null
   const tag = edition ? (initials ? `${edition.year} ${initials}` : String(edition.year)) : null
 
-  const alt = moment.caption ?? 'festival moment'
+  const alt = moment.caption ?? tm('imageAlt')
   const tagEl = tag && (
     <span
       aria-hidden="true"

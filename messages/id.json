@@ -28,7 +28,8 @@
     "backToWall": "← kembali ke dinding",
     "takedownLink": "hapus",
     "showOriginal": "tampilkan aslinya",
-    "showTranslation": "tampilkan terjemahan"
+    "showTranslation": "tampilkan terjemahan",
+    "imageAlt": "momen festival"
   },
   "report": {
     "button": "laporkan",
@@ -90,7 +91,8 @@
     "confirmBody": "ini langsung menyembunyikannya dari dinding. tindakan ini tak bisa dibatalkan dari sini.",
     "confirm": "ya, hapus",
     "done": "sudah dihapus. terima kasih telah menjadi bagian dari dinding.",
-    "invalid": "tautan ini tidak valid — momennya mungkin sudah hilang."
+    "invalid": "tautan ini tidak valid — momennya mungkin sudah hilang.",
+    "error": "terjadi kesalahan — coba lagi."
   },
   "footer": {
     "disclaimer": "Proyek penggemar tidak resmi — tidak berafiliasi, didukung, atau terhubung dengan Q-dance / Defqon.1.",

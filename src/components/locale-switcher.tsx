@@ -38,7 +38,13 @@ export function LocaleSwitcher() {
     <select
       aria-label="language"
       value={locale}
-      onChange={(e) => router.replace(pathname, { locale: e.target.value as Locale })}
+      onChange={(e) => {
+        // Preserve the current query (e.g. a shared ?e=2026 filter) across a
+        // language switch — usePathname drops it. window.location is safe here:
+        // onChange only fires client-side, so no useSearchParams CSR bailout.
+        const search = typeof window !== 'undefined' ? window.location.search : ''
+        router.replace(`${pathname}${search}`, { locale: e.target.value as Locale })
+      }}
       className="rounded-full border border-line bg-black px-2 py-1 text-sm text-muted"
     >
       {LOCALES.map((code) => (

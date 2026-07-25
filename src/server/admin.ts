@@ -58,6 +58,13 @@ export function createAdminQueueHandler(deps: AdminDeps) {
       deps.db.from('reports').select('*', { count: 'exact', head: true }),
     ])
 
+    // A swallowed DB error here would render the console as "0 reports, all
+    // clear" — the most dangerous moderation failure. Surface it as a 500 so the
+    // operator sees a fault instead of a false all-clear.
+    if ([reports, recent, hidden, todayLive, openReports].some((r) => r.error)) {
+      return json(500, { error: 'could not load the queue' })
+    }
+
     return json(200, {
       reports: reports.data ?? [],
       recent: recent.data ?? [],

@@ -37,7 +37,10 @@ function render(props: Partial<Parameters<typeof PassportProfile>[0]> = {}) {
 describe('PassportProfile', () => {
   test('shows the saved name, handle and country, collapsed until edit is clicked', () => {
     render({ displayName: 'weekend warrior', instagram: 'neo_raver', homeCountry: 'NL' })
-    expect(screen.getByText('@weekend warrior')).toBeInTheDocument()
+    // the display name shows WITHOUT an "@" — that belongs only on the real
+    // handle (docs/00 D30); the handle appears separately as instagram.com/…
+    expect(screen.getByText('weekend warrior')).toBeInTheDocument()
+    expect(screen.queryByText('@weekend warrior')).not.toBeInTheDocument()
     expect(screen.getByText('instagram.com/neo_raver', { exact: false })).toBeInTheDocument()
     // home country renders as flag + localized name
     expect(screen.getByText(/Netherlands/)).toBeInTheDocument()
@@ -119,6 +122,6 @@ describe('PassportProfile', () => {
     await user.click(screen.getByRole('button', { name: 'cancel' }))
 
     expect(updateProfile).not.toHaveBeenCalled()
-    expect(screen.getByText('@keep me')).toBeInTheDocument()
+    expect(screen.getByText('keep me')).toBeInTheDocument()
   })
 })

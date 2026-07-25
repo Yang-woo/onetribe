@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test, vi } from 'vitest'
 import { renderWithIntl } from '@/test-utils'
@@ -63,5 +63,19 @@ describe('CountryField', () => {
     render({ value: '' })
     await user.type(screen.getByRole('combobox'), 'zzzznotacountry')
     expect(await screen.findByText(/no match/i)).toBeInTheDocument()
+  })
+
+  test('clearing the input and blurring removes the country (D31 opt-out)', async () => {
+    const user = userEvent.setup()
+    const { onChange } = render({ value: 'NL' })
+    const input = screen.getByRole('combobox')
+
+    await user.click(input) // focus selects all
+    await user.clear(input) // empty the field
+    await user.tab() // blur
+
+    // an emptied, pre-filled field publishes NO country — honoring "(optional)"
+    // instead of snapping back to the previous selection.
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith(''))
   })
 })

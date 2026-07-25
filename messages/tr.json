@@ -28,7 +28,8 @@
     "backToWall": "← duvara dön",
     "takedownLink": "kaldırma",
     "showOriginal": "orijinali göster",
-    "showTranslation": "çeviriyi göster"
+    "showTranslation": "çeviriyi göster",
+    "imageAlt": "bir festival anı"
   },
   "report": {
     "button": "bildir",
@@ -90,7 +91,8 @@
     "confirmBody": "bu, onu duvardan hemen gizler. buradan geri alınamaz.",
     "confirm": "evet, kaldır",
     "done": "kaldırıldı. duvarın bir parçası olduğun için teşekkürler.",
-    "invalid": "bu bağlantı geçerli değil — an çoktan gitmiş olabilir."
+    "invalid": "bu bağlantı geçerli değil — an çoktan gitmiş olabilir.",
+    "error": "bir şeyler ters gitti — lütfen tekrar dene."
   },
   "footer": {
     "disclaimer": "Resmi olmayan bir hayran projesi — Q-dance / Defqon.1 ile bağlantılı, onaylı ya da ilişkili değildir.",

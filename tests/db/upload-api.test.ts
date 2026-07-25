@@ -209,6 +209,29 @@ describe('POST /api/memories — file flow', () => {
     expect(await countMarkerRows()).toBe(before)
   })
 
+  test('a replayed session cannot mint duplicate rows (media_url UNIQUE)', async () => {
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const body = {
+      session,
+      eventId,
+      rightsConfirmed: true,
+      caption: MARKER,
+      media: uploads.map((u) => ({ key: u.key, contentType: 'image/jpeg' })),
+    }
+    const first = await createMemoriesHandler(deps())(post(body))
+    expect(first.status).toBe(201)
+    // Replaying the SAME session + server key re-derives the same media_url; the
+    // partial UNIQUE index rejects it, so one valid session can't be looped into
+    // unlimited duplicate live rows (D9 P4 "1 solve = 1 batch", migration 000200).
+    const replay = await createMemoriesHandler(deps())(post(body))
+    expect(replay.status).not.toBe(201)
+    const { count } = await db
+      .from('memories')
+      .select('*', { count: 'exact', head: true })
+      .eq('media_url', `https://media.test/${uploads[0].key}`)
+    expect(count).toBe(1)
+  })
+
   test('missing or forged session → 403', async () => {
     const { uploads } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
     const media = uploads.map((u) => ({ key: u.key, contentType: 'image/jpeg' }))

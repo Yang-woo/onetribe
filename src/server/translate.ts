@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { json, parseBody } from '@/lib/server/http'
 import { isLocale } from '@/lib/locales'
 import { isMomentId } from '@/lib/moments'
-import { translateCaption, type TranslationProvider } from '@/lib/translate'
+import { translateWithCache, type TranslationProvider } from '@/lib/translate'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
@@ -44,9 +44,26 @@ export function createTranslateHandler(deps: TranslateDeps) {
     const caption = data?.caption?.trim()
     if (!caption) return json(200, { text: null })
 
-    // Shared caption rule (no provider / same language → original, never blank)
-    // lives in translateCaption so this route and the moment page can't drift.
-    const text = await translateCaption(deps.db, deps.provider, caption, locale, data!.source_lang)
-    return json(200, { text })
+    // No provider → the original, never a blank (docs/16 D). Same guarantee as
+    // the moment page's translateCaption; inlined here because we also persist
+    // the detected source language below, which needs the full outcome.
+    if (!deps.provider) return json(200, { text: caption })
+
+    const sourceLang = data!.source_lang
+    const outcome = await translateWithCache(deps.db, deps.provider, caption, locale, sourceLang)
+
+    // The first real translation is when DeepL reports the true source language;
+    // persist it once so a same-language viewer skips the round-trip next time
+    // (docs/04). Guarded with .is(null) so it only ever fills an unknown — never
+    // overwrites a value the write-time detector set, and safe under a concurrent
+    // write. Best-effort: a failure here never blocks returning the translation.
+    if (sourceLang == null && outcome.detectedSourceLang && isLocale(outcome.detectedSourceLang)) {
+      await deps.db
+        .from('memories')
+        .update({ source_lang: outcome.detectedSourceLang })
+        .eq('id', memoryId)
+        .is('source_lang', null)
+    }
+    return json(200, { text: outcome.text })
   }
 }

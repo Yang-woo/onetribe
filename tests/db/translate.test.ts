@@ -56,7 +56,12 @@ describe('translateWithCache', () => {
     const text = trackedText('the sunrise at the red stage')
 
     const first = await translateWithCache(db, provider, text, 'ko')
-    expect(first).toEqual({ text: `[deepl-fake:ko] ${text}`, cached: false, failed: false })
+    expect(first).toEqual({
+      text: `[deepl-fake:ko] ${text}`,
+      cached: false,
+      failed: false,
+      detectedSourceLang: 'en',
+    })
     expect(provider.calls).toBe(1)
 
     const { data: row } = await db
@@ -97,7 +102,7 @@ describe('translateWithCache', () => {
     const text = trackedText('never a blank screen')
 
     const result = await translateWithCache(db, failing, text, 'fr')
-    expect(result).toEqual({ text, cached: false, failed: true })
+    expect(result).toEqual({ text, cached: false, failed: true, detectedSourceLang: null })
 
     const { data } = await db
       .from('translations')
@@ -112,6 +117,18 @@ describe('translateWithCache', () => {
     const result = await translateWithCache(db, provider, trackedText('hi'), 'en', 'en')
     expect(result.failed).toBe(false)
     expect(provider.calls).toBe(0)
+  })
+
+  test('a multi-part locale code (zh-Hant) caches and hits — not truncated to char(2)', async () => {
+    const provider = fakeProvider()
+    const text = trackedText('lasers over the black stage')
+    const first = await translateWithCache(db, provider, text, 'zh-Hant')
+    expect(first.cached).toBe(false)
+    // Before target_lang was widened to text, this upsert failed with 22001 and
+    // the read missed, so zh-Hant re-hit the provider on every view (docs/16).
+    const second = await translateWithCache(db, provider, text, 'zh-Hant')
+    expect(second.cached).toBe(true)
+    expect(provider.calls).toBe(1)
   })
 
   test('providers are swappable behind the same call (adapter seam)', async () => {
@@ -186,6 +203,22 @@ describe('createTranslateHandler', () => {
     const id = await seed({ caption: trackedText('loc'), source_lang: 'en' })
     const badLoc = await createTranslateHandler(deps())(post({ memoryId: id, locale: 'xx' }))
     expect(badLoc.status).toBe(400)
+  })
+
+  test('back-fills an unknown source_lang from the first translation (docs/04)', async () => {
+    const caption = trackedText('detect my language please')
+    const id = await seed({ caption, source_lang: null })
+    await createTranslateHandler(deps())(post({ memoryId: id, locale: 'ko' }))
+    const { data } = await db.from('memories').select('source_lang').eq('id', id).single()
+    expect(data!.source_lang).toBe('en') // fakeProvider reports detectedSourceLang 'en'
+  })
+
+  test('never overwrites a source_lang that was already set', async () => {
+    const caption = trackedText('already tagged german')
+    const id = await seed({ caption, source_lang: 'de' })
+    await createTranslateHandler(deps())(post({ memoryId: id, locale: 'ko' }))
+    const { data } = await db.from('memories').select('source_lang').eq('id', id).single()
+    expect(data!.source_lang).toBe('de')
   })
 })
 

@@ -28,7 +28,8 @@
     "backToWall": "← zurück zur Wand",
     "takedownLink": "entfernen",
     "showOriginal": "Original anzeigen",
-    "showTranslation": "Übersetzung anzeigen"
+    "showTranslation": "Übersetzung anzeigen",
+    "imageAlt": "ein Festivalmoment"
   },
   "report": {
     "button": "melden",
@@ -90,7 +91,8 @@
     "confirmBody": "er verschwindet sofort von der Wand. das lässt sich hier nicht rückgängig machen.",
     "confirm": "ja, entfernen",
     "done": "er ist weg. danke, dass du Teil der Wand warst.",
-    "invalid": "dieser Link ist ungültig — der Moment ist vielleicht schon weg."
+    "invalid": "dieser Link ist ungültig — der Moment ist vielleicht schon weg.",
+    "error": "etwas ist schiefgelaufen — bitte versuche es erneut."
   },
   "footer": {
     "disclaimer": "Inoffizielles Fanprojekt — nicht verbunden mit, unterstützt von oder zugehörig zu Q-dance / Defqon.1.",

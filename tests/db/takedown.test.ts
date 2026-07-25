@@ -61,11 +61,14 @@ test('the correct token hides the memory', async () => {
   expect(await statusOf(memoryId)).toBe('hidden')
 })
 
-test('repeat calls are no-ops once hidden', async () => {
+test('a valid token is idempotent — already hidden still reports success', async () => {
+  // The RPC is idempotent (migration 20260725000300): a matching token succeeds
+  // even when the moment is already hidden, so a double-clicked takedown link
+  // reads as "done", not "invalid". Only a wrong token returns false.
   const { data } = await anon.rpc('takedown_memory', {
     p_memory_id: memoryId,
     p_token: token,
   })
-  expect(data).toBe(false)
+  expect(data).toBe(true)
   expect(await statusOf(memoryId)).toBe('hidden')
 })

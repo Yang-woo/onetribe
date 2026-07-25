@@ -28,7 +28,8 @@
     "backToWall": "← volver al muro",
     "takedownLink": "retirar",
     "showOriginal": "ver original",
-    "showTranslation": "ver traducción"
+    "showTranslation": "ver traducción",
+    "imageAlt": "un momento del festival"
   },
   "report": {
     "button": "denunciar",
@@ -90,7 +91,8 @@
     "confirmBody": "desaparecerá del muro inmediatamente. esto no se puede deshacer desde aquí.",
     "confirm": "sí, retíralo",
     "done": "ya no está. gracias por ser parte del muro.",
-    "invalid": "este enlace no es válido — puede que el momento ya no exista."
+    "invalid": "este enlace no es válido — puede que el momento ya no exista.",
+    "error": "algo salió mal — inténtalo de nuevo."
   },
   "footer": {
     "disclaimer": "Proyecto de fans no oficial — sin afiliación, respaldo ni conexión con Q-dance / Defqon.1.",

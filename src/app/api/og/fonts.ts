@@ -28,6 +28,11 @@ export async function loadOgFonts(): Promise<OgFont[]> {
       }
     }),
   )
-  cached = entries.filter((e) => e !== null)
-  return cached
+  const fonts = entries.filter((e) => e !== null)
+  // Only memoize a COMPLETE load. A transient readFile failure would otherwise
+  // pin an empty (or partial) array forever on this serverless instance, so
+  // every later OG card would render text-less (moment cards gate on
+  // fonts.length > 0) with no retry.
+  if (fonts.length === FILES.length) cached = fonts
+  return fonts
 }

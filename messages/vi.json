@@ -28,7 +28,8 @@
     "backToWall": "← quay lại bức tường",
     "takedownLink": "gỡ bỏ",
     "showOriginal": "xem bản gốc",
-    "showTranslation": "xem bản dịch"
+    "showTranslation": "xem bản dịch",
+    "imageAlt": "một khoảnh khắc lễ hội"
   },
   "report": {
     "button": "báo cáo",
@@ -90,7 +91,8 @@
     "confirmBody": "việc này ẩn nó khỏi tường ngay lập tức. không thể hoàn tác từ đây.",
     "confirm": "vâng, gỡ xuống",
     "done": "nó đã được gỡ. cảm ơn bạn đã là một phần của bức tường.",
-    "invalid": "liên kết này không hợp lệ — có thể khoảnh khắc đã biến mất rồi."
+    "invalid": "liên kết này không hợp lệ — có thể khoảnh khắc đã biến mất rồi.",
+    "error": "đã xảy ra lỗi — vui lòng thử lại."
   },
   "footer": {
     "disclaimer": "Dự án fan không chính thức — không liên kết, không được xác nhận, cũng không có quan hệ với Q-dance / Defqon.1.",

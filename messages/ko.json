@@ -28,7 +28,8 @@
     "backToWall": "← 담벼락으로 돌아가기",
     "takedownLink": "삭제 요청",
     "showOriginal": "원문 보기",
-    "showTranslation": "번역 보기"
+    "showTranslation": "번역 보기",
+    "imageAlt": "페스티벌의 순간"
   },
   "report": {
     "button": "신고",
@@ -90,7 +91,8 @@
     "confirmBody": "담벼락에서 즉시 사라집니다. 여기서는 되돌릴 수 없어요.",
     "confirm": "네, 내려주세요",
     "done": "내려갔어요. 담벼락의 일부가 되어주셔서 고마워요.",
-    "invalid": "유효하지 않은 링크예요 — 이미 내려간 순간일 수 있어요."
+    "invalid": "유효하지 않은 링크예요 — 이미 내려간 순간일 수 있어요.",
+    "error": "문제가 생겼어요 — 다시 시도해 주세요."
   },
   "footer": {
     "disclaimer": "비공식 팬 프로젝트 — Q-dance / Defqon.1과 무관하며, 후원·승인·연계 관계가 없습니다.",

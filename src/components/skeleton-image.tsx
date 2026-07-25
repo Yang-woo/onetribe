@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * An <img> that shows a shimmering placeholder until it decodes, then fades in
@@ -38,6 +38,26 @@ export function SkeletonImage({
   defaultAspectRatio?: string
 }) {
   const [loaded, setLoaded] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  // Reset when the src changes so a reused instance (the lightbox swaps src on
+  // prev/next without remounting) doesn't show the previous photo as "loaded"
+  // under the new moment's caption. Adjusting state during render is the React-
+  // blessed pattern for "derive from props" — cheaper than an effect + reflow.
+  const [trackedSrc, setTrackedSrc] = useState(src)
+  if (src !== trackedSrc) {
+    setTrackedSrc(src)
+    setLoaded(false)
+  }
+
+  // An <img> that finished loading before React attached onLoad — SSR'd markup,
+  // or a disk-cached image after a slow hydration — never fires the event
+  // (react#15446), stranding it at opacity-0 with the shimmer spinning forever.
+  // Check .complete on mount and on every src change, exactly as next/image does.
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true)
+  }, [src])
+
   const knownRatio =
     aspectRatio && Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : null
   // Known ratio → reserve the exact box always (no shift). Unknown → a
@@ -56,6 +76,7 @@ export function SkeletonImage({
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         loading={loading}

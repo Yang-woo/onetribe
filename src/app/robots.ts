@@ -11,6 +11,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
+        // OG image endpoints must stay crawlable — they're the share-card
+        // source. `allow` is more specific than the `/api/` disallow, so
+        // standards-respecting crawlers (Google, Bing, Twitterbot) still fetch
+        // them while the rest of /api stays off-limits.
+        allow: ['/api/og/'],
         disallow: ['/api/', ...LOCALES.map((locale) => `/${locale}/admin`)],
       },
     ],

@@ -99,6 +99,10 @@ export async function GET(
       width: 1200,
       height: 630,
       fonts: fonts.length ? fonts : undefined,
+      // Without this, next/og defaults to 1-year immutable caching, so a
+      // taken-down or deleted moment's synthesized card (fullbleed photo) keeps
+      // serving from the CDN — "delete for good" leaks here. Match og/site's TTL.
+      headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600' },
     },
   )
 }

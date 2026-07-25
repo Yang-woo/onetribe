@@ -130,7 +130,7 @@ export default async function MomentPage({
           {src && (
             <SkeletonImage
               src={src}
-              alt={moment.caption ?? 'moment'}
+              alt={moment.caption ?? t('imageAlt')}
               loading="eager"
               defaultAspectRatio="16 / 9"
               wrapperClassName="w-full"
@@ -143,7 +143,7 @@ export default async function MomentPage({
         src && (
           <SkeletonImage
             src={src}
-            alt={moment.caption ?? 'moment'}
+            alt={moment.caption ?? t('imageAlt')}
             loading="eager"
             aspectRatio={moment.aspect_ratio}
             defaultAspectRatio="3 / 2"

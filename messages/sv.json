@@ -28,7 +28,8 @@
     "backToWall": "← tillbaka till väggen",
     "takedownLink": "ta bort",
     "showOriginal": "visa original",
-    "showTranslation": "visa översättning"
+    "showTranslation": "visa översättning",
+    "imageAlt": "ett festivalögonblick"
   },
   "report": {
     "button": "anmäl",
@@ -90,7 +91,8 @@
     "confirmBody": "det här döljer det direkt från väggen. det går inte att ångra härifrån.",
     "confirm": "ja, ta bort det",
     "done": "det är borttaget. tack för att du var en del av väggen.",
-    "invalid": "den här länken är ogiltig — minnet kanske redan är borta."
+    "invalid": "den här länken är ogiltig — minnet kanske redan är borta.",
+    "error": "något gick fel — försök igen."
   },
   "footer": {
     "disclaimer": "Inofficiellt fanprojekt — inte anslutet till, godkänt av eller kopplat till Q-dance / Defqon.1.",

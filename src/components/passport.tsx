@@ -45,6 +45,9 @@ export function Passport({
   const [busy, setBusy] = useState(false)
   const [signIn, setSignIn] = useState(false)
   const [oauthErrorKey, setOauthErrorKey] = useState<PassportAuthErrorCode | null>(null)
+  // Surfaces a failed start / attendance toggle instead of a silent no-op
+  // (an unhandled rejection plus a UI that lies about what was saved).
+  const [actionError, setActionError] = useState(false)
 
   useEffect(() => {
     // OAuth return errors arrive as URL params — the backend reads and strips
@@ -75,8 +78,11 @@ export function Passport({
             disabled={busy}
             onClick={async () => {
               setBusy(true)
+              setActionError(false)
               try {
                 setState(await api.start(name))
+              } catch {
+                setActionError(true)
               } finally {
                 setBusy(false)
               }
@@ -85,6 +91,11 @@ export function Passport({
           >
             {t('start')}
           </button>
+          {actionError && (
+            <p role="alert" className="text-sm text-red">
+              {t('genericError')}
+            </p>
+          )}
         </div>
 
         {/* returning warrior — no session on this screen, so signing in can't orphan stamps */}
@@ -153,6 +164,8 @@ export function Passport({
   async function toggle(eventId: string) {
     if (!state) return
     const on = !attended.has(eventId)
+    const snapshot = state
+    setActionError(false)
     // optimistic — RLS guarantees only own rows change (tests/db/rls ⑥)
     setState({
       ...state,
@@ -160,7 +173,14 @@ export function Passport({
         ? [...state.attendedEventIds, eventId]
         : state.attendedEventIds.filter((id) => id !== eventId),
     })
-    await api.setAttendance(eventId, on)
+    try {
+      await api.setAttendance(eventId, on)
+    } catch {
+      // Roll back so the stamp never claims a save that didn't happen (a refresh
+      // would otherwise silently drop it).
+      setState(snapshot)
+      setActionError(true)
+    }
   }
 
   return (
@@ -255,6 +275,11 @@ export function Passport({
           })}
         </div>
         <p className="text-xs text-[#6e655c]">{t('stampHint')}</p>
+        {actionError && (
+          <p role="alert" className="text-sm text-red">
+            {t('genericError')}
+          </p>
+        )}
       </section>
 
       {/* keep / manage the passport — upgrade while anonymous, account controls after */}

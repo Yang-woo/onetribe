@@ -28,7 +28,8 @@
     "backToWall": "← terug naar de muur",
     "takedownLink": "verwijderen",
     "showOriginal": "origineel tonen",
-    "showTranslation": "vertaling tonen"
+    "showTranslation": "vertaling tonen",
+    "imageAlt": "een festivalmoment"
   },
   "report": {
     "button": "melden",
@@ -90,7 +91,8 @@
     "confirmBody": "het verdwijnt direct van de muur. dit kan hier niet ongedaan worden gemaakt.",
     "confirm": "ja, haal het weg",
     "done": "het is weg. bedankt dat je deel was van de muur.",
-    "invalid": "deze link is niet geldig — het moment is misschien al weg."
+    "invalid": "deze link is niet geldig — het moment is misschien al weg.",
+    "error": "er ging iets mis — probeer het opnieuw."
   },
   "footer": {
     "disclaimer": "Onofficieel fanproject — niet verbonden aan, goedgekeurd door of gelieerd aan Q-dance / Defqon.1.",

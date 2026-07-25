@@ -28,7 +28,8 @@
     "backToWall": "← 壁に戻る",
     "takedownLink": "削除申請",
     "showOriginal": "原文を見る",
-    "showTranslation": "翻訳を見る"
+    "showTranslation": "翻訳を見る",
+    "imageAlt": "フェスティバルの瞬間"
   },
   "report": {
     "button": "通報",
@@ -90,7 +91,8 @@
     "confirmBody": "壁からすぐに消えます。ここからは元に戻せません。",
     "confirm": "はい、取り下げます",
     "done": "取り下げました。壁の一部でいてくれてありがとう。",
-    "invalid": "このリンクは無効です — すでに取り下げられた可能性があります。"
+    "invalid": "このリンクは無効です — すでに取り下げられた可能性があります。",
+    "error": "問題が発生しました — もう一度お試しください。"
   },
   "footer": {
     "disclaimer": "非公式ファンプロジェクト — Q-dance / Defqon.1とは提携・承認・関係は一切ありません。",

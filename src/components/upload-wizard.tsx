@@ -128,6 +128,9 @@ export function UploadWizard({
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<DoneMoment[] | null>(null)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  // Bumped on a failed submit to re-render Turnstile: presign spends the token,
+  // so a retry needs a fresh one or it 403s until expiry (docs/17 T2.1).
+  const [turnstileReset, setTurnstileReset] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Revoke leftover preview URLs only when the wizard unmounts — a ref keeps
@@ -381,6 +384,10 @@ export function UploadWizard({
       setDone(moments)
     } catch {
       setError(t('errors.failed'))
+      // presign may have already spent the Turnstile token; drop it and
+      // re-render the widget so a retry solves a fresh one (docs/17 T2.1).
+      setTurnstileToken(null)
+      setTurnstileReset((n) => n + 1)
     } finally {
       setSubmitting(false)
     }
@@ -620,7 +627,7 @@ export function UploadWizard({
             </span>
             <span>{t('rightsLabel')}</span>
           </label>
-          <Turnstile onToken={setTurnstileToken} />
+          <Turnstile onToken={setTurnstileToken} resetSignal={turnstileReset} />
         </section>
       )}
 
@@ -671,6 +678,7 @@ function DoneScreen({ moments }: { moments: DoneMoment[] }) {
   const t = useTranslations('upload')
   const locale = useLocale()
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const linkRefs = useRef<(HTMLSpanElement | null)[]>([])
   // Client-only screen (renders after submit) — window always exists.
   // The locale prefix keeps the stored link redirect-free.
   const links = moments.map(
@@ -687,12 +695,34 @@ function DoneScreen({ moments }: { moments: DoneMoment[] }) {
             key={link}
             className="flex items-center gap-2 rounded-lg border border-[rgba(163,154,144,.2)] bg-surface px-3 py-2.5"
           >
-            <span className="flex-1 truncate text-left font-mono text-xs text-muted">{link}</span>
+            <span
+              ref={(el) => {
+                linkRefs.current[i] = el
+              }}
+              className="flex-1 truncate text-left font-mono text-xs text-muted"
+            >
+              {link}
+            </span>
             <button
               type="button"
               onClick={async () => {
-                await navigator.clipboard.writeText(link)
-                setCopiedIndex(i)
+                try {
+                  await navigator.clipboard.writeText(link)
+                  setCopiedIndex(i)
+                } catch {
+                  // The async clipboard API is often blocked in in-app webviews
+                  // (Instagram/Facebook) — select the link so a manual long-press
+                  // "copy" works instead of a silent no-op on the only takedown
+                  // handle an anonymous uploader gets.
+                  const el = linkRefs.current[i]
+                  const sel = window.getSelection()
+                  if (el && sel) {
+                    const range = document.createRange()
+                    range.selectNodeContents(el)
+                    sel.removeAllRanges()
+                    sel.addRange(range)
+                  }
+                }
               }}
               className="rounded-md bg-orange px-3 py-1 text-[13px] font-medium text-black transition-opacity hover:opacity-90"
             >

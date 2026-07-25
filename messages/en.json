@@ -28,7 +28,8 @@
     "backToWall": "← back to the wall",
     "takedownLink": "removal",
     "showOriginal": "show original",
-    "showTranslation": "show translation"
+    "showTranslation": "show translation",
+    "imageAlt": "a festival moment"
   },
   "report": {
     "button": "report",
@@ -90,7 +91,8 @@
     "confirmBody": "this hides it from the wall immediately. this cannot be undone from here.",
     "confirm": "yes, take it down",
     "done": "it’s down. thank you for being part of the wall.",
-    "invalid": "this link is not valid — the moment may already be gone."
+    "invalid": "this link is not valid — the moment may already be gone.",
+    "error": "something went wrong — please try again."
   },
   "footer": {
     "disclaimer": "Unofficial fan project — not affiliated with, endorsed by, or connected to Q-dance / Defqon.1.",

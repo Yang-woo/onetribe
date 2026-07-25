@@ -46,7 +46,9 @@ export function PassportProfile({
   if (!editing) {
     return (
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        {displayName && <span className="text-muted">@{displayName}</span>}
+        {/* the display name is a name, not a handle — "@" belongs only on the
+            real Instagram handle below (docs/00 D30, matching AuthorTag) */}
+        {displayName && <span className="text-muted">{displayName}</span>}
         {instagram && (
           <span className="font-mono text-xs text-muted">instagram.com/{instagram}</span>
         )}

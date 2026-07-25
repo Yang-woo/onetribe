@@ -51,4 +51,16 @@ describe('SkeletonImage', () => {
     fireEvent.load(img)
     expect(img.style.aspectRatio).toBe('') // released to the image's natural size
   })
+
+  test('resets to loading when src changes on a reused instance (lightbox nav)', () => {
+    const { rerender } = render(<SkeletonImage src="/a.jpg" alt="nav" />)
+    fireEvent.load(screen.getByAltText('nav'))
+    expect(screen.getByAltText('nav')).toHaveAttribute('data-loaded', 'true')
+
+    // Same instance, new src (the lightbox swaps src on prev/next without
+    // remounting) must go back to loading so the previous photo isn't shown
+    // under the new moment's caption until the new bytes arrive (docs/00 D32).
+    rerender(<SkeletonImage src="/b.jpg" alt="nav" />)
+    expect(screen.getByAltText('nav')).toHaveAttribute('data-loaded', 'false')
+  })
 })
