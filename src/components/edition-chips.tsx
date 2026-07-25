@@ -110,7 +110,7 @@ export function EditionChips({
   const base = 'shrink-0 rounded-full border px-3 py-1 text-sm transition-colors whitespace-nowrap'
   const idle = 'border-line text-muted hover:text-paper'
   const active = 'border-orange text-orange'
-  const lost = 'border-red/40 text-red'
+  const lost = 'border-red/40 text-red-strong'
 
   // The tapped chip pulses until the parent's fetch lands — nothing navigates,
   // so this and the wall's dim are the only "we heard you" (docs/15 states).

@@ -24,7 +24,10 @@ export function AuthorTag({ moment }: { moment: Pick<Moment, 'author_name' | 'au
         href={moment.author_link!}
         target="_blank"
         rel="noopener noreferrer nofollow"
-        aria-label={`Instagram @${handle}`}
+        // WCAG 2.5.3 (label in name): the accessible name must contain the
+        // visible text. When a display name shows, it leads the label so the
+        // handle only adds context — never replaces what the eye reads.
+        aria-label={name ? `${name} — Instagram @${handle}` : `Instagram @${handle}`}
         className="text-flame hover:underline"
       >
         {name ?? `@${handle}`}

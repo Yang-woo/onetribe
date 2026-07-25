@@ -229,7 +229,7 @@ export function AdminPanel() {
                 <button
                   type="button"
                   onClick={() => void act(memory.id, 'delete')}
-                  className="rounded-full border border-red/40 px-3 py-1 text-sm text-red"
+                  className="rounded-full border border-red/40 px-3 py-1 text-sm text-red-strong"
                 >
                   delete
                 </button>

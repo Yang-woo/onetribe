@@ -85,7 +85,9 @@ export function InstagramField({
       <span id={hintId} className="min-h-[1.125rem] text-xs" aria-live="polite">
         {handle !== '' &&
           (invalid ? (
-            <span className="text-red">{isIgUrl(handle) ? t('igNotProfile') : t('igInvalid')}</span>
+            <span className="text-red-strong">
+              {isIgUrl(handle) ? t('igNotProfile') : t('igInvalid')}
+            </span>
           ) : (
             <span className="font-mono">
               <span className="text-orange">→ </span>

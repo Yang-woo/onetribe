@@ -76,7 +76,7 @@ export function EmailOtpForm({
           className={inputClass}
         />
         {errorKey && (
-          <p role="alert" className="text-sm text-red">
+          <p role="alert" className="text-sm text-red-strong">
             {t(errorKey)}
           </p>
         )}
@@ -111,7 +111,7 @@ export function EmailOtpForm({
         className={inputClass}
       />
       {errorKey && (
-        <p role="alert" className="text-sm text-red">
+        <p role="alert" className="text-sm text-red-strong">
           {t(errorKey)}
         </p>
       )}

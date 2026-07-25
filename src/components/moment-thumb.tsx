@@ -58,49 +58,28 @@ export function MomentThumb({
 
   return (
     <figure className="mb-3 break-inside-avoid overflow-hidden rounded-lg bg-surface">
-      {onOpen ? (
-        <button
-          type="button"
-          onClick={onOpen}
-          aria-label={moment.caption ?? tm('openMoment')}
-          className="group relative block w-full overflow-hidden"
-        >
-          <SkeletonImage
-            src={src}
-            alt={alt}
-            loading="lazy"
-            aspectRatio={moment.aspect_ratio}
-            wrapperClassName="w-full"
-            className="w-full transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none"
-          />
-          {tagEl}
-          {/* Desktop hover affordance (pointer devices): a faint scrim + an
-              expand glyph so the card visibly invites a click. Hidden on touch,
-              where the whole card is the obvious tap target. */}
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 hidden bg-black/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:block"
-          />
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute right-2 top-2 hidden h-7 w-7 place-items-center rounded-full bg-black/55 text-paper opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 md:grid"
+      {/* The decorative edition tag and hover affordances sit OUTSIDE the open
+          button, as siblings in this positioning/hover context. Keeping them out
+          of the button leaves it with no competing visible text, so its
+          accessible name (the caption) matches — WCAG 2.5.3 (label in name). */}
+      <div className="group relative overflow-hidden">
+        {onOpen ? (
+          <button
+            type="button"
+            onClick={onOpen}
+            aria-label={moment.caption ?? tm('openMoment')}
+            className="block w-full"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-            </svg>
-          </span>
-        </button>
-      ) : (
-        <div className="relative">
+            <SkeletonImage
+              src={src}
+              alt={alt}
+              loading="lazy"
+              aspectRatio={moment.aspect_ratio}
+              wrapperClassName="w-full"
+              className="w-full transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none"
+            />
+          </button>
+        ) : (
           <SkeletonImage
             src={src}
             alt={alt}
@@ -109,9 +88,37 @@ export function MomentThumb({
             wrapperClassName="w-full"
             className="w-full"
           />
-          {tagEl}
-        </div>
-      )}
+        )}
+        {tagEl}
+        {/* Desktop hover affordance (pointer devices): a faint scrim + an
+            expand glyph so the card visibly invites a click. Hidden on touch,
+            where the whole card is the obvious tap target. */}
+        {onOpen && (
+          <>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 hidden bg-black/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:block"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-2 top-2 hidden h-7 w-7 place-items-center rounded-full bg-black/55 text-paper opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 md:grid"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+              </svg>
+            </span>
+          </>
+        )}
+      </div>
       <figcaption className="flex flex-col gap-0.5 px-3 py-2">
         {moment.caption && <span className="text-sm text-paper">{moment.caption}</span>}
         {/* author (or @handle) · country · time — shared with the modal so the

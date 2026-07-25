@@ -136,7 +136,7 @@ export function PassportAccount({
       {connectedLabel && <p className="text-sm text-orange">{connectedLabel}</p>}
       <p className="text-sm text-muted">{t('otherDeviceHint')}</p>
       {errorKey && (
-        <p role="alert" className="text-sm text-red">
+        <p role="alert" className="text-sm text-red-strong">
           {t(errorKey)}
         </p>
       )}
@@ -156,7 +156,7 @@ export function PassportAccount({
             if (!window.confirm(t('deleteConfirm'))) return
             endSession(() => api.deleteAccount())
           }}
-          className="rounded-full border border-red/45 px-4 py-2 text-sm text-red/80 transition-colors hover:border-red hover:text-red disabled:opacity-50"
+          className="rounded-full border border-red/45 px-4 py-2 text-sm text-red-strong transition-colors hover:border-red hover:text-red-strong disabled:opacity-50"
         >
           {t('deleteAccount')}
         </button>

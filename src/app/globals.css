@@ -4,6 +4,9 @@
  * fire palette — single source: docs/12-brand.md B (D10: deployed code is the visual SSOT; Figma retired).
  * Role separation: orange = identity (CTA, counters, focus), red = emotion (hearts, loss).
  * The default Tailwind palette is stripped on purpose — tokens only.
+ * Contrast (docs/00 D35): #e3241d and #6e655c miss WCAG AA at small text sizes,
+ * so `red-strong`/`faint` are the accessible variants for text; the brand red
+ * stays for large text, hearts, borders and the logo.
  */
 @theme {
   --color-*: initial;
@@ -12,9 +15,11 @@
   --color-surface-raised: #1f1712;
   --color-orange: #ff6a00; /* Q Orange — identity */
   --color-flame: #ff9a4d; /* Light Flame — links, translation marker */
-  --color-red: #e3241d; /* Defqon Red — emotion */
+  --color-red: #e3241d; /* Defqon Red — emotion (hearts, loss); large text, borders, logo */
+  --color-red-strong: #f5352b; /* accessible Defqon red for small text on dark — clears AA 4.5:1 where #e3241d (4.29) misses it (docs/00 D35) */
   --color-paper: #f2ede6; /* body text */
   --color-muted: #a39a90; /* secondary text */
+  --color-faint: #8a8178; /* faint text — dimmer than muted but still AA on black/surface (docs/00 D35) */
   --color-line: rgba(163, 154, 144, 0.15); /* borders */
   --color-success: #34d399; /* UI state only */
   --color-warning: #fbbf24; /* UI state only */

@@ -65,6 +65,16 @@ describe('MomentThumb', () => {
     expect(screen.getByText('2024 POTT')).toBeInTheDocument()
   })
 
+  test('the edition tag is decorative context, not inside the open button (WCAG 2.5.3)', () => {
+    renderWithIntl(<MomentThumb moment={momentFixture('a')} edition={ed} onOpen={() => {}} />)
+    // The tag sits OUTSIDE the open button so it never competes with the
+    // button's accessible name (the caption) — label-content-name-mismatch. It
+    // used to render inside the button, dragging "2024 POTT" into the label.
+    const tag = screen.getByText('2024 POTT')
+    const button = screen.getByRole('button', { name: 'caption-a' })
+    expect(button.contains(tag)).toBe(false)
+  })
+
   test('reserves the stored aspect ratio on the image (zero-shift skeleton, D32)', () => {
     renderWithIntl(
       <MomentThumb moment={momentFixture('a', { aspect_ratio: 0.75 })} onOpen={() => {}} />,

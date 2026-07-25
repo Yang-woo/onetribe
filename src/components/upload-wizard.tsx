@@ -408,7 +408,9 @@ export function UploadWizard({
           </h1>
           <span className="font-display text-sm text-orange">{t('step', { n: step })}</span>
         </div>
-        <div aria-label="progress" className="h-[3px] rounded-full bg-surface">
+        {/* Decorative — the step is already announced by the "step N" text above.
+            aria-hidden avoids a prohibited aria-label on a role-less div (a11y). */}
+        <div aria-hidden="true" className="h-[3px] rounded-full bg-surface">
           <div
             className="h-[3px] rounded-full bg-orange transition-[width] duration-250"
             style={{ width: step === 1 ? '50%' : '100%' }}
@@ -500,7 +502,7 @@ export function UploadWizard({
                   </button>
                 )}
               </div>
-              <p className="text-[13px] text-[#6e655c]">{t('dropHint')}</p>
+              <p className="text-[13px] text-faint">{t('dropHint')}</p>
               {fileError && (
                 <p role="alert" className="text-sm text-warning">
                   {fileError}
@@ -517,7 +519,7 @@ export function UploadWizard({
                 onChange={(e) => setEmbedUrl(e.target.value)}
                 className={inputClass}
               />
-              <p className="text-[13px] text-[#6e655c]">{t('embedHint')}</p>
+              <p className="text-[13px] text-faint">{t('embedHint')}</p>
             </div>
           )}
 
@@ -541,7 +543,7 @@ export function UploadWizard({
                       selected
                         ? 'border-orange text-orange'
                         : edition.canceled
-                          ? 'border-red/40 text-red'
+                          ? 'border-red/40 text-red-strong'
                           : 'border-line text-muted hover:text-paper'
                     }`}
                   >

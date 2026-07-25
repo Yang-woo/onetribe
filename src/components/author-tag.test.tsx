@@ -7,7 +7,7 @@ import { AuthorTag } from './author-tag'
 // prefixes the real handle (from author_link), never the display name.
 
 describe('AuthorTag', () => {
-  test('name present + handle → the name, linked to the real handle (no @ on the name)', () => {
+  test('name present + handle → the name, linked; visible name leads the accessible name (WCAG 2.5.3)', () => {
     renderWithIntl(
       <AuthorTag
         moment={momentFixture('a', {
@@ -16,7 +16,11 @@ describe('AuthorTag', () => {
         })}
       />,
     )
-    const link = screen.getByRole('link', { name: 'Instagram @lee_yangwoo' })
+    // The visible text ("yann") must be part of the accessible name — the old
+    // "Instagram @lee_yangwoo" label dropped it entirely (a 2.5.3 violation, so
+    // speech-input "click yann" couldn't reach the link). The handle now only
+    // trails as context.
+    const link = screen.getByRole('link', { name: 'yann — Instagram @lee_yangwoo' })
     expect(link).toHaveTextContent('yann')
     expect(link).not.toHaveTextContent('@')
     expect(link).toHaveAttribute('href', 'https://instagram.com/lee_yangwoo')

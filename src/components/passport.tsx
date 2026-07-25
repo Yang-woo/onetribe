@@ -92,7 +92,7 @@ export function Passport({
             {t('start')}
           </button>
           {actionError && (
-            <p role="alert" className="text-sm text-red">
+            <p role="alert" className="text-sm text-red-strong">
               {t('genericError')}
             </p>
           )}
@@ -101,7 +101,7 @@ export function Passport({
         {/* returning warrior — no session on this screen, so signing in can't orphan stamps */}
         <div className="flex flex-col gap-3 border-t border-line pt-5">
           {oauthErrorKey && (
-            <p role="alert" className="text-sm text-red">
+            <p role="alert" className="text-sm text-red-strong">
               {t(oauthErrorKey)}
             </p>
           )}
@@ -257,7 +257,7 @@ export function Passport({
                   on
                     ? 'border-2 border-orange bg-[rgba(255,106,0,.07)] text-orange'
                     : canceled
-                      ? 'border-2 border-dashed border-red/45 text-red/70'
+                      ? 'border-2 border-dashed border-red/45 text-red-strong'
                       : 'border border-line text-muted hover:text-paper'
                 }`}
               >
@@ -274,9 +274,9 @@ export function Passport({
             )
           })}
         </div>
-        <p className="text-xs text-[#6e655c]">{t('stampHint')}</p>
+        <p className="text-xs text-faint">{t('stampHint')}</p>
         {actionError && (
-          <p role="alert" className="text-sm text-red">
+          <p role="alert" className="text-sm text-red-strong">
             {t('genericError')}
           </p>
         )}

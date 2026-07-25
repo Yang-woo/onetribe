@@ -9,7 +9,7 @@ import { AuthorTag } from './author-tag'
 /** Decorative dot between meta fields. */
 export function MetaSep() {
   return (
-    <span aria-hidden="true" className="text-[#6e655c]">
+    <span aria-hidden="true" className="text-faint">
       ·
     </span>
   )

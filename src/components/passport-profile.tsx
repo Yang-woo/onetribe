@@ -109,7 +109,7 @@ export function PassportProfile({
       <InstagramField value={ig} onChange={setIg} />
       <CountryField value={country} onChange={setCountry} />
       {failed && (
-        <p role="alert" className="text-sm text-red">
+        <p role="alert" className="text-sm text-red-strong">
           {t('genericError')}
         </p>
       )}
