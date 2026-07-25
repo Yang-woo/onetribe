@@ -84,6 +84,19 @@ const actionSchema = z.object({
   action: z.enum(['hide', 'unhide', 'delete', 'dismiss']),
 })
 
+/**
+ * Clear a moment's reports — shared by `dismiss` and `unhide` (docs/09 B). Both
+ * restore a moment to a clean state, which must also reset the 3-strike auto-hide
+ * counter: leaving the distinct reporter_hints on the row lets the very next
+ * report (even a re-report) hide it again, so a griefer could loop it
+ * (docs/09 A-2). So unhide == restore + dismiss. Returns a 500 Response on
+ * failure, else null.
+ */
+async function clearReports(db: SupabaseClient, memoryId: string): Promise<Response | null> {
+  const { error } = await db.from('reports').delete().eq('memory_id', memoryId)
+  return error ? json(500, { error: error.message }) : null
+}
+
 export function createAdminActionHandler(deps: AdminDeps) {
   return async (req: Request): Promise<Response> => {
     const denied = await requireAdmin(deps, req)
@@ -94,6 +107,15 @@ export function createAdminActionHandler(deps: AdminDeps) {
     const { memoryId, action } = parsed.data
 
     if (action === 'hide' || action === 'unhide') {
+      // unhide clears reports BEFORE flipping to 'live'. The auto-hide trigger
+      // only fires on status='live', so clearing first (while still hidden)
+      // means a report landing mid-restore can't re-trip the 3-strike threshold
+      // and then have its trail wiped by the clear — which would silently leave
+      // the moment hidden with 0 reports (code review). hide never clears.
+      if (action === 'unhide') {
+        const failure = await clearReports(deps.db, memoryId)
+        if (failure) return failure
+      }
       const { error } = await deps.db
         .from('memories')
         .update({ status: action === 'hide' ? 'hidden' : 'live' })
@@ -122,8 +144,9 @@ export function createAdminActionHandler(deps: AdminDeps) {
         }
       }
     } else {
-      const { error } = await deps.db.from('reports').delete().eq('memory_id', memoryId)
-      if (error) return json(500, { error: error.message })
+      // dismiss: keep the moment up, clear its reports (the "OK" key — docs/15 §5)
+      const failure = await clearReports(deps.db, memoryId)
+      if (failure) return failure
     }
     return json(200, { ok: true })
   }

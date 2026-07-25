@@ -290,10 +290,15 @@ export function createMemoriesHandler(deps: UploadDeps) {
 
     // Independent pre-checks run concurrently; results apply in a fixed
     // precedence (429 rate → 401 auth → 400 event) so errors stay
-    // deterministic.
-    const ipHash = hashIp(ip, 'upload')
+    // deterministic. The file flow was ALREADY rate-checked AND recorded at
+    // presign (which mints the R2 grants); re-checking here would count the same
+    // upload twice and 429 the last allowed one AFTER its bytes are in R2,
+    // leaving an orphan. Only the embed flow (no presign) is gated here — so the
+    // ip hash is computed only when embed, and its presence gates both the check
+    // above and the record below.
+    const ipHash = input.embed ? hashIp(ip, 'upload') : null
     const [limited, authUser, event] = await Promise.all([
-      overRateLimit(deps.db, ipHash, UPLOADS_PER_HOUR),
+      ipHash ? overRateLimit(deps.db, ipHash, UPLOADS_PER_HOUR) : Promise.resolve(false),
       input.authToken ? deps.db.auth.getUser(input.authToken) : Promise.resolve(null),
       deps.db.from('events').select('id').eq('id', input.eventId).maybeSingle(),
     ])
@@ -422,8 +427,8 @@ export function createMemoriesHandler(deps: UploadDeps) {
 
     // File uploads were already counted at presign; only the embed flow (no
     // presign) records its rate event here — otherwise a file upload would
-    // consume two of the hourly budget.
-    if (input.embed) await recordRateEvent(deps.db, ipHash)
+    // consume two of the hourly budget. ipHash is non-null iff embed.
+    if (ipHash) await recordRateEvent(deps.db, ipHash)
     return json(201, {
       moments: inserted.map((row) => ({ id: row.id, takedownToken: row.takedown_token })),
     })

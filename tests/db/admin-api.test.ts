@@ -135,6 +135,29 @@ describe('actions', () => {
     expect(data!.status).toBe('live')
   })
 
+  test('unhide clears the reports that hid it, so a single re-report cannot instantly re-hide it', async () => {
+    const id = await createMemory(`admin-unhide-clear-${randomUUID().slice(0, 6)}`, 'hidden')
+    // the three distinct hints that tripped the auto-hide threshold sit on the row
+    await service
+      .from('reports')
+      .insert(
+        [1, 2, 3].map((n) => ({ memory_id: id, reason: 'nsfw', reporter_hint: `h${n}-${id}` })),
+      )
+
+    await createAdminActionHandler(deps())(
+      withAuth(operatorToken, { memoryId: id, action: 'unhide' }),
+    )
+
+    const { data } = await service.from('memories').select('status').eq('id', id).single()
+    expect(data!.status).toBe('live')
+    // reports gone → the 3-strike counter resets; the next lone report can't re-hide
+    const { count } = await service
+      .from('reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('memory_id', id)
+    expect(count).toBe(0)
+  })
+
   test('dismiss clears reports but keeps the memory live', async () => {
     const id = await createMemory(`admin-dismiss-${randomUUID().slice(0, 6)}`)
     await service.from('reports').insert({ memory_id: id, reason: 'spam', reporter_hint: 'x' })

@@ -65,6 +65,23 @@ describe('CountryField', () => {
     expect(await screen.findByText(/no match/i)).toBeInTheDocument()
   })
 
+  test('emptying a pre-filled field then picking from the list keeps the pick (not cleared 120ms later)', async () => {
+    const user = userEvent.setup()
+    const { onChange } = render({ value: 'NL' })
+    const input = screen.getByRole('combobox')
+
+    await user.click(input) // focus selects all
+    await user.clear(input) // empty → full list shown, query === ''
+    // pick from the list WITHOUT typing, so query is still '' at commit time —
+    // exactly when the stale blur closure used to fire onChange('') afterwards.
+    await user.click(await screen.findByRole('option', { name: 'South Korea' }))
+
+    // let the (now-cancelled) blur timer's window pass
+    await new Promise((r) => setTimeout(r, 200))
+    expect(onChange).toHaveBeenLastCalledWith('KR')
+    expect(onChange).not.toHaveBeenCalledWith('')
+  })
+
   test('clearing the input and blurring removes the country (D31 opt-out)', async () => {
     const user = userEvent.setup()
     const { onChange } = render({ value: 'NL' })

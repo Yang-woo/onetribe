@@ -161,6 +161,69 @@ describe('MemoryWall', () => {
     expect(screen.getByText('caption-new')).toBeInTheDocument()
   })
 
+  test('a failed page parks auto-loading so the observer stops re-firing, and recovers on a manual retry', async () => {
+    // A controllable observer (the global mock is a no-op) so we can drive the
+    // sentinel-into-view path directly — that's where the infinite spin lived.
+    const fires: Array<() => void> = []
+    const realIO = globalThis.IntersectionObserver
+    globalThis.IntersectionObserver = class {
+      constructor(cb: IntersectionObserverCallback) {
+        const self = this as unknown as IntersectionObserver
+        fires.push(() => cb([{ isIntersecting: true } as IntersectionObserverEntry], self))
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return []
+      }
+      root = null
+      rootMargin = ''
+      thresholds = []
+    } as unknown as typeof IntersectionObserver
+
+    try {
+      const user = (await import('@testing-library/user-event')).default.setup()
+      let attempt = 0
+      const loadMore = vi.fn(async () => {
+        attempt += 1
+        if (attempt === 1) throw new Error('offline')
+        return [moment('recovered')]
+      })
+      renderWithIntl(
+        <MemoryWall
+          initialMoments={Array.from({ length: 40 }, (_, i) => moment(`m${i}`))}
+          loadMoreImpl={loadMore}
+          subscribeImpl={noSubscribe}
+        />,
+      )
+      const scrollSentinelIntoView = () => fires[fires.length - 1]?.()
+
+      // first intersection loads a page — which fails
+      await act(async () => {
+        scrollSentinelIntoView()
+      })
+      expect(loadMore).toHaveBeenCalledTimes(1)
+
+      // further intersections must NOT re-fire: a failed page parks auto-loading.
+      // (Dropping the catch OR the `!failed` observer guard spins here → >1 call.)
+      await act(async () => {
+        scrollSentinelIntoView()
+      })
+      await act(async () => {
+        scrollSentinelIntoView()
+      })
+      expect(loadMore).toHaveBeenCalledTimes(1)
+
+      // the wall is not marked exhausted, so a deliberate button retry recovers
+      await user.click(screen.getByRole('button', { name: 'more moments' }))
+      expect(loadMore).toHaveBeenCalledTimes(2)
+      expect(screen.getByText('caption-recovered')).toBeInTheDocument()
+    } finally {
+      globalThis.IntersectionObserver = realIO
+    }
+  })
+
   // docs/15 §1 — filtered views get an edition header; the live signal counts
   // this session's inserts and only appears once something has landed.
   test('a fully-canceled year with no anthem keeps the generic remembers-the-edition line', () => {

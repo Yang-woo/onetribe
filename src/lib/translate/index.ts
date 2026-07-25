@@ -50,7 +50,12 @@ export async function translateWithCache(
   if (hit) return { text: hit.text, cached: true, failed: false, detectedSourceLang: null }
 
   try {
-    const result = await provider.translate(trimmed, targetLang, sourceLang)
+    // sourceLang (from the write-time franc guess) drives the same-language SKIP
+    // above, but is deliberately NOT forwarded to the provider: franc-min mis-tags
+    // short captions, and forcing a wrong source_lang produced a wrong translation
+    // that the permanent cache then froze in (docs/04). DeepL's own auto-detection
+    // is more reliable and its detected language back-fills an unknown source_lang.
+    const result = await provider.translate(trimmed, targetLang)
     const { error: cacheError } = await db.from('translations').upsert({
       source_hash: hash,
       target_lang: targetLang,

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { hashIp } from '@/lib/server/request-meta'
-import { THUMB_MAX_UPLOAD_BYTES } from '@/lib/upload/constants'
+import { THUMB_MAX_UPLOAD_BYTES, UPLOADS_PER_HOUR } from '@/lib/upload/constants'
 import type { StorageAdapter } from '@/lib/storage'
 import {
   createMemoriesHandler,
@@ -768,6 +768,44 @@ describe('rate limiting (D9 P4)', () => {
       }),
     )
     expect(memories.status).toBe(429)
+  })
+
+  test('the file flow is NOT re-rate-limited at memories — presign already counted it (off-by-one)', async () => {
+    const ip = `10.20.${runId}.7`
+    const rateHash = hashIp(ip, 'upload')
+    const headers = { 'x-forwarded-for': ip }
+    // one below the limit → the next presign is the last allowed upload
+    await db
+      .from('upload_events')
+      .insert(Array.from({ length: UPLOADS_PER_HOUR - 1 }, () => ({ ip_hash: rateHash })))
+
+    try {
+      // allowed (count was limit-1), and it records the event → now exactly at limit
+      const presign = await createPresignHandler(deps())(
+        post({ turnstileToken: 't', files: [{ contentType: 'image/jpeg', size: 1000 }] }, headers),
+      )
+      expect(presign.status).toBe(200)
+      const { uploads, session } = await presign.json()
+
+      // Committing that SAME upload must succeed: re-checking the rate here would
+      // 429 the last allowed upload AFTER its bytes are already in R2 (orphan).
+      const memories = await createMemoriesHandler(deps())(
+        post(
+          {
+            session,
+            eventId,
+            caption: `${MARKER}-offbyone`,
+            rightsConfirmed: true,
+            media: uploads.map((u: { key: string }) => ({ key: u.key, contentType: 'image/jpeg' })),
+          },
+          headers,
+        ),
+      )
+      expect(memories.status).toBe(201)
+    } finally {
+      // always clear the seeded rate rows, even if an assertion above throws
+      await db.from('upload_events').delete().eq('ip_hash', rateHash)
+    }
   })
 
   test('presign records a rate event so minting R2 grants is bounded', async () => {

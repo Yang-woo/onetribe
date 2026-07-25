@@ -68,6 +68,11 @@ export function CountryField({
     setFocused(false)
     setActive(-1)
     inputRef.current?.blur()
+    // blur() above fires onBlur synchronously, which schedules the clear-on-empty
+    // timer with THIS render's stale closure (query==='' after the user emptied
+    // the field to search) — 120ms later it would wipe the country we just chose.
+    // An explicit selection is not an opt-out, so cancel that pending clear (D31).
+    if (blurTimer.current) clearTimeout(blurTimer.current)
   }
 
   const move = (delta: number) => {

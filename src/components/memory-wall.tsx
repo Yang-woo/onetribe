@@ -52,6 +52,11 @@ export function MemoryWall({
   const [moments, setMoments] = useState(initialMoments)
   const [exhausted, setExhausted] = useState(initialMoments.length < WALL_PAGE_SIZE)
   const [loading, setLoading] = useState(false)
+  // A failed page (offline at a festival) parks auto-loading: without this the
+  // observer re-fires the instant `loading` clears, spinning an unbounded retry
+  // loop (and an unhandled rejection). The manual "load more" button clears it
+  // for a deliberate retry.
+  const [failed, setFailed] = useState(false)
   // Track the open lightbox by moment id, not index: a live insert prepends to
   // `moments`, which would shift an index-based pointer onto a different card
   // mid-view. The index is derived per render, so a prepend just re-finds the
@@ -68,6 +73,7 @@ export function MemoryWall({
 
   const loadMore = useCallback(async () => {
     setLoading(true)
+    setFailed(false)
     try {
       const last = moments[moments.length - 1]
       if (!last) return
@@ -78,6 +84,9 @@ export function MemoryWall({
         const seen = new Set(current.map((m) => m.id))
         return [...current, ...next.filter((m) => !seen.has(m.id))]
       })
+    } catch {
+      // Park auto-loading (see `failed`); the manual button stays for a retry.
+      setFailed(true)
     } finally {
       setLoading(false)
     }
@@ -103,11 +112,11 @@ export function MemoryWall({
     const sentinel = sentinelRef.current
     if (!sentinel || exhausted) return
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting && !loading) void loadMore()
+      if (entries[0]?.isIntersecting && !loading && !failed) void loadMore()
     })
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [exhausted, loading, loadMore])
+  }, [exhausted, loading, failed, loadMore])
 
   // Derived each render so a prepend/removal re-points to the same open moment.
   const openIndex = openId === null ? -1 : moments.findIndex((m) => m.id === openId)
