@@ -47,7 +47,8 @@ test('anonymous passport → email link → sign back in with stamps intact', as
   await page.getByRole('button', { name: 'confirm' }).click()
 
   await expect(page.getByText('my journey')).toBeVisible()
-  await expect(page.getByText('@e2e warrior')).toBeVisible()
+  // display name shows WITHOUT an "@" — that belongs only on a real handle (D30)
+  await expect(page.getByText('e2e warrior')).toBeVisible()
   await expect(page.getByRole('button', { name: '2024', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
