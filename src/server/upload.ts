@@ -2,6 +2,12 @@ import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { normalizeCountry } from '@/lib/country'
+import {
+  type DiscordNotifier,
+  newMomentMessage,
+  notifyDiscord,
+  reportMessage,
+} from '@/lib/server/discord'
 import { json, parseBody } from '@/lib/server/http'
 import { clientIp, hashIp } from '@/lib/server/request-meta'
 import { detectCaptionLocale } from '@/lib/translate/detect'
@@ -35,6 +41,9 @@ export interface UploadDeps {
   verifyTurnstile: TurnstileVerifier
   db: SupabaseClient // service role
   sessionSecret: string
+  // Operator Discord alerts (docs/00 D36) — optional, defaults to the real
+  // env-gated notifier. Best-effort: never fails a write. Injectable for tests.
+  notify?: DiscordNotifier
 }
 
 const mimeValues = Object.keys(ALLOWED_MIME) as [AllowedMime, ...AllowedMime[]]
@@ -429,6 +438,29 @@ export function createMemoriesHandler(deps: UploadDeps) {
     // presign) records its rate event here — otherwise a file upload would
     // consume two of the hourly budget. ipHash is non-null iff embed.
     if (ipHash) await recordRateEvent(deps.db, ipHash)
+
+    // Operator Discord alert with each new post's image + caption (docs/00 D36).
+    // Best-effort: the WHOLE block is wrapped so neither the message builder nor
+    // the notifier can fail an already-saved upload. `inserted` is in insert
+    // order so inserted[i] pairs with rows[i] for the per-moment media. Awaited
+    // (not fire-and-forget) so it isn't dropped when the function freezes.
+    try {
+      await (deps.notify ?? notifyDiscord)(
+        newMomentMessage(
+          inserted.map((row, i) => ({
+            id: row.id,
+            caption,
+            authorName: shared.author_name,
+            country,
+            imageUrl: rows[i]?.media_url ?? null,
+            kind: rows[i]?.media_kind ?? 'image',
+          })),
+        ),
+      )
+    } catch {
+      // the moment is saved — an alert failure must never turn it into a 500
+    }
+
     return json(201, {
       moments: inserted.map((row) => ({ id: row.id, takedownToken: row.takedown_token })),
     })
@@ -444,7 +476,7 @@ const reportSchema = z.object({
   reason: z.enum(REPORT_REASONS),
 })
 
-export function createReportHandler(deps: Pick<UploadDeps, 'db'>) {
+export function createReportHandler(deps: Pick<UploadDeps, 'db' | 'notify'>) {
   return async (req: Request): Promise<Response> => {
     const body = await parseBody(req)
     const parsed = reportSchema.safeParse(body)
@@ -464,6 +496,13 @@ export function createReportHandler(deps: Pick<UploadDeps, 'db'>) {
     if (error) return json(400, { error: 'could not file report' })
 
     await recordRateEvent(deps.db, reportScopedHash)
+    // Best-effort operator alert so a report reaches moderation fast (docs/00 D36).
+    // Wrapped so neither the builder nor the notifier can fail a filed report.
+    try {
+      await (deps.notify ?? notifyDiscord)(reportMessage(parsed.data.memoryId, parsed.data.reason))
+    } catch {
+      // the report is filed — an alert failure must not turn it into an error
+    }
     return json(201, { ok: true })
   }
 }

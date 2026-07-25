@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
 import { hashIp } from '@/lib/server/request-meta'
 import { THUMB_MAX_UPLOAD_BYTES, UPLOADS_PER_HOUR } from '@/lib/upload/constants'
 import type { StorageAdapter } from '@/lib/storage'
@@ -336,6 +336,51 @@ describe('POST /api/memories — file flow', () => {
       expect(row.author_link).toBe('https://instagram.com/onetribe.world')
       expect(row.author_name).toBe('tester')
     }
+  })
+
+  test('a successful upload fires a best-effort Discord alert with the image + permalink (D36)', async () => {
+    const notify = vi.fn(async (_msg: unknown) => {})
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const res = await createMemoriesHandler(deps({ notify }))(
+      post({
+        session,
+        eventId,
+        caption: `${MARKER}-discord`,
+        rightsConfirmed: true,
+        media: [{ key: uploads[0].key, contentType: 'image/jpeg' }],
+      }),
+    )
+    expect(res.status).toBe(201)
+    expect(notify).toHaveBeenCalledTimes(1)
+    const msg = notify.mock.calls[0][0] as {
+      embeds: Array<{ url: string; image?: { url: string } }>
+    }
+    expect(msg.embeds[0].url).toMatch(/\/m\/[0-9a-f-]{36}$/)
+    expect(msg.embeds[0].image?.url).toBe(`https://media.test/${uploads[0].key}`)
+  })
+
+  test('a throwing notifier never fails a saved upload — the alert is best-effort (D36)', async () => {
+    const notify = vi.fn(async () => {
+      throw new Error('discord down')
+    })
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const res = await createMemoriesHandler(deps({ notify }))(
+      post({
+        session,
+        eventId,
+        caption: `${MARKER}-notify-throws`,
+        rightsConfirmed: true,
+        media: [{ key: uploads[0].key, contentType: 'image/jpeg' }],
+      }),
+    )
+    // the moment was saved, so the failing alert must NOT turn it into a 500
+    expect(res.status).toBe(201)
+    expect(notify).toHaveBeenCalledTimes(1)
+    const { count } = await db
+      .from('memories')
+      .select('*', { count: 'exact', head: true })
+      .eq('caption', `${MARKER}-notify-throws`)
+    expect(count).toBe(1)
   })
 
   test('media aspect_ratio round-trips; an out-of-range value is nulled (D32)', async () => {
@@ -894,5 +939,21 @@ describe('POST /api/report — server-computed reporter_hint', () => {
 
     const { data: anonView } = await anon.from('memories').select('id').eq('id', memoryId)
     expect(anonView ?? []).toHaveLength(0)
+  })
+
+  test('a filed report fires a best-effort Discord alert linking the moment (D36)', async () => {
+    const notify = vi.fn(async (_msg: unknown) => {})
+    const memoryId = await fixtureMemory(`${MARKER}-report-discord`)
+    const res = await createReportHandler({ db, notify })(
+      new Request('http://localhost/api/report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': `${REPORT_IP_BASE}.4` },
+        body: JSON.stringify({ memoryId, reason: 'spam' }),
+      }),
+    )
+    expect(res.status).toBe(201)
+    expect(notify).toHaveBeenCalledTimes(1)
+    const msg = notify.mock.calls[0][0] as { embeds: Array<{ url: string }> }
+    expect(msg.embeds[0].url).toContain(`/m/${memoryId}`)
   })
 })
