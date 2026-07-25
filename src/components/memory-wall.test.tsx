@@ -288,7 +288,7 @@ describe('MemoryWall', () => {
     expect(screen.queryByText(/never opened/)).not.toBeInTheDocument()
   })
 
-  test('cards carry the edition tag (year + anthem initials) and an anonymous meta line', () => {
+  test('cards carry the edition tag (year + anthem, spelled out) and an anonymous meta line', () => {
     const ed: EditionChip = {
       id: 'e2024',
       year: 2024,
@@ -303,7 +303,9 @@ describe('MemoryWall', () => {
         subscribeImpl={noSubscribe}
       />,
     )
-    expect(screen.getByText('2024 POTT')).toBeInTheDocument()
+    // spelled out, not initials: "2024 POTT" meant nothing to a reader who
+    // didn't already know the anthem. Same shape as the modal/filter header.
+    expect(screen.getByText('2024 — Power of the Tribe')).toBeInTheDocument()
     expect(screen.getByText('anonymous')).toBeInTheDocument()
   })
 })

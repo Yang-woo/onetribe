@@ -1,4 +1,6 @@
 import { screen } from '@testing-library/react'
+import { NextIntlClientProvider } from 'next-intl'
+import messages from '../../messages/en.json'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test, vi } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
@@ -13,13 +15,16 @@ const editionById = new Map<string, EditionChip>([
   ['event-1', { id: 'event-1', year: 2024, edition: 'Power of the Tribe', canceled: false }],
 ])
 
+// The modal is opened BY ID (docs/00 D33) — `open(n)` names the nth moment of
+// the list so the tests still read positionally, while what crosses the prop
+// boundary is the id the hosts actually hold.
 function open(index: number, moments = [momentFixture('a'), momentFixture('b')], extra = {}) {
   const onClose = vi.fn()
   const onNavigate = vi.fn()
   renderWithIntl(
     <Lightbox
       moments={moments}
-      index={index}
+      openId={moments[index]!.id}
       editionById={editionById}
       onClose={onClose}
       onNavigate={onNavigate}
@@ -91,7 +96,7 @@ describe('Lightbox (moment modal)', () => {
     const { onNavigate } = open(0)
     expect(screen.getByRole('button', { name: 'previous' })).toBeDisabled()
     await user.click(screen.getByRole('button', { name: 'next' }))
-    expect(onNavigate).toHaveBeenCalledWith(1)
+    expect(onNavigate).toHaveBeenCalledWith('b')
   })
 
   test('next is disabled at the last moment', () => {
@@ -107,16 +112,87 @@ describe('Lightbox (moment modal)', () => {
     await user.keyboard('{ArrowLeft}') // at the first moment — guarded, no move
     expect(onNavigate).not.toHaveBeenCalled()
     await user.keyboard('{ArrowRight}')
-    expect(onNavigate).toHaveBeenCalledWith(1)
+    expect(onNavigate).toHaveBeenCalledWith('b')
   })
 
   test('ArrowLeft from a later moment steps back', async () => {
     const user = userEvent.setup()
     const { onNavigate } = open(1)
     await user.keyboard('{ArrowLeft}')
-    expect(onNavigate).toHaveBeenCalledWith(0)
+    expect(onNavigate).toHaveBeenCalledWith('a')
     await user.keyboard('{ArrowRight}') // at the last moment — guarded, no move
     expect(onNavigate).toHaveBeenCalledTimes(1)
+  })
+
+  // The modal owns the "open by id" guarantee (docs/00 D33) so no host has to
+  // re-implement an index adapter: the list moving underneath must not shift the
+  // view onto a different photo.
+  test('resolves the open moment against the current list, so a prepend cannot shift it', () => {
+    const moments = [momentFixture('a'), momentFixture('b')]
+    const { rerender } = renderWithIntl(
+      <Lightbox
+        moments={moments}
+        openId="a"
+        onClose={vi.fn()}
+        onNavigate={vi.fn()}
+        translateImpl={async () => null}
+      />,
+    )
+    expect(screen.getByText('caption-a')).toBeInTheDocument()
+
+    rerender(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <Lightbox
+          moments={[momentFixture('fresh'), ...moments]}
+          openId="a"
+          onClose={vi.fn()}
+          onNavigate={vi.fn()}
+          translateImpl={async () => null}
+        />
+      </NextIntlClientProvider>,
+    )
+    expect(screen.getByText('caption-a')).toBeInTheDocument()
+    expect(screen.queryByText('caption-fresh')).not.toBeInTheDocument()
+  })
+
+  test('an open moment that leaves the list closes the modal instead of hanging open', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const onNavigate = vi.fn()
+    const { rerender } = renderWithIntl(
+      <Lightbox
+        moments={[momentFixture('a'), momentFixture('b')]}
+        openId="gone"
+        onClose={onClose}
+        onNavigate={onNavigate}
+        translateImpl={async () => null}
+      />,
+    )
+    // nothing rendered — and the host is told, so it can drop its open id
+    // (otherwise the modal stays mounted, keeping the key handler and the
+    // stranded focus, with the host still thinking a moment is open)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    // exactly once — the host passes a fresh `onClose` identity every render,
+    // so an unlatched effect would re-fire for as long as it stays mounted
+    expect(onClose).toHaveBeenCalledTimes(1)
+    // still once after a re-render that hands us a fresh onClose identity
+    rerender(
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <Lightbox
+          moments={[momentFixture('a'), momentFixture('b')]}
+          openId="gone"
+          onClose={() => onClose()}
+          onNavigate={onNavigate}
+          translateImpl={async () => null}
+        />
+      </NextIntlClientProvider>,
+    )
+    expect(onClose).toHaveBeenCalledTimes(1)
+
+    // and no keyboard navigation escapes from the unresolved state
+    await user.keyboard('{ArrowRight}')
+    await user.keyboard('{ArrowLeft}')
+    expect(onNavigate).not.toHaveBeenCalled()
   })
 
   test('Escape closes the modal', async () => {

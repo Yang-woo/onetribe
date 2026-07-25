@@ -130,12 +130,20 @@ describe('PassportAccount — anonymous', () => {
 })
 
 describe('PassportAccount — upgraded', () => {
+  test('heading is account management, not the anonymous "keep" pitch', () => {
+    renderAccount({ identity: LINKED })
+    // The upgrade already happened — a section holding sign-out and deletion
+    // must not be titled "keep this passport".
+    expect(screen.getByText('passport account')).toBeInTheDocument()
+    expect(screen.queryByText('keep this passport')).not.toBeInTheDocument()
+  })
+
   test('shows the linked email, sign-out ends this device session', async () => {
     const user = userEvent.setup()
     const { api, onState } = renderAccount({ identity: LINKED })
 
     expect(screen.getByText('connected as raver@example.com')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'leave this passport on this device' }))
+    await user.click(screen.getByRole('button', { name: 'sign out on this device' }))
     expect(api.signOut).toHaveBeenCalled()
     await waitFor(() => expect(onState).toHaveBeenCalledWith(null))
   })

@@ -1,20 +1,14 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test, vi } from 'vitest'
-import type { EditionChip } from '@/lib/moments'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { MomentThumb } from './moment-thumb'
 
 // Spec: docs/15 §1 + wall UX pass — the image opens the moment modal, while the
-// @handle is a SEPARATE Instagram link (distinct hit areas), and the passport
-// reuses the card inert (no onOpen).
+// @handle is a SEPARATE Instagram link (distinct hit areas). The corner tag is
+// caller-supplied text: the wall spells the anthem out, the passport shows the year.
 
-const ed: EditionChip = {
-  id: 'event-1',
-  year: 2024,
-  edition: 'Power of the Tribe',
-  canceled: false,
-}
+const TAG = '2024 — Power of the Tribe'
 
 describe('MomentThumb', () => {
   test('the image is a button that opens the moment (onOpen), named by the caption', async () => {
@@ -60,17 +54,26 @@ describe('MomentThumb', () => {
     expect(screen.getByText('raver')).toBeInTheDocument()
   })
 
-  test('carries the edition tag (year + anthem initials)', () => {
-    renderWithIntl(<MomentThumb moment={momentFixture('a')} edition={ed} onOpen={() => {}} />)
-    expect(screen.getByText('2024 POTT')).toBeInTheDocument()
+  test('no tag → nothing printed over the photo', () => {
+    // an unknown event id (a hidden edition year, or an edition the lookup
+    // missed) must not stamp an empty chip on the picture
+    const { container } = renderWithIntl(
+      <MomentThumb moment={momentFixture('a')} onOpen={() => {}} />,
+    )
+    const imageArea = container.querySelector('figure > div')!
+    expect(imageArea.textContent).toBe('')
+    // A chip with no text is still a black pill stamped on the photo, and an
+    // empty string is invisible to any text query — so this counts boxes: the
+    // scrim and the expand glyph, and nothing else.
+    expect(imageArea.querySelectorAll(':scope > span')).toHaveLength(2)
   })
 
-  test('the edition tag is decorative context, not inside the open button (WCAG 2.5.3)', () => {
-    renderWithIntl(<MomentThumb moment={momentFixture('a')} edition={ed} onOpen={() => {}} />)
+  test('renders the tag verbatim, outside the open button (WCAG 2.5.3)', () => {
+    renderWithIntl(<MomentThumb moment={momentFixture('a')} tag={TAG} onOpen={() => {}} />)
     // The tag sits OUTSIDE the open button so it never competes with the
     // button's accessible name (the caption) — label-content-name-mismatch. It
-    // used to render inside the button, dragging "2024 POTT" into the label.
-    const tag = screen.getByText('2024 POTT')
+    // used to render inside the button, dragging the tag into the label.
+    const tag = screen.getByText(TAG)
     const button = screen.getByRole('button', { name: 'caption-a' })
     expect(button.contains(tag)).toBe(false)
   })
@@ -81,11 +84,5 @@ describe('MomentThumb', () => {
     )
     // jsdom serializes the ratio as "0.75 / 1" — assert on the value
     expect(screen.getByAltText('caption-a').style.aspectRatio).toMatch(/0\.75/)
-  })
-
-  test('without onOpen (passport) the card is inert — no button', () => {
-    renderWithIntl(<MomentThumb moment={momentFixture('a')} />)
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
-    expect(screen.getByText('caption-a')).toBeInTheDocument()
   })
 })

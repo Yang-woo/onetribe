@@ -149,7 +149,10 @@ async function stateFor(client: SupabaseClient, user: User): Promise<PassportSta
       .from('memories')
       .select(PUBLIC_MEMORY_COLUMNS)
       .eq('author_id', userId)
-      .order('created_at', { ascending: false }),
+      // (created_at, id) like the wall: a 5-photo batch shares one timestamp, so
+      // created_at alone leaves the grid — and the modal's ←/→ order — arbitrary.
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false }),
   ])
   return {
     userId,

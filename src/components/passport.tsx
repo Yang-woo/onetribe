@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
-import type { EditionChip } from '@/lib/moments'
+import { editionMap, type EditionChip } from '@/lib/moments'
 import {
   GOOGLE_AUTH_ENABLED,
   consumeOauthReturnError,
@@ -14,6 +14,7 @@ import {
 } from '@/lib/passport/backend'
 import { Link } from '@/i18n/navigation'
 import { EmailOtpForm } from './email-otp-form'
+import { Lightbox } from './lightbox'
 import { MomentThumb } from './moment-thumb'
 import { PassportAccount } from './passport-account'
 import { PassportProfile } from './passport-profile'
@@ -48,6 +49,8 @@ export function Passport({
   // Surfaces a failed start / attendance toggle instead of a silent no-op
   // (an unhandled rejection plus a UI that lies about what was saved).
   const [actionError, setActionError] = useState(false)
+  // The open moment, by id — the lightbox resolves it against the list itself.
+  const [openId, setOpenId] = useState<string | null>(null)
 
   useEffect(() => {
     // OAuth return errors arrive as URL params — the backend reads and strips
@@ -141,6 +144,8 @@ export function Passport({
 
   const n = state.attendedEventIds.length
   const attended = new Set(state.attendedEventIds)
+  const moments = state.moments
+  const editionById = editionMap(editions)
   const attendedYears = editions.filter((e) => attended.has(e.id)).map((e) => e.year)
   const firstYear = attendedYears.length ? Math.min(...attendedYears) : null
   // 1-based ordinal of each attended edition among the user's attended years,
@@ -201,10 +206,8 @@ export function Passport({
 
       {/* the moments are the hero — this is what the passport is for */}
       <section className="flex flex-col gap-3">
-        <h3 className="font-display lowercase">
-          {t('myMoments', { count: state.moments.length })}
-        </h3>
-        {state.moments.length === 0 ? (
+        <h3 className="font-display lowercase">{t('myMoments', { count: moments.length })}</h3>
+        {moments.length === 0 ? (
           <div className="flex flex-col items-start gap-3 rounded-lg border border-line p-6">
             <p className="text-sm text-muted">{t('noMoments')}</p>
             <Link
@@ -216,8 +219,14 @@ export function Passport({
           </div>
         ) : (
           <div className="columns-2 gap-3 sm:columns-3">
-            {state.moments.map((moment) => (
-              <MomentThumb key={moment.id} moment={moment} />
+            {moments.map((moment) => (
+              <MomentThumb
+                key={moment.id}
+                moment={moment}
+                // the year alone: the stamp grid below already names the edition
+                tag={editionById.get(moment.event_id)?.year.toString()}
+                onOpen={() => setOpenId(moment.id)}
+              />
             ))}
             {/* one more moment — a quiet dashed tile at the end of the wall */}
             <Link
@@ -230,6 +239,17 @@ export function Passport({
               <span className="text-[11px] text-muted">{t('addMoment')}</span>
             </Link>
           </div>
+        )}
+        {/* Same modal as the wall (docs/00 D32) — "view details ↗" carries on to
+            /m/[id]. RLS returns live rows only, so every thumb has a live permalink. */}
+        {openId && (
+          <Lightbox
+            moments={moments}
+            openId={openId}
+            editionById={editionById}
+            onClose={() => setOpenId(null)}
+            onNavigate={setOpenId}
+          />
         )}
       </section>
 
@@ -288,7 +308,12 @@ export function Passport({
         api={api}
         // a link only changes who the passport belongs to — merge, don't refetch
         onIdentity={(identity) => setState((s) => (s ? { ...s, identity } : s))}
-        onState={setState}
+        // signing out / into another passport replaces the moments wholesale —
+        // an id opened from the previous one must not survive the swap
+        onState={(next) => {
+          setOpenId(null)
+          setState(next)
+        }}
       />
     </section>
   )

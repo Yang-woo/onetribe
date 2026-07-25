@@ -15,7 +15,9 @@ export function relativeTime(iso: string, locale: string): string {
 }
 
 /** The edition context line for a moment card/modal on the wall: `year — anthem`
- *  (the wall has no city/festival join — editions are all Defqon.1). */
+ *  (the wall has no city/festival join — editions are all Defqon.1). The dash is
+ *  load-bearing on the card tag: without it `2019 One Tribe` reads as this
+ *  site's own name stamped on the photo rather than as that year's anthem. */
 export function editionLine(edition: { year: number; edition: string | null }): string {
   return edition.edition ? `${edition.year} — ${edition.edition}` : String(edition.year)
 }

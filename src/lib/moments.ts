@@ -108,8 +108,14 @@ export function wallFilterFor(editions: EditionChip[], year: number | null): Wal
     eventIds:
       year === null ? undefined : editions.filter((ed) => ed.year === year).map((ed) => ed.id),
     filterEdition: year === null ? undefined : editions.find((ed) => ed.year === year),
-    editionById: new Map(editions.map((ed) => [ed.id, ed])),
+    editionById: editionMap(editions),
   }
+}
+
+/** Event id → edition, for the card tag and the modal's context line. Shared so
+ *  the wall and the passport can't drift on what the lookup contains. */
+export function editionMap(editions: EditionChip[]): Map<string, EditionChip> {
+  return new Map(editions.map((ed) => [ed.id, ed]))
 }
 
 export const WALL_PAGE_SIZE = 40

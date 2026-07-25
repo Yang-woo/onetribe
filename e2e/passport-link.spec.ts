@@ -4,7 +4,7 @@ import { otpFor } from '../tests/mailpit'
 
 /**
  * Passport upgrade round trip — docs/15 §4, D16. Anonymous start → link an
- * email with a real OTP (Mailpit) → leave the device → sign back in → the
+ * email with a real OTP (Mailpit) → sign out of the device → sign back in → the
  * same passport (stamps intact) opens. This is the whole point of D16:
  * the passport survives the browser.
  */
@@ -34,8 +34,8 @@ test('anonymous passport → email link → sign back in with stamps intact', as
   await page.getByRole('button', { name: 'confirm' }).click()
   await expect(page.getByText(`connected as ${email}`)).toBeVisible()
 
-  // leave this device → back to the start screen
-  await page.getByRole('button', { name: 'leave this passport on this device' }).click()
+  // sign out of this device → back to the start screen
+  await page.getByRole('button', { name: 'sign out on this device' }).click()
   await expect(page.getByText('start anonymously — just pick a name')).toBeVisible()
 
   // sign back in — same passport, stamp still there

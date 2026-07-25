@@ -36,33 +36,43 @@ const defaultTranslate: TranslateImpl = async (memoryId, locale) => {
  */
 export function Lightbox({
   moments,
-  index,
+  openId,
   editionById,
   onClose,
   onNavigate,
   translateImpl = defaultTranslate,
 }: {
   moments: Moment[]
-  index: number
+  /**
+   * The open moment, by id — never an index. The list moves under the modal
+   * (a live insert prepends to the wall), so an index would silently re-point
+   * at a different photo mid-view (docs/00 D33). Resolving the index here, and
+   * reporting ids back through `onNavigate`, keeps that guarantee inside the
+   * modal instead of asking every host to re-implement the same adapter.
+   */
+  openId: string
   /** Edition lookup for the per-moment context line (no extra fetch). */
   editionById?: Map<string, EditionChip>
   onClose: () => void
-  onNavigate: (index: number) => void
+  onNavigate: (id: string) => void
   /** test seam — the real impl hits /api/translate */
   translateImpl?: TranslateImpl
 }) {
   const t = useTranslations('moment')
   const locale = useLocale()
+  const index = moments.findIndex((m) => m.id === openId)
   const moment = moments[index]
   const touchStartX = useRef<number | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
 
   const prev = useCallback(() => {
-    if (index > 0) onNavigate(index - 1)
-  }, [index, onNavigate])
+    const target = index > 0 ? moments[index - 1] : undefined
+    if (target) onNavigate(target.id)
+  }, [index, moments, onNavigate])
   const next = useCallback(() => {
-    if (index < moments.length - 1) onNavigate(index + 1)
-  }, [index, moments.length, onNavigate])
+    const target = index >= 0 ? moments[index + 1] : undefined
+    if (target) onNavigate(target.id)
+  }, [index, moments, onNavigate])
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -98,6 +108,20 @@ export function Lightbox({
     dialogRef.current?.focus()
     return () => restoreTo?.focus?.()
   }, [])
+
+  // The open moment left the list (a sign-in swapped the passport's moments, a
+  // hidden row dropped out of a refetch). Rendering nothing isn't enough — the
+  // host still believes a modal is open, so tell it to close: that unmounts us,
+  // which restores focus to the trigger and detaches the key handler. Latched:
+  // both hosts unmount us in response, but a host that only re-rendered would
+  // otherwise spin here (the inline `onClose` is a new identity every render).
+  const missing = index < 0
+  const closedRef = useRef(false)
+  useEffect(() => {
+    if (!missing || closedRef.current) return
+    closedRef.current = true
+    onClose()
+  }, [missing, onClose])
 
   if (!moment) return null
 

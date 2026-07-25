@@ -132,7 +132,8 @@ export function PassportAccount({
 
   return (
     <section className="flex flex-col gap-3 border-t border-line pt-6">
-      <h3 className="font-display lowercase">{t('keepTitle')}</h3>
+      {/* account management, not the anonymous "keep this passport" pitch above */}
+      <h3 className="font-display lowercase">{t('accountTitle')}</h3>
       {connectedLabel && <p className="text-sm text-orange">{connectedLabel}</p>}
       <p className="text-sm text-muted">{t('otherDeviceHint')}</p>
       {errorKey && (

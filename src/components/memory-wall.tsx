@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { editionLine } from '@/lib/format'
 import { fetchMoments, WALL_PAGE_SIZE, type EditionChip, type Moment } from '@/lib/moments'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 import { Lightbox } from './lightbox'
@@ -57,10 +58,8 @@ export function MemoryWall({
   // loop (and an unhandled rejection). The manual "load more" button clears it
   // for a deliberate retry.
   const [failed, setFailed] = useState(false)
-  // Track the open lightbox by moment id, not index: a live insert prepends to
-  // `moments`, which would shift an index-based pointer onto a different card
-  // mid-view. The index is derived per render, so a prepend just re-finds the
-  // same moment (and a moment that vanishes closes the lightbox gracefully).
+  // The open moment, by id — the lightbox resolves it against the live list on
+  // every render (docs/00 D33), so a live insert can't shift the view.
   const [openId, setOpenId] = useState<string | null>(null)
   // moments that landed live this session (past the active filter) — the
   // "just landed" signal. Resets per filter view (page re-keys on year).
@@ -118,17 +117,10 @@ export function MemoryWall({
     return () => observer.disconnect()
   }, [exhausted, loading, failed, loadMore])
 
-  // Derived each render so a prepend/removal re-points to the same open moment.
-  const openIndex = openId === null ? -1 : moments.findIndex((m) => m.id === openId)
-
   const canceled = filterEdition?.canceled ?? false
   // A canceled edition keeps its real anthem title (2026 — Sacred Oath); the
   // red styling and the sub-line below carry the "never opened" meaning.
-  const headerTitle = filterEdition
-    ? filterEdition.edition
-      ? `${filterEdition.year} — ${filterEdition.edition}`
-      : String(filterEdition.year)
-    : null
+  const headerTitle = filterEdition ? editionLine(filterEdition) : null
 
   // Rendered above both the grid and the empty state so a filtered-but-empty
   // view (e.g. a canceled year before it has uploads) still frames the edition.
@@ -186,23 +178,26 @@ export function MemoryWall({
       {filterHeader}
 
       <div className="columns-2 gap-3 md:columns-3 lg:columns-4">
-        {moments.map((moment) => (
-          <MomentThumb
-            key={moment.id}
-            moment={moment}
-            edition={editionById?.get(moment.event_id)}
-            onOpen={() => setOpenId(moment.id)}
-          />
-        ))}
+        {moments.map((moment) => {
+          const edition = editionById?.get(moment.event_id)
+          return (
+            <MomentThumb
+              key={moment.id}
+              moment={moment}
+              // the same "year — anthem" the modal and the filter header show
+              tag={edition && editionLine(edition)}
+              onOpen={() => setOpenId(moment.id)}
+            />
+          )
+        })}
       </div>
-      {openIndex >= 0 && (
+      {openId && (
         <Lightbox
           moments={moments}
-          index={openIndex}
+          openId={openId}
           editionById={editionById}
           onClose={() => setOpenId(null)}
-          // map the index the lightbox reports back to a stable id
-          onNavigate={(i) => setOpenId(moments[i]?.id ?? null)}
+          onNavigate={setOpenId}
         />
       )}
       {!exhausted && (

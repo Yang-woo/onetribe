@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
@@ -190,16 +190,62 @@ describe('Passport', () => {
       instagram: null,
       homeCountry: null,
       attendedEventIds: [],
-      moments: [momentFixture('m1', { caption: 'my own moment', author_name: 'tester' })],
+      moments: [
+        momentFixture('m1', {
+          caption: 'my own moment',
+          author_name: 'tester',
+          event_id: 'e2024',
+        }),
+      ],
       identity: ANON_IDENTITY,
     })
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 
     expect(await screen.findByText('my moments (1)')).toBeInTheDocument()
     expect(screen.getByText('my own moment')).toBeInTheDocument()
+    // the card tag is the YEAR only here — the anthem name ("2024 Power of the
+    // Tribe", as on the wall) would just repeat what the stamps below already say
+    const card = screen.getByRole('button', { name: 'my own moment' }).closest('figure')!
+    expect(within(card).getByText('2024')).toBeInTheDocument()
+    expect(within(card).queryByText(/Power of the Tribe/)).not.toBeInTheDocument()
     // with moments present, the grid ends in a "+ add a moment" tile to /upload
     const addTile = screen.getByRole('link', { name: 'add a moment' })
     expect(addTile).toHaveAttribute('href', '/en/upload')
+  })
+
+  test('tapping an own moment opens the same modal as the wall (permalink included)', async () => {
+    const user = userEvent.setup()
+    const backend = fakeBackend({
+      userId: 'u1',
+      displayName: null,
+      instagram: null,
+      homeCountry: null,
+      attendedEventIds: [],
+      moments: [
+        momentFixture('m1', { caption: 'my own moment', event_id: 'e2024' }),
+        momentFixture('m2', { caption: 'my other moment', event_id: 'e2025' }),
+      ],
+      identity: ANON_IDENTITY,
+    })
+    renderWithIntl(<Passport editions={editions} backend={backend} />)
+
+    await user.click(await screen.findByRole('button', { name: 'my other moment' }))
+
+    const dialog = await screen.findByRole('dialog')
+    // the tapped moment opens (not just any of them), with its edition line —
+    // proof the passport wires `editionById` through. Thumbs used to be a dead end.
+    expect(within(dialog).getByText('2025')).toBeInTheDocument()
+    expect(within(dialog).getByRole('link', { name: /view details/i })).toHaveAttribute(
+      'href',
+      '/en/m/m2',
+    )
+
+    // ← / → are wired through this screen's own `onNavigate`
+    await user.click(within(dialog).getByRole('button', { name: 'previous' }))
+    expect(within(dialog).getByRole('link', { name: /view details/i })).toHaveAttribute(
+      'href',
+      '/en/m/m1',
+    )
   })
 
   test('the journey view carries the keep-this-passport section (D16)', async () => {
