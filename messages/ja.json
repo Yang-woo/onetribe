@@ -75,7 +75,7 @@
     "copyLink": "削除リンクをコピー",
     "copied": "コピーしました",
     "toWall": "壁で見る",
-    "toPassport": "パスポートに保存",
+    "toPassport": "パスポートで見る",
     "errors": {
       "tooMany": "1回につき最大5ファイルまで",
       "unsupported": "写真・GIFのみ — 動画はリンクで",

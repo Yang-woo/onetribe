@@ -75,7 +75,7 @@
     "copyLink": "copy delete link",
     "copied": "copied",
     "toWall": "see it on the wall",
-    "toPassport": "save it to your passport",
+    "toPassport": "see it in your passport",
     "errors": {
       "tooMany": "up to 5 files per moment",
       "unsupported": "photos and GIFs only — link videos instead",

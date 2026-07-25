@@ -75,7 +75,7 @@
     "copyLink": "kopiera raderingslänk",
     "copied": "kopierad",
     "toWall": "se det på väggen",
-    "toPassport": "spara det i ditt pass",
+    "toPassport": "se det i ditt pass",
     "errors": {
       "tooMany": "upp till 5 filer per minne",
       "unsupported": "endast foton och GIF:ar — länka videor istället",

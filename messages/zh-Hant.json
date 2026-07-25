@@ -75,7 +75,7 @@
     "copyLink": "複製刪除連結",
     "copied": "已複製",
     "toWall": "去牆上看看",
-    "toPassport": "儲存到你的護照",
+    "toPassport": "去你的護照裡看看",
     "errors": {
       "tooMany": "每個瞬間最多 5 個檔案",
       "unsupported": "只支援照片和 GIF — 影片請改用連結",
