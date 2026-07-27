@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { MultilingualArticle, type LocalizedContent } from '@/components/multilingual-article'
+import { secondaryButtonClass } from '@/components/ui'
 import { ABOUT_SUPPORT } from '@/lib/policy-content'
 import { ABOUT_I18N } from '@/lib/policy-content-i18n'
 import { SUPPORT_LINKS, hasSupportLinks } from '@/lib/support'
@@ -27,10 +28,6 @@ export async function generateMetadata({
 // donating must not climb to that rank. #ff6a00 on #0b0908 is 6.9:1 (docs/00 D35).
 const supportButtonClass =
   'inline-flex items-center gap-2 rounded-full border border-orange px-6 py-3 font-medium text-orange transition-colors hover:bg-orange/10'
-
-/** Secondary rails keep the quieter outline — only Ko-fi carries the mark. */
-const supportSecondaryClass =
-  'rounded-full border border-line px-5 py-2 text-sm font-medium text-paper transition-colors hover:border-orange hover:text-orange'
 
 export default function AboutPage() {
   // Every language stacked (docs/00 D18); the support CTA renders once below.
@@ -65,9 +62,21 @@ export default function AboutPage() {
                     this: linking to your page). Decorative — alt="" keeps the
                     accessible name to the label alone (docs/00 D35, WCAG 2.5.3).
                     The label stays in our voice: the body says "buy the server a
-                    coffee", so the button must not say "buy me a coffee". */}
+                    coffee", so the button must not say "buy me a coffee".
+                    loading="lazy" is load-bearing, not habit: React's SSR renderer
+                    emits <link rel="preload" as="image"> for any plain-src <img>
+                    unless it is lazy, which would race a 20px decoration against
+                    the page's font preloads. This one sits below a 17-locale wall
+                    of text — it must never compete for the first paint. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/kofi-cup.png" alt="" width={25} height={20} className="h-5 w-auto" />
+                <img
+                  src="/kofi-cup.png"
+                  alt=""
+                  width={25}
+                  height={20}
+                  loading="lazy"
+                  className="h-5 w-auto"
+                />
                 buy the server a coffee ↗
               </a>
             )}
@@ -76,7 +85,7 @@ export default function AboutPage() {
                 href={SUPPORT_LINKS.githubSponsors}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={supportSecondaryClass}
+                className={secondaryButtonClass}
               >
                 github sponsors ↗
               </a>

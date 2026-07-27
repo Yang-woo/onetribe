@@ -38,10 +38,16 @@ test('the support rail is reachable and its Ko-fi mark actually loads', async ({
   const mark = support.locator('img')
   // Decorative: the accessible name must stay the label alone (WCAG 2.5.3, D35).
   await expect(mark).toHaveAttribute('alt', '')
+
   // A missing file under public/ survives typecheck, lint and the build — only a
   // real decode proves the mark shipped instead of rendering as a broken icon.
-  await expect(mark).toHaveJSProperty('complete', true)
-  expect(await mark.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0)
+  // naturalWidth is the whole signal: it stays 0 both before the fetch and after
+  // a failed one, so polling it waits and verifies in one step (`complete` would
+  // not — it flips true on a 404 too). The mark is lazy, so bring it into view.
+  await mark.scrollIntoViewIfNeeded()
+  await expect
+    .poll(() => mark.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+    .toBeGreaterThan(0)
 })
 
 test('every locale sees the binding-language notice', async ({ page }) => {
