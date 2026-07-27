@@ -1,3 +1,5 @@
+[![One Tribe — the moments we took home — onetribe.world](./.github/readme-banner.png)](https://onetribe.world)
+
 # One Tribe
 
 **English** · [한국어](./README.ko.md)

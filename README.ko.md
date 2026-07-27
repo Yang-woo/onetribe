@@ -1,3 +1,5 @@
+[![One Tribe — 우리가 가지고 돌아온 순간들 — onetribe.world](./.github/readme-banner.png)](https://onetribe.world)
+
 # One Tribe
 
 [English](./README.md) · **한국어**
