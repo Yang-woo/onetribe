@@ -9,5 +9,8 @@ export const SUPPORT_LINKS = {
 }
 
 export function hasSupportLinks(): boolean {
-  return Boolean(SUPPORT_LINKS.kofi ?? SUPPORT_LINKS.githubSponsors)
+  // `||`, not `??`: emptying a rail to '' is the obvious way to switch one off
+  // without deleting the key, and `??` would stop at that empty string and hide
+  // the whole section while another rail is still live.
+  return Boolean(SUPPORT_LINKS.kofi || SUPPORT_LINKS.githubSponsors)
 }

@@ -39,14 +39,25 @@ test('the support rail is reachable and its Ko-fi mark actually loads', async ({
   // Decorative: the accessible name must stay the label alone (WCAG 2.5.3, D35).
   await expect(mark).toHaveAttribute('alt', '')
 
+  // React's SSR renderer preloads any plain-src <img> that is not lazy, which would
+  // race this 20px decoration against the page's font preloads. That the mark stays
+  // out of <head> rests on one attribute, so pin it here — dropping loading="lazy"
+  // leaves typecheck, lint, the build and every other test green.
+  await expect(page.locator('link[rel="preload"][href="/kofi-cup.png"]')).toHaveCount(0)
+
   // A missing file under public/ survives typecheck, lint and the build — only a
   // real decode proves the mark shipped instead of rendering as a broken icon.
-  // naturalWidth is the whole signal: it stays 0 both before the fetch and after
-  // a failed one, so polling it waits and verifies in one step (`complete` would
-  // not — it flips true on a 404 too). The mark is lazy, so bring it into view.
-  await mark.scrollIntoViewIfNeeded()
+  // naturalWidth is the whole signal: it stays 0 both before the fetch and after a
+  // failed one, so polling it waits and verifies in one step (`complete` would not —
+  // it flips true on a 404 too). Because the mark is lazy it only fetches once it is
+  // in view, and the 17-locale page reflows as fonts swap, so re-scroll every poll
+  // rather than once up front — otherwise a shift parks it outside the viewport and
+  // the timeout reads exactly like the missing file this test exists to catch.
   await expect
-    .poll(() => mark.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+    .poll(async () => {
+      await mark.scrollIntoViewIfNeeded()
+      return mark.evaluate((el) => (el as HTMLImageElement).naturalWidth)
+    })
     .toBeGreaterThan(0)
 })
 

@@ -26,6 +26,11 @@ export async function generateMetadata({
 // the body rules around it. Orange outline — not a filled orange pill — because
 // filled orange is the site's primary action ("add yours" in the header) and
 // donating must not climb to that rank. #ff6a00 on #0b0908 is 6.9:1 (docs/00 D35).
+//
+// The button carries Ko-fi's own cup mark, unmodified and self-hosted, so the page
+// makes no third-party request (their brand page offers the download for exactly
+// this: linking to your own page). The label stays in our voice — the body says
+// "buy the server a coffee", so the button must not say "buy me a coffee".
 const supportButtonClass =
   'inline-flex items-center gap-2 rounded-full border border-orange px-6 py-3 font-medium text-orange transition-colors hover:bg-orange/10'
 
@@ -57,17 +62,11 @@ export default function AboutPage() {
                 rel="noopener noreferrer"
                 className={supportButtonClass}
               >
-                {/* Ko-fi's own cup mark, unmodified, self-hosted so the page makes
-                    no third-party request (their brand page offers it for exactly
-                    this: linking to your page). Decorative — alt="" keeps the
-                    accessible name to the label alone (docs/00 D35, WCAG 2.5.3).
-                    The label stays in our voice: the body says "buy the server a
-                    coffee", so the button must not say "buy me a coffee".
-                    loading="lazy" is load-bearing, not habit: React's SSR renderer
-                    emits <link rel="preload" as="image"> for any plain-src <img>
-                    unless it is lazy, which would race a 20px decoration against
-                    the page's font preloads. This one sits below a 17-locale wall
-                    of text — it must never compete for the first paint. */}
+                {/* alt="" — decorative, so the accessible name stays the label alone
+                    (WCAG 2.5.3). loading="lazy" is load-bearing, not habit: React's
+                    SSR renderer preloads any plain-src <img> that is not lazy, and a
+                    20px decoration below a 17-locale wall of text must never compete
+                    with the font preloads. e2e pins both. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/kofi-cup.png"
@@ -80,6 +79,11 @@ export default function AboutPage() {
                 buy the server a coffee ↗
               </a>
             )}
+            {/* Deliberate dead path: githubSponsors is null (docs/00 D15, dropped
+                2026-07-28) and this branch renders nothing today. It is kept as the
+                one-line re-enable point, and it takes the house secondary recipe —
+                so a revived second rail ships quieter than the Ko-fi primary by
+                design, not by the sizing this file used to fork. */}
             {SUPPORT_LINKS.githubSponsors && (
               <a
                 href={SUPPORT_LINKS.githubSponsors}
