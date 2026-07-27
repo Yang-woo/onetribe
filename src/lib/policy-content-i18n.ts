@@ -90,7 +90,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Storage & processors",
           "paragraphs": [
             "Content is stored with our infrastructure providers (database/auth: Supabase; media: Cloudflare R2; translation: DeepL; sign-in emails: Resend). Captions are machine-translated; translated text is cached. Data may be processed in the EU and US under standard safeguards.",
-            "Donations are processed off-site by Ko-fi and GitHub Sponsors; we receive no payment data."
+            "Donations are processed off-site by Ko-fi; we receive no payment data."
           ]
         },
         {
@@ -257,7 +257,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Opslag en verwerkers",
           "paragraphs": [
             "De inhoud wordt opgeslagen bij onze infrastructuurproviders (database/authenticatie: Supabase; media: Cloudflare R2; vertaling: DeepL; inlog-e-mails: Resend). Bijschriften worden automatisch vertaald; de vertaalde tekst wordt in de cache opgeslagen. Gegevens kunnen in de EU en de VS worden verwerkt onder naleving van de standaardwaarborgen.",
-            "Donaties worden extern verwerkt door Ko-fi en GitHub Sponsors; wij ontvangen geen betalingsgegevens."
+            "Donaties worden extern verwerkt door Ko-fi; wij ontvangen geen betalingsgegevens."
           ]
         },
         {
@@ -424,7 +424,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Speicher & Prozessoren",
           "paragraphs": [
             "Die Inhalte werden bei unseren Infrastrukturanbietern gespeichert (Datenbank/Authentifizierung: Supabase; Medien: Cloudflare R2; Übersetzung: DeepL; E-Mails zur Anmeldung: Resend). Bildunterschriften werden maschinell übersetzt; der übersetzte Text wird zwischengespeichert. Die Daten können unter Einhaltung der üblichen Sicherheitsvorkehrungen in der EU und den USA verarbeitet werden.",
-            "Spenden werden extern von Ko-fi und GitHub Sponsors abgewickelt; wir erhalten keine Zahlungsdaten."
+            "Spenden werden extern von Ko-fi abgewickelt; wir erhalten keine Zahlungsdaten."
           ]
         },
         {
@@ -591,7 +591,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Almacenamiento y procesadores",
           "paragraphs": [
             "El contenido se almacena en los servidores de nuestros proveedores de infraestructura (base de datos/autenticación: Supabase; archivos multimedia: Cloudflare R2; traducción: DeepL; correos electrónicos de inicio de sesión: Resend). Los pies de foto se traducen automáticamente; el texto traducido se almacena en caché. Los datos pueden tratarse en la UE y en EE. UU. bajo las garantías habituales.",
-            "Las donaciones las gestionan externamente Ko-fi y GitHub Sponsors; nosotros no recibimos ningún dato relativo a los pagos."
+            "Las donaciones las gestiona externamente Ko-fi; nosotros no recibimos ningún dato relativo a los pagos."
           ]
         },
         {
@@ -758,7 +758,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Stockage et sous-traitants",
           "paragraphs": [
             "Le contenu est hébergé chez nos fournisseurs d'infrastructure (base de données/authentification : Supabase ; médias : Cloudflare R2 ; traduction : DeepL ; e-mails de connexion : Resend). Les légendes sont traduites automatiquement ; le texte traduit est mis en cache. Les données peuvent être traitées dans l'UE et aux États-Unis dans le respect des garanties standard.",
-            "Les dons sont traités en externe par Ko-fi et GitHub Sponsors ; nous ne recevons aucune donnée relative aux paiements."
+            "Les dons sont traités en externe par Ko-fi ; nous ne recevons aucune donnée relative aux paiements."
           ]
         },
         {
@@ -925,7 +925,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Archiviazione e responsabili del trattamento",
           "paragraphs": [
             "I contenuti sono archiviati presso i nostri fornitori di infrastrutture (database/autenticazione: Supabase; file multimediali: Cloudflare R2; traduzione: DeepL; e-mail di accesso: Resend). Le didascalie sono tradotte automaticamente; il testo tradotto viene memorizzato nella cache. I dati possono essere trattati nell'UE e negli Stati Uniti nel rispetto delle garanzie standard.",
-            "Le donazioni vengono gestite esternamente da Ko-fi e GitHub Sponsors; non riceviamo alcun dato relativo ai pagamenti."
+            "Le donazioni vengono gestite esternamente da Ko-fi; non riceviamo alcun dato relativo ai pagamenti."
           ]
         },
         {
@@ -1092,7 +1092,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Armazenamento e processadores",
           "paragraphs": [
             "O conteúdo é armazenado junto dos nossos fornecedores de infraestrutura (base de dados/autenticação: Supabase; ficheiros multimédia: Cloudflare R2; tradução: DeepL; e-mails de início de sessão: Resend). As legendas são traduzidas automaticamente; o texto traduzido é armazenado em cache. Os dados podem ser tratados na UE e nos EUA ao abrigo de medidas de proteção padrão.",
-            "As doações são processadas externamente pela Ko-fi e pelo GitHub Sponsors; não recebemos quaisquer dados relativos aos pagamentos."
+            "As doações são processadas externamente pela Ko-fi; não recebemos quaisquer dados relativos aos pagamentos."
           ]
         },
         {
@@ -1259,7 +1259,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. ストレージおよびプロセッサ",
           "paragraphs": [
             "コンテンツは、当社のインフラプロバイダー（データベース／認証：Supabase、メディア：Cloudflare R2、翻訳：DeepL、ログイン用メール：Resend）に保存されています。キャプションは機械翻訳されており、翻訳されたテキストはキャッシュされます。データは、標準的な保護措置の下、EUおよび米国で処理される場合があります。",
-            "寄付の処理は、Ko-fiおよびGitHub Sponsorsによって外部で行われており、当方では支払いデータを受け取ることはありません。"
+            "寄付の処理は、Ko-fiによって外部で行われており、当方では支払いデータを受け取ることはありません。"
           ]
         },
         {
@@ -1426,7 +1426,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. 저장 및 처리 업체",
           "paragraphs": [
             "콘텐츠는 당사의 인프라 제공업체에 저장됩니다(데이터베이스/인증: Supabase; 미디어: Cloudflare R2; 번역: DeepL; 로그인 이메일: Resend). 캡션은 기계 번역되며, 번역된 텍스트는 캐시에 저장됩니다. 데이터는 표준 보호 조치에 따라 EU 및 미국에서 처리될 수 있습니다.",
-            "기부금은 Ko-fi와 GitHub Sponsors를 통해 외부에서 처리되며, 당사는 결제 정보를 전혀 수신하지 않습니다."
+            "기부금은 Ko-fi를 통해 외부에서 처리되며, 당사는 결제 정보를 전혀 수신하지 않습니다."
           ]
         },
         {
@@ -1593,7 +1593,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Przechowywanie i podmioty przetwarzające dane",
           "paragraphs": [
             "Treści są przechowywane u naszych dostawców infrastruktury (baza danych/uwierzytelnianie: Supabase; multimedia: Cloudflare R2; tłumaczenia: DeepL; wiadomości e-mail dotyczące logowania: Resend). Opisy są tłumaczone automatycznie; przetłumaczony tekst jest buforowany. Dane mogą być przetwarzane w UE i USA z zachowaniem standardowych zabezpieczeń.",
-            "Darowizny są przetwarzane poza naszą platformą przez serwisy Ko-fi i GitHub Sponsors; nie otrzymujemy żadnych danych dotyczących płatności."
+            "Darowizny są przetwarzane poza naszą platformą przez serwis Ko-fi; nie otrzymujemy żadnych danych dotyczących płatności."
           ]
         },
         {
@@ -1760,7 +1760,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Lagring och leverantörer",
           "paragraphs": [
             "Innehållet lagras hos våra infrastrukturleverantörer (databas/autentisering: Supabase; media: Cloudflare R2; översättning: DeepL; e-postmeddelanden för inloggning: Resend). Bildtexterna maskinöversätts och den översatta texten lagras i cache. Uppgifterna kan behandlas inom EU och USA i enlighet med standardiserade skyddsåtgärder.",
-            "Donationerna hanteras externt av Ko-fi och GitHub Sponsors; vi får inga betalningsuppgifter."
+            "Donationerna hanteras externt av Ko-fi; vi får inga betalningsuppgifter."
           ]
         },
         {
@@ -1927,7 +1927,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Depolama ve işlemciler",
           "paragraphs": [
             "İçerik, altyapı sağlayıcılarımızda depolanmaktadır (veritabanı/kimlik doğrulama: Supabase; medya: Cloudflare R2; çeviri: DeepL; oturum açma e-postaları: Resend). Açıklamalar makine çevirisiyle çevrilir; çevrilmiş metin önbelleğe alınır. Veriler, standart güvenlik önlemleri kapsamında AB ve ABD’de işlenebilir.",
-            "Bağışlar, Ko-fi ve GitHub Sponsors tarafından platform dışında işlenmektedir; bize herhangi bir ödeme bilgisi ulaşmamaktadır."
+            "Bağışlar, Ko-fi tarafından platform dışında işlenmektedir; bize herhangi bir ödeme bilgisi ulaşmamaktadır."
           ]
         },
         {
@@ -2094,7 +2094,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. 存储与数据处理方",
           "paragraphs": [
             "内容存储于我们的基础设施提供商处（数据库/身份验证：Supabase；媒体：Cloudflare R2；翻译：DeepL；登录邮件：Resend）。配文采用机器翻译生成；翻译后的文本会被缓存。数据可能会在欧盟和美国境内，在标准保障措施下进行处理。",
-            "捐款由 Ko-fi 和 GitHub Sponsors 在站外处理；我们不会收到任何支付数据。"
+            "捐款由 Ko-fi 在站外处理；我们不会收到任何支付数据。"
           ]
         },
         {
@@ -2261,7 +2261,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. 儲存與資料處理者",
           "paragraphs": [
             "內容儲存於我們的基礎設施供應商處（資料庫／身分驗證：Supabase；媒體：Cloudflare R2；翻譯：DeepL；登入郵件：Resend）。配文採用機器翻譯產生；翻譯後的文字會被快取。資料可能在標準保障措施下，於歐盟與美國境內處理。",
-            "捐款由 Ko-fi 與 GitHub Sponsors 在站外處理；我們不會收到任何支付資料。"
+            "捐款由 Ko-fi 在站外處理；我們不會收到任何支付資料。"
           ]
         },
         {
@@ -2428,7 +2428,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Penyimpanan & prosesor",
           "paragraphs": [
             "Konten disimpan di penyedia infrastruktur kami (basis data/otentikasi: Supabase; media: Cloudflare R2; terjemahan: DeepL; email untuk masuk: Resend). Keterangan gambar diterjemahkan secara otomatis; teks terjemahan disimpan dalam cache. Data mungkin diproses di Uni Eropa dan Amerika Serikat dengan mengikuti langkah-langkah perlindungan standar.",
-            "Donasi diproses di luar platform oleh Ko-fi dan GitHub Sponsors; kami tidak menerima data pembayaran apa pun."
+            "Donasi diproses di luar platform oleh Ko-fi; kami tidak menerima data pembayaran apa pun."
           ]
         },
         {
@@ -2595,7 +2595,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. การจัดเก็บและผู้ประมวลผลข้อมูล",
           "paragraphs": [
             "เนื้อหาถูกเก็บไว้กับผู้ให้บริการโครงสร้างพื้นฐานของเรา (ฐานข้อมูล/ระบบการยืนยันตัวตน: Supabase; สื่อ: Cloudflare R2; การแปล: DeepL; อีเมลสำหรับการเข้าสู่ระบบ: Resend) คำบรรยายถูกแปลโดยระบบอัตโนมัติ และข้อความที่แปลแล้วจะถูกเก็บไว้ในแคช ข้อมูลอาจถูกประมวลผลในสหภาพยุโรปและสหรัฐอเมริกาภายใต้มาตรการคุ้มครองมาตรฐาน",
-            "การบริจาคจะถูกดำเนินการโดย Ko-fi และ GitHub Sponsors นอกเว็บไซต์ของเรา; เราไม่ได้รับข้อมูลการชำระเงินใดๆ"
+            "การบริจาคจะถูกดำเนินการโดย Ko-fi นอกเว็บไซต์ของเรา; เราไม่ได้รับข้อมูลการชำระเงินใดๆ"
           ]
         },
         {
@@ -2762,7 +2762,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "5. Lưu trữ và bên xử lý dữ liệu",
           "paragraphs": [
             "Nội dung được lưu trữ tại các nhà cung cấp hạ tầng của chúng tôi (cơ sở dữ liệu/xác thực: Supabase; phương tiện truyền thông: Cloudflare R2; dịch thuật: DeepL; email đăng nhập: Resend). Chú thích được dịch bằng máy; văn bản đã dịch được lưu trong bộ nhớ đệm. Dữ liệu có thể được xử lý tại Liên minh Châu Âu (EU) và Hoa Kỳ theo các biện pháp bảo vệ tiêu chuẩn.",
-            "Các khoản đóng góp được xử lý bên ngoài nền tảng thông qua Ko-fi và GitHub Sponsors; chúng tôi không nhận được bất kỳ dữ liệu thanh toán nào."
+            "Các khoản đóng góp được xử lý bên ngoài nền tảng thông qua Ko-fi; chúng tôi không nhận được bất kỳ dữ liệu thanh toán nào."
           ]
         },
         {

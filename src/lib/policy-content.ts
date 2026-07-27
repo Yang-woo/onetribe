@@ -9,7 +9,7 @@
  */
 
 /** ISO date shown as "last updated" across every policy page. */
-export const POLICY_LAST_UPDATED = '2026-07-24'
+export const POLICY_LAST_UPDATED = '2026-07-28'
 
 /** Public site domain (D14) — display strings derive from this one literal. */
 export const SITE_DOMAIN = 'onetribe.world'
@@ -108,7 +108,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
         heading: '5. Storage & processors',
         paragraphs: [
           'Content is stored with our infrastructure providers (database/auth: Supabase; media: Cloudflare R2; translation: DeepL; sign-in emails: Resend). Captions are machine-translated; translated text is cached. Data may be processed in the EU and US under standard safeguards.',
-          'Donations are processed off-site by Ko-fi and GitHub Sponsors; we receive no payment data.',
+          'Donations are processed off-site by Ko-fi; we receive no payment data.',
         ],
       },
       {

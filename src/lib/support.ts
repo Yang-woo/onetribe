@@ -5,7 +5,7 @@
  */
 export const SUPPORT_LINKS = {
   kofi: 'https://ko-fi.com/onetribeworld' as string | null, // D15 rail — live 2026-07-20, one-time tips, no perks
-  githubSponsors: 'https://github.com/sponsors/Yang-woo' as string | null, // D15 rail — approved 2026-07-23, no-perk tiers
+  githubSponsors: null as string | null, // dropped 2026-07-28 (D15): approved, but donating meant a GitHub account + login — too much friction for a fan audience. Ko-fi is the single rail.
 }
 
 export function hasSupportLinks(): boolean {
