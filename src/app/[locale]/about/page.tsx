@@ -20,7 +20,16 @@ export async function generateMetadata({
   return { title: ABOUT_I18N[locale].title, alternates: localeAlternates('/about', locale) }
 }
 
+// The donation rail sat at the bottom of a long page as a faint outline pill and
+// read as a footnote (docs/00 D15, 2026-07-28): its border was the same value as
+// the body rules around it. Orange outline — not a filled orange pill — because
+// filled orange is the site's primary action ("add yours" in the header) and
+// donating must not climb to that rank. #ff6a00 on #0b0908 is 6.9:1 (docs/00 D35).
 const supportButtonClass =
+  'inline-flex items-center gap-2 rounded-full border border-orange px-6 py-3 font-medium text-orange transition-colors hover:bg-orange/10'
+
+/** Secondary rails keep the quieter outline — only Ko-fi carries the mark. */
+const supportSecondaryClass =
   'rounded-full border border-line px-5 py-2 text-sm font-medium text-paper transition-colors hover:border-orange hover:text-orange'
 
 export default function AboutPage() {
@@ -51,7 +60,15 @@ export default function AboutPage() {
                 rel="noopener noreferrer"
                 className={supportButtonClass}
               >
-                ko-fi ↗
+                {/* Ko-fi's own cup mark, unmodified, self-hosted so the page makes
+                    no third-party request (their brand page offers it for exactly
+                    this: linking to your page). Decorative — alt="" keeps the
+                    accessible name to the label alone (docs/00 D35, WCAG 2.5.3).
+                    The label stays in our voice: the body says "buy the server a
+                    coffee", so the button must not say "buy me a coffee". */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/kofi-cup.png" alt="" width={25} height={20} className="h-5 w-auto" />
+                buy the server a coffee ↗
               </a>
             )}
             {SUPPORT_LINKS.githubSponsors && (
@@ -59,7 +76,7 @@ export default function AboutPage() {
                 href={SUPPORT_LINKS.githubSponsors}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={supportButtonClass}
+                className={supportSecondaryClass}
               >
                 github sponsors ↗
               </a>

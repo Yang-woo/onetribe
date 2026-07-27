@@ -30,6 +30,20 @@ test('about tells the creator story', async ({ page }) => {
   await expect(page.getByText(/fan from South Korea/)).toBeVisible()
 })
 
+test('the support rail is reachable and its Ko-fi mark actually loads', async ({ page }) => {
+  await page.goto('/en/about')
+  const support = page.getByRole('link', { name: /buy the server a coffee/ })
+  await expect(support).toHaveAttribute('href', /ko-fi\.com/)
+
+  const mark = support.locator('img')
+  // Decorative: the accessible name must stay the label alone (WCAG 2.5.3, D35).
+  await expect(mark).toHaveAttribute('alt', '')
+  // A missing file under public/ survives typecheck, lint and the build — only a
+  // real decode proves the mark shipped instead of rendering as a broken icon.
+  await expect(mark).toHaveJSProperty('complete', true)
+  expect(await mark.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0)
+})
+
 test('every locale sees the binding-language notice', async ({ page }) => {
   // D18: the page is identical for every URL locale and carries one English
   // binding notice (the per-locale enNotice banner was retired).
