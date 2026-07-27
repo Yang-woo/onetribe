@@ -1,5 +1,7 @@
 # One Tribe
 
+**English** · [한국어](./README.ko.md)
+
 A place where hardstyle fans around the world keep the moments they took home from the dancefloor — in their own language.
 
 > ⚠️ **Unofficial fan project — not affiliated with, endorsed by, or connected to Q-dance / Defqon.1 / ID&T.** No official logos, trademarks, or assets are used.
