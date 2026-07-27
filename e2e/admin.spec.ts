@@ -88,6 +88,9 @@ test('the operator hides a reported moment and it leaves the wall', async ({ pag
     await page.goto('/en')
     await expect(page.getByText(caption)).toHaveCount(0)
   } finally {
-    await service.from('memories').delete().eq('id', memory!.id)
+    // Guard the cleanup: when the insert above fails, `memory` is null and a
+    // bare memory!.id throws from the finally block, replacing whatever really
+    // went wrong with "Cannot read properties of null".
+    if (memory) await service.from('memories').delete().eq('id', memory.id)
   }
 })
