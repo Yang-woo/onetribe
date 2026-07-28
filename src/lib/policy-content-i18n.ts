@@ -25,7 +25,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Your content",
           "paragraphs": [
-            "When you upload a photo or GIF, or link a video (\"Memory\"), you confirm that: you captured it yourself and hold the rights to share it; it was taken at a music event you attended; you grant One Tribe a non-exclusive, worldwide, royalty-free license to host, display, resize, and translate its caption, solely to operate this site.",
+            "When you upload a photo or GIF, or link a video (\"Memory\"), you confirm that: you captured it yourself and hold the rights to share it; it was taken at a music event you attended; you grant One Tribe a non-exclusive, worldwide, royalty-free license to host, display, resize, and translate its caption to run this site, and to feature it — credited to your display name or handle — on One Tribe’s own social accounts. That is the whole license: we never sell it, sub-license it, or use it in advertising. Tell us and we will remove it from those accounts and not feature it again.",
             "You keep ownership. You can delete your Memory at any time using your deletion link."
           ]
         },
@@ -192,7 +192,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Je inhoud",
           "paragraphs": [
-            "Wanneer je een foto of GIF uploadt, of een link naar een video plaatst (“Herinnering”), bevestig je dat: je deze zelf hebt gemaakt en de rechten hebt om deze te delen; deze is gemaakt tijdens een muziekevenement dat je hebt bijgewoond; je One Tribe een niet-exclusieve, wereldwijde, royaltyvrije licentie verleent om de foto te hosten, weer te geven, het formaat aan te passen en het bijschrift te vertalen, uitsluitend ten behoeve van de exploitatie van deze website.",
+            "Wanneer je een foto of GIF uploadt, of een link naar een video plaatst (“Herinnering”), bevestig je dat: je deze zelf hebt gemaakt en de rechten hebt om deze te delen; deze is gemaakt tijdens een muziekevenement dat je hebt bijgewoond; je One Tribe een niet-exclusieve, wereldwijde, royaltyvrije licentie verleent om de foto te hosten, weer te geven, het formaat aan te passen en het bijschrift te vertalen om deze website te laten draaien, en om haar — met vermelding van je weergavenaam of handle — te tonen op de eigen socialmedia-accounts van One Tribe. Dat is de volledige licentie: we verkopen je Herinnering nooit, geven er geen sublicentie op en gebruiken haar niet in advertenties. Laat het ons weten en we halen haar van die accounts af en tonen haar niet opnieuw.",
             "Je blijft eigenaar. Je kunt je Herinnering op elk moment verwijderen via de verwijderingslink."
           ]
         },
@@ -359,7 +359,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Ihre Inhalte",
           "paragraphs": [
-            "Wenn Sie ein Foto oder ein GIF hochladen oder ein Video verlinken („Erinnerung“), bestätigen Sie, dass: Sie das Material selbst aufgenommen haben und über die Rechte zur Weitergabe verfügen; es bei einer Musikveranstaltung aufgenommen wurde, an der Sie teilgenommen haben; Sie gewähren One Tribe eine nicht-exklusive, weltweite, gebührenfreie Lizenz zum Hosten, Anzeigen, Anpassen der Größe und Übersetzen der Bildunterschrift, ausschließlich zum Zweck des Betriebs dieser Website.",
+            "Wenn Sie ein Foto oder ein GIF hochladen oder ein Video verlinken („Erinnerung“), bestätigen Sie, dass: Sie das Material selbst aufgenommen haben und über die Rechte zur Weitergabe verfügen; es bei einer Musikveranstaltung aufgenommen wurde, an der Sie teilgenommen haben; Sie gewähren One Tribe eine nicht-exklusive, weltweite, gebührenfreie Lizenz zum Hosten, Anzeigen, Anpassen der Größe und Übersetzen der Bildunterschrift, um diese Website zu betreiben, sowie um sie — mit Nennung Ihres Anzeigenamens oder Handles — auf den eigenen Social-Media-Konten von One Tribe vorzustellen. Das ist der gesamte Umfang der Lizenz: Wir verkaufen Ihre Erinnerung nicht, vergeben keine Unterlizenzen und nutzen sie nicht für Werbung. Sagen Sie uns Bescheid, und wir entfernen sie von diesen Konten und zeigen sie dort nicht erneut.",
             "Sie behalten das Eigentumsrecht. Sie können Ihre „Erinnerung“ jederzeit über Ihren Löschlink löschen."
           ]
         },
@@ -526,7 +526,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Tu contenido",
           "paragraphs": [
-            "Al subir una foto o un GIF, o al enlazar un vídeo («Recuerdo»), confirmas que: lo has capturado tú mismo y tienes los derechos para compartirlo; fue tomado en un evento musical al que asististe; concedes a One Tribe una licencia no exclusiva, mundial y libre de regalías para alojar, mostrar, redimensionar y traducir su pie de foto, con el único fin de gestionar este sitio web.",
+            "Al subir una foto o un GIF, o al enlazar un vídeo («Recuerdo»), confirmas que: lo has capturado tú mismo y tienes los derechos para compartirlo; fue tomado en un evento musical al que asististe; concedes a One Tribe una licencia no exclusiva, mundial y libre de regalías para alojar, mostrar, redimensionar y traducir su pie de foto con el fin de gestionar este sitio web, y para difundirlo —con tu nombre visible o tu usuario como crédito— en las cuentas de redes sociales del propio One Tribe. Esa es toda la licencia: nunca vendemos tu Recuerdo, no lo sublicenciamos ni lo usamos en publicidad. Dínoslo y lo retiraremos de esas cuentas y no volveremos a difundirlo.",
             "La propiedad sigue siendo tuya. Puedes eliminar tu «Recuerdo» en cualquier momento utilizando el enlace de eliminación."
           ]
         },
@@ -693,7 +693,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Votre contenu",
           "paragraphs": [
-            "Lorsque vous publiez une photo ou un GIF, ou que vous ajoutez un lien vers une vidéo (« Souvenir »), vous confirmez que : vous en êtes l'auteur et que vous détenez les droits nécessaires pour la partager ; elle a été prise lors d'un événement musical auquel vous avez assisté ; vous accordez à One Tribe une licence non exclusive, mondiale et libre de droits pour héberger, afficher, redimensionner et traduire sa légende, dans le seul but d’exploiter ce site.",
+            "Lorsque vous publiez une photo ou un GIF, ou que vous ajoutez un lien vers une vidéo (« Souvenir »), vous confirmez que : vous en êtes l'auteur et que vous détenez les droits nécessaires pour la partager ; elle a été prise lors d'un événement musical auquel vous avez assisté ; vous accordez à One Tribe une licence non exclusive, mondiale et libre de droits pour héberger, afficher, redimensionner et traduire sa légende afin d’exploiter ce site, ainsi que pour le mettre en avant — en créditant votre nom affiché ou votre pseudo — sur les comptes de réseaux sociaux de One Tribe. C’est là toute la licence : nous ne vendons jamais votre Souvenir, ne le sous-licencions pas et ne l’utilisons pas à des fins publicitaires. Dites-le-nous et nous le retirerons de ces comptes sans le republier.",
             "Vous en restez propriétaire. Vous pouvez supprimer votre « Souvenir » à tout moment à l'aide de votre lien de suppression."
           ]
         },
@@ -860,7 +860,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. I tuoi contenuti",
           "paragraphs": [
-            "Quando carichi una foto o una GIF, oppure inserisci il link a un video (“Ricordo”), confermi che: l’hai scattata o registrata tu stesso e ne detieni i diritti di condivisione; è stata scattata o registrata durante un evento musicale a cui hai partecipato; concedi a One Tribe una licenza non esclusiva, valida in tutto il mondo e esente da royalty per ospitare, visualizzare, ridimensionare e tradurre la didascalia, esclusivamente ai fini del funzionamento di questo sito.",
+            "Quando carichi una foto o una GIF, oppure inserisci il link a un video (“Ricordo”), confermi che: l’hai scattata o registrata tu stesso e ne detieni i diritti di condivisione; è stata scattata o registrata durante un evento musicale a cui hai partecipato; concedi a One Tribe una licenza non esclusiva, valida in tutto il mondo e esente da royalty per ospitare, visualizzare, ridimensionare e tradurre la didascalia ai fini del funzionamento di questo sito, e per pubblicarlo — con il tuo nome visualizzato o il tuo handle come credito — sugli account social di One Tribe. La licenza è tutta qui: non vendiamo il tuo Ricordo, non lo concediamo in sublicenza e non lo usiamo nella pubblicità. Basta dircelo e lo rimuoveremo da quegli account senza ripubblicarlo.",
             "La proprietà rimane a te. Puoi cancellare il tuo Ricordo in qualsiasi momento utilizzando il link di cancellazione."
           ]
         },
@@ -1027,7 +1027,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. O seu conteúdo",
           "paragraphs": [
-            "Ao carregares uma fotografia ou um GIF, ou ao partilhares um vídeo («Memória»), confirmas que: foste tu próprio que o captaste e deténs os direitos para o partilhar; foi captado num evento musical em que estiveste presente; concedes ao One Tribe uma licença não exclusiva, mundial e isenta de royalties para alojar, exibir, redimensionar e traduzir a sua legenda, exclusivamente para o funcionamento deste site.",
+            "Ao carregares uma fotografia ou um GIF, ou ao partilhares um vídeo («Memória»), confirmas que: foste tu próprio que o captaste e deténs os direitos para o partilhar; foi captado num evento musical em que estiveste presente; concedes ao One Tribe uma licença não exclusiva, mundial e isenta de royalties para alojar, exibir, redimensionar e traduzir a sua legenda para o funcionamento deste site, e para a destacar — com o teu nome visível ou identificador como crédito — nas contas de redes sociais do próprio One Tribe. A licença é apenas esta: nunca vendemos a tua Memória, não a sublicenciamos nem a usamos em publicidade. Basta dizeres-nos e retiramo-la dessas contas e não voltamos a destacá-la.",
             "A propriedade continua a ser sua. Pode eliminar a sua Memória a qualquer momento através do seu link de eliminação."
           ]
         },
@@ -1194,7 +1194,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. コンテンツについて",
           "paragraphs": [
-            "写真やGIFをアップロードしたり、動画（「メモリー」）へのリンクを貼ったりする場合、以下の事項を確認したものとみなされます：そのコンテンツはご自身で撮影したものであり、共有する権利を有していること；そのコンテンツは、ご自身が参加した音楽イベントで撮影されたものであること； また、本サイトの運営のみを目的として、One Tribeに対し、そのコンテンツをホスト、表示、サイズ変更、およびキャプションの翻訳を行うための非独占的、全世界的、ロイヤリティフリーのライセンスを付与するものとします。",
+            "写真やGIFをアップロードしたり、動画（「メモリー」）へのリンクを貼ったりする場合、以下の事項を確認したものとみなされます：そのコンテンツはご自身で撮影したものであり、共有する権利を有していること；そのコンテンツは、ご自身が参加した音楽イベントで撮影されたものであること； また、本サイトを運営するため、および表示名またはハンドルをクレジットとして明記したうえで One Tribe 自身のソーシャルメディアアカウントで紹介するために、One Tribeに対し、そのコンテンツをホスト、表示、サイズ変更、およびキャプションの翻訳を行うための非独占的、全世界的、ロイヤリティフリーのライセンスを付与するものとします。ライセンスの範囲はこれだけです。お客様のメモリーを販売したり、再許諾したり、広告に使用したりすることは一切ありません。ご連絡いただければ、これらのアカウントから削除し、再び紹介することはありません。",
             "所有権は引き続きお客様にあります。削除リンクを使用して、いつでもご自身の「Memory」を削除することができます。"
           ]
         },
@@ -1361,7 +1361,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. 귀하의 콘텐츠",
           "paragraphs": [
-            "사진이나 GIF를 업로드하거나 동영상(“메모리”)을 링크할 때, 귀하는 다음 사항을 확인하는 것으로 간주됩니다: 해당 콘텐츠를 직접 촬영했으며 공유할 권리를 보유하고 있음; 해당 콘텐츠가 귀하가 참석한 음악 행사에서 촬영된 것임; 귀하는 본 사이트 운영을 목적으로만 One Tribe에 해당 콘텐츠를 호스팅, 표시, 크기 조정 및 캡션 번역할 수 있는 비독점적, 전 세계적, 로열티 없는 라이선스를 부여합니다.",
+            "사진이나 GIF를 업로드하거나 동영상(“메모리”)을 링크할 때, 귀하는 다음 사항을 확인하는 것으로 간주됩니다: 해당 콘텐츠를 직접 촬영했으며 공유할 권리를 보유하고 있음; 해당 콘텐츠가 귀하가 참석한 음악 행사에서 촬영된 것임; 귀하는 본 사이트를 운영하기 위해, 그리고 표시 이름 또는 핸들을 출처로 밝혀 One Tribe의 소셜 계정에 소개하기 위해 One Tribe에 해당 콘텐츠를 호스팅, 표시, 크기 조정 및 캡션 번역할 수 있는 비독점적, 전 세계적, 로열티 없는 라이선스를 부여합니다. 라이선스의 범위는 여기까지입니다. 귀하의 메모리를 판매하거나 재라이선스하거나 광고에 사용하지 않습니다. 알려주시면 해당 계정에서 내리고 다시 소개하지 않습니다.",
             "소유권은 귀하에게 있습니다. 삭제 링크를 통해 언제든지 귀하의 메모리를 삭제할 수 있습니다."
           ]
         },
@@ -1528,7 +1528,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Twoje treści",
           "paragraphs": [
-            "Przesyłając zdjęcie lub plik GIF albo zamieszczając link do filmu („Wspomnienie”), potwierdzasz, że: sam je wykonałeś i posiadasz prawa do jego udostępniania; zostało ono zarejestrowane podczas wydarzenia muzycznego, w którym brałeś udział; udzielasz One Tribe niewyłącznej, ogólnoświatowej, bezpłatnej licencji na hostowanie, wyświetlanie, zmianę rozmiaru oraz tłumaczenie opisu, wyłącznie w celu prowadzenia tej strony.",
+            "Przesyłając zdjęcie lub plik GIF albo zamieszczając link do filmu („Wspomnienie”), potwierdzasz, że: sam je wykonałeś i posiadasz prawa do jego udostępniania; zostało ono zarejestrowane podczas wydarzenia muzycznego, w którym brałeś udział; udzielasz One Tribe niewyłącznej, ogólnoświatowej, bezpłatnej licencji na hostowanie, wyświetlanie, zmianę rozmiaru oraz tłumaczenie opisu w celu prowadzenia tej strony, a także na prezentowanie go — z podaniem Twojej nazwy wyświetlanej lub nicka — na własnych kontach One Tribe w mediach społecznościowych. To cała licencja: nigdy nie sprzedajemy Twojego Wspomnienia, nie udzielamy sublicencji ani nie wykorzystujemy go w reklamach. Wystarczy dać nam znać, a usuniemy je z tych kont i nie pokażemy ponownie.",
             "Własność pozostaje po Twojej stronie. W każdej chwili możesz usunąć swoje Wspomnienie, korzystając z linku do usunięcia."
           ]
         },
@@ -1695,7 +1695,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Ditt innehåll",
           "paragraphs": [
-            "När du laddar upp en bild eller en GIF, eller länkar till en video (”Minne”), bekräftar du att: du själv har tagit det och har rätt att dela det; det togs vid ett musikevenemang som du deltog i; du beviljar One Tribe en icke-exklusiv, världsomspännande och royaltyfri licens att lagra, visa, ändra storlek på och översätta bildtexten, enbart i syfte att driva denna webbplats.",
+            "När du laddar upp en bild eller en GIF, eller länkar till en video (”Minne”), bekräftar du att: du själv har tagit det och har rätt att dela det; det togs vid ett musikevenemang som du deltog i; du beviljar One Tribe en icke-exklusiv, världsomspännande och royaltyfri licens att lagra, visa, ändra storlek på och översätta bildtexten för att driva denna webbplats, och att lyfta fram det — med ditt visningsnamn eller användarnamn som kredit — på One Tribes egna konton i sociala medier. Det är hela licensen: vi säljer aldrig ditt Minne, vidarelicensierar det inte och använder det inte i reklam. Säg bara till, så tar vi bort det från de kontona och visar det inte igen.",
             "Du behåller äganderätten. Du kan när som helst radera ditt minne med hjälp av raderingslänken."
           ]
         },
@@ -1862,7 +1862,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. İçeriğiniz",
           "paragraphs": [
-            "Bir fotoğraf veya GIF yüklediğinizde ya da bir videoya bağlantı verdiğinizde (“Anı”), şunları teyit etmiş olursunuz: bu içeriği kendiniz çekmişsiniz ve paylaşma haklarına sahipsiniz; içerik, katıldığınız bir müzik etkinliğinde çekilmiştir; One Tribe’a, yalnızca bu siteyi işletmek amacıyla, içeriği barındırma, görüntüleme, boyutunu değiştirme ve açıklamalarını çevirme konusunda münhasır olmayan, dünya çapında geçerli ve telifsiz bir lisans verdiğinizi.",
+            "Bir fotoğraf veya GIF yüklediğinizde ya da bir videoya bağlantı verdiğinizde (“Anı”), şunları teyit etmiş olursunuz: bu içeriği kendiniz çekmişsiniz ve paylaşma haklarına sahipsiniz; içerik, katıldığınız bir müzik etkinliğinde çekilmiştir; One Tribe’a, bu siteyi işletmek ve görünen adınız veya kullanıcı adınız künye olarak belirtilerek içeriği One Tribe’ın kendi sosyal medya hesaplarında paylaşmak amacıyla, içeriği barındırma, görüntüleme, boyutunu değiştirme ve açıklamalarını çevirme konusunda münhasır olmayan, dünya çapında geçerli ve telifsiz bir lisans verdiğinizi. Lisansın kapsamı bundan ibarettir: Anınızı asla satmaz, alt lisans vermez ve reklamlarda kullanmayız. Bize haber vermeniz yeterli; içeriği o hesaplardan kaldırır ve bir daha paylaşmayız.",
             "Mülkiyet hakkı size aittir. Silme bağlantınızı kullanarak anınızı istediğiniz zaman silebilirsiniz."
           ]
         },
@@ -2029,7 +2029,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. 您的内容",
           "paragraphs": [
-            "当您上传照片或GIF，或分享视频链接（“回忆”）时，您确认：该内容由您亲自拍摄且拥有分享权；该内容拍摄于您参加的音乐活动； 您授予 One Tribe 一项非独占性、全球范围、免版税的许可，允许其托管、展示、调整尺寸并翻译相关文字说明，且该许可仅用于运营本网站。",
+            "当您上传照片或GIF，或分享视频链接（“回忆”）时，您确认：该内容由您亲自拍摄且拥有分享权；该内容拍摄于您参加的音乐活动； 您授予 One Tribe 一项非独占性、全球范围、免版税的许可，允许其托管、展示、调整尺寸并翻译相关文字说明，该许可用于运营本网站，并可在 One Tribe 自有的社交媒体账号上展示该内容，同时标注您的显示名称或账号作为署名。许可范围仅限于此：我们绝不出售、转授权，也不会将其用于广告。只要告诉我们，我们就会从这些账号中删除，并且不再展示。",
             "您仍拥有所有权。您可以随时使用删除链接删除您的“回忆”。"
           ]
         },
@@ -2196,7 +2196,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. 您的內容",
           "paragraphs": [
-            "當您上傳照片或 GIF，或分享影片連結（「回憶」）時，您確認：該內容由您親自拍攝且擁有分享權；該內容拍攝於您參加的音樂活動；您授予 One Tribe 一項非獨占、全球範圍、免權利金的授權，允許其代管、展示、調整尺寸並翻譯相關文字說明，且該授權僅用於營運本網站。",
+            "當您上傳照片或 GIF，或分享影片連結（「回憶」）時，您確認：該內容由您親自拍攝且擁有分享權；該內容拍攝於您參加的音樂活動；您授予 One Tribe 一項非獨占、全球範圍、免權利金的授權，允許其代管、展示、調整尺寸並翻譯相關文字說明，該授權用於營運本網站，並可在 One Tribe 自有的社群媒體帳號上分享該內容，同時標註您的顯示名稱或帳號作為署名。授權範圍僅止於此：我們絕不出售、再授權，也不會將其用於廣告。只要告訴我們，我們就會從這些帳號移除，且不再分享。",
             "您仍擁有所有權。您可以隨時使用刪除連結刪除您的「回憶」。"
           ]
         },
@@ -2363,7 +2363,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Konten Anda",
           "paragraphs": [
-            "Saat Anda mengunggah foto atau GIF, atau menyertakan tautan video (“Memory”), Anda menyatakan bahwa: Anda sendiri yang mengambilnya dan memiliki hak untuk membagikannya; foto atau video tersebut diambil pada acara musik yang Anda hadiri; Anda memberikan lisensi non-eksklusif, berlaku di seluruh dunia, dan bebas royalti kepada One Tribe untuk menghosting, menampilkan, mengubah ukuran, dan menerjemahkan keterangan foto tersebut, semata-mata untuk mengoperasikan situs ini.",
+            "Saat Anda mengunggah foto atau GIF, atau menyertakan tautan video (“Memory”), Anda menyatakan bahwa: Anda sendiri yang mengambilnya dan memiliki hak untuk membagikannya; foto atau video tersebut diambil pada acara musik yang Anda hadiri; Anda memberikan lisensi non-eksklusif, berlaku di seluruh dunia, dan bebas royalti kepada One Tribe untuk menghosting, menampilkan, mengubah ukuran, dan menerjemahkan keterangan foto tersebut guna mengoperasikan situs ini, serta untuk menampilkannya — dengan mencantumkan nama tampilan atau handle Anda sebagai kredit — di akun media sosial milik One Tribe sendiri. Hanya itu isi lisensinya: kami tidak pernah menjual Memory Anda, memberikan sublisensi, atau menggunakannya dalam iklan. Cukup beri tahu kami, dan kami akan menghapusnya dari akun-akun tersebut dan tidak menampilkannya lagi.",
             "Anda tetap memegang hak kepemilikan. Anda dapat menghapus Memory Anda kapan saja menggunakan tautan penghapusan Anda."
           ]
         },
@@ -2530,7 +2530,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. เนื้อหาของคุณ",
           "paragraphs": [
-            "เมื่อคุณอัปโหลดรูปภาพหรือ GIF หรือใส่ลิงก์วิดีโอ (“Memory”) คุณยืนยันว่า: คุณเป็นผู้ที่ถ่ายหรือสร้างมันขึ้นเองและถือสิทธิ์ในการแบ่งปัน; มันถูกถ่ายหรือสร้างขึ้นที่งานดนตรีที่คุณเข้าร่วม; คุณให้สิทธิ์แก่ One Tribe ในรูปแบบใบอนุญาตที่ไม่ผูกขาด ทั่วโลก และไม่ต้องจ่ายค่าลิขสิทธิ์ เพื่อจัดเก็บ แสดง ปรับขนาด และแปลคำอธิบายของเนื้อหาดังกล่าว โดยใช้เพื่อดำเนินการเว็บไซต์นี้เท่านั้น",
+            "เมื่อคุณอัปโหลดรูปภาพหรือ GIF หรือใส่ลิงก์วิดีโอ (“Memory”) คุณยืนยันว่า: คุณเป็นผู้ที่ถ่ายหรือสร้างมันขึ้นเองและถือสิทธิ์ในการแบ่งปัน; มันถูกถ่ายหรือสร้างขึ้นที่งานดนตรีที่คุณเข้าร่วม; คุณให้สิทธิ์แก่ One Tribe ในรูปแบบใบอนุญาตที่ไม่ผูกขาด ทั่วโลก และไม่ต้องจ่ายค่าลิขสิทธิ์ เพื่อจัดเก็บ แสดง ปรับขนาด และแปลคำอธิบายของเนื้อหาดังกล่าว โดยใช้เพื่อดำเนินการเว็บไซต์นี้ และเพื่อนำเสนอเนื้อหานั้นบนบัญชีโซเชียลมีเดียของ One Tribe เอง โดยให้เครดิตเป็นชื่อที่แสดงหรือแฮนเดิลของคุณ ใบอนุญาตมีเพียงเท่านี้ เราไม่ขาย ไม่ให้สิทธิ์ช่วง และไม่ใช้เนื้อหาของคุณในโฆษณา เพียงแจ้งให้เราทราบ เราจะนำออกจากบัญชีเหล่านั้นและจะไม่นำเสนออีก",
             "คุณยังคงเป็นเจ้าของข้อมูลนั้น คุณสามารถลบ Memory ของคุณได้เมื่อใดก็ได้โดยใช้ลิงก์การลบ"
           ]
         },
@@ -2697,7 +2697,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. Nội dung của bạn",
           "paragraphs": [
-            "Khi bạn tải lên một bức ảnh hoặc tệp GIF, hoặc chia sẻ liên kết video (“Ký ức”), bạn xác nhận rằng: chính bạn là người đã ghi lại nội dung đó và sở hữu quyền chia sẻ nó; nội dung đó được ghi lại tại một sự kiện âm nhạc mà bạn đã tham dự; bạn cấp cho One Tribe giấy phép không độc quyền, trên toàn thế giới, miễn phí bản quyền để lưu trữ, hiển thị, điều chỉnh kích thước và dịch chú thích của nội dung đó, chỉ nhằm mục đích vận hành trang web này.",
+            "Khi bạn tải lên một bức ảnh hoặc tệp GIF, hoặc chia sẻ liên kết video (“Ký ức”), bạn xác nhận rằng: chính bạn là người đã ghi lại nội dung đó và sở hữu quyền chia sẻ nó; nội dung đó được ghi lại tại một sự kiện âm nhạc mà bạn đã tham dự; bạn cấp cho One Tribe giấy phép không độc quyền, trên toàn thế giới, miễn phí bản quyền để lưu trữ, hiển thị, điều chỉnh kích thước và dịch chú thích của nội dung đó, nhằm vận hành trang web này, và để giới thiệu nội dung đó — có ghi nguồn bằng tên hiển thị hoặc tên tài khoản của bạn — trên các tài khoản mạng xã hội của chính One Tribe. Giấy phép chỉ gồm bấy nhiêu: chúng tôi không bao giờ bán Ký ức của bạn, không cấp phép lại và không dùng nó trong quảng cáo. Bạn chỉ cần báo cho chúng tôi, chúng tôi sẽ gỡ khỏi các tài khoản đó và không giới thiệu lại.",
             "Bạn vẫn giữ quyền sở hữu. Bạn có thể xóa Ký ức của mình bất cứ lúc nào bằng cách sử dụng liên kết xóa."
           ]
         },

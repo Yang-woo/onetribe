@@ -9,7 +9,7 @@
  */
 
 /** ISO date shown as "last updated" across every policy page. */
-export const POLICY_LAST_UPDATED = '2026-07-28'
+export const POLICY_LAST_UPDATED = '2026-07-29'
 
 /** Public site domain (D14) — display strings derive from this one literal. */
 export const SITE_DOMAIN = 'onetribe.world'
@@ -42,7 +42,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '2. Your content',
         paragraphs: [
-          'When you upload a photo or GIF, or link a video ("Memory"), you confirm that: you captured it yourself and hold the rights to share it; it was taken at a music event you attended; you grant One Tribe a non-exclusive, worldwide, royalty-free license to host, display, resize, and translate its caption, solely to operate this site.',
+          'When you upload a photo or GIF, or link a video ("Memory"), you confirm that: you captured it yourself and hold the rights to share it; it was taken at a music event you attended; you grant One Tribe a non-exclusive, worldwide, royalty-free license to host, display, resize, and translate its caption to run this site, and to feature it — credited to your display name or handle — on One Tribe’s own social accounts. That is the whole license: we never sell it, sub-license it, or use it in advertising. Tell us and we will remove it from those accounts and not feature it again.',
           'You keep ownership. You can delete your Memory at any time using your deletion link.',
         ],
       },
