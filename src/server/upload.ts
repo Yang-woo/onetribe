@@ -272,7 +272,14 @@ export function fillEmptyIdentity(
   return identity
 }
 
-export function createMemoriesHandler(deps: UploadDeps) {
+/** Publishing additionally drops the cached wall counters (docs/00 D12) — the
+ *  presign and report handlers don't touch the live count, so only this one
+ *  carries the seam, and TypeScript makes a route that skips it fail to build. */
+export interface PublishDeps extends UploadDeps {
+  revalidate: (tag: string) => void
+}
+
+export function createMemoriesHandler(deps: PublishDeps) {
   return async (req: Request): Promise<Response> => {
     const body = await parseBody(req)
     const parsed = memoriesSchema.safeParse(body)
@@ -405,6 +412,15 @@ export function createMemoriesHandler(deps: UploadDeps) {
       .insert(rows)
       .select('id, takedown_token')
     if (error || !inserted) return json(500, { error: 'could not save your moment' })
+
+    // The counters are cached (D12); the wall is realtime. Invalidate here or
+    // the uploader watches their own moment land while the count contradicts
+    // it. Best-effort like the alert below — a saved moment must not 500.
+    try {
+      deps.revalidate('counters')
+    } catch {
+      // stale by up to the cache window is the worst case
+    }
 
     // Register the reusable identity (name / handle / home country) so the next
     // upload — and the passport — pre-fill it (docs/00 D30, D31). Runs only now

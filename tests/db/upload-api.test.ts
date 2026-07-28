@@ -7,7 +7,7 @@ import {
   createMemoriesHandler,
   createPresignHandler,
   createReportHandler,
-  type UploadDeps,
+  type PublishDeps,
 } from '@/server/upload'
 import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
@@ -49,12 +49,17 @@ const fakeStorage: StorageAdapter = {
 const allow = async () => true
 const deny = async () => false
 
-function deps(overrides: Partial<UploadDeps> = {}): UploadDeps {
+// Cache tags dropped by the handler under test — asserted by the counter tests
+// below. Reset per test so one publish can't satisfy another's assertion.
+let revalidated: string[] = []
+
+function deps(overrides: Partial<PublishDeps> = {}): PublishDeps {
   return {
     storage: fakeStorage,
     verifyTurnstile: allow,
     db,
     sessionSecret: 'test-secret',
+    revalidate: (tag) => revalidated.push(tag),
     ...overrides,
   }
 }
@@ -97,6 +102,7 @@ beforeAll(async () => {
 // across tests — clear it after each so tests stay order-independent. Tests
 // that assert rate limiting use their own dedicated IPs.
 afterEach(async () => {
+  revalidated = []
   await db.from('upload_events').delete().eq('ip_hash', hashIp(IP, 'upload'))
 })
 
@@ -207,6 +213,50 @@ describe('POST /api/memories — file flow', () => {
     )
     expect(res.status).toBe(400)
     expect(await countMarkerRows()).toBe(before)
+  })
+
+  // The wall inserts new moments over realtime, but "N moments · M countries"
+  // is server-rendered from a 60s cache (docs/00 D12). Without this drop the
+  // uploader watches their own photo land while the count still reads the old
+  // number — and a rejected upload must not drop it, or every bot probe
+  // re-queries the counters.
+  test('a published moment drops the cached counters; a rejected one does not', async () => {
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const media = uploads.map((u) => ({ key: u.key, contentType: 'image/jpeg' }))
+
+    const rejected = await createMemoriesHandler(deps())(
+      post({ session, eventId, caption: MARKER, rightsConfirmed: false, media }),
+    )
+    expect(rejected.status).toBe(400)
+    expect(revalidated).toEqual([])
+
+    const published = await createMemoriesHandler(deps())(
+      post({ session, eventId, caption: MARKER, rightsConfirmed: true, media }),
+    )
+    expect(published.status).toBe(201)
+    expect(revalidated).toContain('counters')
+  })
+
+  test('a revalidate that throws never fails a saved moment', async () => {
+    const { uploads, session } = await presignFiles([{ contentType: 'image/jpeg', size: 1000 }])
+    const before = await countMarkerRows()
+    const res = await createMemoriesHandler(
+      deps({
+        revalidate: () => {
+          throw new Error('no request scope')
+        },
+      }),
+    )(
+      post({
+        session,
+        eventId,
+        caption: MARKER,
+        rightsConfirmed: true,
+        media: uploads.map((u) => ({ key: u.key, contentType: 'image/jpeg' })),
+      }),
+    )
+    expect(res.status).toBe(201)
+    expect(await countMarkerRows()).toBe(before + 1)
   })
 
   test('a replayed session cannot mint duplicate rows (media_url UNIQUE)', async () => {

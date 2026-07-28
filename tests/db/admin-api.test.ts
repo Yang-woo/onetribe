@@ -41,8 +41,17 @@ const fakeStorage: StorageAdapter = {
   },
 }
 
+// Cache tags dropped by the handler — moderation moves the live count, which
+// the wall header serves from a 60s cache (docs/00 D12).
+const revalidated: string[] = []
+
 function deps() {
-  return { db: service, adminEmails: [OPERATOR.email.toLowerCase()], storage: fakeStorage }
+  return {
+    db: service,
+    adminEmails: [OPERATOR.email.toLowerCase()],
+    storage: fakeStorage,
+    revalidate: (tag: string) => revalidated.push(tag),
+  }
 }
 
 function withAuth(token?: string, body?: unknown): Request {
@@ -133,6 +142,20 @@ describe('actions', () => {
     await action(withAuth(operatorToken, { memoryId: id, action: 'unhide' }))
     ;({ data } = await service.from('memories').select('status').eq('id', id).single())
     expect(data!.status).toBe('live')
+  })
+
+  // Hiding a moment lowers the live count the wall header shows from cache
+  // (docs/00 D12), so moderation has to drop that cache like a publish does —
+  // otherwise a moment taken down for a report is still counted for a minute.
+  test('a moderation action drops the cached counters', async () => {
+    const id = await createMemory(`admin-revalidate-${randomUUID().slice(0, 6)}`)
+    const before = revalidated.length
+
+    await createAdminActionHandler(deps())(
+      withAuth(operatorToken, { memoryId: id, action: 'hide' }),
+    )
+
+    expect(revalidated.slice(before)).toContain('counters')
   })
 
   test('unhide clears the reports that hid it, so a single re-report cannot instantly re-hide it', async () => {

@@ -16,6 +16,12 @@ export interface AdminDeps {
   storage: StorageAdapter // delete removes the media object too (docs/00 D9-c)
 }
 
+/** Moderation moves the live count, so the action handler additionally needs the
+ *  cache seam — the read-only queue handler does not (docs/00 D12). */
+export interface ModerationDeps extends AdminDeps {
+  revalidate: (tag: string) => void
+}
+
 async function requireAdmin(deps: AdminDeps, req: Request): Promise<Response | null> {
   const auth = await requireBearerUser(deps.db, req)
   if (auth.denied) return auth.denied
@@ -97,7 +103,7 @@ async function clearReports(db: SupabaseClient, memoryId: string): Promise<Respo
   return error ? json(500, { error: error.message }) : null
 }
 
-export function createAdminActionHandler(deps: AdminDeps) {
+export function createAdminActionHandler(deps: ModerationDeps) {
   return async (req: Request): Promise<Response> => {
     const denied = await requireAdmin(deps, req)
     if (denied) return denied
@@ -147,6 +153,13 @@ export function createAdminActionHandler(deps: AdminDeps) {
       // dismiss: keep the moment up, clear its reports (the "OK" key — docs/15 §5)
       const failure = await clearReports(deps.db, memoryId)
       if (failure) return failure
+    }
+    // hide/unhide/delete changed how many moments are live; dismiss didn't, but
+    // dropping a 60s cache entry costs one query — not worth branching on.
+    try {
+      deps.revalidate('counters')
+    } catch {
+      // the action already succeeded; a stale count is not worth a 500
     }
     return json(200, { ok: true })
   }
