@@ -26,6 +26,15 @@ describe('EmailOtpForm', () => {
     expect(screen.getByRole('button', { name: 'send it again' })).toBeDisabled()
   })
 
+  // The counterpart to the display-name guards (docs/00 D39): this is the one
+  // field that should take a saved email, and giving autofill its intended
+  // target is what keeps it away from the fields that get published.
+  test('the email field is the declared autofill target', () => {
+    renderWithIntl(<EmailOtpForm send={vi.fn()} verify={vi.fn()} />)
+
+    expect(screen.getByLabelText('your email')).toHaveAttribute('autocomplete', 'email')
+  })
+
   test('verifying the code passes email + code through', async () => {
     const user = userEvent.setup()
     const send = vi.fn().mockResolvedValue(undefined)

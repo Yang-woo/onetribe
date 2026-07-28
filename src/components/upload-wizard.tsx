@@ -589,6 +589,9 @@ export function UploadWizard({
             {t('nameLabel')}
             <input
               value={authorName}
+              // names the field so autofill can't drop a saved email into what
+              // goes public as the author name (docs/00 D39)
+              autoComplete="nickname"
               maxLength={MAX_AUTHOR_NAME_LENGTH}
               onChange={(e) => setAuthorName(e.target.value)}
               className={inputClass}

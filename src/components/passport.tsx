@@ -71,6 +71,11 @@ export function Passport({
           <h2 className="font-display text-xl lowercase">{t('startTitle')}</h2>
           <input
             value={name}
+            // "nickname", not "off": a lone name field on what looks like a
+            // sign-up screen is exactly what browsers autofill with a saved
+            // email address, and Chrome ignores "off" here. This name is
+            // published as the author of every upload (docs/00 D39).
+            autoComplete="nickname"
             aria-label={t('namePlaceholder')}
             placeholder={t('namePlaceholder')}
             onChange={(e) => setName(e.target.value)}

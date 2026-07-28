@@ -53,6 +53,21 @@ describe('PassportProfile', () => {
     expect(screen.getByRole('button', { name: 'edit profile' })).toBeInTheDocument()
   })
 
+  // Same autofill guard the upload wizard carries (docs/00 D39) — this editor
+  // writes straight to the profile, so an autofilled email would then pre-fill
+  // every later upload as well.
+  test('the edit form fields are not autofill targets for a saved email', async () => {
+    const user = userEvent.setup()
+    render({ displayName: null, instagram: null })
+    await user.click(screen.getByRole('button', { name: 'edit profile' }))
+
+    expect(screen.getByLabelText('your name on the wall')).toHaveAttribute(
+      'autocomplete',
+      'nickname',
+    )
+    expect(screen.getByLabelText('instagram (optional)')).toHaveAttribute('autocomplete', 'off')
+  })
+
   test('editing saves the typed values (incl. country) and reports back what persisted', async () => {
     const user = userEvent.setup()
     // resolve values DISTINCT from the typed input so the onSaved assertion

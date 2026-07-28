@@ -68,6 +68,10 @@ export function EmailOtpForm({
       >
         <input
           type="email"
+          // the one field on the site that *should* take a saved email: giving
+          // autofill its intended target is half of keeping it out of the
+          // display-name fields (docs/00 D39)
+          autoComplete="email"
           required
           value={email}
           aria-label={t('emailPlaceholder')}

@@ -115,6 +115,18 @@ describe('Passport', () => {
     expect(screen.queryByRole('link', { name: 'add a moment' })).not.toBeInTheDocument()
   })
 
+  // A lone name field on a screen that looks like sign-up is the likeliest
+  // place for a browser to paste a saved email — and whatever lands here
+  // becomes the author name on every upload (docs/00 D39).
+  test('the start screen name field is not an autofill target', async () => {
+    renderWithIntl(<Passport editions={editions} backend={fakeBackend(null)} />)
+
+    expect(await screen.findByLabelText('your name on the wall')).toHaveAttribute(
+      'autocomplete',
+      'nickname',
+    )
+  })
+
   test('checking editions updates the identity line optimistically', async () => {
     const user = userEvent.setup()
     const backend = fakeBackend({

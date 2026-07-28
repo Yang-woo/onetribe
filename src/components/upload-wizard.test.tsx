@@ -152,6 +152,19 @@ describe('UploadWizard', () => {
     expect(screen.getByText('instagram.com/qdance', { exact: false })).toBeInTheDocument()
   })
 
+  // Autofill guard (docs/00 D39). Both fields are published — the name as the
+  // author of the moment, the handle as a link on the card — and a browser that
+  // reads them as sign-up fields fills them with a saved email address. Naming
+  // the field is what prevents it: "off" alone is ignored by Chrome here.
+  test('the identity fields are not autofill targets for a saved email', async () => {
+    const user = userEvent.setup()
+    renderWizard()
+    await fillToStep2(user)
+
+    expect(screen.getByLabelText('display name')).toHaveAttribute('autocomplete', 'nickname')
+    expect(screen.getByLabelText('instagram (optional)')).toHaveAttribute('autocomplete', 'off')
+  })
+
   test('pasting a profile URL collapses to the handle', async () => {
     const user = userEvent.setup()
     renderWizard()

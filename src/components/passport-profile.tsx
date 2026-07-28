@@ -98,6 +98,9 @@ export function PassportProfile({
             override the visible label and duplicate the string) */}
         <input
           value={name}
+          // same guard as the upload wizard: this name is what the wall shows
+          // as the author, so autofill must not reach it (docs/00 D39)
+          autoComplete="nickname"
           placeholder={t('namePlaceholder')}
           // bound the direct-to-DB write to match the upload wizard's name
           // field (rls-security review 2026-07-24, informational hardening)

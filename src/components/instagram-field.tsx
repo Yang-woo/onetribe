@@ -53,6 +53,10 @@ export function InstagramField({
           // input. No maxLength — it would truncate a pasted profile URL before
           // normalizeIgInput sees it; overlong input is caught by the hint.
           placeholder="yourhandle"
+          // no autofill category fits a bare handle, and "username" would
+          // invite a password manager to fill an email here — the handle is
+          // published as a link on every card (docs/00 D39)
+          autoComplete="off"
           aria-invalid={invalid || undefined}
           aria-describedby={hintId}
           onChange={(e) => {
