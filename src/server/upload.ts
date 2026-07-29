@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { normalizeCountry } from '@/lib/country'
 import {
   type DiscordNotifier,
@@ -417,7 +418,7 @@ export function createMemoriesHandler(deps: PublishDeps) {
     // the uploader watches their own moment land while the count contradicts
     // it. Best-effort like the alert below — a saved moment must not 500.
     try {
-      deps.revalidate('counters')
+      deps.revalidate(COUNTERS_TAG)
     } catch {
       // stale by up to the cache window is the worst case
     }
@@ -492,7 +493,16 @@ const reportSchema = z.object({
   reason: z.enum(REPORT_REASONS),
 })
 
-export function createReportHandler(deps: Pick<UploadDeps, 'db' | 'notify'>) {
+/** A report can trip the 3-strike auto-hide trigger (migration
+ *  20260712000200), which flips a moment to hidden and lowers the live count —
+ *  so this handler carries the same `revalidate` seam as the other counter-
+ *  changing write sites (docs/00 D41). Required, not optional, so a route that
+ *  wires reports can't silently leave an auto-hide stale. */
+export type ReportDeps = Pick<UploadDeps, 'db' | 'notify'> & {
+  revalidate: (tag: string) => void
+}
+
+export function createReportHandler(deps: ReportDeps) {
   return async (req: Request): Promise<Response> => {
     const body = await parseBody(req)
     const parsed = reportSchema.safeParse(body)
@@ -510,6 +520,17 @@ export function createReportHandler(deps: Pick<UploadDeps, 'db' | 'notify'>) {
       reporter_hint: hashIp(ip, 'reporter'),
     })
     if (error) return json(400, { error: 'could not file report' })
+
+    // This report may have tripped the auto-hide trigger, taking the moment off
+    // the wall and lowering the cached live count (D12/D41). We can't see the
+    // trigger's result from here, so drop the counters unconditionally — a
+    // report that didn't trip it just costs one cache refill, like admin
+    // dismiss. Best-effort: a filed report must not 500 on a cache miss.
+    try {
+      deps.revalidate(COUNTERS_TAG)
+    } catch {
+      // an auto-hidden moment stays counted for up to the cache window at worst
+    }
 
     await recordRateEvent(deps.db, reportScopedHash)
     // Best-effort operator alert so a report reaches moderation fast (docs/00 D36).

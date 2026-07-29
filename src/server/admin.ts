@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { json, parseBody, requireBearerUser } from '@/lib/server/http'
 import type { StorageAdapter } from '@/lib/storage'
 
@@ -157,7 +158,7 @@ export function createAdminActionHandler(deps: ModerationDeps) {
     // hide/unhide/delete changed how many moments are live; dismiss didn't, but
     // dropping a 60s cache entry costs one query — not worth branching on.
     try {
-      deps.revalidate('counters')
+      deps.revalidate(COUNTERS_TAG)
     } catch {
       // the action already succeeded; a stale count is not worth a 500
     }

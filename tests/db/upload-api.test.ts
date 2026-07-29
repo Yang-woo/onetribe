@@ -8,6 +8,7 @@ import {
   createPresignHandler,
   createReportHandler,
   type PublishDeps,
+  type ReportDeps,
 } from '@/server/upload'
 import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from './helpers'
 
@@ -933,13 +934,19 @@ describe('rate limiting (D9 P4)', () => {
 })
 
 describe('POST /api/report — server-computed reporter_hint', () => {
+  // A report can trip the auto-hide trigger, which lowers the live count — so
+  // the handler carries the same counters seam as publish/admin (docs/00 D41).
+  function reportDeps(overrides: Partial<ReportDeps> = {}): ReportDeps {
+    return { db, revalidate: (tag) => revalidated.push(tag), ...overrides }
+  }
+
   async function fixtureMemory(caption: string): Promise<string> {
     return seedMemory(db, { event_id: eventId, caption })
   }
 
   test('files a report with the hint derived from the real IP', async () => {
     const memoryId = await fixtureMemory(`${MARKER}-report`)
-    const res = await createReportHandler({ db })(
+    const res = await createReportHandler(reportDeps())(
       new Request('http://localhost/api/report', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-forwarded-for': `${REPORT_IP_BASE}.0` },
@@ -958,12 +965,12 @@ describe('POST /api/report — server-computed reporter_hint', () => {
 
   test('invalid reason and unknown memory → 400', async () => {
     const memoryId = await fixtureMemory(`${MARKER}-report-bad`)
-    const badReason = await createReportHandler({ db })(
+    const badReason = await createReportHandler(reportDeps())(
       post({ memoryId, reason: 'i-just-dislike-it' }),
     )
     expect(badReason.status).toBe(400)
 
-    const unknown = await createReportHandler({ db })(
+    const unknown = await createReportHandler(reportDeps())(
       post({ memoryId: randomUUID(), reason: 'spam' }),
     )
     expect(unknown.status).toBe(400)
@@ -972,7 +979,7 @@ describe('POST /api/report — server-computed reporter_hint', () => {
   test('3 reports from 3 real IPs auto-hide the memory (threshold via the route)', async () => {
     const memoryId = await fixtureMemory(`${MARKER}-report-threshold`)
     for (const i of [1, 2, 3]) {
-      const res = await createReportHandler({ db })(
+      const res = await createReportHandler(reportDeps())(
         new Request('http://localhost/api/report', {
           method: 'POST',
           headers: {
@@ -989,12 +996,17 @@ describe('POST /api/report — server-computed reporter_hint', () => {
 
     const { data: anonView } = await anon.from('memories').select('id').eq('id', memoryId)
     expect(anonView ?? []).toHaveLength(0)
+
+    // The auto-hide dropped the live count, so the cached counters must have
+    // been invalidated (docs/00 D41) — otherwise the wall header keeps counting
+    // a moment that's no longer on the wall for up to the cache window.
+    expect(revalidated).toContain('counters')
   })
 
   test('a filed report fires a best-effort Discord alert linking the moment (D36)', async () => {
     const notify = vi.fn(async (_msg: unknown) => {})
     const memoryId = await fixtureMemory(`${MARKER}-report-discord`)
-    const res = await createReportHandler({ db, notify })(
+    const res = await createReportHandler(reportDeps({ notify }))(
       new Request('http://localhost/api/report', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-forwarded-for': `${REPORT_IP_BASE}.4` },

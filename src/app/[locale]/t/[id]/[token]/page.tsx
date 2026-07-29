@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { revalidateTag } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
+import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 // Secret-token URL — must never end up in an index if a link leaks
@@ -43,9 +44,15 @@ export default async function TakedownPage({
     // A successful hide lowers the live count the wall header serves from a 60s
     // cache (docs/00 D12/D41) — drop it here like the publish and admin paths
     // do, or the moment vanishes from the wall while the count still includes it.
-    // This is the third counter-changing write site; the other two thread the
-    // same invalidation through their server handlers' `revalidate` seam.
-    if (data === true) revalidateTag('counters', { expire: 0 })
+    // Best-effort like those sites: the hide already committed, so a cache
+    // failure must not turn a successful takedown into an error page.
+    if (data === true) {
+      try {
+        revalidateTag(COUNTERS_TAG, { expire: 0 })
+      } catch {
+        // the moment is already hidden; a stale count is not worth failing on
+      }
+    }
     redirect(`/${locale}/t/${id}/${token}?done=${data === true ? '1' : '0'}`)
   }
 

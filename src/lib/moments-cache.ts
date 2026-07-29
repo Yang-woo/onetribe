@@ -1,4 +1,5 @@
 import { unstable_cache } from 'next/cache'
+import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { fetchCounters, fetchEditions } from '@/lib/moments'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
@@ -22,5 +23,5 @@ export const getCachedEditions = unstable_cache(
 export const getCachedCounters = unstable_cache(
   () => fetchCounters(supabaseServerAnon()),
   ['wall-counters'],
-  { revalidate: 60, tags: ['counters'] },
+  { revalidate: 60, tags: [COUNTERS_TAG] },
 )
