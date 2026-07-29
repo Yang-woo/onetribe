@@ -268,6 +268,75 @@ describe('UploadWizard', () => {
     expect(payload.authorLink).toBe('qdance')
   })
 
+  // docs/00 D43: an upload-first user (no passport yet) still gets attributed —
+  // the wizard mints an anonymous session and sends its token, so the moment
+  // lands under a passport they can later add an email to, not unattributed.
+  test('attributes the upload to the session token from ensureSessionImpl (D43)', async () => {
+    const user = userEvent.setup()
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const href = String(url)
+      calls.push({ url: href, init })
+      if (href.endsWith('/api/upload/presign'))
+        return Response.json({
+          uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+          session: 'sess-token',
+        })
+      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+      if (href.endsWith('/api/memories'))
+        return Response.json(
+          { moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] },
+          { status: 201 },
+        )
+      throw new Error(`unexpected fetch ${href}`)
+    })
+    vi.stubGlobal('fetch', fetchStub)
+    const ensureSessionImpl = vi.fn().mockResolvedValue('minted-anon-token')
+
+    renderWizard({ ensureSessionImpl })
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: 'share my moment' }))
+
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+    expect(ensureSessionImpl).toHaveBeenCalled()
+    const memoriesCall = calls.find((c) => c.url.endsWith('/api/memories'))!
+    expect(JSON.parse(String(memoriesCall.init?.body)).authToken).toBe('minted-anon-token')
+  })
+
+  // Best-effort: if minting fails (returns undefined), the upload still goes
+  // through — unattributed, exactly as before D43. Never blocks a post.
+  test('an upload still posts when no session can be minted (unattributed)', async () => {
+    const user = userEvent.setup()
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const href = String(url)
+      calls.push({ url: href, init })
+      if (href.endsWith('/api/upload/presign'))
+        return Response.json({
+          uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+          session: 'sess-token',
+        })
+      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+      if (href.endsWith('/api/memories'))
+        return Response.json(
+          { moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] },
+          { status: 201 },
+        )
+      throw new Error(`unexpected fetch ${href}`)
+    })
+    vi.stubGlobal('fetch', fetchStub)
+
+    renderWizard({ ensureSessionImpl: async () => undefined })
+    await fillToStep2(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: 'share my moment' }))
+
+    expect(await screen.findByRole('heading', { name: /on the wall/ })).toBeInTheDocument()
+    const memoriesCall = calls.find((c) => c.url.endsWith('/api/memories'))!
+    expect(JSON.parse(String(memoriesCall.init?.body)).authToken).toBeUndefined()
+  })
+
   // docs/00 D32: the aspect ratio must be measured from the COMPRESSED output,
   // not the original — browser-image-compression bakes EXIF orientation into the
   // pixels, so a rotated phone photo's uploaded ratio is the inverse of its raw

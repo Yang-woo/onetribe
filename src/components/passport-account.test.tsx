@@ -28,6 +28,7 @@ function fakeApi(overrides: Partial<PassportBackend> = {}): PassportBackend {
   return {
     load: vi.fn(),
     start: vi.fn(),
+    ensureSession: vi.fn().mockResolvedValue('anon-token'),
     loadProfileDefaults: vi.fn().mockResolvedValue(null),
     updateProfile: vi
       .fn()

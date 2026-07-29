@@ -45,6 +45,9 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
       }
       return state
     },
+    async ensureSession() {
+      return 'anon-token'
+    },
     async loadProfileDefaults() {
       if (!state) return null
       return {

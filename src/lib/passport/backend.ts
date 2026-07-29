@@ -106,6 +106,12 @@ export function consumeOauthReturnError(): PassportAuthErrorCode | null {
 export interface PassportBackend {
   load(): Promise<PassportState | null>
   start(displayName: string): Promise<PassportState>
+  /** Returns an access token to attribute an upload to a passport, minting an
+   *  anonymous one if this browser has none yet (docs/00 D43). So an
+   *  upload-first visitor still owns their moment — it lands under a passport
+   *  they can later add an email to — instead of unattributed. Throws only if
+   *  the mint itself fails; callers treat that as "unattributed". */
+  ensureSession(): Promise<string>
   /** Light read for pre-filling the upload form — null if no session (docs/00 D30). */
   loadProfileDefaults(): Promise<ProfileDefaults | null>
   /** Edit the reusable identity from the passport; returns the saved values (docs/00 D30, D31). */
@@ -190,6 +196,18 @@ export function createSupabasePassportBackend(
         .upsert({ id: data.user.id, display_name: displayName.trim() || null })
       if (profileError) throw new Error(`profile create failed: ${profileError.message}`)
       return stateFor(client, data.user)
+    },
+
+    async ensureSession() {
+      // Reuse the device-local session if one exists (passport-first, or a
+      // prior upload already minted one) — never mint a second anonymous user
+      // for the same browser. getSession is local (no network), so this stays
+      // cheap on the hot path.
+      const existing = await client.auth.getSession()
+      if (existing.data.session) return existing.data.session.access_token
+      const { data, error } = await client.auth.signInAnonymously()
+      if (error || !data.session) throw new Error(`anonymous sign-in failed: ${error?.message}`)
+      return data.session.access_token
     },
 
     async loadProfileDefaults() {

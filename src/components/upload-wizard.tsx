@@ -5,7 +5,6 @@ import { Link } from '@/i18n/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { EditionChip } from '@/lib/moments'
 import { createSupabasePassportBackend, type ProfileDefaults } from '@/lib/passport/backend'
-import { supabaseBrowser } from '@/lib/supabase/browser'
 import {
   imageAspectRatio,
   prepareForUpload,
@@ -82,6 +81,21 @@ async function loadUploadDefaults(): Promise<ProfileDefaults | null> {
   }
 }
 
+/**
+ * Return an access token to attribute this upload, minting an anonymous passport
+ * if this browser has none yet (docs/00 D43) — so an upload-first user still
+ * owns their moment and can later add an email to keep it. Best-effort: a mint
+ * failure (or no Supabase env in tests) falls back to an unattributed upload,
+ * exactly as before this existed.
+ */
+async function ensureUploadSession(): Promise<string | undefined> {
+  try {
+    return await createSupabasePassportBackend().ensureSession()
+  } catch {
+    return undefined
+  }
+}
+
 export function UploadWizard({
   editions,
   ipCountry = '',
@@ -89,6 +103,7 @@ export function UploadWizard({
   prepareThumbImpl = prepareThumb,
   aspectImpl = imageAspectRatio,
   loadDefaultsImpl = loadUploadDefaults,
+  ensureSessionImpl = ensureUploadSession,
 }: {
   editions: EditionChip[]
   /** Server-derived IP country (docs/00 D31) — the picker's first guess before
@@ -102,6 +117,8 @@ export function UploadWizard({
   aspectImpl?: (file: File) => Promise<number | null>
   /** test seam — passport pre-fill needs Supabase env at runtime */
   loadDefaultsImpl?: () => Promise<ProfileDefaults | null>
+  /** test seam — minting an anonymous session needs Supabase env at runtime */
+  ensureSessionImpl?: () => Promise<string | undefined>
 }) {
   const t = useTranslations('upload')
   const [step, setStep] = useState<Step>(1)
@@ -241,15 +258,11 @@ export function UploadWizard({
     setSubmitting(true)
     setError(null)
     try {
-      // Passport attribution is best-effort: no session (or no Supabase env
-      // in tests) simply means an unattributed upload.
-      let authToken: string | undefined
-      try {
-        const { data: sessionData } = await supabaseBrowser().auth.getSession()
-        authToken = sessionData.session?.access_token
-      } catch {
-        authToken = undefined
-      }
+      // Attribute the upload to a passport, minting an anonymous one if this
+      // browser has none yet (docs/00 D43) — so an upload-first user still owns
+      // their moment and can later add an email to keep it. Best-effort: a mint
+      // failure (or no Supabase env in tests) falls back to unattributed.
+      const authToken = await ensureSessionImpl()
       const shared = {
         authToken,
         eventId,
