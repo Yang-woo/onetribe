@@ -39,6 +39,29 @@ function gifFile(name: string): File {
   return new File([new Uint8Array([0x47, 0x49, 0x46])], name, { type: 'image/gif' })
 }
 
+// The standard successful upload round-trip (presign → PUT → memories). Stubs
+// global fetch and returns the recorded calls so a test can assert what the
+// wizard sent to /api/memories. (The pre-D43 tests still inline this stub;
+// converting them is a separate cleanup.)
+function stubUploadRoundTrip() {
+  const calls: Array<{ url: string; init?: RequestInit }> = []
+  const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+    const href = String(url)
+    calls.push({ url: href, init })
+    if (href.endsWith('/api/upload/presign'))
+      return Response.json({
+        uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+        session: 'sess-token',
+      })
+    if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
+    if (href.endsWith('/api/memories'))
+      return Response.json({ moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] }, { status: 201 })
+    throw new Error(`unexpected fetch ${href}`)
+  })
+  vi.stubGlobal('fetch', fetchStub)
+  return { calls }
+}
+
 // Step 1 now holds media + edition + caption; step 2 holds the signature.
 async function fillToStep2(user: ReturnType<typeof userEvent.setup>, editionYear = '2023') {
   await user.upload(screen.getByLabelText('photos'), [gifFile('a.gif')])
@@ -273,24 +296,7 @@ describe('UploadWizard', () => {
   // lands under a passport they can later add an email to, not unattributed.
   test('attributes the upload to the session token from ensureSessionImpl (D43)', async () => {
     const user = userEvent.setup()
-    const calls: Array<{ url: string; init?: RequestInit }> = []
-    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
-      const href = String(url)
-      calls.push({ url: href, init })
-      if (href.endsWith('/api/upload/presign'))
-        return Response.json({
-          uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
-          session: 'sess-token',
-        })
-      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
-      if (href.endsWith('/api/memories'))
-        return Response.json(
-          { moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] },
-          { status: 201 },
-        )
-      throw new Error(`unexpected fetch ${href}`)
-    })
-    vi.stubGlobal('fetch', fetchStub)
+    const { calls } = stubUploadRoundTrip()
     const ensureSessionImpl = vi.fn().mockResolvedValue('minted-anon-token')
 
     renderWizard({ ensureSessionImpl })
@@ -308,24 +314,7 @@ describe('UploadWizard', () => {
   // through — unattributed, exactly as before D43. Never blocks a post.
   test('an upload still posts when no session can be minted (unattributed)', async () => {
     const user = userEvent.setup()
-    const calls: Array<{ url: string; init?: RequestInit }> = []
-    const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
-      const href = String(url)
-      calls.push({ url: href, init })
-      if (href.endsWith('/api/upload/presign'))
-        return Response.json({
-          uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
-          session: 'sess-token',
-        })
-      if (href.startsWith('https://put.test/')) return new Response(null, { status: 200 })
-      if (href.endsWith('/api/memories'))
-        return Response.json(
-          { moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] },
-          { status: 201 },
-        )
-      throw new Error(`unexpected fetch ${href}`)
-    })
-    vi.stubGlobal('fetch', fetchStub)
+    const { calls } = stubUploadRoundTrip()
 
     renderWizard({ ensureSessionImpl: async () => undefined })
     await fillToStep2(user)

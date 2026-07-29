@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { revalidateTag } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
@@ -39,6 +40,12 @@ export default async function TakedownPage({
     // idempotent RPC (migration 20260725000300) a matching token yields true even
     // if the moment was already hidden, so `false` means a genuinely bad token.
     if (error) redirect(`/${locale}/t/${id}/${token}?done=error`)
+    // A successful hide lowers the live count the wall header serves from a 60s
+    // cache (docs/00 D12/D41) — drop it here like the publish and admin paths
+    // do, or the moment vanishes from the wall while the count still includes it.
+    // This is the third counter-changing write site; the other two thread the
+    // same invalidation through their server handlers' `revalidate` seam.
+    if (data === true) revalidateTag('counters', { expire: 0 })
     redirect(`/${locale}/t/${id}/${token}?done=${data === true ? '1' : '0'}`)
   }
 

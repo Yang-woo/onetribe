@@ -203,8 +203,10 @@ export function createSupabasePassportBackend(
       // prior upload already minted one) — never mint a second anonymous user
       // for the same browser. getSession is local (no network), so this stays
       // cheap on the hot path.
-      const existing = await client.auth.getSession()
-      if (existing.data.session) return existing.data.session.access_token
+      const {
+        data: { session },
+      } = await client.auth.getSession()
+      if (session) return session.access_token
       const { data, error } = await client.auth.signInAnonymously()
       if (error || !data.session) throw new Error(`anonymous sign-in failed: ${error?.message}`)
       return data.session.access_token
