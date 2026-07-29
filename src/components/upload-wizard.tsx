@@ -259,12 +259,15 @@ export function UploadWizard({
     setError(null)
     try {
       // Attribute the upload to a passport, minting an anonymous one if this
-      // browser has none yet (docs/00 D43) — so an upload-first user still owns
-      // their moment and can later add an email to keep it. Best-effort: a mint
-      // failure (or no Supabase env in tests) falls back to unattributed.
-      const authToken = await ensureSessionImpl()
+      // browser has none yet (docs/00 D43). Fired WITHOUT awaiting: the token is
+      // only needed for the /api/memories POST, so a first uploader's anonymous
+      // sign-in round-trip overlaps with compression, presign and the R2 PUTs
+      // below instead of blocking in front of them. Best-effort: a mint failure
+      // (or no Supabase env in tests) falls back to unattributed, and `.catch`
+      // keeps it from becoming an unhandled rejection if an earlier step throws
+      // before we await it at the POST.
+      const sessionPromise = ensureSessionImpl().catch(() => undefined)
       const shared = {
-        authToken,
         eventId,
         caption: caption.trim() || undefined,
         authorName: authorName.trim() || undefined,
@@ -387,10 +390,13 @@ export function UploadWizard({
         }
       }
 
+      // Resolve attribution now — the sign-in RTT has been running behind the
+      // presign + PUT work above (docs/00 D43).
+      const authToken = await sessionPromise
       const res = await fetch('/api/memories', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, authToken }),
       })
       if (!res.ok) throw new Error('memories failed')
       const { moments } = (await res.json()) as { moments: DoneMoment[] }
