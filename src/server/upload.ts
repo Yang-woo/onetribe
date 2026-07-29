@@ -306,8 +306,9 @@ export function createMemoriesHandler(deps: PublishDeps) {
     }
 
     // Independent pre-checks run concurrently; results apply in a fixed
-    // precedence (429 rate → 401 auth → 400 event) so errors stay
-    // deterministic. The file flow was ALREADY rate-checked AND recorded at
+    // precedence (429 rate → 400 event) so errors stay deterministic. The
+    // auth lookup runs here too but never errors the request — attribution is
+    // best-effort (below). The file flow was ALREADY rate-checked AND recorded at
     // presign (which mints the R2 grants); re-checking here would count the same
     // upload twice and 429 the last allowed one AFTER its bytes are in R2,
     // leaving an orphan. Only the embed flow (no presign) is gated here — so the
@@ -322,16 +323,15 @@ export function createMemoriesHandler(deps: PublishDeps) {
 
     if (limited) return json(429, { error: 'too many uploads — try again later' })
 
-    // Passport attribution: a valid anonymous-auth token links the moment
-    // to its uploader (docs/15 §4). Invalid tokens are rejected, not
-    // silently dropped — losing attribution quietly would be worse.
-    let authorId: string | null = null
-    if (input.authToken) {
-      if (authUser?.error || !authUser?.data.user) {
-        return json(401, { error: 'invalid auth token' })
-      }
-      authorId = authUser.data.user.id
-    }
+    // Passport attribution is best-effort (docs/00 D43): a token we can resolve
+    // links the moment to its uploader (docs/15 §4), but one we can't — a device
+    // session whose anonymous user was deleted server-side, or a malformed
+    // token — must never block the post. We drop attribution (author_id stays
+    // null) instead of 401-ing, so a stale session can't wedge uploads. No
+    // hijack risk: getUser validates the JWT, so an unresolvable token yields no
+    // user, never someone else's.
+    const authorId =
+      input.authToken && !authUser?.error && authUser?.data.user ? authUser.data.user.id : null
 
     // A DB error here isn't a bad eventId — masking it as 400 "unknown event"
     // tells the client to fix valid input instead of retrying a transient fault.

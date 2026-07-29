@@ -691,18 +691,31 @@ describe('passport attribution (T4.1)', () => {
     await db.auth.admin.deleteUser(uid)
   })
 
-  test('an invalid auth token is rejected, not silently dropped', async () => {
+  // docs/00 D43: attribution is best-effort. Since the wizard now always sends
+  // a token (minting one if needed), a token we can't resolve — a stale session
+  // whose anonymous user was deleted server-side, or a malformed one — must not
+  // block the post. It publishes unattributed (author_id null), never 401s, so a
+  // dead device session can't wedge uploads.
+  test('an unresolvable auth token publishes unattributed, never 401s', async () => {
+    const caption = `${MARKER}-badauthor`
     const res = await createMemoriesHandler(deps())(
       post({
         turnstileToken: 't',
         authToken: 'not-a-real-token',
         eventId,
-        caption: `${MARKER}-badauthor`,
+        caption,
         rightsConfirmed: true,
         embed: { url: 'https://youtu.be/dQw4w9WgXcQ' },
       }),
     )
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(201)
+
+    const { data: row } = await db
+      .from('memories')
+      .select('author_id')
+      .eq('caption', caption)
+      .single()
+    expect(row!.author_id).toBeNull()
   })
 
   // Identity reuse (docs/00 D30, D31): an upload registers its name + handle +
