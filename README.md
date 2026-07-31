@@ -24,7 +24,7 @@ The site is live and feature-complete; it has not been publicly announced yet, s
 - 📤 **Upload without an account** — a moment goes live immediately; moderation happens after the fact, backed by community reports and self-serve takedown
 - 🖼️ **Photos and GIFs** — JPEG, PNG, WebP and GIF, compressed in the browser, up to 5 per moment. Video is linked, never re-hosted
 - 🔗 **Moment pages** — every memory gets a shareable URL and a generated OG card
-- 🎫 **Festival Passport** — log the editions you attended and collect "my Nth Defqon" stamps. Anonymous by default; connect an email or Google account only if you want it to survive a lost device
+- 🎫 **Festival Passport** — log the editions you attended and collect "my Nth Defqon" stamps. Anonymous by default; connect an email only if you want it to survive a lost device — and signing in from another browser folds whatever that browser collected into your account
 - ♿ **Accessible** — Lighthouse accessibility 100 on the wall and the upload flow
 
 ## Tech stack

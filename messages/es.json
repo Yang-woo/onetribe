@@ -143,7 +143,7 @@
     "signInHint": "inicia sesión con el correo que conectaste.",
     "deleteAccount": "eliminar mi pasaporte",
     "deleteConfirm": "esto elimina permanentemente tu pasaporte, tus sellos y la conexión. los momentos que compartiste siguen en el muro — anónimos, cada uno con su propio enlace de borrado. ¿continuar?",
-    "emailInUse": "ese correo ya está conectado a otro pasaporte",
+    "emailInUse": "ese correo ya está conectado a otro pasaporte — inicia sesión abajo y los momentos de este dispositivo se van contigo",
     "noPassport": "no hay pasaporte para este correo",
     "badCode": "ese código no funcionó — revísalo e inténtalo de nuevo",
     "rateLimited": "demasiados correos — inténtalo en un minuto",

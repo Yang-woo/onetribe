@@ -143,7 +143,7 @@
     "signInHint": "bağladığın e-posta ile giriş yap.",
     "deleteAccount": "pasaportumu sil",
     "deleteConfirm": "bu, pasaportunu, damgalarını ve bağlı hesabını kalıcı olarak siler. paylaştığın anlar duvarda kalır — anonimleştirilmiş, her biri kendi silme bağlantısıyla. devam edilsin mi?",
-    "emailInUse": "bu e-posta zaten başka bir pasaporta bağlı",
+    "emailInUse": "bu e-posta zaten başka bir pasaporta bağlı — aşağıdan giriş yap, bu cihazdaki anlar da seninle gelir",
     "noPassport": "bu e-postaya ait pasaport bulunamadı",
     "badCode": "bu kod çalışmadı — kontrol et ve tekrar dene",
     "rateLimited": "çok fazla e-posta — bir dakika sonra tekrar dene",

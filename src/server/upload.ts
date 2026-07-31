@@ -10,6 +10,7 @@ import {
   reportMessage,
 } from '@/lib/server/discord'
 import { json, parseBody } from '@/lib/server/http'
+import { mergedTargetFor } from '@/lib/server/passport-merge-record'
 import { clientIp, hashIp } from '@/lib/server/request-meta'
 import { detectCaptionLocale } from '@/lib/translate/detect'
 import type { TurnstileVerifier } from '@/lib/server/turnstile'
@@ -315,10 +316,11 @@ export function createMemoriesHandler(deps: PublishDeps) {
     // ip hash is computed only when embed, and its presence gates both the check
     // above and the record below.
     const ipHash = input.embed ? hashIp(ip, 'upload') : null
-    const [limited, authUser, event] = await Promise.all([
+    const [limited, authUser, event, mergedTarget] = await Promise.all([
       ipHash ? overRateLimit(deps.db, ipHash, UPLOADS_PER_HOUR) : Promise.resolve(false),
       input.authToken ? deps.db.auth.getUser(input.authToken) : Promise.resolve(null),
       deps.db.from('events').select('id').eq('id', input.eventId).maybeSingle(),
+      input.authToken ? mergedTargetFor(deps.db, input.authToken) : Promise.resolve(null),
     ])
 
     if (limited) return json(429, { error: 'too many uploads — try again later' })
@@ -330,8 +332,18 @@ export function createMemoriesHandler(deps: PublishDeps) {
     // null) instead of 401-ing, so a stale session can't wedge uploads. No
     // hijack risk: getUser validates the JWT, so an unresolvable token yields no
     // user, never someone else's.
+    //
+    // The merge mapping wins when it exists (docs/00 D45). This upload's token
+    // was captured at submit start — before compression, presign and the PUTs —
+    // so a sign-in completed anywhere on this device since then has already
+    // folded that passport into an account and deleted it. Without the mapping
+    // the token resolves to nobody and the moment publishes permanently
+    // unattributed: precisely the loss D44 exists to prevent, arriving through
+    // the door D44 opened. Holding the token is the same proof the merge itself
+    // required, so honouring it grants nothing new.
     const authorId =
-      input.authToken && !authUser?.error && authUser?.data.user ? authUser.data.user.id : null
+      mergedTarget ??
+      (input.authToken && !authUser?.error && authUser?.data.user ? authUser.data.user.id : null)
 
     // A DB error here isn't a bad eventId — masking it as 400 "unknown event"
     // tells the client to fix valid input instead of retrying a transient fault.

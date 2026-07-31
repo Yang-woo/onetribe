@@ -143,7 +143,7 @@
     "signInHint": "logga in med mejladressen du kopplade.",
     "deleteAccount": "radera mitt pass",
     "deleteConfirm": "det här raderar ditt pass, dina stämplar och kopplingen permanent. minnen du delat stannar på väggen — anonymiserade, vart och ett med sin egen raderingslänk. fortsätta?",
-    "emailInUse": "den mejladressen är redan kopplad till ett annat pass",
+    "emailInUse": "den mejladressen är redan kopplad till ett annat pass — logga in nedan, så följer minnena från den här enheten med",
     "noPassport": "inget pass hittades för den här mejladressen",
     "badCode": "den koden funkade inte — kontrollera den och försök igen",
     "rateLimited": "för många mejl — försök igen om en minut",

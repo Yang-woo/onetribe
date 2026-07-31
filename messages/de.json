@@ -143,7 +143,7 @@
     "signInHint": "melde dich mit der verbundenen E-Mail an.",
     "deleteAccount": "meinen Pass löschen",
     "deleteConfirm": "das löscht deinen Pass, deine Stempel und die Verbindung dauerhaft. geteilte Momente bleiben an der Wand — anonymisiert, jeweils mit eigenem Löschlink. fortfahren?",
-    "emailInUse": "diese E-Mail ist schon mit einem anderen Pass verbunden",
+    "emailInUse": "diese E-Mail ist schon mit einem anderen Pass verbunden — melde dich unten an, die Momente von diesem Gerät kommen mit",
     "noPassport": "kein Pass für diese E-Mail gefunden",
     "badCode": "der Code hat nicht funktioniert — prüf ihn und versuch es nochmal",
     "rateLimited": "zu viele E-Mails — versuch es in einer Minute nochmal",

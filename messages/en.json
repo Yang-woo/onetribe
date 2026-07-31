@@ -143,7 +143,7 @@
     "signInHint": "sign in with the email you connected.",
     "deleteAccount": "delete my passport",
     "deleteConfirm": "this permanently deletes your passport, stamps and connection. moments you shared stay on the wall — anonymized, each with its own delete link. continue?",
-    "emailInUse": "that email is already connected to another passport",
+    "emailInUse": "that email is already connected to another passport — sign in below, and this device's moments come with you",
     "noPassport": "no passport found for this email",
     "badCode": "that code didn't work — check it and try again",
     "rateLimited": "too many emails — try again in a minute",

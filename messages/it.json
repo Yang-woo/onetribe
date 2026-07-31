@@ -143,7 +143,7 @@
     "signInHint": "accedi con l'email che hai collegato.",
     "deleteAccount": "elimina il mio passaporto",
     "deleteConfirm": "questo elimina per sempre il tuo passaporto, i timbri e il collegamento. i momenti condivisi restano sul muro — anonimi, ognuno con il proprio link di eliminazione. continuare?",
-    "emailInUse": "quell'email è già collegata a un altro passaporto",
+    "emailInUse": "quell'email è già collegata a un altro passaporto — accedi qui sotto e i momenti di questo dispositivo vengono con te",
     "noPassport": "nessun passaporto trovato per questa email",
     "badCode": "quel codice non ha funzionato — controllalo e riprova",
     "rateLimited": "troppe email — riprova tra un minuto",

@@ -143,7 +143,7 @@
     "signInHint": "masuk dengan email yang kamu hubungkan.",
     "deleteAccount": "hapus pasporku",
     "deleteConfirm": "ini menghapus paspor, stempel, dan koneksimu secara permanen. momen yang kamu bagikan tetap di dinding — dianonimkan, masing-masing dengan tautan hapusnya sendiri. lanjutkan?",
-    "emailInUse": "email itu sudah terhubung dengan paspor lain",
+    "emailInUse": "email itu sudah terhubung dengan paspor lain — masuk di bawah, momen dari perangkat ini ikut pindah",
     "noPassport": "tidak ada paspor untuk email ini",
     "badCode": "kode itu tidak berhasil — periksa dan coba lagi",
     "rateLimited": "terlalu banyak email — coba lagi dalam semenit",

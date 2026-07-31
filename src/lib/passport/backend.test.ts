@@ -79,10 +79,29 @@ const anonSession = (token = 'anon-token', id = 'anon-1'): Session => ({
 })
 
 describe('signInEmailVerify — anonymous passport merge', () => {
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
 
-  function stubFetch(ok = true, status = ok ? 200 : 500) {
-    const fetchMock = vi.fn(async () => ({ ok, status, json: async () => ({ ok }) }))
+  /** Answers `statuses` in order, repeating the last one. 0 = network failure. */
+  function stubFetch(...statuses: number[]) {
+    const queue = statuses.length > 0 ? statuses : [200]
+    const fetchMock = vi.fn(async () => {
+      const status = queue.length > 1 ? (queue.shift() as number) : queue[0]
+      if (status === 0) throw new TypeError('Failed to fetch')
+      return { ok: status < 400, status }
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    return fetchMock
+  }
+
+  function stubTimeout() {
+    const fetchMock = vi.fn(async () => {
+      const err = new Error('signal timed out')
+      err.name = 'TimeoutError'
+      throw err
+    })
     vi.stubGlobal('fetch', fetchMock)
     return fetchMock
   }
@@ -124,10 +143,59 @@ describe('signInEmailVerify — anonymous passport merge', () => {
   })
 
   test('a merge failure does not undo the sign-in (best-effort)', async () => {
-    stubFetch(false) // merge route returns 500
+    stubFetch(500)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'target-1'))
     // resolves to the signed-in state anyway — the user is in their account
     const state = await backend.signInEmailVerify('raver@example.com', '123456')
     expect(state.userId).toBe('target-1')
+    // ...but it is not silent: this is the last chance to use the anonymous
+    // token, so a failure here is permanent and has to leave a trace
+    expect(warn).toHaveBeenCalled()
+  })
+
+  test('retries once on a transient fault — the anonymous token has no second chance', async () => {
+    // by now verifyOtp has replaced the stored session, so the token exists
+    // nowhere but that stack frame. A blip must not be the end of it.
+    const fetchMock = stubFetch(500, 200)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'target-1'))
+    await backend.signInEmailVerify('raver@example.com', '123456')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  test('retries a network failure too', async () => {
+    const fetchMock = stubFetch(0, 200)
+    const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'target-1'))
+    await backend.signInEmailVerify('raver@example.com', '123456')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  test('does NOT retry a refusal — 4xx is a verdict on these two tokens', async () => {
+    const fetchMock = stubFetch(403)
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'target-1'))
+    await backend.signInEmailVerify('raver@example.com', '123456')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  test('gives up after a timeout instead of making sign-in wait twice', async () => {
+    // the request is capped so a stalled route can't pin the user on a dead
+    // confirm button; spending that budget a second time defeats the cap
+    const fetchMock = stubTimeout()
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'target-1'))
+    const state = await backend.signInEmailVerify('raver@example.com', '123456')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(state.userId).toBe('target-1')
+  })
+
+  test('caps the request — an open-ended merge would hold the sign-in forever', async () => {
+    const fetchMock = stubFetch(200)
+    const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'target-1'))
+    await backend.signInEmailVerify('raver@example.com', '123456')
+    const [, opts] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    expect(opts.signal).toBeInstanceOf(AbortSignal)
   })
 })

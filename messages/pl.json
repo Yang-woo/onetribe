@@ -143,7 +143,7 @@
     "signInHint": "zaloguj się połączonym wcześniej e-mailem.",
     "deleteAccount": "usuń mój paszport",
     "deleteConfirm": "to trwale usuwa twój paszport, pieczątki i połączenie. udostępnione przez ciebie momenty zostają na ścianie — zanonimizowane, każdy z własnym linkiem do usunięcia. kontynuować?",
-    "emailInUse": "ten e-mail jest już połączony z innym paszportem",
+    "emailInUse": "ten e-mail jest już połączony z innym paszportem — zaloguj się poniżej, a momenty z tego urządzenia pójdą z tobą",
     "noPassport": "nie znaleziono paszportu dla tego e-maila",
     "badCode": "ten kod nie zadziałał — sprawdź go i spróbuj ponownie",
     "rateLimited": "zbyt wiele e-maili — spróbuj ponownie za minutę",

@@ -3,6 +3,7 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { normalizeCountry } from '@/lib/country'
 import { PUBLIC_MEMORY_COLUMNS, type Moment } from '@/lib/moments'
+import { siteUrl } from '@/lib/site-url'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 
 /**
@@ -106,20 +107,63 @@ function identityOf(user: User): PassportIdentity {
   }
 }
 
+const MERGE_PATH = '/api/passport/merge'
+/** Sign-in is blocked on the merge, so a stalled route must not pin the user on
+ *  a dead confirm button — a hang is a failure like any other. */
+const MERGE_TIMEOUT_MS = 5000
+
+/** Relative in the browser, absolute under Node — a server-side caller with a
+ *  relative URL doesn't fail loudly, it rejects on parse and lands in the same
+ *  swallow below, i.e. skips the merge while looking like it ran. */
+function mergeUrl(): string {
+  return typeof window === 'undefined' ? new URL(MERGE_PATH, siteUrl()).toString() : MERGE_PATH
+}
+
+type MergeOutcome = 'ok' | 'refused' | 'error' | 'timeout'
+
+async function attemptMerge(targetToken: string, anonToken: string): Promise<MergeOutcome> {
+  try {
+    const res = await fetch(mergeUrl(), {
+      method: 'POST',
+      headers: { authorization: `Bearer ${targetToken}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ anonToken }),
+      signal: AbortSignal.timeout(MERGE_TIMEOUT_MS),
+    })
+    if (res.ok) return 'ok'
+    // 4xx is a verdict on these two tokens (not anonymous, already spent,
+    // over the ceiling) — asking again with the same pair can't change it.
+    return res.status < 500 ? 'refused' : 'error'
+  } catch (err) {
+    return err instanceof Error && err.name === 'TimeoutError' ? 'timeout' : 'error'
+  }
+}
+
 /**
  * Fold an anonymous passport (its uploads + stamps) into the account the user
  * just signed into (docs/00 D44). The server proves ownership of BOTH sides —
  * the target from this request's bearer, the anonymous source from its own
- * token — then reassigns and deletes the source. Best-effort by contract: the
- * caller swallows failures so a merge hiccup never undoes a successful sign-in.
+ * token — then reassigns and deletes the source.
+ *
+ * Never throws: the swallow lives HERE rather than at the call site, so a
+ * second sign-in method can't forget it and turn a merge hiccup into a failed
+ * sign-in — the exact thing the best-effort contract forbids. Retried once on a
+ * transient fault, because by now verifyOtp has replaced the stored session and
+ * the anonymous token exists nowhere but this stack frame: there is no later
+ * attempt. Retrying is safe — the route is idempotent (docs/00 D45).
  */
-async function mergeAnonInto(targetToken: string, anonToken: string): Promise<void> {
-  const res = await fetch('/api/passport/merge', {
-    method: 'POST',
-    headers: { authorization: `Bearer ${targetToken}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ anonToken }),
-  })
-  if (!res.ok) throw new Error(`passport merge failed (${res.status})`)
+async function mergeAnonInto(targetToken: string, anonToken: string): Promise<boolean> {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const outcome = await attemptMerge(targetToken, anonToken)
+    if (outcome === 'ok') return true
+    // A verdict is final, and a timeout already spent the whole budget the
+    // sign-in can afford to wait — only a fast fault is worth asking twice.
+    if (outcome !== 'error') break
+  }
+  // The merge failed and cannot be retried later. The server alerts the
+  // operator when the fault was its own (docs/00 D45); this covers the rest —
+  // the request never landed, so nothing else anywhere knows it happened.
+  console.warn('passport merge failed — this device’s passport was not folded in')
+  return false
 }
 
 async function stateFor(client: SupabaseClient, user: User): Promise<PassportState> {
@@ -296,7 +340,7 @@ export function createSupabasePassportBackend(
       // account, and best-effort: a merge failure must not undo the sign-in.
       const targetToken = data.session?.access_token
       if (anonToken && targetToken && data.user.id !== priorId) {
-        await mergeAnonInto(targetToken, anonToken).catch(() => {})
+        await mergeAnonInto(targetToken, anonToken)
       }
       // Re-read AFTER the merge so the moved moments/stamps show up.
       return stateFor(client, data.user)

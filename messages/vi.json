@@ -143,7 +143,7 @@
     "signInHint": "đăng nhập bằng email bạn đã kết nối.",
     "deleteAccount": "xóa hộ chiếu của mình",
     "deleteConfirm": "việc này xóa vĩnh viễn hộ chiếu, con dấu và kết nối của bạn. những khoảnh khắc bạn đã chia sẻ vẫn ở lại trên tường — được ẩn danh, mỗi cái có liên kết xóa riêng. tiếp tục?",
-    "emailInUse": "email đó đã được kết nối với một hộ chiếu khác",
+    "emailInUse": "email đó đã được kết nối với một hộ chiếu khác — đăng nhập bên dưới, khoảnh khắc trên thiết bị này sẽ đi cùng bạn",
     "noPassport": "không tìm thấy hộ chiếu nào cho email này",
     "badCode": "mã đó không đúng — kiểm tra lại và thử lần nữa",
     "rateLimited": "gửi quá nhiều email — thử lại sau một phút",

@@ -338,15 +338,9 @@ max_frequency = "5s"
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
 
-# D16: Google linking is a prod feature (NEXT_PUBLIC_AUTH_GOOGLE=1 gates the button).
-# Local dev strategy = email OTP + Mailpit only; flip enabled=true with real
-# credentials only when validating Google locally (skip_nonce_check required).
-[auth.external.google]
-enabled = false
-client_id = ""
-secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
-skip_nonce_check = true
-
+# D44 removed Google linking from the app — every provider below stays off, and
+# email OTP + Mailpit is the whole local auth story. Reinstating one means
+# restoring its app wiring from git, not just flipping enabled here.
 [auth.external.apple]
 enabled = false
 client_id = ""

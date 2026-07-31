@@ -143,7 +143,7 @@
     "signInHint": "log in met de e-mail die je hebt gekoppeld.",
     "deleteAccount": "verwijder mijn paspoort",
     "deleteConfirm": "dit verwijdert je paspoort, stempels en koppeling permanent. gedeelde momenten blijven op de muur — geanonimiseerd, elk met een eigen verwijderlink. doorgaan?",
-    "emailInUse": "die e-mail is al aan een ander paspoort gekoppeld",
+    "emailInUse": "die e-mail is al aan een ander paspoort gekoppeld — log hieronder in, de momenten van dit apparaat gaan mee",
     "noPassport": "geen paspoort gevonden voor deze e-mail",
     "badCode": "die code klopte niet — controleer en probeer opnieuw",
     "rateLimited": "te veel e-mails — probeer het over een minuut opnieuw",
