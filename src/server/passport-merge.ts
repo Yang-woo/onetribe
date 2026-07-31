@@ -23,15 +23,9 @@ export interface PassportMergeDeps {
   db: SupabaseClient // service role
 }
 
-interface MergeBody {
-  anonToken: string
-}
-
-function readBody(body: unknown): MergeBody | null {
-  if (!body || typeof body !== 'object') return null
-  const anonToken = (body as { anonToken?: unknown }).anonToken
-  if (typeof anonToken !== 'string' || anonToken.length === 0) return null
-  return { anonToken }
+function readAnonToken(body: unknown): string | null {
+  const token = (body as { anonToken?: unknown } | null)?.anonToken
+  return typeof token === 'string' && token.length > 0 ? token : null
 }
 
 export function createPassportMergeHandler(deps: PassportMergeDeps) {
@@ -41,11 +35,11 @@ export function createPassportMergeHandler(deps: PassportMergeDeps) {
     if (auth.denied) return auth.denied
     const targetId = auth.user.id
 
-    const body = readBody(await parseBody(req))
-    if (!body) return json(400, { error: 'anonToken required' })
+    const anonToken = readAnonToken(await parseBody(req))
+    if (!anonToken) return json(400, { error: 'anonToken required' })
 
     // ── source: the anonymous passport this device is leaving behind ──
-    const { data: srcData, error: srcError } = await deps.db.auth.getUser(body.anonToken)
+    const { data: srcData, error: srcError } = await deps.db.auth.getUser(anonToken)
     if (srcError || !srcData.user) return json(401, { error: 'invalid source session' })
     const source = srcData.user
     // Absorb ONLY an anonymous throwaway — never fold in (and delete) a real

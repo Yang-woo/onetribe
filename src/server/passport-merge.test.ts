@@ -24,32 +24,24 @@ function stubDeps(config: StubConfig) {
     profileUpserts: 0,
   }
   function builder(table: string) {
-    const state: { op?: string } = {}
+    // The awaited result is fixed by table: memories → the moved rows,
+    // attendance → the source's stamps, everything else → empty.
     const chain = {
       update(payload: { author_id: string }) {
-        state.op = 'update'
         if (table === 'memories') calls.reassignedTo = payload.author_id
         return chain
       },
       upsert(payload: unknown) {
-        state.op = 'upsert'
         if (table === 'profiles') calls.profileUpserts += 1
         if (table === 'attendance')
           calls.stampUpsert = payload as { profile_id: string; event_id: string }[]
         return chain
       },
-      select() {
-        state.op ??= 'select'
-        return chain
-      },
-      eq() {
-        return chain
-      },
+      select: () => chain,
+      eq: () => chain,
       then(resolve: (value: { data: unknown; error: null }) => void) {
-        if (table === 'memories' && state.op === 'update')
-          return resolve({ data: config.moved ?? [], error: null })
-        if (table === 'attendance' && state.op === 'select')
-          return resolve({ data: config.stamps ?? [], error: null })
+        if (table === 'memories') return resolve({ data: config.moved ?? [], error: null })
+        if (table === 'attendance') return resolve({ data: config.stamps ?? [], error: null })
         return resolve({ data: [], error: null })
       },
     }
