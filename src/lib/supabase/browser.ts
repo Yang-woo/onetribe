@@ -6,9 +6,9 @@ let client: SupabaseClient | undefined
 
 /** Browser anon client — all client reads pass RLS (live rows only). */
 export function supabaseBrowser(): SupabaseClient {
-  // PKCE so OAuth linking (passport → Google, D16) completes entirely in the
-  // browser: detectSessionInUrl exchanges the ?code= on return, no server
-  // callback route. Sessions stay device-local (localStorage) by design.
+  // Sessions stay device-local (localStorage) by design — an anonymous
+  // passport lives in this browser until an email is linked (D16). PKCE flow
+  // for the email OTP exchange; no server callback route.
   client ??= createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

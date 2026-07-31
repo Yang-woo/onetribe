@@ -11,8 +11,8 @@ import { PassportAccount } from './passport-account'
  * Destructive/session-replacing actions must sit behind a confirm.
  */
 
-const ANON: PassportIdentity = { email: null, providers: [], isAnonymous: true }
-const LINKED: PassportIdentity = { email: 'raver@example.com', providers: [], isAnonymous: false }
+const ANON: PassportIdentity = { email: null, isAnonymous: true }
+const LINKED: PassportIdentity = { email: 'raver@example.com', isAnonymous: false }
 
 const SIGNED_IN_STATE: PassportState = {
   userId: 'u-linked',
@@ -36,10 +36,8 @@ function fakeApi(overrides: Partial<PassportBackend> = {}): PassportBackend {
     setAttendance: vi.fn(),
     linkEmailStart: vi.fn().mockResolvedValue(undefined),
     linkEmailVerify: vi.fn().mockResolvedValue(LINKED),
-    linkGoogle: vi.fn().mockResolvedValue(undefined),
     signInEmailStart: vi.fn().mockResolvedValue(undefined),
     signInEmailVerify: vi.fn().mockResolvedValue(SIGNED_IN_STATE),
-    signInGoogle: vi.fn().mockResolvedValue(undefined),
     signOut: vi.fn().mockResolvedValue(undefined),
     deleteAccount: vi.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -51,16 +49,9 @@ function renderAccount({
   api = fakeApi(),
   onIdentity = vi.fn(),
   onState = vi.fn(),
-  googleEnabled = false,
 } = {}) {
   renderWithIntl(
-    <PassportAccount
-      identity={identity}
-      api={api}
-      onIdentity={onIdentity}
-      onState={onState}
-      googleEnabled={googleEnabled}
-    />,
+    <PassportAccount identity={identity} api={api} onIdentity={onIdentity} onState={onState} />,
   )
   return { api, onIdentity, onState }
 }
@@ -68,18 +59,10 @@ function renderAccount({
 afterEach(() => vi.restoreAllMocks())
 
 describe('PassportAccount — anonymous', () => {
-  test('offers the upgrade; google stays hidden until the flag enables it', () => {
+  test('offers the email upgrade', () => {
     renderAccount()
     expect(screen.getByText('keep this passport')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'connect an email' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'connect google' })).not.toBeInTheDocument()
-  })
-
-  test('google button appears with the flag and starts the link flow', async () => {
-    const user = userEvent.setup()
-    const { api } = renderAccount({ googleEnabled: true })
-    await user.click(screen.getByRole('button', { name: 'connect google' }))
-    expect(api.linkGoogle).toHaveBeenCalledWith(expect.stringContaining('/en/passport'))
   })
 
   test('linking an email runs send → verify → identity merge, no refetch', async () => {
@@ -99,24 +82,20 @@ describe('PassportAccount — anonymous', () => {
     expect(api.load).not.toHaveBeenCalled()
   })
 
-  test('"sign in instead" is gated by the stay-behind warning', async () => {
+  test('"sign in instead" reveals the form directly — no stay-behind confirm (D44)', async () => {
     const user = userEvent.setup()
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    // merge makes signing in non-destructive, so there is no confirm gate to
+    // pass — the form appears on the first click and window.confirm is untouched.
+    const confirm = vi.spyOn(window, 'confirm')
     renderAccount()
 
     await user.click(screen.getByRole('button', { name: 'i already have a passport' }))
-    expect(confirm).toHaveBeenCalled()
-    // declined → the sign-in form must not appear
-    expect(screen.queryByLabelText('your email')).not.toBeInTheDocument()
-
-    confirm.mockReturnValue(true)
-    await user.click(screen.getByRole('button', { name: 'i already have a passport' }))
     expect(await screen.findByLabelText('your email')).toBeInTheDocument()
+    expect(confirm).not.toHaveBeenCalled()
   })
 
   test('signing in hands the returned passport state up — no second load', async () => {
     const user = userEvent.setup()
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const { api, onState } = renderAccount()
 
     await user.click(screen.getByRole('button', { name: 'i already have a passport' }))
@@ -147,11 +126,6 @@ describe('PassportAccount — upgraded', () => {
     await user.click(screen.getByRole('button', { name: 'sign out on this device' }))
     expect(api.signOut).toHaveBeenCalled()
     await waitFor(() => expect(onState).toHaveBeenCalledWith(null))
-  })
-
-  test('a google-only identity reads as google connected', () => {
-    renderAccount({ identity: { email: null, providers: ['google'], isAnonymous: false } })
-    expect(screen.getByText('google connected')).toBeInTheDocument()
   })
 
   test('deletion never fires when the confirm is declined', async () => {

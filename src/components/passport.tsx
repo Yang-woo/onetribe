@@ -1,14 +1,10 @@
 'use client'
 
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { editionMap, type EditionChip } from '@/lib/moments'
 import {
-  GOOGLE_AUTH_ENABLED,
-  consumeOauthReturnError,
   createSupabasePassportBackend,
-  passportReturnUrl,
-  type PassportAuthErrorCode,
   type PassportBackend,
   type PassportState,
 } from '@/lib/passport/backend'
@@ -18,7 +14,7 @@ import { Lightbox } from './lightbox'
 import { MomentThumb } from './moment-thumb'
 import { PassportAccount } from './passport-account'
 import { PassportProfile } from './passport-profile'
-import { inputClass, secondaryButtonClass } from './ui'
+import { inputClass } from './ui'
 
 // Deterministic "hand-stamped" tilt per edition id (§4-1) — stable across
 // renders, never random and never per-render. Only attended/canceled stamps
@@ -38,14 +34,12 @@ export function Passport({
   backend?: PassportBackend
 }) {
   const t = useTranslations('passport')
-  const locale = useLocale()
   const api = useMemo(() => backend ?? createSupabasePassportBackend(), [backend])
   // undefined = loading, null = no passport yet, object = active session
   const [state, setState] = useState<PassportState | null | undefined>(undefined)
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [signIn, setSignIn] = useState(false)
-  const [oauthErrorKey, setOauthErrorKey] = useState<PassportAuthErrorCode | null>(null)
   // Surfaces a failed start / attendance toggle instead of a silent no-op
   // (an unhandled rejection plus a UI that lies about what was saved).
   const [actionError, setActionError] = useState(false)
@@ -53,13 +47,7 @@ export function Passport({
   const [openId, setOpenId] = useState<string | null>(null)
 
   useEffect(() => {
-    // OAuth return errors arrive as URL params — the backend reads and strips
-    // them through the same GoTrue error map as the promise-based flows (D16).
-    const returnedError = consumeOauthReturnError()
-    void api.load().then((loaded) => {
-      setState(loaded)
-      if (returnedError) setOauthErrorKey(returnedError)
-    })
+    void api.load().then(setState)
   }, [api])
 
   if (state === undefined) return null
@@ -106,13 +94,8 @@ export function Passport({
           )}
         </div>
 
-        {/* returning warrior — no session on this screen, so signing in can't orphan stamps */}
+        {/* returning warrior — no session on this screen, so there's nothing to fold in */}
         <div className="flex flex-col gap-3 border-t border-line pt-5">
-          {oauthErrorKey && (
-            <p role="alert" className="text-sm text-red-strong">
-              {t(oauthErrorKey)}
-            </p>
-          )}
           {!signIn ? (
             <button
               type="button"
@@ -131,15 +114,6 @@ export function Passport({
                   setState(await api.signInEmailVerify(email, code))
                 }}
               />
-              {GOOGLE_AUTH_ENABLED && (
-                <button
-                  type="button"
-                  onClick={() => void api.signInGoogle(passportReturnUrl(locale))}
-                  className={`self-start ${secondaryButtonClass}`}
-                >
-                  {t('connectGoogle')}
-                </button>
-              )}
             </>
           )}
         </div>

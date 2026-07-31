@@ -8,17 +8,17 @@ import { supabaseBrowser } from '@/lib/supabase/browser'
 /**
  * Passport data access — docs/15 §4. Anonymous Supabase auth: the session
  * lives in this browser only (a device-local pass, no email required).
- * D16 adds an optional upgrade — link an email (6-digit OTP) or Google so
- * the same passport opens on any device. Upgrading keeps the user id, so
- * profiles/attendance/memories rows carry over untouched.
+ * D16 adds an optional upgrade — link an email (6-digit OTP) so the same
+ * passport opens on any device. Upgrading keeps the user id, so
+ * profiles/attendance/memories rows carry over untouched. Signing in from a
+ * device that already holds an anonymous passport folds it into the target
+ * account (docs/00 D44), so an upload made there isn't left orphaned.
  * RLS scopes every read/write to the owner (tests/db/rls).
  */
 
 export interface PassportIdentity {
   /** Linked email, null while anonymous. */
   email: string | null
-  /** Linked OAuth providers (e.g. ['google']) — 'email' is not listed here. */
-  providers: string[]
   isAnonymous: boolean
 }
 
@@ -51,11 +51,10 @@ export interface ProfileDefaults {
  * code through this one map.
  */
 export type PassportAuthErrorCode =
-  'emailInUse' | 'googleInUse' | 'noPassport' | 'badCode' | 'rateLimited' | 'genericError'
+  'emailInUse' | 'noPassport' | 'badCode' | 'rateLimited' | 'genericError'
 
 const AUTH_ERROR_CODES: Record<string, PassportAuthErrorCode> = {
   email_exists: 'emailInUse',
-  identity_already_exists: 'googleInUse', // only linkIdentity (Google) raises this
   // signInWithOtp({ shouldCreateUser: false }) rejects unknown emails with this
   otp_disabled: 'noPassport',
   otp_expired: 'badCode',
@@ -69,38 +68,6 @@ export function passportAuthErrorCode(error: unknown): PassportAuthErrorCode {
     if (mapped) return mapped
   }
   return 'genericError'
-}
-
-/** Google linking is a deploy-gated capability of this backend (docs/00 D16). */
-export const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_GOOGLE === '1'
-
-/** Where OAuth flows return to — the locale-prefixed passport page. */
-export function passportReturnUrl(locale: string): string {
-  return `${window.location.origin}/${locale}/passport`
-}
-
-/**
- * OAuth returns report errors as URL params, not promises. Read them through
- * the same GoTrue map as everything else, then strip every auth param so a
- * reload doesn't replay the state. Call once on passport mount.
- */
-export function consumeOauthReturnError(): PassportAuthErrorCode | null {
-  const params = new URLSearchParams(window.location.search)
-  const failed = params.has('error_code') || params.has('error')
-  const code = params.get('error_code')
-  let dirty = false
-  for (const key of ['code', 'error', 'error_code', 'error_description']) {
-    if (params.has(key)) {
-      params.delete(key)
-      dirty = true
-    }
-  }
-  if (dirty) {
-    const query = params.toString()
-    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
-  }
-  if (!failed) return null
-  return (code && AUTH_ERROR_CODES[code]) || 'genericError'
 }
 
 export interface PassportBackend {
@@ -122,11 +89,11 @@ export interface PassportBackend {
   // ── upgrade: keeps the current user id, data carries over ──
   linkEmailStart(email: string): Promise<void>
   linkEmailVerify(email: string, code: string): Promise<PassportIdentity>
-  linkGoogle(redirectTo: string): Promise<void>
-  // ── sign in on another device: replaces the local session ──
+  // ── sign in on another device: replaces the local session. If this browser
+  //    already holds an anonymous passport, its uploads/stamps fold into the
+  //    account being signed into (docs/00 D44). ──
   signInEmailStart(email: string): Promise<void>
   signInEmailVerify(email: string, code: string): Promise<PassportState>
-  signInGoogle(redirectTo: string): Promise<void>
   // ── account ──
   signOut(): Promise<void>
   deleteAccount(): Promise<void>
@@ -135,11 +102,24 @@ export interface PassportBackend {
 function identityOf(user: User): PassportIdentity {
   return {
     email: user.email ?? null,
-    providers: (user.identities ?? [])
-      .map((identity) => identity.provider)
-      .filter((provider) => provider !== 'email'),
     isAnonymous: user.is_anonymous ?? false,
   }
+}
+
+/**
+ * Fold an anonymous passport (its uploads + stamps) into the account the user
+ * just signed into (docs/00 D44). The server proves ownership of BOTH sides —
+ * the target from this request's bearer, the anonymous source from its own
+ * token — then reassigns and deletes the source. Best-effort by contract: the
+ * caller swallows failures so a merge hiccup never undoes a successful sign-in.
+ */
+async function mergeAnonInto(targetToken: string, anonToken: string): Promise<void> {
+  const res = await fetch('/api/passport/merge', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${targetToken}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ anonToken }),
+  })
+  if (!res.ok) throw new Error(`passport merge failed (${res.status})`)
 }
 
 async function stateFor(client: SupabaseClient, user: User): Promise<PassportState> {
@@ -289,15 +269,6 @@ export function createSupabasePassportBackend(
       return identityOf(data.user)
     },
 
-    async linkGoogle(redirectTo) {
-      // Navigates away; requires "manual linking" enabled on the project.
-      const { error } = await client.auth.linkIdentity({
-        provider: 'google',
-        options: { redirectTo },
-      })
-      if (error) throw error
-    },
-
     async signInEmailStart(email) {
       // shouldCreateUser:false — signing in must never mint an empty passport.
       const { error } = await client.auth.signInWithOtp({
@@ -308,18 +279,27 @@ export function createSupabasePassportBackend(
     },
 
     async signInEmailVerify(email, code) {
+      // Capture the outgoing anonymous session BEFORE verifyOtp swaps it for the
+      // target — its token is the proof we own it, and it's gone after the swap.
+      const { data: before } = await client.auth.getSession()
+      const prior = before.session
+      const anonToken = prior?.user?.is_anonymous ? prior.access_token : undefined
+      const priorId = prior?.user?.id
+
       const { data, error } = await client.auth.verifyOtp({ email, token: code, type: 'email' })
       if (error) throw error
       if (!data.user) throw new Error('sign-in returned no user')
-      return stateFor(client, data.user)
-    },
 
-    async signInGoogle(redirectTo) {
-      const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo },
-      })
-      if (error) throw error
+      // Signed in from a device holding an anonymous passport → fold that
+      // passport's uploads/stamps into the account, so a moment made here
+      // isn't orphaned (docs/00 D44). Only when the target is a DIFFERENT
+      // account, and best-effort: a merge failure must not undo the sign-in.
+      const targetToken = data.session?.access_token
+      if (anonToken && targetToken && data.user.id !== priorId) {
+        await mergeAnonInto(targetToken, anonToken).catch(() => {})
+      }
+      // Re-read AFTER the merge so the moved moments/stamps show up.
+      return stateFor(client, data.user)
     },
 
     async signOut() {

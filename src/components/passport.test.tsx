@@ -24,7 +24,7 @@ const editions: EditionChip[] = [
   { id: 'e2024', year: 2024, edition: 'Power of the Tribe', canceled: false },
 ]
 
-const ANON_IDENTITY: PassportIdentity = { email: null, providers: [], isAnonymous: true }
+const ANON_IDENTITY: PassportIdentity = { email: null, isAnonymous: true }
 
 function fakeBackend(initial: PassportState | null): PassportBackend & { toggles: string[] } {
   let state = initial
@@ -70,11 +70,10 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
     },
     async linkEmailStart() {},
     async linkEmailVerify(email: string) {
-      const identity = { email, providers: [], isAnonymous: false }
+      const identity = { email, isAnonymous: false }
       if (state) state = { ...state, identity }
       return identity
     },
-    async linkGoogle() {},
     async signInEmailStart() {},
     async signInEmailVerify(email: string): Promise<PassportState> {
       state = {
@@ -84,11 +83,10 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
         homeCountry: null,
         attendedEventIds: [],
         moments: [],
-        identity: { email, providers: [], isAnonymous: false },
+        identity: { email, isAnonymous: false },
       }
       return state
     },
-    async signInGoogle() {},
     async signOut() {
       state = null
     },

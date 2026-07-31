@@ -1,22 +1,17 @@
 'use client'
 
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import {
-  GOOGLE_AUTH_ENABLED,
-  passportReturnUrl,
-  type PassportBackend,
-  type PassportIdentity,
-  type PassportState,
-} from '@/lib/passport/backend'
+import type { PassportBackend, PassportIdentity, PassportState } from '@/lib/passport/backend'
 import { EmailOtpForm } from './email-otp-form'
 import { secondaryButtonClass } from './ui'
 
 /**
  * Passport account section (docs/15 §4, D16). Anonymous passports get the
- * "keep this passport" upgrade (email OTP / Google link — same user id, so
- * stamps and moments carry over); upgraded ones show what's connected plus
- * sign-out and GDPR self-serve deletion.
+ * "keep this passport" upgrade (email OTP — same user id, so stamps and
+ * moments carry over); upgraded ones show what's connected plus sign-out and
+ * GDPR self-serve deletion. Signing into another passport from here folds this
+ * device's anonymous uploads/stamps into it (docs/00 D44).
  */
 
 export function PassportAccount({
@@ -24,7 +19,6 @@ export function PassportAccount({
   api,
   onIdentity,
   onState,
-  googleEnabled = GOOGLE_AUTH_ENABLED,
 }: {
   identity: PassportIdentity
   api: PassportBackend
@@ -32,10 +26,8 @@ export function PassportAccount({
   onIdentity: (identity: PassportIdentity) => void
   /** The session itself changed — signed into another passport (state) or out (null). */
   onState: (state: PassportState | null) => void
-  googleEnabled?: boolean
 }) {
   const t = useTranslations('passport')
-  const locale = useLocale()
   const [panel, setPanel] = useState<'none' | 'link-email' | 'sign-in'>('none')
   const [busy, setBusy] = useState(false)
   const [errorKey, setErrorKey] = useState<'genericError' | null>(null)
@@ -48,11 +40,6 @@ export function PassportAccount({
       .then(() => onState(null))
       .catch(() => setErrorKey('genericError'))
       .finally(() => setBusy(false))
-  }
-  // OAuth navigates away on success — busy only resets on failure.
-  const oauth = (start: (redirectTo: string) => Promise<void>) => {
-    setBusy(true)
-    void start(passportReturnUrl(locale)).catch(() => setBusy(false))
   }
 
   if (identity.isAnonymous) {
@@ -68,16 +55,6 @@ export function PassportAccount({
           >
             {t('connectEmail')}
           </button>
-          {googleEnabled && (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => oauth(api.linkGoogle)}
-              className={secondaryButtonClass}
-            >
-              {t('connectGoogle')}
-            </button>
-          )}
         </div>
         {panel === 'link-email' && (
           <EmailOtpForm
@@ -87,14 +64,12 @@ export function PassportAccount({
             }}
           />
         )}
-        {/* already upgraded elsewhere? switching replaces this device's session —
-            stamps made on this anonymous passport stay behind (no merge, D16) */}
+        {/* already have a passport? signing in folds this device's stamps and
+            moments into it (docs/00 D44), so it's safe — no stay-behind warning */}
         {panel !== 'sign-in' ? (
           <button
             type="button"
-            onClick={() => {
-              if (window.confirm(t('switchWarning'))) setPanel('sign-in')
-            }}
+            onClick={() => setPanel('sign-in')}
             className="self-start text-sm text-muted underline-offset-2 hover:text-paper hover:underline"
           >
             {t('signInTitle')}
@@ -108,27 +83,13 @@ export function PassportAccount({
                 onState(await api.signInEmailVerify(email, code))
               }}
             />
-            {googleEnabled && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => oauth(api.signInGoogle)}
-                className={`self-start ${secondaryButtonClass}`}
-              >
-                {t('connectGoogle')}
-              </button>
-            )}
           </div>
         )}
       </section>
     )
   }
 
-  const connectedLabel = identity.email
-    ? t('linkedAs', { email: identity.email })
-    : identity.providers.includes('google')
-      ? t('linkedGoogle')
-      : null
+  const connectedLabel = identity.email ? t('linkedAs', { email: identity.email }) : null
 
   return (
     <section className="flex flex-col gap-3 border-t border-line pt-6">
