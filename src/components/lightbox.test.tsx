@@ -29,6 +29,9 @@ function open(index: number, moments = [momentFixture('a'), momentFixture('b')],
       onClose={onClose}
       onNavigate={onNavigate}
       translateImpl={async () => null}
+      // These tests are about WHAT the modal shows, not when it translates —
+      // the debounce window itself is covered by its own test below.
+      translateDelayMs={0}
       {...extra}
     />,
   )
@@ -73,6 +76,48 @@ describe('Lightbox (moment modal)', () => {
     await Promise.resolve()
     expect(translateImpl).not.toHaveBeenCalled()
     expect(screen.getByText('caption-a')).toBeInTheDocument()
+  })
+
+  // ←/→ remounts the caption per moment, so translating on mount bought — and
+  // permanently cached — a translation for every photo flipped past unread
+  // (docs/00 D46). Only the moment the viewer settles on may cost a call.
+  test('flipping past moments buys no translation; settling on one does', async () => {
+    const translateImpl = vi.fn(async () => '번역됨')
+    const moments = ['a', 'b', 'c'].map((id) => momentFixture(id, { source_lang: 'nl' }))
+    const view = (openId: string) => (
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <Lightbox
+          moments={moments}
+          openId={openId}
+          onClose={vi.fn()}
+          onNavigate={vi.fn()}
+          translateImpl={translateImpl}
+          translateDelayMs={300}
+        />
+      </NextIntlClientProvider>
+    )
+    const { rerender } = renderWithIntl(
+      <Lightbox
+        moments={moments}
+        openId="a"
+        onClose={vi.fn()}
+        onNavigate={vi.fn()}
+        translateImpl={translateImpl}
+        translateDelayMs={300}
+      />,
+    )
+    // real elapsed time between presses, so a window too short to cover an
+    // arrow-key flip fails here just as loudly as no window at all
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    rerender(view('b'))
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    rerender(view('c'))
+    // a and b were left inside the debounce window — neither was ever bought
+    expect(translateImpl).not.toHaveBeenCalled()
+    // and the moment actually being read still translates on its own
+    expect(await screen.findByText('번역됨')).toBeInTheDocument()
+    expect(translateImpl).toHaveBeenCalledTimes(1)
+    expect(translateImpl).toHaveBeenCalledWith('c', 'en')
   })
 
   test('the caption is clamped to a teaser, not shown in full', () => {

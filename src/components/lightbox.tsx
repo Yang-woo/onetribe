@@ -12,6 +12,13 @@ import { SkeletonImage } from './skeleton-image'
  *  any failure resolves null and the modal keeps the original caption. */
 export type TranslateImpl = (memoryId: string, locale: string) => Promise<string | null>
 
+/**
+ * How long a moment must stay open before its caption is translated (docs/00
+ * D46). ←/→ flipping through the wall is faster than this, so photos the eye
+ * merely passes over cost nothing; settling to read pays one round-trip.
+ */
+const TRANSLATE_DEBOUNCE_MS = 500
+
 const defaultTranslate: TranslateImpl = async (memoryId, locale) => {
   try {
     const res = await fetch('/api/translate', {
@@ -41,6 +48,7 @@ export function Lightbox({
   onClose,
   onNavigate,
   translateImpl = defaultTranslate,
+  translateDelayMs = TRANSLATE_DEBOUNCE_MS,
 }: {
   moments: Moment[]
   /**
@@ -57,6 +65,8 @@ export function Lightbox({
   onNavigate: (id: string) => void
   /** test seam — the real impl hits /api/translate */
   translateImpl?: TranslateImpl
+  /** test seam — the debounce window before a caption is translated */
+  translateDelayMs?: number
 }) {
   const t = useTranslations('moment')
   const locale = useLocale()
@@ -222,6 +232,7 @@ export function Lightbox({
               sourceLang={moment.source_lang}
               locale={locale}
               translateImpl={translateImpl}
+              delayMs={translateDelayMs}
             />
           )}
           <MomentMeta moment={moment} center />
@@ -233,11 +244,12 @@ export function Lightbox({
 
 /**
  * The modal caption is a TEASER (docs/00 D32): the viewer-language caption,
- * clamped to 3 lines. Translated on open so the glance is already localized,
- * but the full text, the original toggle, sharing and report all live on
- * /m/[id] — that's what the "자세히 보기 ↗" permalink is for. Mounted with a
- * moment+locale key so each moment gets fresh translation state; the fetch is
- * best-effort and the original shows until (and unless) a real translation lands.
+ * clamped to 3 lines. Translated once the viewer settles on the moment so the
+ * glance is already localized, but the full text, the original toggle, sharing
+ * and report all live on /m/[id] — that's what the "자세히 보기 ↗" permalink is
+ * for. Mounted with a moment+locale key so each moment gets fresh translation
+ * state; the fetch is best-effort and the original shows until (and unless) a
+ * real translation lands.
  */
 function ModalCaption({
   memoryId,
@@ -245,12 +257,14 @@ function ModalCaption({
   sourceLang,
   locale,
   translateImpl,
+  delayMs,
 }: {
   memoryId: string
   original: string
   sourceLang: string | null
   locale: string
   translateImpl: TranslateImpl
+  delayMs: number
 }) {
   const [translated, setTranslated] = useState<string | null>(null)
 
@@ -261,14 +275,21 @@ function ModalCaption({
     // source_lang (undetected) still fetches.
     if (!trimmed || sourceLang === locale) return
     let alive = true
-    void translateImpl(memoryId, locale).then((text) => {
-      // Only surface a genuine translation — an echo of the original changes nothing.
-      if (alive && text && text.trim() !== trimmed) setTranslated(text)
-    })
+    // Debounced, NOT on mount (docs/00 D46): ←/→ remounts this per moment, so
+    // firing immediately bought — and permanently cached — a translation for
+    // every photo flipped past unread. The timer is cleared by the unmount that
+    // navigation causes, so only a moment the viewer stays on costs a call.
+    const timer = setTimeout(() => {
+      void translateImpl(memoryId, locale).then((text) => {
+        // Only surface a genuine translation — an echo of the original changes nothing.
+        if (alive && text && text.trim() !== trimmed) setTranslated(text)
+      })
+    }, delayMs)
     return () => {
       alive = false
+      clearTimeout(timer)
     }
-  }, [memoryId, original, sourceLang, locale, translateImpl])
+  }, [memoryId, original, sourceLang, locale, translateImpl, delayMs])
 
   return <p className="line-clamp-3 text-sm text-paper">{translated ?? original}</p>
 }
