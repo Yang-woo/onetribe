@@ -3,13 +3,22 @@ import type { Moment } from '@/lib/moments'
 import { NextIntlClientProvider } from 'next-intl'
 import en from '../messages/en.json'
 
-/** Component tests run under the EN messages — same provider as production. */
-export function renderWithIntl(ui: React.ReactElement) {
-  return render(
+/**
+ * The provider component tests run under — EN messages, same as production.
+ * Exported because RTL's `rerender` replaces the whole tree: a test that
+ * re-renders has to re-apply the provider, and doing that by hand is how the
+ * two renders drift onto different intl config.
+ */
+export function withIntl(ui: React.ReactElement) {
+  return (
     <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
       {ui}
-    </NextIntlClientProvider>,
+    </NextIntlClientProvider>
   )
+}
+
+export function renderWithIntl(ui: React.ReactElement) {
+  return render(withIntl(ui))
 }
 
 /** Fully-populated Moment fixture — new schema columns get added here once. */

@@ -8,8 +8,10 @@ import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
 import { MomentMeta } from './moment-meta'
 import { SkeletonImage } from './skeleton-image'
 
-/** On-open caption translation via /api/translate (docs/00 D32). Best-effort:
- *  any failure resolves null and the modal keeps the original caption. */
+/** Caption translation via /api/translate (docs/00 D32). Best-effort: any
+ *  failure resolves null and the modal keeps the original caption. A fresh
+ *  identity per render is safe — ModalCaption latches it so the debounce is
+ *  never restarted by a re-rendering host. */
 export type TranslateImpl = (memoryId: string, locale: string) => Promise<string | null>
 
 /**
@@ -74,6 +76,49 @@ export function Lightbox({
   const moment = moments[index]
   const touchStartX = useRef<number | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
+
+  // One translation per (moment, locale) for as long as the modal is open.
+  // The caption is keyed per moment, so ←/→ back to a photo already read
+  // throws its state away and would re-buy the round-trip the debounce below
+  // exists to avoid — worst of all for a caption whose language we never
+  // detected, which pays again on every single settle. Lives with the modal:
+  // it dies on close, so nothing has to be invalidated.
+  //   `done` is the settled text, readable synchronously — a return trip must
+  //   render translated on the FIRST frame, not flash the original for another
+  //   debounce window. `inflight` dedupes the round-trip itself.
+  const cacheRef = useRef<{
+    inflight: Map<string, Promise<string | null>>
+    done: Map<string, string>
+  } | null>(null)
+  cacheRef.current ??= { inflight: new Map(), done: new Map() }
+  const cache = cacheRef.current
+
+  const translateOnce = useCallback<TranslateImpl>(
+    (memoryId, target) => {
+      const key = `${memoryId}:${target}`
+      const seen = cache.inflight.get(key)
+      if (seen) return seen
+      const pending = translateImpl(memoryId, target)
+      cache.inflight.set(key, pending)
+      // Only a real answer is worth keeping — a failure must stay retryable,
+      // or one bad round-trip freezes that caption for the whole modal session.
+      void pending.then(
+        (text) => {
+          if (text == null) cache.inflight.delete(key)
+          else cache.done.set(key, text)
+        },
+        () => cache.inflight.delete(key),
+      )
+      return pending
+    },
+    [cache, translateImpl],
+  )
+
+  /** Synchronous peek at an already-settled translation (never a round-trip). */
+  const knownTranslation = useCallback(
+    (memoryId: string, target: string) => cache.done.get(`${memoryId}:${target}`) ?? null,
+    [cache],
+  )
 
   const prev = useCallback(() => {
     const target = index > 0 ? moments[index - 1] : undefined
@@ -231,7 +276,8 @@ export function Lightbox({
               original={moment.caption}
               sourceLang={moment.source_lang}
               locale={locale}
-              translateImpl={translateImpl}
+              translateImpl={translateOnce}
+              known={knownTranslation}
               delayMs={translateDelayMs}
             />
           )}
@@ -257,6 +303,7 @@ function ModalCaption({
   sourceLang,
   locale,
   translateImpl,
+  known,
   delayMs,
 }: {
   memoryId: string
@@ -264,9 +311,21 @@ function ModalCaption({
   sourceLang: string | null
   locale: string
   translateImpl: TranslateImpl
+  known: (memoryId: string, locale: string) => string | null
   delayMs: number
 }) {
-  const [translated, setTranslated] = useState<string | null>(null)
+  // Seeded from the modal's cache, so stepping back to a moment already read
+  // renders it translated on the first frame instead of re-flashing the
+  // original for another debounce window.
+  const [translated, setTranslated] = useState<string | null>(() => known(memoryId, locale))
+
+  // Latched so an unstable `translateImpl` identity (a host passing an inline
+  // lambda) can't restart the timer on every parent render and starve the
+  // translation forever. Read at fire time, so a swapped impl still wins.
+  const implRef = useRef(translateImpl)
+  useEffect(() => {
+    implRef.current = translateImpl
+  }, [translateImpl])
 
   useEffect(() => {
     const trimmed = original.trim()
@@ -274,22 +333,27 @@ function ModalCaption({
     // the server would just echo the original (docs/00 D32 efficiency). null
     // source_lang (undetected) still fetches.
     if (!trimmed || sourceLang === locale) return
+    // Already in hand from a previous view — the seeded state is showing it.
+    if (known(memoryId, locale)) return
     let alive = true
-    // Debounced, NOT on mount (docs/00 D46): ←/→ remounts this per moment, so
-    // firing immediately bought — and permanently cached — a translation for
-    // every photo flipped past unread. The timer is cleared by the unmount that
-    // navigation causes, so only a moment the viewer stays on costs a call.
+    // Debounced, not on mount — see TRANSLATE_DEBOUNCE_MS. Navigating away
+    // unmounts this, and that cleanup is what cancels the pending call.
     const timer = setTimeout(() => {
-      void translateImpl(memoryId, locale).then((text) => {
-        // Only surface a genuine translation — an echo of the original changes nothing.
-        if (alive && text && text.trim() !== trimmed) setTranslated(text)
-      })
+      // The rejection arm is required, not defensive: a throwing impl would
+      // otherwise surface as an unhandled rejection (the cache contemplates one).
+      void implRef.current(memoryId, locale).then(
+        (text) => {
+          // Only surface a genuine translation — an echo of the original changes nothing.
+          if (alive && text && text.trim() !== trimmed) setTranslated(text)
+        },
+        () => {},
+      )
     }, delayMs)
     return () => {
       alive = false
       clearTimeout(timer)
     }
-  }, [memoryId, original, sourceLang, locale, translateImpl, delayMs])
+  }, [memoryId, original, sourceLang, locale, known, delayMs])
 
   return <p className="line-clamp-3 text-sm text-paper">{translated ?? original}</p>
 }

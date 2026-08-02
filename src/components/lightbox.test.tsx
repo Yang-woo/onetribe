@@ -1,11 +1,9 @@
-import { screen } from '@testing-library/react'
-import { NextIntlClientProvider } from 'next-intl'
-import messages from '../../messages/en.json'
+import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, test, vi } from 'vitest'
 import type { EditionChip } from '@/lib/moments'
-import { momentFixture, renderWithIntl } from '@/test-utils'
-import { Lightbox } from './lightbox'
+import { momentFixture, renderWithIntl, withIntl } from '@/test-utils'
+import { Lightbox, type TranslateImpl } from './lightbox'
 
 // Spec: docs/15 §1 + wall UX pass — tapping a card opens the moment IN the
 // modal (caption, edition, Instagram) with a clear "view details ↗" permalink;
@@ -14,6 +12,13 @@ import { Lightbox } from './lightbox'
 const editionById = new Map<string, EditionChip>([
   ['event-1', { id: 'event-1', year: 2024, edition: 'Power of the Tribe', canceled: false }],
 ])
+
+/**
+ * The translation effect schedules a timer, so a microtask flush proves
+ * nothing about it — every assertion on "did it translate" has to cross a
+ * macrotask boundary or it passes for code that never ran.
+ */
+const settle = () => act(async () => new Promise((resolve) => setTimeout(resolve, 0)))
 
 // The modal is opened BY ID (docs/00 D33) — `open(n)` names the nth moment of
 // the list so the tests still read positionally, while what crosses the prop
@@ -65,7 +70,9 @@ describe('Lightbox (moment modal)', () => {
     open(0, [momentFixture('a', { source_lang: 'nl' })], {
       translateImpl: async () => null,
     })
-    await Promise.resolve()
+    // settle(), not a microtask flush: the call has to actually happen and come
+    // back null for this to be a fallback test rather than a first-paint test
+    await settle()
     expect(screen.getByText('caption-a')).toBeInTheDocument()
   })
 
@@ -73,7 +80,7 @@ describe('Lightbox (moment modal)', () => {
     const translateImpl = vi.fn(async () => '번역됨')
     // the test provider renders under locale 'en'; source_lang 'en' → no fetch
     open(0, [momentFixture('a', { source_lang: 'en' })], { translateImpl })
-    await Promise.resolve()
+    await settle()
     expect(translateImpl).not.toHaveBeenCalled()
     expect(screen.getByText('caption-a')).toBeInTheDocument()
   })
@@ -85,39 +92,107 @@ describe('Lightbox (moment modal)', () => {
     const translateImpl = vi.fn(async () => '번역됨')
     const moments = ['a', 'b', 'c'].map((id) => momentFixture(id, { source_lang: 'nl' }))
     const view = (openId: string) => (
-      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-        <Lightbox
-          moments={moments}
-          openId={openId}
-          onClose={vi.fn()}
-          onNavigate={vi.fn()}
-          translateImpl={translateImpl}
-          translateDelayMs={300}
-        />
-      </NextIntlClientProvider>
-    )
-    const { rerender } = renderWithIntl(
       <Lightbox
         moments={moments}
-        openId="a"
+        openId={openId}
         onClose={vi.fn()}
         onNavigate={vi.fn()}
         translateImpl={translateImpl}
         translateDelayMs={300}
-      />,
+      />
     )
-    // real elapsed time between presses, so a window too short to cover an
-    // arrow-key flip fails here just as loudly as no window at all
-    await new Promise((resolve) => setTimeout(resolve, 20))
-    rerender(view('b'))
-    await new Promise((resolve) => setTimeout(resolve, 20))
-    rerender(view('c'))
+    const { rerender } = renderWithIntl(view('a'))
+    // A macrotask boundary between presses, not a microtask one: a zero-length
+    // window would fire inside it, so "the window is too short" fails here just
+    // as loudly as "there is no window". Real time is kept out of the flip so a
+    // stalled CI runner can't manufacture a 300ms gap and fail correct code.
+    await settle()
+    rerender(withIntl(view('b')))
+    await settle()
+    rerender(withIntl(view('c')))
     // a and b were left inside the debounce window — neither was ever bought
     expect(translateImpl).not.toHaveBeenCalled()
     // and the moment actually being read still translates on its own
     expect(await screen.findByText('번역됨')).toBeInTheDocument()
     expect(translateImpl).toHaveBeenCalledTimes(1)
     expect(translateImpl).toHaveBeenCalledWith('c', 'en')
+  })
+
+  // The caption is keyed per moment, so stepping back to a photo already read
+  // remounts it with empty state. Without a modal-lifetime memo that re-buys
+  // the round-trip the debounce exists to save (docs/00 D46).
+  test('stepping back to an already-translated moment does not re-buy it', async () => {
+    const translateImpl = vi.fn(async (id: string) => `번역-${id}`)
+    const moments = ['a', 'b'].map((id) => momentFixture(id, { source_lang: 'nl' }))
+    const view = (openId: string) => (
+      <Lightbox
+        moments={moments}
+        openId={openId}
+        onClose={vi.fn()}
+        onNavigate={vi.fn()}
+        translateImpl={translateImpl}
+        translateDelayMs={0}
+      />
+    )
+    const { rerender } = renderWithIntl(view('a'))
+    expect(await screen.findByText('번역-a')).toBeInTheDocument()
+    rerender(withIntl(view('b')))
+    expect(await screen.findByText('번역-b')).toBeInTheDocument()
+
+    rerender(withIntl(view('a')))
+    // FIRST frame, no await: the answer was already in hand, so re-flashing the
+    // original for another debounce window would be a regression of its own
+    expect(screen.getByText('번역-a')).toBeInTheDocument()
+    // a and b, once each — the return trip was served from the open modal
+    expect(translateImpl).toHaveBeenCalledTimes(2)
+  })
+
+  // Every other translation test injects a window, so nothing pinned the one
+  // that actually ships — TRANSLATE_DEBOUNCE_MS could be deleted or zeroed and
+  // the suite would stay green while D46 silently reverted in production.
+  test('the shipped default window is long enough to swallow a flip', async () => {
+    const translateImpl = vi.fn(async () => '번역됨')
+    // undefined, so the prop default — the production constant — applies,
+    // overriding the 0 that `open()` seeds for the what-it-renders tests
+    open(0, [momentFixture('a', { source_lang: 'nl' })], {
+      translateImpl,
+      translateDelayMs: undefined,
+    })
+    await settle()
+    expect(translateImpl).not.toHaveBeenCalled()
+    // and it does eventually translate — a window that never fires is not a win
+    expect(await screen.findByText('번역됨', undefined, { timeout: 2000 })).toBeInTheDocument()
+  })
+
+  // The cache deletes a failed entry on purpose. Without that a single 500
+  // while the viewer settles pins a null-resolving promise for the whole modal
+  // session: every later settle returns it instantly and that caption can never
+  // translate again until the modal is closed and reopened.
+  test('a failed translation is not cached — the next settle retries it', async () => {
+    const translateImpl = vi
+      .fn<TranslateImpl>()
+      .mockResolvedValueOnce(null) // the round-trip that fails
+      .mockResolvedValue('번역됨')
+    const moments = ['a', 'b'].map((id) => momentFixture(id, { source_lang: 'nl' }))
+    const view = (openId: string) => (
+      <Lightbox
+        moments={moments}
+        openId={openId}
+        onClose={vi.fn()}
+        onNavigate={vi.fn()}
+        translateImpl={translateImpl}
+        translateDelayMs={0}
+      />
+    )
+    const { rerender } = renderWithIntl(view('a'))
+    await settle()
+    expect(screen.getByText('caption-a')).toBeInTheDocument() // original stands
+
+    rerender(withIntl(view('b')))
+    await settle()
+    rerender(withIntl(view('a')))
+    // the retry is allowed to happen, and this time it lands
+    expect(await screen.findByText('번역됨')).toBeInTheDocument()
   })
 
   test('the caption is clamped to a teaser, not shown in full', () => {
@@ -186,15 +261,15 @@ describe('Lightbox (moment modal)', () => {
     expect(screen.getByText('caption-a')).toBeInTheDocument()
 
     rerender(
-      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      withIntl(
         <Lightbox
           moments={[momentFixture('fresh'), ...moments]}
           openId="a"
           onClose={vi.fn()}
           onNavigate={vi.fn()}
           translateImpl={async () => null}
-        />
-      </NextIntlClientProvider>,
+        />,
+      ),
     )
     expect(screen.getByText('caption-a')).toBeInTheDocument()
     expect(screen.queryByText('caption-fresh')).not.toBeInTheDocument()
@@ -222,15 +297,15 @@ describe('Lightbox (moment modal)', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
     // still once after a re-render that hands us a fresh onClose identity
     rerender(
-      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+      withIntl(
         <Lightbox
           moments={[momentFixture('a'), momentFixture('b')]}
           openId="gone"
           onClose={() => onClose()}
           onNavigate={onNavigate}
           translateImpl={async () => null}
-        />
-      </NextIntlClientProvider>,
+        />,
+      ),
     )
     expect(onClose).toHaveBeenCalledTimes(1)
 
