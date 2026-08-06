@@ -27,7 +27,12 @@ export function SkeletonImage({
   alt: string
   /** classes for the <img> itself (width, object-fit, hover transforms) */
   className?: string
-  /** classes for the wrapper (rounding to clip; the shimmer inherits it) */
+  /** classes for the wrapper (rounding to clip; the shimmer inherits it).
+   *  Sizing the image to a *height* has to happen here, with `h-full`: the
+   *  image's own `max-h-full` is a percentage, and CSS resolves it to `none`
+   *  whenever this wrapper's height is auto — silently, so the image just
+   *  overflows and the nearest clipping ancestor crops it (the wall modal's
+   *  portrait photos, fixed 2026-08-06). Width-driven callers want `w-full`. */
   wrapperClassName?: string
   loading?: 'lazy' | 'eager'
   onClick?: (e: React.MouseEvent<HTMLImageElement>) => void

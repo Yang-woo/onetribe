@@ -225,7 +225,12 @@ export function Lightbox({
             loading="eager"
             aspectRatio={moment.aspect_ratio}
             defaultAspectRatio="3 / 2"
-            wrapperClassName="flex max-h-full items-center justify-center"
+            // This is the one place a moment is sized to the viewport's HEIGHT
+            // rather than a column's width, so the wrapper needs a definite
+            // height (`h-full`, never `max-h-full` — see SkeletonImage's prop
+            // doc) or a portrait photo overflows and the row below crops it.
+            // Width needs nothing: flex shrink already caps it at the row.
+            wrapperClassName="flex h-full items-center justify-center"
             className="max-h-full max-w-full rounded-lg object-contain"
             onClick={keepOpen}
           />
