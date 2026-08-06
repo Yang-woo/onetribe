@@ -50,7 +50,7 @@
     "signTitle": "서명하고 게시",
     "modePhotos": "사진 업로드",
     "modeEmbed": "영상 링크",
-    "dropHint": "사진·GIF 최대 5장, 장당 10MB — 드래그해서 놓아도 돼요",
+    "dropHint": "사진 {max}MB · GIF {gifMax}MB, 최대 5장 — 드래그해서 놓아도 돼요",
     "embedHint": "셋 전체 녹화가 아닌, 당신이 찍은 짧은 순간으로",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "사진 제거",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "한 번에 최대 5장까지예요",
       "unsupported": "사진·GIF만 — 영상은 링크로 남겨주세요",
-      "tooLarge": "10MB가 넘는 파일이에요",
+      "tooLarge": "{max}MB가 넘는 파일이에요",
       "needFiles": "사진을 고르거나 영상을 링크해주세요",
       "badEmbed": "YouTube 링크가 아닌 것 같아요",
       "needEvent": "에디션을 골라주세요",

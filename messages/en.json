@@ -50,7 +50,7 @@
     "signTitle": "sign & publish",
     "modePhotos": "upload photos",
     "modeEmbed": "video link",
-    "dropHint": "up to 5 photos or GIFs, 10MB each — drag & drop works too",
+    "dropHint": "up to 5 photos ({max}MB) or GIFs ({gifMax}MB) — drag & drop works too",
     "embedHint": "a short moment you filmed — not a full-set recording",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "remove photo",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "up to 5 files per moment",
       "unsupported": "photos and GIFs only — link videos instead",
-      "tooLarge": "that file is over 10MB",
+      "tooLarge": "that file is over {max}MB",
       "needFiles": "pick at least one photo, or link a video",
       "badEmbed": "that doesn’t look like a YouTube link",
       "needEvent": "pick an edition",

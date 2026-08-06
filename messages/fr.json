@@ -50,7 +50,7 @@
     "signTitle": "signe et publie",
     "modePhotos": "importer des photos",
     "modeEmbed": "lien vidéo",
-    "dropHint": "jusqu’à 5 photos ou GIF, 10 Mo chacune — le glisser-déposer marche aussi",
+    "dropHint": "jusqu’à 5 photos ({max} Mo) ou GIF ({gifMax} Mo) — le glisser-déposer marche aussi",
     "embedHint": "un court moment que tu as filmé — pas l’enregistrement d’un set entier",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "retirer la photo",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "5 fichiers maximum par moment",
       "unsupported": "photos et GIF uniquement — pour les vidéos, mets un lien",
-      "tooLarge": "ce fichier dépasse 10 Mo",
+      "tooLarge": "ce fichier dépasse {max} Mo",
       "needFiles": "choisis au moins une photo, ou mets un lien vidéo",
       "badEmbed": "ça ne ressemble pas à un lien YouTube",
       "needEvent": "choisis une édition",

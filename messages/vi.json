@@ -50,7 +50,7 @@
     "signTitle": "ký tên & đăng",
     "modePhotos": "tải ảnh lên",
     "modeEmbed": "liên kết video",
-    "dropHint": "tối đa 5 ảnh hoặc GIF, mỗi tệp 10MB — kéo thả cũng được",
+    "dropHint": "tối đa 5 ảnh ({max}MB) hoặc GIF ({gifMax}MB) — kéo thả cũng được",
     "embedHint": "một khoảnh khắc ngắn bạn quay — không phải bản quay trọn cả set",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "xóa ảnh",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "tối đa 5 tệp mỗi khoảnh khắc",
       "unsupported": "chỉ ảnh và GIF — video thì dán liên kết",
-      "tooLarge": "tệp đó lớn hơn 10MB",
+      "tooLarge": "tệp đó lớn hơn {max}MB",
       "needFiles": "chọn ít nhất một ảnh, hoặc dán liên kết video",
       "badEmbed": "cái đó trông không giống liên kết YouTube",
       "needEvent": "chọn một kỳ",

@@ -50,7 +50,7 @@
     "signTitle": "tanda tangani & publikasikan",
     "modePhotos": "unggah foto",
     "modeEmbed": "tautan video",
-    "dropHint": "hingga 5 foto atau GIF, masing-masing 10MB — seret & lepas juga bisa",
+    "dropHint": "hingga 5 foto ({max}MB) atau GIF ({gifMax}MB) — seret & lepas juga bisa",
     "embedHint": "momen singkat yang kamu rekam — bukan rekaman set penuh",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "hapus foto",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "maksimal 5 berkas per momen",
       "unsupported": "hanya foto dan GIF — tautkan video saja",
-      "tooLarge": "berkas itu lebih dari 10MB",
+      "tooLarge": "berkas itu lebih dari {max}MB",
       "needFiles": "pilih setidaknya satu foto, atau tautkan video",
       "badEmbed": "itu tidak terlihat seperti tautan YouTube",
       "needEvent": "pilih edisi",

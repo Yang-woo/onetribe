@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
 import { hashIp } from '@/lib/server/request-meta'
-import { THUMB_MAX_UPLOAD_BYTES, UPLOADS_PER_HOUR } from '@/lib/upload/constants'
+import {
+  MAX_GIF_UPLOAD_BYTES,
+  MAX_PRESIGN_BYTES,
+  MAX_UPLOAD_BYTES,
+  THUMB_MAX_UPLOAD_BYTES,
+  UPLOADS_PER_HOUR,
+} from '@/lib/upload/constants'
 import type { StorageAdapter } from '@/lib/storage'
 import {
   createMemoriesHandler,
@@ -135,11 +141,21 @@ describe('POST /api/upload/presign', () => {
     expect(res.status).toBe(400)
   })
 
-  test('oversized file → 400', async () => {
-    const res = await createPresignHandler(deps())(
-      post({ turnstileToken: 't', files: [{ contentType: 'image/jpeg', size: 11 * 1024 * 1024 }] }),
-    )
-    expect(res.status).toBe(400)
+  test('oversized file → 400, bounded by the presign ceiling not the picker (D47)', async () => {
+    // A presign turns a claimed size into a signed write of exactly that many
+    // bytes and nothing downstream re-checks them, so the grant is bounded by
+    // what a compressed upload actually weighs — never by the much larger
+    // original the picker accepts. Pinning the relationship keeps a later
+    // "make the server agree with the client" edit from doubling the write
+    // budget available to anyone posting sizes by hand.
+    expect(MAX_PRESIGN_BYTES).toBeLessThan(MAX_UPLOAD_BYTES)
+
+    for (const size of [MAX_PRESIGN_BYTES + 1, MAX_UPLOAD_BYTES]) {
+      const res = await createPresignHandler(deps())(
+        post({ turnstileToken: 't', files: [{ contentType: 'image/jpeg', size }] }),
+      )
+      expect(res.status).toBe(400)
+    }
   })
 
   test('more than 5 files → 400', async () => {
@@ -180,6 +196,18 @@ describe('POST /api/upload/presign', () => {
       }),
     )
     expect(res.status).toBe(400)
+  })
+
+  test('a GIF at its as-picked ceiling still gets a grant (D47)', async () => {
+    // GIFs skip client compression, so unlike a photo their picked size IS what
+    // gets PUT — the presign ceiling has to clear it or animated uploads break.
+    const res = await createPresignHandler(deps())(
+      post({
+        turnstileToken: 't',
+        files: [{ contentType: 'image/gif', size: MAX_GIF_UPLOAD_BYTES }],
+      }),
+    )
+    expect(res.status).toBe(200)
   })
 
   test('a thumbnail over the thumb size ceiling → 400 (D21)', async () => {

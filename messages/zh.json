@@ -50,7 +50,7 @@
     "signTitle": "署名并发布",
     "modePhotos": "上传照片",
     "modeEmbed": "视频链接",
-    "dropHint": "最多5张照片或GIF，每张不超过10MB — 也可以拖拽上传",
+    "dropHint": "最多5张照片（{max}MB）或GIF（{gifMax}MB） — 也可以拖拽上传",
     "embedHint": "你拍下的一小段瞬间 — 不是整场录像",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "移除照片",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "每个瞬间最多5个文件",
       "unsupported": "只支持照片和GIF — 视频请改用链接",
-      "tooLarge": "这个文件超过10MB了",
+      "tooLarge": "这个文件超过{max}MB了",
       "needFiles": "至少选一张照片，或贴一个视频链接",
       "badEmbed": "这看起来不像YouTube链接",
       "needEvent": "选一届活动",

@@ -1,3 +1,4 @@
+import { createTranslator } from 'next-intl'
 import { describe, expect, test } from 'vitest'
 import de from '../../messages/de.json'
 import en from '../../messages/en.json'
@@ -87,5 +88,30 @@ describe.each(Object.keys(MESSAGES).filter((l) => l !== 'en'))('%s.json', (local
 
   test('no message is left empty', () => {
     for (const [, message] of paths) expect(message.trim().length).toBeGreaterThan(0)
+  })
+})
+
+/**
+ * The argument-name check above compares text with a regex, which cannot see
+ * what the ICU *parser* does. A lone apostrophe is ICU's escape character, so
+ * translations that legitimately contain one — nl "foto's", tr "MB'tan" — can
+ * turn a neighbouring placeholder into literal text. Nothing throws; the number
+ * simply never appears and the user reads "{max}MB". Render for real instead.
+ */
+describe.each(Object.keys(MESSAGES))('%s.json renders', (locale) => {
+  test('every parameterised message substitutes its arguments', () => {
+    const t = createTranslator({
+      locale,
+      messages: MESSAGES[locale] as Parameters<typeof createTranslator>[0]['messages'],
+      onError: (error) => {
+        throw error
+      },
+    })
+    for (const [path, message] of leafPaths(MESSAGES[locale])) {
+      const args = icuArgs(message)
+      if (args.length === 0 || message.includes('<')) continue // rich text needs t.rich
+      const rendered = t(path, Object.fromEntries(args.map((a) => [a, 1])))
+      expect({ path, rendered: /[{}]/.test(rendered) }).toEqual({ path, rendered: false })
+    }
   })
 })

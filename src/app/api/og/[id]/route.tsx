@@ -8,6 +8,7 @@ import {
   type MomentEvent,
 } from '@/lib/moments'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
+import { SHARE_CARD_URL_RE } from '@/lib/upload/constants'
 import { loadOgFonts } from '../fonts'
 
 /**
@@ -36,11 +37,13 @@ export async function GET(
     embed_url: string | null
     events: MomentEvent | null
   }
-  // satori (next/og) decodes JPEG/PNG only — webp/animated-gif would throw and
-  // blank the card. YouTube thumbs are jpg (safe); drop unsafe uploads to the
-  // branded text-only card rather than a broken image.
+  // satori (next/og) decodes JPEG/PNG only, and drops anything else silently.
+  // Uploads are re-encoded into that set (SHARE_CARD_MIME, docs/00 D47) and
+  // YouTube thumbs are jpg, so this should never bite for a photo — it still
+  // guards GIFs and anything stored before that rule existed, which fall back
+  // to the branded text-only card rather than a blank one.
   const rawSrc = momentImageSrc({ ...moment, thumb_url: null })
-  const src = rawSrc && /\.(jpe?g|png)(\?|$)/i.test(rawSrc) ? rawSrc : null
+  const src = rawSrc && SHARE_CARD_URL_RE.test(rawSrc) ? rawSrc : null
 
   const line = eventLine(moment.events)
   const fonts = await loadOgFonts()

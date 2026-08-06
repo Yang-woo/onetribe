@@ -50,7 +50,7 @@
     "signTitle": "onderteken & publiceer",
     "modePhotos": "foto's uploaden",
     "modeEmbed": "videolink",
-    "dropHint": "maximaal 5 foto's of GIF's, elk 10MB — slepen en neerzetten kan ook",
+    "dropHint": "maximaal 5 foto's ({max}MB) of GIF's ({gifMax}MB) — slepen en neerzetten kan ook",
     "embedHint": "een kort moment dat je filmde — geen opname van een volledige set",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "foto verwijderen",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "maximaal 5 bestanden per moment",
       "unsupported": "alleen foto's en GIF's — link video's in plaats daarvan",
-      "tooLarge": "dat bestand is groter dan 10MB",
+      "tooLarge": "dat bestand is groter dan {max}MB",
       "needFiles": "kies minstens één foto, of link een video",
       "badEmbed": "dat lijkt niet op een YouTube-link",
       "needEvent": "kies een editie",

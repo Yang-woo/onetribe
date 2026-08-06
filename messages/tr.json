@@ -50,7 +50,7 @@
     "signTitle": "imzala & yayınla",
     "modePhotos": "fotoğraf yükle",
     "modeEmbed": "video bağlantısı",
-    "dropHint": "en fazla 5 fotoğraf ya da GIF, her biri 10MB — sürükle bırak da olur",
+    "dropHint": "en fazla 5 fotoğraf ({max}MB) ya da GIF ({gifMax}MB) — sürükle bırak da olur",
     "embedHint": "çektiğin kısa bir an — tam set kaydı değil",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "fotoğrafı kaldır",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "an başına en fazla 5 dosya",
       "unsupported": "yalnızca fotoğraf ve GIF — videoları bağlantı olarak ekle",
-      "tooLarge": "bu dosya 10MB'tan büyük",
+      "tooLarge": "bu dosya {max}MB'tan büyük",
       "needFiles": "en az bir fotoğraf seç ya da bir video bağla",
       "badEmbed": "bu bir YouTube bağlantısına benzemiyor",
       "needEvent": "bir edisyon seç",

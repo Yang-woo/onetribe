@@ -50,7 +50,7 @@
     "signTitle": "firma y publica",
     "modePhotos": "subir fotos",
     "modeEmbed": "enlace de vídeo",
-    "dropHint": "hasta 5 fotos o GIFs, 10MB cada una — también puedes arrastrar y soltar",
+    "dropHint": "hasta 5 fotos ({max}MB) o GIFs ({gifMax}MB) — también puedes arrastrar y soltar",
     "embedHint": "un momento corto que grabaste — no la grabación de un set completo",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "quitar foto",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "hasta 5 archivos por momento",
       "unsupported": "solo fotos y GIFs — los vídeos, por enlace",
-      "tooLarge": "ese archivo supera los 10MB",
+      "tooLarge": "ese archivo supera los {max}MB",
       "needFiles": "elige al menos una foto, o enlaza un vídeo",
       "badEmbed": "eso no parece un enlace de YouTube",
       "needEvent": "elige una edición",

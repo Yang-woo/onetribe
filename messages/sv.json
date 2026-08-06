@@ -50,7 +50,7 @@
     "signTitle": "signera & publicera",
     "modePhotos": "ladda upp foton",
     "modeEmbed": "videolänk",
-    "dropHint": "upp till 5 foton eller GIF:ar, 10MB styck — dra & släpp funkar också",
+    "dropHint": "upp till 5 foton ({max}MB) eller GIF:ar ({gifMax}MB) — dra & släpp funkar också",
     "embedHint": "ett kort ögonblick du filmade — ingen inspelning av ett helt set",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "ta bort foto",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "upp till 5 filer per minne",
       "unsupported": "endast foton och GIF:ar — länka videor istället",
-      "tooLarge": "den filen är större än 10MB",
+      "tooLarge": "den filen är större än {max}MB",
       "needFiles": "välj minst ett foto, eller länka en video",
       "badEmbed": "det där ser inte ut som en YouTube-länk",
       "needEvent": "välj en edition",

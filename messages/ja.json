@@ -50,7 +50,7 @@
     "signTitle": "サインして公開",
     "modePhotos": "写真をアップロード",
     "modeEmbed": "動画リンク",
-    "dropHint": "写真・GIFを最大5枚、1枚10MBまで — ドラッグ&ドロップもできます",
+    "dropHint": "写真（{max}MB）・GIF（{gifMax}MB）を最大5枚 — ドラッグ&ドロップもできます",
     "embedHint": "あなたが撮った短い瞬間を — セット全編の録画は不可",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "写真を削除",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "1回につき最大5ファイルまで",
       "unsupported": "写真・GIFのみ — 動画はリンクで",
-      "tooLarge": "10MBを超えるファイルです",
+      "tooLarge": "{max}MBを超えるファイルです",
       "needFiles": "写真を選ぶか、動画をリンクしてください",
       "badEmbed": "YouTubeのリンクではないようです",
       "needEvent": "エディションを選んでください",

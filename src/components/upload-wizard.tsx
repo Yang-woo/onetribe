@@ -16,6 +16,8 @@ import {
   MAX_AUTHOR_NAME_LENGTH,
   MAX_CAPTION_LENGTH,
   MAX_FILES_PER_MOMENT,
+  MAX_GIF_UPLOAD_BYTES,
+  MAX_UPLOAD_BYTES,
   THUMB_MAX_UPLOAD_BYTES,
   THUMB_MIME,
 } from '@/lib/upload/constants'
@@ -60,6 +62,11 @@ interface DoneMoment {
 }
 
 const EDITION_PREVIEW_COUNT = 6
+
+/** A byte ceiling as the whole-MB number the size copy interpolates. Rounds
+ * DOWN: quoting a ceiling up would advertise an allowance the validator, which
+ * works in bytes, does not actually grant. */
+const toMB = (bytes: number) => Math.floor(bytes / (1024 * 1024))
 
 /** Same label grammar the old <select> used, so stored values are unchanged. */
 function editionLabel(edition: EditionChip): string {
@@ -193,7 +200,9 @@ export function UploadWizard({
       ? t('errors.tooMany')
       : invalidFiles.kind === 'unsupported-type'
         ? t('errors.unsupported')
-        : t('errors.tooLarge')
+        : // the ceiling is per-type (D47), so the message quotes the one that
+          // actually rejected this file rather than a single hardcoded number
+          t('errors.tooLarge', { max: toMB(invalidFiles.maxBytes) })
 
   const mediaReady = mode === 'files' ? files.length > 0 && !fileError : embedUrl.trim().length > 0
 
@@ -521,7 +530,12 @@ export function UploadWizard({
                   </button>
                 )}
               </div>
-              <p className="text-[13px] text-faint">{t('dropHint')}</p>
+              <p className="text-[13px] text-faint">
+                {t('dropHint', {
+                  max: toMB(MAX_UPLOAD_BYTES),
+                  gifMax: toMB(MAX_GIF_UPLOAD_BYTES),
+                })}
+              </p>
               {fileError && (
                 <p role="alert" className="text-sm text-warning">
                   {fileError}

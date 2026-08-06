@@ -50,7 +50,7 @@
     "signTitle": "unterschreiben & veröffentlichen",
     "modePhotos": "Fotos hochladen",
     "modeEmbed": "Videolink",
-    "dropHint": "bis zu 5 Fotos oder GIFs, je 10MB — Drag & Drop geht auch",
+    "dropHint": "bis zu 5 Fotos ({max}MB) oder GIFs ({gifMax}MB) — Drag & Drop geht auch",
     "embedHint": "ein kurzer Moment, den du gefilmt hast — keine Aufnahme eines ganzen Sets",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "Foto entfernen",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "höchstens 5 Dateien pro Moment",
       "unsupported": "nur Fotos und GIFs — Videos bitte verlinken",
-      "tooLarge": "diese Datei ist größer als 10MB",
+      "tooLarge": "diese Datei ist größer als {max}MB",
       "needFiles": "wähle mindestens ein Foto oder verlinke ein Video",
       "badEmbed": "das sieht nicht nach einem YouTube-Link aus",
       "needEvent": "wähle eine Edition",

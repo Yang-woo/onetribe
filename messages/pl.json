@@ -50,7 +50,7 @@
     "signTitle": "podpisz i opublikuj",
     "modePhotos": "wgraj zdjęcia",
     "modeEmbed": "link do wideo",
-    "dropHint": "do 5 zdjęć lub GIF-ów, po 10MB każde — przeciągnij i upuść też działa",
+    "dropHint": "do 5 zdjęć ({max}MB) lub GIF-ów ({gifMax}MB) — przeciągnij i upuść też działa",
     "embedHint": "krótki moment nakręcony przez ciebie — nie nagranie całego setu",
     "embedPlaceholder": "https://youtube.com/watch?v=…",
     "removePhoto": "usuń zdjęcie",
@@ -79,7 +79,7 @@
     "errors": {
       "tooMany": "maksymalnie 5 plików na moment",
       "unsupported": "tylko zdjęcia i GIF-y — filmy dodaj linkiem",
-      "tooLarge": "ten plik przekracza 10MB",
+      "tooLarge": "ten plik przekracza {max}MB",
       "needFiles": "wybierz co najmniej jedno zdjęcie albo wklej link do wideo",
       "badEmbed": "to nie wygląda na link do YouTube",
       "needEvent": "wybierz edycję",

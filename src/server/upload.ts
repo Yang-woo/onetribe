@@ -21,7 +21,7 @@ import {
   MAX_AUTHOR_NAME_LENGTH,
   MAX_CAPTION_LENGTH,
   MAX_FILES_PER_MOMENT,
-  MAX_UPLOAD_BYTES,
+  MAX_PRESIGN_BYTES,
   REPORT_REASONS,
   REPORTS_PER_HOUR,
   THUMB_MAX_UPLOAD_BYTES,
@@ -129,27 +129,29 @@ export function normalizeInstagramLink(raw: string): string | null {
 
 // ── POST /api/upload/presign ────────────────────────────────────────────────
 
-// A file may carry a thumbnail descriptor: the client generates a small static
-// variant (docs/00 D21) and we presign a second object for it in the same grant.
-const fileDescriptor = z.object({
-  contentType: z.enum(mimeValues),
-  size: z.number().int().positive().max(MAX_UPLOAD_BYTES),
-})
-
 // The client always generates a small static WebP thumbnail (docs/00 D21) — pin
 // the MIME and a tight size ceiling so a heavy or non-WebP object can't ride in
 // under the "thumb" name and defeat the point of the smaller variant.
-const thumbDescriptor = fileDescriptor.extend({
+const thumbDescriptor = z.object({
   contentType: z.literal(THUMB_MIME),
   size: z.number().int().positive().max(THUMB_MAX_UPLOAD_BYTES),
 })
 
+// A file may carry a thumbnail descriptor: the client generates a small static
+// variant (docs/00 D21) and we presign a second object for it in the same grant.
+// The ceiling is MAX_PRESIGN_BYTES, NOT the picker's much larger
+// MAX_UPLOAD_BYTES (docs/00 D47) — what the picker accepts is an original that
+// gets compressed before it ever reaches this route, and this is the only place
+// the size of the write a grant authorizes is bounded at all.
+const fileDescriptor = z.object({
+  contentType: z.enum(mimeValues),
+  size: z.number().int().positive().max(MAX_PRESIGN_BYTES),
+  thumb: thumbDescriptor.optional(),
+})
+
 const presignSchema = z.object({
   turnstileToken: z.string().min(1).optional(),
-  files: z
-    .array(fileDescriptor.extend({ thumb: thumbDescriptor.optional() }))
-    .min(1)
-    .max(MAX_FILES_PER_MOMENT),
+  files: z.array(fileDescriptor).min(1).max(MAX_FILES_PER_MOMENT),
 })
 
 export function createPresignHandler(deps: UploadDeps) {
