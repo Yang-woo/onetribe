@@ -23,14 +23,26 @@ const passthroughPrepare = async (file: File) => file
 // supplies its own stub to assert the WebP thumbnail wiring.
 const passthroughThumb = async (file: File) => file
 
-// Every test renders with both canvas seams stubbed (they can't run in jsdom);
-// a test needing a real thumbnail overrides prepareThumbImpl.
+// The passport mint is fired WITHOUT awaiting (D43), so the real one races the
+// test that started it. It only reaches the network when Supabase env vars are
+// present in process.env — `yarn test` from a shell that sourced .env.local, or
+// any CI that exports them — and then its auth request lands on whatever fetch
+// stub is installed: counted by the caller, and rejected by stubs that throw on
+// an unexpected URL, inside a promise the wizard deliberately swallows. So the
+// only symptom is a test that passes on one machine and fails on another.
+// Stubbed here rather than per test: every test that submits goes through it.
+const noSession = async () => undefined
+
+// Every test renders with both canvas seams stubbed (they can't run in jsdom)
+// and the session seam neutralized; a test needing a real thumbnail overrides
+// prepareThumbImpl, and the two D43 attribution tests override ensureSessionImpl.
 const renderWizard = (overrides: Partial<Parameters<typeof UploadWizard>[0]> = {}) =>
   renderWithIntl(
     <UploadWizard
       editions={editions}
       prepareImpl={passthroughPrepare}
       prepareThumbImpl={passthroughThumb}
+      ensureSessionImpl={noSession}
       {...overrides}
     />,
   )
