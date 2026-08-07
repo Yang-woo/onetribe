@@ -3,12 +3,38 @@
 import { useEffect, useRef, useState } from 'react'
 
 /**
+ * Which axis the surrounding layout hands this image, and therefore which one
+ * the image must size itself to. Sizing is NOT something a caller can express
+ * in a class name from outside: the image's `max-h-full` is a percentage, and
+ * CSS resolves a percentage max-height to `none` whenever the wrapper's height
+ * is auto — silently, so the image overflows and the nearest clipping ancestor
+ * crops it (the wall modal cropped portrait photos to a middle band this way).
+ * Making the axis an explicit prop keeps that resolution inside this component,
+ * where it can be got right once.
+ */
+const FIT = {
+  /** A column gives the width; height follows the photo. Wall cards, /m/[id]. */
+  width: { wrapper: 'block w-full', image: 'w-full' },
+  /** A box gives both; the photo letterboxes inside it. The modal. */
+  height: {
+    // `max-w-full` is load-bearing next to the reserved ratio below: a
+    // panorama's width would otherwise compute to height × ratio and spill
+    // out of the row sideways.
+    wrapper: 'flex h-full max-w-full items-center justify-center',
+    image: 'max-h-full max-w-full object-contain',
+  },
+} as const
+
+/**
  * An <img> that shows a shimmering placeholder until it decodes, then fades in
  * (docs/15 — skeletons, never spinners). The wall grid and the moment view load
  * media straight from R2, so without this a card is a blank gap until the byte
- * stream arrives — which reads as "slow". Best-effort space reservation: while
- * loading, `defaultAspectRatio` gives the box a height so the shimmer is
- * visible (we don't store real dimensions); the natural size takes over on load.
+ * stream arrives — which reads as "slow".
+ *
+ * The reserved aspect ratio is applied to the WRAPPER as well as the image, so
+ * the shimmer has a real box to fill before any bytes arrive. Without it a
+ * height-fitted image measures 0×0 while loading (a replaced element with no
+ * natural size yet), which collapses the wrapper and paints nothing at all.
  *
  * The image keeps its own className, so a parent `group` can drive
  * `group-hover:` transforms on it (the wall's hover zoom).
@@ -16,6 +42,7 @@ import { useEffect, useRef, useState } from 'react'
 export function SkeletonImage({
   src,
   alt,
+  fit,
   className = '',
   wrapperClassName = '',
   loading,
@@ -25,14 +52,13 @@ export function SkeletonImage({
 }: {
   src: string
   alt: string
-  /** classes for the <img> itself (width, object-fit, hover transforms) */
+  /** Which axis the layout constrains — see FIT. Required: guessing it wrong
+   *  fails silently, so the caller has to say. */
+  fit: keyof typeof FIT
+  /** extra classes for the <img> (rounding, hover transforms) — sizing comes
+   *  from `fit`, so a `max-h-*`/`w-*` here is a sign something is off */
   className?: string
-  /** classes for the wrapper (rounding to clip; the shimmer inherits it).
-   *  Sizing the image to a *height* has to happen here, with `h-full`: the
-   *  image's own `max-h-full` is a percentage, and CSS resolves it to `none`
-   *  whenever this wrapper's height is auto — silently, so the image just
-   *  overflows and the nearest clipping ancestor crops it (the wall modal's
-   *  portrait photos, fixed 2026-08-06). Width-driven callers want `w-full`. */
+  /** extra classes for the wrapper (rounding to clip; the shimmer inherits it) */
   wrapperClassName?: string
   loading?: 'lazy' | 'eager'
   onClick?: (e: React.MouseEvent<HTMLImageElement>) => void
@@ -72,7 +98,7 @@ export function SkeletonImage({
   const aspectStyle = reserved ? { aspectRatio: reserved } : undefined
 
   return (
-    <span className={`relative block ${wrapperClassName}`}>
+    <span className={`relative ${FIT[fit].wrapper} ${wrapperClassName}`} style={aspectStyle}>
       {!loaded && (
         <span
           aria-hidden="true"
@@ -93,7 +119,7 @@ export function SkeletonImage({
         // contract without pinning Tailwind opacity utilities.
         data-loaded={loaded}
         style={aspectStyle}
-        className={`${className} ${
+        className={`${FIT[fit].image} ${className} ${
           loaded ? 'opacity-100' : 'opacity-0'
         } transition-opacity duration-500 motion-reduce:transition-none`}
       />

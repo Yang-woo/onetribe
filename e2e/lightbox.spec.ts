@@ -156,3 +156,48 @@ test('the modal letterboxes a photo instead of cropping it', async ({ page }) =>
       )
   }
 })
+
+test('the shimmer holds the photo’s box while the bytes are still coming', async ({ page }) => {
+  const service = serviceClient()
+  const run = randomUUID().slice(0, 8)
+  const caption = `lightbox-e2e-${run}-slow`
+  // A real URL, not a data: URI — the point is to catch the photo mid-flight,
+  // and only a network request can be held open.
+  const held = `http://localhost:3000/__lightbox-fixture-${run}.svg`
+
+  const { data: seeded, error } = await service
+    .from('memories')
+    .insert({
+      event_id: await eventIdByYear(service, 2015),
+      media_kind: 'image',
+      media_url: held,
+      caption,
+      aspect_ratio: 1710 / 2280,
+      rights_confirmed: true,
+      status: 'live',
+    })
+    .select('id')
+    .single()
+  if (error) throw error
+
+  try {
+    // Never fulfilled: the modal stays in its loading state for the whole test.
+    await page.route(held, () => {})
+    await page.goto('/en')
+    await page.getByRole('button', { name: caption }).click()
+
+    const modal = page.getByRole('dialog', { name: caption })
+    await expect(modal.locator('img')).toHaveAttribute('data-loaded', 'false')
+
+    // An <img> with no bytes yet has no natural size, so it measures 0x0 and
+    // takes its wrapper down with it unless the reserved ratio is on the
+    // WRAPPER too — and an `absolute inset-0` shimmer over a collapsed wrapper
+    // paints nothing. docs/15 is explicit: skeletons, never a blank hole.
+    const shimmer = await modal.locator('.animate-pulse').boundingBox()
+    expect(shimmer, 'no shimmer while the photo loads').not.toBeNull()
+    expect(shimmer!.width, 'the shimmer collapsed to zero width').toBeGreaterThan(50)
+    expect(shimmer!.height, 'the shimmer collapsed to zero height').toBeGreaterThan(50)
+  } finally {
+    await service.from('memories').delete().eq('id', seeded!.id)
+  }
+})

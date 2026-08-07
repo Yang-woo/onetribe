@@ -133,8 +133,8 @@ export default async function MomentPage({
               alt={moment.caption ?? t('imageAlt')}
               loading="eager"
               defaultAspectRatio="16 / 9"
-              wrapperClassName="w-full"
-              className="w-full rounded-lg"
+              fit="width"
+              className="rounded-lg"
             />
           )}
           <span className="mt-2 block text-sm text-flame">{t('watchOnYoutube')}</span>
@@ -147,8 +147,8 @@ export default async function MomentPage({
             loading="eager"
             aspectRatio={moment.aspect_ratio}
             defaultAspectRatio="3 / 2"
-            wrapperClassName="w-full"
-            className="w-full rounded-lg"
+            fit="width"
+            className="rounded-lg"
           />
         )
       )}

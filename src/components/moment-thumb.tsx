@@ -62,8 +62,8 @@ export function MomentThumb({
             alt={alt}
             loading="lazy"
             aspectRatio={moment.aspect_ratio}
-            wrapperClassName="w-full"
-            className="w-full transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none"
+            fit="width"
+            className="transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none"
           />
         </button>
         {tagEl}
