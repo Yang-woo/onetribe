@@ -15,6 +15,7 @@ import {
   TARGET_IMAGE_BYTES,
   THUMB_MAX_DIM,
   THUMB_MIME,
+  THUMB_MIMES,
   THUMB_QUALITY,
   THUMB_TARGET_BYTES,
 } from './constants'
@@ -199,12 +200,33 @@ describe('prepareThumb', () => {
     })
   })
 
-  test('rejects without canvas WebP instead of encoding bytes the server pins away', async () => {
-    // The presign schema only accepts WebP thumbs (D21), so a PNG one would be
-    // dropped by the wizard anyway — spend nothing producing it. Rejecting is
-    // the documented best-effort contract; the wall falls back to media_url.
-    await expect(prepareThumb(photo, false)).rejects.toThrow(/WebP/)
-    expect(compress).not.toHaveBeenCalled()
+  test('falls back to JPEG when the canvas cannot encode WebP (every iPhone)', async () => {
+    // WebKit's toDataURL('image/webp') silently returns a PNG, so this branch is
+    // all of iOS. It used to reject, which meant no thumbnail at all and a
+    // full-size photo behind that wall card — 935KB against 83KB, measured in
+    // production. JPEG is the fallback because WebKit does encode it and the
+    // share card never reads thumb_url (D47 doesn't reach here).
+    const out = new File([new Uint8Array([1])], 'crowd_t.jpg', { type: 'image/jpeg' })
+    compress.mockResolvedValue(out)
+
+    expect(await prepareThumb(photo, false)).toBe(out)
+    expect(compress.mock.calls[0][1]).toMatchObject({
+      fileType: 'image/jpeg',
+      // everything else must stay identical to the WebP path — a fallback that
+      // quietly dropped the resolution pin would defeat D47
+      initialQuality: THUMB_QUALITY,
+      alwaysKeepResolution: true,
+      maxWidthOrHeight: THUMB_MAX_DIM,
+      maxSizeMB: THUMB_TARGET_BYTES / (1024 * 1024),
+      preserveExif: false,
+    })
+  })
+
+  test('the fallback stays inside what the presign schema accepts', () => {
+    // The wizard drops any thumb whose type the server would reject, so a
+    // fallback outside this set would silently produce no thumbnail again.
+    expect(THUMB_MIMES).toContain('image/jpeg')
+    expect(THUMB_MIMES).toContain(THUMB_MIME)
   })
 })
 

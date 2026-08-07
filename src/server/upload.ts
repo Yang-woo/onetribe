@@ -25,7 +25,7 @@ import {
   REPORT_REASONS,
   REPORTS_PER_HOUR,
   THUMB_MAX_UPLOAD_BYTES,
-  THUMB_MIME,
+  THUMB_MIMES,
   UPLOAD_SESSION_TTL_MS,
   UPLOADS_PER_HOUR,
   type AllowedMime,
@@ -129,11 +129,12 @@ export function normalizeInstagramLink(raw: string): string | null {
 
 // ── POST /api/upload/presign ────────────────────────────────────────────────
 
-// The client always generates a small static WebP thumbnail (docs/00 D21) — pin
-// the MIME and a tight size ceiling so a heavy or non-WebP object can't ride in
-// under the "thumb" name and defeat the point of the smaller variant.
+// The client generates a small static thumbnail (docs/00 D21) — WebP, or JPEG
+// on engines whose canvas cannot encode WebP (every iPhone; see THUMB_MIMES).
+// Both are pinned here, with a tight size ceiling, so a heavy or arbitrary
+// object can't ride in under the "thumb" name and defeat the smaller variant.
 const thumbDescriptor = z.object({
-  contentType: z.literal(THUMB_MIME),
+  contentType: z.enum(THUMB_MIMES),
   size: z.number().int().positive().max(THUMB_MAX_UPLOAD_BYTES),
 })
 

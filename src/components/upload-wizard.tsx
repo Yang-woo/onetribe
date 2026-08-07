@@ -19,7 +19,7 @@ import {
   MAX_GIF_UPLOAD_BYTES,
   MAX_UPLOAD_BYTES,
   THUMB_MAX_UPLOAD_BYTES,
-  THUMB_MIME,
+  THUMB_MIMES,
 } from '@/lib/upload/constants'
 import { isIgHandleInvalid } from '@/lib/upload/instagram-input'
 import { CountryField } from './country-field'
@@ -303,12 +303,16 @@ export function UploadWizard({
             prepared.map((file) => prepareThumbImpl(file).catch(() => null)),
           )
         }
-        // Only offer a thumbnail the server will accept: the presign schema pins
-        // thumbs to a small WebP (docs/00 D21), so a non-WebP re-encode (e.g. a
-        // browser without WebP canvas support) or an oversized one is dropped
-        // here — the upload proceeds without a thumb instead of failing.
+        // Only offer a thumbnail the server will accept: the presign schema takes
+        // a small WebP or JPEG (docs/00 D21), so anything else — or an oversized
+        // one — is dropped here and the upload proceeds without a thumb instead
+        // of failing.
         const usableThumbs = thumbs.map((t) =>
-          t && t.type === THUMB_MIME && t.size <= THUMB_MAX_UPLOAD_BYTES ? t : null,
+          t &&
+          (THUMB_MIMES as readonly string[]).includes(t.type) &&
+          t.size <= THUMB_MAX_UPLOAD_BYTES
+            ? t
+            : null,
         )
         // Aspect ratios are measured from the compressed (EXIF-baked) output so
         // they match the uploaded image; a prepare failure leaves them null, and

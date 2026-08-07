@@ -92,6 +92,18 @@ export const IMAGE_MAX_ITERATIONS = 3
 export const THUMB_MAX_DIM = 640
 export const THUMB_TARGET_BYTES = 200 * 1024
 export const THUMB_MIME = 'image/webp' // must stay within ALLOWED_MIME (presign enum)
+/**
+ * The thumbnail formats the server accepts, best first (docs/00 D21, revised).
+ * WebKit — so every iPhone, since iOS has no other engine — cannot encode WebP
+ * from a canvas: `toDataURL('image/webp')` silently returns a PNG. Pinning the
+ * thumbnail to WebP therefore meant every Safari upload stored none at all, and
+ * its wall card fell back to the full-size photo (measured on production: 935KB
+ * a card against 83KB with a thumb). JPEG is the fallback because WebKit does
+ * encode it, and the share card never reads `thumb_url`, so D47's satori
+ * constraint doesn't reach here.
+ */
+export const THUMB_MIMES = ['image/webp', 'image/jpeg'] as const
+export type ThumbMime = (typeof THUMB_MIMES)[number]
 export const THUMB_QUALITY = 0.8 // see IMAGE_QUALITY — the default 1.0 shrinks 640px thumbs below 640px
 // Presign ceiling for the thumbnail — far below MAX_PRESIGN_BYTES so a
 // "thumbnail" can't inflate the storage a single presign mints (target ~200KB).

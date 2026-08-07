@@ -12,6 +12,7 @@ import {
   TARGET_IMAGE_BYTES,
   THUMB_MAX_DIM,
   THUMB_MIME,
+  type ThumbMime,
   THUMB_QUALITY,
   THUMB_TARGET_BYTES,
 } from './constants'
@@ -133,12 +134,15 @@ export async function prepareForUpload(file: File): Promise<File> {
  * than spending a full compression on bytes the wizard would drop anyway.
  */
 export async function prepareThumb(file: File, webp = canvasSupportsWebp()): Promise<File> {
-  if (!webp) throw new Error('canvas cannot encode WebP — no thumbnail for this browser')
+  // JPEG when the canvas can't encode WebP rather than no thumbnail at all:
+  // that branch is every iPhone (see THUMB_MIMES), and giving up there put a
+  // full-size photo behind each of those wall cards.
+  const fileType: ThumbMime = webp ? THUMB_MIME : 'image/jpeg'
   return imageCompression(file, {
     ...BASE_COMPRESSION,
     maxSizeMB: THUMB_TARGET_BYTES / (1024 * 1024),
     maxWidthOrHeight: THUMB_MAX_DIM,
-    fileType: THUMB_MIME,
+    fileType,
     initialQuality: THUMB_QUALITY,
     alwaysKeepResolution: true,
   })

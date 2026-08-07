@@ -186,7 +186,18 @@ describe('POST /api/upload/presign', () => {
     expect(uploads[0].thumb!.key).toBe(uploads[0].key.replace(/\.jpg$/, '_t.webp'))
   })
 
-  test('a non-WebP thumbnail descriptor → 400 (D21 — thumbs are pinned to WebP)', async () => {
+  test('a JPEG thumbnail is accepted and keyed _t.jpg (D21 — the iPhone fallback)', async () => {
+    // WebKit cannot encode WebP from a canvas, so pinning thumbs to WebP stored
+    // none at all for every iPhone upload. JPEG is the documented fallback.
+    const { uploads } = await presignFiles([
+      { contentType: 'image/jpeg', size: 1000, thumb: { contentType: 'image/jpeg', size: 200 } },
+    ])
+    expect(uploads[0].thumb!.key).toBe(uploads[0].key.replace(/\.jpg$/, '_t.jpg'))
+  })
+
+  test('a thumbnail outside the accepted formats → 400 (D21)', async () => {
+    // Still pinned: only the two formats the wall variant is defined in. A PNG
+    // "thumbnail" is how a full-size object rides in under the smaller name.
     const res = await createPresignHandler(deps())(
       post({
         turnstileToken: 't',
