@@ -9,6 +9,26 @@ import { SkeletonImage } from './skeleton-image'
 /** The shimmer's own box — it is the wrapper's only child besides the image. */
 const wrapperOf = (img: HTMLElement) => img.parentElement!
 
+/**
+ * Run `body` with every <img> reporting `complete` — a photo that finished
+ * before React could attach `onLoad` (react#15446): SSR'd markup, or one served
+ * from the HTTP cache. jsdom never fetches images, so `complete` is always
+ * false there and this path is otherwise unreachable from a component test.
+ */
+function withCachedImages(body: () => void) {
+  const original = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'complete')
+  Object.defineProperty(HTMLImageElement.prototype, 'complete', {
+    configurable: true,
+    get: () => true,
+  })
+  try {
+    body()
+  } finally {
+    if (original) Object.defineProperty(HTMLImageElement.prototype, 'complete', original)
+    else Reflect.deleteProperty(HTMLImageElement.prototype, 'complete')
+  }
+}
+
 describe('SkeletonImage', () => {
   test('starts hidden behind a shimmer, then reveals on load', () => {
     const { container } = render(<SkeletonImage src="/x.jpg" alt="a moment" fit="width" />)
@@ -119,5 +139,28 @@ describe('SkeletonImage', () => {
     const img = screen.getByAltText('gone')
     fireEvent.error(img)
     expect(wrapperOf(img).style.aspectRatio).toBe('4 / 5')
+  })
+  test('an image that finished before React attached onLoad still reveals', () => {
+    // No load event is ever fired here — that is the whole point. Without the
+    // .complete check the image sits at opacity-0 behind a shimmer forever.
+    withCachedImages(() => {
+      render(<SkeletonImage src="/cached.jpg" alt="cached" fit="width" />)
+    })
+    expect(screen.getByAltText('cached')).toHaveAttribute('data-loaded', 'true')
+  })
+
+  test('stepping back to a cached photo clears the shimmer again (lightbox nav)', () => {
+    const { rerender } = render(<SkeletonImage src="/a.jpg" alt="back" fit="width" />)
+    fireEvent.load(screen.getByAltText('back'))
+
+    // Arrowing back to a photo already in the HTTP cache: the render-phase
+    // reset flips it to loading, and no load event follows because the image
+    // was complete before React attached the handler. Only re-running the
+    // check ON EVERY SRC can clear it — keyed to mount alone, the shimmer
+    // would spin over a photo that is right there.
+    withCachedImages(() => {
+      rerender(<SkeletonImage src="/b.jpg" alt="back" fit="width" />)
+    })
+    expect(screen.getByAltText('back')).toHaveAttribute('data-loaded', 'true')
   })
 })
