@@ -44,7 +44,6 @@ export function SkeletonImage({
   alt,
   fit,
   className = '',
-  wrapperClassName = '',
   loading,
   onClick,
   aspectRatio,
@@ -58,8 +57,6 @@ export function SkeletonImage({
   /** extra classes for the <img> (rounding, hover transforms) — sizing comes
    *  from `fit`, so a `max-h-*`/`w-*` here is a sign something is off */
   className?: string
-  /** extra classes for the wrapper (rounding to clip; the shimmer inherits it) */
-  wrapperClassName?: string
   loading?: 'lazy' | 'eager'
   onClick?: (e: React.MouseEvent<HTMLImageElement>) => void
   /** The media's real width/height (docs/00 D32). When known, it's applied for
@@ -69,6 +66,7 @@ export function SkeletonImage({
   defaultAspectRatio?: string
 }) {
   const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
 
   // Reset when the src changes so a reused instance (the lightbox swaps src on
@@ -79,6 +77,7 @@ export function SkeletonImage({
   if (src !== trackedSrc) {
     setTrackedSrc(src)
     setLoaded(false)
+    setFailed(false)
   }
 
   // An <img> that finished loading before React attached onLoad — SSR'd markup,
@@ -92,17 +91,21 @@ export function SkeletonImage({
   const knownRatio =
     aspectRatio && Number.isFinite(aspectRatio) && aspectRatio > 0 ? aspectRatio : null
   // Known ratio → reserve the exact box always (no shift). Unknown → a
-  // placeholder ratio holds space only until the image supplies its own (released
-  // on load).
-  const reserved = knownRatio ? String(knownRatio) : loaded ? undefined : defaultAspectRatio
+  // placeholder ratio holds space until the image supplies its own.
+  //   Released on DECODE, not on `loaded`: `loaded` also flips on error (so the
+  //   shimmer can't spin forever), and a broken image has no natural size to
+  //   take over — releasing there collapses the card to a strip and reflows the
+  //   masonry column around it.
+  const decoded = loaded && !failed
+  const reserved = knownRatio ? String(knownRatio) : decoded ? undefined : defaultAspectRatio
   const aspectStyle = reserved ? { aspectRatio: reserved } : undefined
 
   return (
-    <span className={`relative ${FIT[fit].wrapper} ${wrapperClassName}`} style={aspectStyle}>
+    <span className={`relative ${FIT[fit].wrapper}`} style={aspectStyle}>
       {!loaded && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 animate-pulse rounded-[inherit] bg-surface-raised motion-reduce:animate-none"
+          className="pointer-events-none absolute inset-0 animate-pulse bg-surface-raised motion-reduce:animate-none"
         />
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -113,8 +116,12 @@ export function SkeletonImage({
         loading={loading}
         onClick={onClick}
         onLoad={() => setLoaded(true)}
-        // A broken image should still clear the shimmer (no permanent pulse).
-        onError={() => setLoaded(true)}
+        // A broken image should still clear the shimmer (no permanent pulse),
+        // but it must not be mistaken for a decode — see `decoded` above.
+        onError={() => {
+          setFailed(true)
+          setLoaded(true)
+        }}
         // Stable state hook (not a styling class) so tests assert the fade
         // contract without pinning Tailwind opacity utilities.
         data-loaded={loaded}

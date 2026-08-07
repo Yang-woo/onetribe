@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { expect, test, type Page } from '@playwright/test'
-import { eventIdByYear, serviceClient } from './fixtures'
+import { eventIdByYear, seedMemory, serviceClient } from './fixtures'
 
 /**
  * The wall modal shows the WHOLE photo — docs/15 §1. The modal is the only
@@ -18,8 +18,9 @@ import { eventIdByYear, serviceClient } from './fixtures'
 
 /**
  * A solid rectangle whose intrinsic size is exactly w×h — no bytes to fetch.
- * `tag` only rides along to keep the URI unique: media_url is the dedup key
- * (`memories_media_url_key`), and two fixtures share the 1710×2280 shape.
+ * `tag` only rides along to keep the URI unique, because `media_url` carries a
+ * unique index (`memories_media_url_key`) and two fixtures share the 1710×2280
+ * shape. `thumb_url` has no such index — the tag there is only for legibility.
  */
 const svgDataUri = (w: number, h: number, tag: string) =>
   'data:image/svg+xml;utf8,' +
@@ -82,6 +83,20 @@ async function openPhoto(page: Page, caption: string): Promise<{ visible: number
   }, caption)
 }
 
+// Playwright tears the worker down on a *timeout* without unwinding to a test's
+// `finally`, which would strand live fixtures on every local wall from then on.
+// So no test here trusts its own cleanup: each one first sweeps what earlier
+// runs left behind — but only rows that have aged out, or the sibling project
+// running this same spec in parallel would lose its fixtures mid-test.
+test.beforeEach(async () => {
+  const anHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  await serviceClient()
+    .from('memories')
+    .delete()
+    .like('caption', 'lightbox-e2e-%')
+    .lt('created_at', anHourAgo)
+})
+
 test('the modal letterboxes a photo instead of cropping it', async ({ page }) => {
   const service = serviceClient()
   // unique per invocation — the mobile and desktop projects run this against
@@ -89,18 +104,6 @@ test('the modal letterboxes a photo instead of cropping it', async ({ page }) =>
   const run = randomUUID().slice(0, 8)
   const captionFor = (key: string) => `lightbox-e2e-${run}-${key}`
   const eventId = await eventIdByYear(service, 2015)
-
-  // Playwright tears the worker down on a *timeout* without unwinding to the
-  // finally below, which would strand live red rectangles on every local wall
-  // from then on. Sweep anything older than this run instead of trusting
-  // cleanup — but only what has aged out, or the sibling project running this
-  // same spec in parallel would lose its fixtures mid-test.
-  const anHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-  await service
-    .from('memories')
-    .delete()
-    .like('caption', 'lightbox-e2e-%')
-    .lt('created_at', anHourAgo)
 
   const { data: seeded, error } = await service
     .from('memories')
@@ -163,22 +166,21 @@ test('the shimmer holds the photo’s box while the bytes are still coming', asy
   const caption = `lightbox-e2e-${run}-slow`
   // A real URL, not a data: URI — the point is to catch the photo mid-flight,
   // and only a network request can be held open.
+  //
+  // Only the MODAL's photo is held: the wall card reads `thumb_url` and the
+  // modal reads `media_url` (momentImageSrc), so the card gets an instant data:
+  // URI. That is the real shape of this moment — thumbnail up, full photo still
+  // arriving — and it keeps the held request off the wall entirely, so nothing
+  // about page load has to depend on how the browser schedules a card image.
   const held = `http://localhost:3000/__lightbox-fixture-${run}.svg`
 
-  const { data: seeded, error } = await service
-    .from('memories')
-    .insert({
-      event_id: await eventIdByYear(service, 2015),
-      media_kind: 'image',
-      media_url: held,
-      caption,
-      aspect_ratio: 1710 / 2280,
-      rights_confirmed: true,
-      status: 'live',
-    })
-    .select('id')
-    .single()
-  if (error) throw error
+  const seededId = await seedMemory(service, {
+    event_id: await eventIdByYear(service, 2015),
+    media_url: held,
+    thumb_url: svgDataUri(171, 228, `${run}-slow-thumb`),
+    caption,
+    aspect_ratio: 1710 / 2280,
+  })
 
   try {
     // Never fulfilled: the modal stays in its loading state for the whole test.
@@ -198,6 +200,6 @@ test('the shimmer holds the photo’s box while the bytes are still coming', asy
     expect(shimmer!.width, 'the shimmer collapsed to zero width').toBeGreaterThan(50)
     expect(shimmer!.height, 'the shimmer collapsed to zero height').toBeGreaterThan(50)
   } finally {
-    await service.from('memories').delete().eq('id', seeded!.id)
+    await service.from('memories').delete().eq('id', seededId)
   }
 })
