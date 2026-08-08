@@ -61,3 +61,13 @@ body {
   word-break: keep-all;
   overflow-wrap: break-word;
 }
+
+/* The wall's info button (SiteInfoFab) hides while a moment modal is open.
+ * z-order alone isn't enough: the modal's backdrop is bg-black/95, so 5% of
+ * the button still ghosts through on a near-black ground. Focus and screen
+ * readers are already handled by the modal itself (Tab trap + aria-modal) —
+ * this only closes the visual gap, from a distance so the wall never has to
+ * know that a piece of site chrome exists. */
+body:has([role='dialog'][aria-modal='true']) [data-site-info] {
+  display: none;
+}

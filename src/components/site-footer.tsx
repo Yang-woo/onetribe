@@ -1,8 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
+import { FOOTER_LINKS } from '@/lib/site-links'
 import { hasSupportLinks } from '@/lib/support'
-
-const FOOTER_LINKS = ['terms', 'privacy', 'takedown', 'guidelines', 'about'] as const
 
 // The disclaimer is a legal guardrail (docs/05) — it renders on every page.
 export async function SiteFooter() {

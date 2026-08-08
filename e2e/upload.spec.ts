@@ -49,7 +49,53 @@ test('the wall renders with hero, counter and disclaimer', async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/) // locale negotiation redirect (T3.1)
   await expect(page.getByText('the weekend never happened.')).toBeVisible()
   await expect(page.getByText(/moments? · \d+ (country|countries)/)).toBeVisible()
-  await expect(page.getByText(/Unofficial fan project/)).toBeVisible()
+  // Two copies on this page by design (docs/00 D51): the footer's, and one
+  // under the counters because the wall auto-loads and the footer's sits below
+  // a bottom that keeps moving. `.first()` is the hero one, above the fold.
+  await expect(page.getByText(/Unofficial fan project/).first()).toBeVisible()
+})
+
+test('the wall info button reaches the policy links without scrolling (D51)', async ({ page }) => {
+  await page.goto('/en')
+
+  const info = page.getByRole('button', { name: 'site info' })
+  await expect(info).toBeVisible()
+  await expect(info).toHaveAttribute('aria-expanded', 'false')
+
+  await info.click()
+  const panel = page.getByRole('navigation', { name: 'site info' })
+  await expect(panel.getByRole('link', { name: 'removals' })).toHaveAttribute(
+    'href',
+    '/en/takedown',
+  )
+
+  // Never flush to the left edge — that's where iOS starts its back swipe.
+  const box = (await info.boundingBox())!
+  const wallLeft = (await page.locator('#wall').boundingBox())!.x
+  expect(box.x).toBeGreaterThanOrEqual(16)
+  if (wallLeft >= box.width + 16) {
+    // Wide enough for a gutter: the button parks beside the wall, not on it.
+    expect(box.x + box.width).toBeLessThanOrEqual(wallLeft)
+  } else {
+    // A phone has no gutter to use, so it falls back to the 1rem inset and
+    // accepts covering a corner of the bottom-left photo.
+    expect(box.x).toBe(16)
+  }
+
+  // The gutter branch needs a viewport wider than the 72rem wall plus the
+  // button — neither project is, so ask for one. This is the case the position
+  // was designed for: a big display must not strand the button in black.
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  const wide = (await info.boundingBox())!
+  const wideWallLeft = (await page.locator('#wall').boundingBox())!.x
+  expect(wide.x + wide.width).toBeLessThanOrEqual(wideWallLeft)
+  // Anchored to the wall, not the viewport corner: the gap to the photos is
+  // the same 3.5rem it would be at any width.
+  expect(wideWallLeft - (wide.x + wide.width)).toBeLessThanOrEqual(56)
+
+  // Esc gives the page back.
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
 })
 
 test('locale routes serve translated copy with full hreflang alternates (T3.1)', async ({

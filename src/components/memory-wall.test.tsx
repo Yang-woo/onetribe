@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { beforeAll, describe, expect, test, vi } from 'vitest'
 import type { EditionChip, Moment } from '@/lib/moments'
-import { MemoryWall } from './memory-wall'
+import { MemoryWall, WALL_AUTO_PAGES } from './memory-wall'
 
 // Spec: docs/15 §1 — empty state invites the first upload; realtime
 // inserts appear at the top without a reload; no duplicates.
@@ -219,6 +219,72 @@ describe('MemoryWall', () => {
       await user.click(screen.getByRole('button', { name: 'more moments' }))
       expect(loadMore).toHaveBeenCalledTimes(2)
       expect(screen.getByText('caption-recovered')).toBeInTheDocument()
+    } finally {
+      globalThis.IntersectionObserver = realIO
+    }
+  })
+
+  test('the sentinel stops after WALL_AUTO_PAGES — the bottom has to stop retreating', async () => {
+    // This observer honours disconnect(), unlike the one above: the cap works
+    // by tearing the observer down, so a mock that keeps firing a disconnected
+    // one would report a cap that isn't there.
+    const alive = new Map<object, () => void>()
+    const realIO = globalThis.IntersectionObserver
+    globalThis.IntersectionObserver = class {
+      root = null
+      rootMargin = ''
+      thresholds = []
+      constructor(cb: IntersectionObserverCallback) {
+        const self = this as unknown as IntersectionObserver
+        alive.set(this, () => cb([{ isIntersecting: true } as IntersectionObserverEntry], self))
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {
+        alive.delete(this)
+      }
+      takeRecords() {
+        return []
+      }
+    } as unknown as typeof IntersectionObserver
+
+    try {
+      const user = (await import('@testing-library/user-event')).default.setup()
+      let page = 0
+      // A full page every time: the wall is never exhausted, so only the cap
+      // can stop the auto-loading (docs/00 D51).
+      const loadMore = vi.fn(async () => {
+        page += 1
+        return Array.from({ length: 40 }, (_, i) => moment(`p${page}-${i}`))
+      })
+      renderWithIntl(
+        <MemoryWall
+          initialMoments={Array.from({ length: 40 }, (_, i) => moment(`m${i}`))}
+          loadMoreImpl={loadMore}
+          subscribeImpl={noSubscribe}
+        />,
+      )
+      const scrollSentinelIntoView = async () => {
+        await act(async () => {
+          alive.forEach((fire) => fire())
+        })
+      }
+
+      for (let i = 0; i < WALL_AUTO_PAGES; i += 1) await scrollSentinelIntoView()
+      expect(loadMore).toHaveBeenCalledTimes(WALL_AUTO_PAGES)
+
+      // Past the cap the observer is gone: reaching the bottom appends nothing,
+      // so the footer below the wall finally stays put.
+      await scrollSentinelIntoView()
+      await scrollSentinelIntoView()
+      expect(loadMore).toHaveBeenCalledTimes(WALL_AUTO_PAGES)
+
+      // The wall is still endless — it just waits to be asked now, and asking
+      // never hands control back to the sentinel.
+      await user.click(screen.getByRole('button', { name: 'more moments' }))
+      expect(loadMore).toHaveBeenCalledTimes(WALL_AUTO_PAGES + 1)
+      await scrollSentinelIntoView()
+      expect(loadMore).toHaveBeenCalledTimes(WALL_AUTO_PAGES + 1)
     } finally {
       globalThis.IntersectionObserver = realIO
     }

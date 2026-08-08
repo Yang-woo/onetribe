@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { BrowseWallButton } from '@/components/browse-wall-button'
 import { MemoryWall } from '@/components/memory-wall'
+import { SiteInfoFab } from '@/components/site-info-fab'
 import { WallFilter } from '@/components/wall-filter'
 import { WallSkeleton } from '@/components/wall-skeleton'
 import { JsonLd } from '@/components/json-ld'
@@ -57,6 +58,7 @@ async function WallSection({
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
   const t = await getTranslations('hero')
+  const tFooter = await getTranslations('footer')
   const locale = await getLocale()
   const { e } = await searchParams
   const selectedYear = parseEditionYear(e)
@@ -132,6 +134,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           </span>
           {t('counterCountries', { countries: counters.countries })}
         </p>
+
+        {/* The unofficial-project notice, above the fold (docs/05 asks for it
+            at the top as well as in the footer). The wall auto-loads, so on
+            this one page the footer copy sits below a bottom that keeps
+            moving — a guardrail nobody can scroll to is a guardrail on paper.
+            Negative margin so it reads as a caption on the counters rather
+            than a fifth peer in the hero's stack. */}
+        <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint">
+          {tFooter('disclaimer')}
+        </p>
       </section>
 
       <div id="wall" className="mx-auto max-w-6xl scroll-mt-16">
@@ -141,6 +153,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           </Suspense>
         </WallFilter>
       </div>
+
+      {/* Only page that needs it: everywhere else the footer is at a bottom
+          you can actually reach (docs/00 D51). */}
+      <SiteInfoFab />
     </main>
   )
 }

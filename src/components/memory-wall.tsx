@@ -16,6 +16,16 @@ function defaultLoadMore(eventIds?: string[]): LoadMore {
   return (before) => fetchMoments(supabaseBrowser(), { eventIds, before })
 }
 
+/**
+ * Pages the wall appends before the sentinel retires and every further page
+ * has to be asked for (docs/00 D51). Uncapped auto-loading has two costs: the
+ * page bottom retreats every time you approach it, so anything anchored below
+ * the wall is out of reach; and a phone quietly downloads hundreds of photos
+ * nobody chose to fetch. The button below the wall still loads forever past
+ * this point — the wall stays endless, it just stops being involuntary.
+ */
+export const WALL_AUTO_PAGES = 2
+
 // Realtime INSERTs pass RLS (live rows only) and the publication's column
 // list (no takedown_token) — see tests/db/wall.test.ts.
 const defaultSubscribe: Subscribe = (onInsert) => {
@@ -58,6 +68,8 @@ export function MemoryWall({
   // loop (and an unhandled rejection). The manual "load more" button clears it
   // for a deliberate retry.
   const [failed, setFailed] = useState(false)
+  // Pages appended so far, however they were asked for — see WALL_AUTO_PAGES.
+  const [pagesLoaded, setPagesLoaded] = useState(0)
   // The open moment, by id — the lightbox resolves it against the live list on
   // every render (docs/00 D33), so a live insert can't shift the view.
   const [openId, setOpenId] = useState<string | null>(null)
@@ -71,6 +83,7 @@ export function MemoryWall({
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   const loadMore = useCallback(async () => {
+    setPagesLoaded((pages) => pages + 1)
     setLoading(true)
     setFailed(false)
     try {
@@ -109,13 +122,13 @@ export function MemoryWall({
 
   useEffect(() => {
     const sentinel = sentinelRef.current
-    if (!sentinel || exhausted) return
+    if (!sentinel || exhausted || pagesLoaded >= WALL_AUTO_PAGES) return
     const observer = new IntersectionObserver((entries) => {
       if (entries[0]?.isIntersecting && !loading && !failed) void loadMore()
     })
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [exhausted, loading, failed, loadMore])
+  }, [exhausted, loading, failed, pagesLoaded, loadMore])
 
   const canceled = filterEdition?.canceled ?? false
   // A canceled edition keeps its real anthem title (2026 — Sacred Oath); the

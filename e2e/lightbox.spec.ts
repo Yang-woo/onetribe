@@ -203,3 +203,36 @@ test('the shimmer holds the photo’s box while the bytes are still coming', asy
     await service.from('memories').delete().eq('id', seededId)
   }
 })
+
+test('the wall info button gets out of the way while a moment is open (D51)', async ({ page }) => {
+  const service = serviceClient()
+  const run = randomUUID().slice(0, 8)
+  const caption = `lightbox-e2e-${run}-fab`
+
+  const seededId = await seedMemory(service, {
+    event_id: await eventIdByYear(service, 2015),
+    media_url: svgDataUri(1200, 800, `${run}-fab`),
+    thumb_url: svgDataUri(300, 200, `${run}-fab-thumb`),
+    caption,
+    aspect_ratio: 1200 / 800,
+  })
+
+  try {
+    await page.goto('/en')
+    const info = page.getByRole('button', { name: 'site info' })
+    await expect(info).toBeVisible()
+
+    await page.getByRole('button', { name: caption }).click()
+    await expect(page.getByRole('dialog', { name: caption })).toBeVisible()
+
+    // Only a real browser can see this: the modal's backdrop is bg-black/95,
+    // so z-order alone would leave the button ghosting through at 5%. The
+    // `:has()` rule in globals.css is what actually takes it out (docs/00 D51).
+    await expect(info).toBeHidden()
+
+    await page.keyboard.press('Escape')
+    await expect(info).toBeVisible()
+  } finally {
+    await service.from('memories').delete().eq('id', seededId)
+  }
+})

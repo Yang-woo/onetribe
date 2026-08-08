@@ -62,6 +62,11 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // Dev only, and it never reaches a build: Next parks its dev indicator in
+  // the bottom-left corner, which is exactly where the wall's info button
+  // lives (docs/00 D51). Left alone it covers the button in `next dev` and
+  // swallows clicks aimed at it.
+  devIndicators: { position: 'bottom-right' },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }]
   },
