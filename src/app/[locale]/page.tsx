@@ -70,7 +70,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   return (
     <main className="flex-1">
       <JsonLd data={websiteJsonLd(t('body'))} />
-      <section className="relative isolate mx-auto flex max-w-[960px] flex-col items-center gap-7 px-6 pb-[72px] pt-[88px] text-center">
+      {/* #hero is a handle for SiteInfoFab, which stands down while the hero
+          is on screen (docs/00 D51). */}
+      <section
+        id="hero"
+        className="relative isolate mx-auto flex max-w-[960px] flex-col items-center gap-7 px-6 pb-[72px] pt-[88px] text-center"
+      >
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[420px]"

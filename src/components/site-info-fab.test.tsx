@@ -71,7 +71,7 @@ describe('SiteInfoFab', () => {
     }
   })
 
-  test('stands down once the footer is on screen', async () => {
+  test("stands down at the wall's bookends — hero above, footer below", async () => {
     const user = userEvent.setup()
     const { fireAll, restore } = installIntersectionObserver()
     try {
@@ -84,8 +84,9 @@ describe('SiteInfoFab', () => {
       await user.click(screen.getByRole('button', { name: 'site info' }))
       expect(screen.getByRole('link', { name: 'about' })).toBeInTheDocument()
 
-      // Reaching the footer both makes the shortcut pointless and would park
-      // the button on top of the footer's own links.
+      // Either bookend coming into view retires it: above the wall the
+      // shortcut is premature and covers the hero's own notice, below it the
+      // reader has arrived and the button covers the footer's links.
       await act(async () => {
         fireAll()
       })

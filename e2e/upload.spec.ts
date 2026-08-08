@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { scrollIntoWall } from './fixtures'
 
 /**
  * Upload happy path — docs/17 T2.4 (redesign 2026-07-16 §3: 2 steps). Runs
@@ -60,7 +61,12 @@ test('the wall renders with hero, counter and disclaimer', async ({ page }) => {
 test('the wall info button reaches the policy links without scrolling (D51)', async ({ page }) => {
   await page.goto('/en')
 
+  // It belongs to the wall, so it isn't there while the hero is (docs/00 D51):
+  // at the top of a phone screen it would sit on the hero's own copy.
   const info = page.getByRole('button', { name: 'site info' })
+  await expect(info).toBeHidden()
+
+  await scrollIntoWall(page)
   await expect(info).toBeVisible()
   await expect(info).toHaveAttribute('aria-expanded', 'false')
 
