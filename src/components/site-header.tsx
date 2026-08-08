@@ -8,10 +8,13 @@ export async function SiteHeader() {
   const tp = await getTranslations('passport')
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-black/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 max-[374px]:px-2 sm:gap-3 sm:px-4">
         {/* Horizontal lockup — the handoff's vertical primary doesn't fit a
             48px header; beam mark ≥16px min-size, wordmark per spec
-            (Space Grotesk 700, .18em tracking, uppercase). */}
+            (Space Grotesk 700, .18em tracking, uppercase).
+            The narrow tiers below carry slack on purpose: the same markup
+            measures a few px wider under CI's Linux fonts than on macOS, and
+            landing exactly on 320 meant fitting on one and not the other. */}
         <Link href="/" className="flex items-center gap-2.5">
           <LogoMark className="h-5 w-[30px]" />
           {/* Symbol alone below sm — the four items do not fit a 360px phone
@@ -21,10 +24,10 @@ export async function SiteHeader() {
             ONE TRIBE
           </span>
         </Link>
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 max-[374px]:gap-1 sm:gap-3">
           <Link
             href="/passport"
-            className="whitespace-nowrap text-[13px] lowercase text-muted transition-colors hover:text-paper sm:text-sm"
+            className="whitespace-nowrap text-[13px] lowercase text-muted transition-colors hover:text-paper max-[374px]:text-xs sm:text-sm"
           >
             {tp('nav')}
           </Link>

@@ -17,13 +17,23 @@ test('the header fits every phone width without scrolling the page sideways', as
     await page.setViewportSize({ width, height: 800 })
     await page.goto('/en')
 
-    const { overflow, headerNeeds } = await page.evaluate(() => ({
-      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      headerNeeds: (document.querySelector('header > div') as HTMLElement).scrollWidth,
-    }))
+    const { overflow, slack } = await page.evaluate(() => {
+      const bar = document.querySelector('header > div') as HTMLElement
+      const [mark, group] = [...bar.children] as HTMLElement[]
+      return {
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        // Gap between the mark and the right-hand group: the room left before
+        // the two collide. `scrollWidth` cannot show this — it only grows once
+        // the overflow has already happened.
+        slack: group.getBoundingClientRect().left - mark.getBoundingClientRect().right,
+      }
+    })
 
     expect(overflow, `the page scrolls sideways at ${width}px`).toBe(0)
-    expect(headerNeeds, `the header overflows its own bar at ${width}px`).toBeLessThanOrEqual(width)
+    // A few px of margin, not zero: the same markup measures wider under CI's
+    // Linux fonts than on macOS, and a header that fits exactly on one machine
+    // is a header that overflows on the other.
+    expect(slack, `the header has no room left at ${width}px`).toBeGreaterThanOrEqual(4)
   }
 })
 
