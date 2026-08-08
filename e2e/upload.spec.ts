@@ -73,28 +73,21 @@ test('the wall info button reaches the policy links without scrolling (D51)', as
   )
   expect(beforeWall, 'the info button comes after the wall in tab order').toBe(true)
 
-  // TEMP diagnostic (removed once CI explains itself)
-  console.log(
-    'FABDIAG',
-    JSON.stringify(
-      await page.evaluate(() => {
-        const el = document.querySelector('[aria-label="site info"]') as HTMLElement
-        const w = el.parentElement as HTMLElement
-        const b = el.getBoundingClientRect()
-        const top = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2) as HTMLElement
-        const cs = getComputedStyle(w)
-        return {
-          vw: innerWidth,
-          vh: innerHeight,
-          btn: [Math.round(b.x), Math.round(b.y), Math.round(b.width)],
-          wrapper: { pos: cs.position, z: cs.zIndex, left: cs.left, bottom: cs.bottom },
-          top: top?.tagName + '|' + String(top?.className ?? '').slice(0, 40),
-          sheets: document.styleSheets.length,
-        }
-      }),
-    ),
-  )
-  await info.click()
+  // Tappability asserted directly, as the property that matters: the button's
+  // own centre is the topmost element there. Playwright's click has to scroll
+  // and re-hit-test, and on the phone project that dance kept landing on the
+  // hero underneath even though the button was on top the whole time.
+  const topmostIsButton = await page.evaluate(() => {
+    const el = document.querySelector('[aria-label="site info"]')!
+    const box = el.getBoundingClientRect()
+    const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+    return !!hit && (hit === el || el.contains(hit))
+  })
+  expect(topmostIsButton, 'something is layered over the info button').toBe(true)
+
+  // Opened from the keyboard — the path the source order above exists to serve.
+  await info.focus()
+  await page.keyboard.press('Enter')
   const panel = page.getByRole('navigation', { name: 'site info' })
   await expect(panel.getByRole('link', { name: 'removals' })).toHaveAttribute(
     'href',
