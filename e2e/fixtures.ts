@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { expect, type Page } from '@playwright/test'
 
 /**
  * Shared e2e fixtures. Row-shaped helpers are re-exported from the DB suite's
@@ -37,35 +36,4 @@ export function serviceClient(): SupabaseClient {
     throw new Error('NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be in .env.local')
   }
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
-}
-
-/**
- * Put the wall's top edge above the viewport, so SiteInfoFab is on screen
- * (it stands down while the hero or the footer is — docs/00 D51).
- *
- * Waits for fonts first: the display headline reflows when Space Grotesk
- * arrives and the hero grows by ~220px, so a scroll computed before that
- * lands short and leaves the hero — and no button — in view.
- */
-export async function scrollIntoWall(page: Page): Promise<void> {
-  await page.evaluate(() => document.fonts.ready)
-  // Scroll, then scroll again after a beat. A scroll issued before hydration
-  // finishes is undone by scroll restoration, putting the hero — and so no
-  // button — back on screen; the second pass lands after hydration and sticks.
-  const settle = async () =>
-    expect
-      .poll(() =>
-        page.evaluate(() => {
-          const wall = document.querySelector('#wall')
-          if (!wall) return -1
-          const { top } = wall.getBoundingClientRect()
-          if (top > -100) window.scrollTo(0, top + window.scrollY + 200)
-          return Math.round(wall.getBoundingClientRect().top)
-        }),
-      )
-      .toBeLessThan(-100)
-
-  await settle()
-  await page.waitForTimeout(250)
-  await settle()
 }

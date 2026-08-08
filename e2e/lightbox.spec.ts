@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { expect, test, type Page } from '@playwright/test'
-import { eventIdByYear, scrollIntoWall, seedMemory, serviceClient } from './fixtures'
+import { eventIdByYear, seedMemory, serviceClient } from './fixtures'
 
 /**
  * The wall modal shows the WHOLE photo — docs/15 §1. The modal is the only
@@ -223,11 +223,6 @@ test('the wall info button gets out of the way while a moment is open (D51)', as
   try {
     await page.goto('/en')
     const info = page.getByRole('button', { name: 'site info' })
-    // It only exists while the wall is what's on screen (docs/00 D51). Waiting
-    // for its absence also waits out hydration, so the scroll below measures a
-    // settled layout rather than a half-built wall.
-    await expect(info).toBeHidden()
-    await scrollIntoWall(page)
     await expect(info).toBeVisible()
 
     await page.getByRole('button', { name: caption }).click()
@@ -235,7 +230,7 @@ test('the wall info button gets out of the way while a moment is open (D51)', as
 
     // Only a real browser can see this: the modal's backdrop is bg-black/95,
     // so z-order alone would leave the button ghosting through at 5%. The
-    // `:has()` rule in globals.css is what actually takes it out (docs/00 D51).
+    // `hide-under-modal` utility is what actually takes it out (docs/00 D51).
     await expect(info).toBeHidden()
 
     await page.keyboard.press('Escape')

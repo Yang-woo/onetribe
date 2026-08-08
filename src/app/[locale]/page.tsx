@@ -70,12 +70,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   return (
     <main className="flex-1">
       <JsonLd data={websiteJsonLd(t('body'))} />
-      {/* #hero is a handle for SiteInfoFab, which stands down while the hero
-          is on screen (docs/00 D51). */}
-      <section
-        id="hero"
-        className="relative isolate mx-auto flex max-w-[960px] flex-col items-center gap-7 px-6 pb-[72px] pt-[88px] text-center"
-      >
+      <section className="relative isolate mx-auto flex max-w-[960px] flex-col items-center gap-7 px-6 pb-[72px] pt-[88px] text-center">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[420px]"
@@ -144,7 +139,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             and this is the page where that matters: the footer's copy is many
             screens below a wall that keeps growing. Negative margin so it
             reads as a caption on the counters, not a fifth peer in the stack. */}
-        <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint">
+        {/* max-sm inset keeps the text clear of the wall's info button, which
+            is fixed at 1rem from the left edge on screens with no gutter to
+            park in — without it the button covers the first word of a legal
+            notice on a phone (docs/00 D51). */}
+        <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint max-sm:px-14">
           {tFooter('disclaimer')}
         </p>
       </section>

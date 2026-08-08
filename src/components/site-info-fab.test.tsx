@@ -1,6 +1,6 @@
-import { act, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { installIntersectionObserver, renderWithIntl } from '@/test-utils'
+import { renderWithIntl } from '@/test-utils'
 import { describe, expect, test, vi } from 'vitest'
 import { SITE_LINKS } from '@/lib/site-links'
 import { SUPPORT_ANCHOR } from '@/lib/support'
@@ -68,33 +68,6 @@ describe('SiteInfoFab', () => {
       expect(screen.queryByRole('link', { name: 'support' })).not.toBeInTheDocument()
     } finally {
       rail.live = true
-    }
-  })
-
-  test("stands down at the wall's bookends — hero above, footer below", async () => {
-    const user = userEvent.setup()
-    const { fireAll, restore } = installIntersectionObserver()
-    try {
-      renderWithIntl(
-        <>
-          <SiteInfoFab />
-          <footer>the real footer</footer>
-        </>,
-      )
-      await user.click(screen.getByRole('button', { name: 'site info' }))
-      expect(screen.getByRole('link', { name: 'about' })).toBeInTheDocument()
-
-      // Either bookend coming into view retires it: above the wall the
-      // shortcut is premature and covers the hero's own notice, below it the
-      // reader has arrived and the button covers the footer's links.
-      await act(async () => {
-        fireAll()
-      })
-
-      expect(screen.queryByRole('button', { name: 'site info' })).not.toBeInTheDocument()
-      expect(screen.queryByRole('link', { name: 'about' })).not.toBeInTheDocument()
-    } finally {
-      restore()
     }
   })
 

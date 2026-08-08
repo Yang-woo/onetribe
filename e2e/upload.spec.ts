@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { scrollIntoWall } from './fixtures'
 
 /**
  * Upload happy path — docs/17 T2.4 (redesign 2026-07-16 §3: 2 steps). Runs
@@ -61,12 +60,7 @@ test('the wall renders with hero, counter and disclaimer', async ({ page }) => {
 test('the wall info button reaches the policy links without scrolling (D51)', async ({ page }) => {
   await page.goto('/en')
 
-  // It belongs to the wall, so it isn't there while the hero is (docs/00 D51):
-  // at the top of a phone screen it would sit on the hero's own copy.
   const info = page.getByRole('button', { name: 'site info' })
-  await expect(info).toBeHidden()
-
-  await scrollIntoWall(page)
   await expect(info).toBeVisible()
   await expect(info).toHaveAttribute('aria-expanded', 'false')
 
@@ -85,33 +79,68 @@ test('the wall info button reaches the policy links without scrolling (D51)', as
     'href',
     '/en/takedown',
   )
-
-  // Both position cases, pinned explicitly rather than branched on whichever
-  // project is running — a conditional assertion can pass by taking the branch
-  // you weren't testing, and at 1280 the two are separated by a scrollbar's
-  // width.
-  const leftEdgeOf = async (locator: typeof info) => (await locator.boundingBox())!.x
-
-  // No gutter: the button falls back to the 1rem inset and accepts covering a
-  // corner of the bottom-left photo. 1rem, not 0 — the left edge is where iOS
-  // starts its back swipe. Polled, because a plain `expect(value)` does not
-  // retry and would read the pre-resize box; approximate, because Pixel 7's
-  // 2.625 device ratio can hand back 15.99.
-  await page.setViewportSize({ width: 390, height: 844 })
-  await expect.poll(() => leftEdgeOf(info)).toBeCloseTo(16, 0)
-
-  // Gutter: it parks beside the wall, off the photos entirely, and stays 3.5rem
-  // from them however wide the display gets — never stranded in the black.
-  await page.setViewportSize({ width: 1920, height: 1080 })
-  await expect.poll(() => leftEdgeOf(info)).toBeGreaterThan(16)
-  const wide = (await info.boundingBox())!
-  const wallLeft = await leftEdgeOf(page.locator('#wall'))
-  expect(wide.x + wide.width).toBeLessThanOrEqual(wallLeft)
-  expect(wallLeft - (wide.x + wide.width)).toBeLessThanOrEqual(56)
-
-  // Esc gives the page back.
   await page.keyboard.press('Escape')
   await expect(panel).toBeHidden()
+
+  // Never flush to the left edge — that's where iOS starts its back swipe.
+  expect((await info.boundingBox())!.x).toBeGreaterThanOrEqual(16)
+
+  // The gutter branch needs a viewport wider than the 72rem wall plus the
+  // button — neither project is, so ask for one. This is the case the position
+  // was designed for: a big display must not strand the button in black.
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await expect.poll(async () => (await info.boundingBox())!.x).toBeGreaterThan(16)
+  const wide = (await info.boundingBox())!
+  const wallLeft = (await page.locator('#wall').boundingBox())!.x
+  expect(wide.x + wide.width).toBeLessThanOrEqual(wallLeft)
+  expect(wallLeft - (wide.x + wide.width)).toBeLessThanOrEqual(56)
+})
+
+test('the floating button covers no policy text (D51)', async ({ page }) => {
+  await page.goto('/en')
+
+  // First paint, before any scrolling: the hero carries the unofficial-project
+  // notice (docs/05 wants it at the top), and on a phone the button's fixed
+  // 1rem-from-the-left band runs straight through it. The notice is inset on
+  // small screens to clear it — this is what proves it.
+  // Measured over the text itself, not the paragraph box — the inset is
+  // padding, so the box still starts where it always did.
+  const textLeft = await page
+    .getByText(/Unofficial fan project/)
+    .first()
+    .evaluate((el) => {
+      const range = document.createRange()
+      range.selectNodeContents(el)
+      return range.getBoundingClientRect().x
+    })
+  const topBox = (await page.getByRole('button', { name: 'site info' }).boundingBox())!
+  expect(textLeft, 'the info button overlaps the unofficial-project notice').toBeGreaterThanOrEqual(
+    topBox.x + topBox.width,
+  )
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+
+  const button = (await page.getByRole('button', { name: 'site info' }).boundingBox())!
+
+  // Measured in the page so every link is included, laid out or not.
+  const linkRects = await page.locator('footer a').evaluateAll((els) =>
+    els.map((el) => {
+      const { x, y, width, height } = el.getBoundingClientRect()
+      return { text: el.textContent ?? '', x, y, width, height }
+    }),
+  )
+  expect(linkRects.length).toBeGreaterThan(0)
+
+  // The footer's bottom padding is what buys this. Without it the button lands
+  // on the last row of links at full scroll and swallows taps meant for them.
+  for (const link of linkRects) {
+    const overlaps =
+      link.x < button.x + button.width &&
+      link.x + link.width > button.x &&
+      link.y < button.y + button.height &&
+      link.y + link.height > button.y
+    expect(overlaps, `footer link "${link.text}" sits under the info button`).toBe(false)
+  }
 })
 
 test('locale routes serve translated copy with full hreflang alternates (T3.1)', async ({

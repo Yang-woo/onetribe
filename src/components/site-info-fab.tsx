@@ -8,8 +8,7 @@ import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 
 /**
  * The policy links, on the one page where the footer is a long scroll away
- * (docs/00 D51). The wall's only extra chrome, and it lives for exactly as
- * long as the wall is what's on screen — see the bookend observer below.
+ * (docs/00 D51). The wall's only extra chrome.
  *
  * Bottom-LEFT on purpose. Bottom-right is the primary-action corner and the
  * best thumb reach on a phone — spending it on the least-used links would both
@@ -24,44 +23,8 @@ import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 export function SiteInfoFab() {
   const t = useTranslations('footer')
   const [open, setOpen] = useState(false)
-  // Bookends of the wall. The button belongs to the wall and only the wall:
-  // before it the shortcut is premature and would sit on the hero's own copy
-  // — including the unofficial-project notice, which on a 390×844 phone lands
-  // exactly in this band; after it the reader has arrived, and the button
-  // would cover the footer's links (both sit 1rem from the left edge) and
-  // swallow taps meant for them.
-  const [hero, setHero] = useState(false)
-  const [footer, setFooter] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    const heroEl = document.querySelector('#hero')
-    const targets = [heroEl, document.querySelector('footer')].filter((el) => el !== null)
-    if (targets.length === 0) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const set = entry.target === heroEl ? setHero : setFooter
-          set(entry.isIntersecting)
-          // Leaving the wall closes the panel, so scrolling back doesn't find
-          // it hanging open from before.
-          if (entry.isIntersecting) setOpen(false)
-        }
-      },
-      // Shrink the root by a pixel so an edge resting exactly on the viewport
-      // boundary doesn't count as on-screen: scrolling to precisely the top of
-      // the wall leaves the hero's last row at y=0, which the default treats as
-      // still visible — and parking there would flicker the button.
-      { rootMargin: '-1px' },
-    )
-    for (const target of targets) observer.observe(target)
-    return () => observer.disconnect()
-  }, [])
-
-  // Both default false, so a tree without those landmarks (a unit test) shows
-  // the button rather than silently rendering nothing.
-  const inTheWall = !hero && !footer
 
   // The panel has no backdrop of its own, so it needs both dismissals: Esc
   // (focus back to the button, since that's where the user came from) and a
@@ -91,8 +54,6 @@ export function SiteInfoFab() {
   }, [open])
 
   const linkClass = 'text-sm text-muted transition-colors hover:text-paper'
-
-  if (!inTheWall) return null
 
   return (
     <div
