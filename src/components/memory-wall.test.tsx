@@ -14,7 +14,7 @@ let restoreObserver: () => void
 beforeAll(() => {
   ;({ restore: restoreObserver } = installIntersectionObserver())
 })
-afterAll(() => restoreObserver())
+afterAll(() => restoreObserver?.())
 
 const moment = momentFixture
 
@@ -286,6 +286,43 @@ describe('MemoryWall', () => {
       // Counting the failed attempt would have retired it here.
       await scrollSentinelIntoView()
       expect(loadMore).toHaveBeenCalledTimes(3)
+    } finally {
+      restore()
+    }
+  })
+
+  test('a page that appends nothing does not spend the auto-load budget', async () => {
+    const { fireAll, restore } = installIntersectionObserver()
+
+    try {
+      const initial = Array.from({ length: 40 }, (_, i) => moment(`m${i}`))
+      let call = 0
+      // A full page of rows the wall already has — the shape a realtime insert
+      // makes when it races the cursor. Full-length so the wall is not marked
+      // exhausted; the reader still received nothing.
+      const loadMore = vi.fn(async () => {
+        call += 1
+        return call <= 2 ? initial : Array.from({ length: 40 }, (_, i) => moment(`new${i}`))
+      })
+      renderWithIntl(
+        <MemoryWall initialMoments={initial} loadMoreImpl={loadMore} subscribeImpl={noSubscribe} />,
+      )
+      const scrollSentinelIntoView = async () => {
+        await act(async () => {
+          fireAll()
+        })
+      }
+
+      await scrollSentinelIntoView()
+      await scrollSentinelIntoView()
+      expect(loadMore).toHaveBeenCalledTimes(2)
+      expect(screen.getAllByText('caption-m0')).toHaveLength(1)
+
+      // Two pages fetched, nothing appended: the budget is untouched, so the
+      // sentinel still owes the reader WALL_AUTO_PAGES real pages.
+      for (let i = 0; i < WALL_AUTO_PAGES; i += 1) await scrollSentinelIntoView()
+      expect(loadMore).toHaveBeenCalledTimes(2 + WALL_AUTO_PAGES)
+      expect(screen.getByText('caption-new0')).toBeInTheDocument()
     } finally {
       restore()
     }

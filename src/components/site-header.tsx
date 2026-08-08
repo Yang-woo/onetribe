@@ -8,7 +8,7 @@ export async function SiteHeader() {
   const tp = await getTranslations('passport')
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-black/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-2 py-3 sm:gap-3 sm:px-4">
         {/* Horizontal lockup — the handoff's vertical primary doesn't fit a
             48px header; beam mark ≥16px min-size, wordmark per spec
             (Space Grotesk 700, .18em tracking, uppercase). */}
@@ -16,8 +16,12 @@ export async function SiteHeader() {
           <LogoMark className="h-5 w-[30px]" />
           {/* Symbol alone below sm — the four items do not fit a 360px phone
               together, and docs/12 sanctions the mark on its own down to 16px
-              (full lockup 24px). The wordmark returns as soon as there's room. */}
-          <span className="hidden font-display text-sm font-bold tracking-[0.18em] text-paper sm:inline">
+              (full lockup 24px).
+              `sr-only`, not `hidden`: the mark is aria-hidden, so this text is
+              the home link's only accessible name and `display:none` would
+              leave the link nameless on every phone (WCAG 2.4.4). sr-only is
+              out of flow, so it still costs the row nothing. */}
+          <span className="sr-only font-display text-sm font-bold tracking-[0.18em] text-paper sm:not-sr-only">
             ONE TRIBE
           </span>
         </Link>

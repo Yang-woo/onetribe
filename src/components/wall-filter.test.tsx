@@ -16,7 +16,7 @@ let restoreObserver: () => void
 beforeAll(() => {
   ;({ restore: restoreObserver } = installIntersectionObserver())
 })
-afterAll(() => restoreObserver())
+afterAll(() => restoreObserver?.())
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/en')

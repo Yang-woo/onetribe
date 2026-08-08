@@ -96,15 +96,23 @@ export function MemoryWall({
       const impl = loadMoreImpl ?? defaultLoadMore(eventIds)
       const next = await impl({ createdAt: last.created_at, id: last.id })
       if (next.length < WALL_PAGE_SIZE) setExhausted(true)
+      // Counted out here, applied in the updater: the updater runs later, so
+      // reading a count it assigned would read it before it ran. This copy
+      // decides the budget; the one inside stays authoritative for the list,
+      // in case a realtime insert landed while the page was in flight.
+      const known = new Set(moments.map((m) => m.id))
+      const fresh = next.filter((m) => !known.has(m.id))
       setMoments((current) => {
         const seen = new Set(current.map((m) => m.id))
-        return [...current, ...next.filter((m) => !seen.has(m.id))]
+        const unseen = fresh.filter((m) => !seen.has(m.id))
+        return unseen.length === 0 ? current : [...current, ...unseen]
       })
-      // Counted here, not on entry: WALL_AUTO_PAGES caps pages the wall
-      // actually appended. Counting attempts would let one failed page plus
+      // Counted on rows actually appended, not on calls: WALL_AUTO_PAGES caps
+      // pages the reader got. Counting attempts would let a failed page plus
       // the manual retry that recovers it retire the sentinel after a single
-      // page — spending the budget on a page the reader never got.
-      setPagesLoaded((pages) => pages + 1)
+      // page, and a page whose rows were all already on screen (a realtime
+      // insert raced the cursor) would spend budget for nothing.
+      if (fresh.length > 0) setPagesLoaded((pages) => pages + 1)
     } catch {
       // Park auto-loading (see `failed`); the manual button stays for a retry.
       setFailed(true)

@@ -20,23 +20,29 @@ import { LOCALES } from '../src/lib/locales'
 const WIDTHS = [320, 360, 375, 390, 412, 430]
 
 /**
- * Room left in the bar: its content box minus the two groups in it. Negative
- * means they have already collided.
+ * Room left in the bar: its content box minus everything in it, gaps included.
+ * Negative means the row no longer fits.
  *
- * Not the gap between them — nothing in this header shrinks (`whitespace-nowrap`
- * throughout, no `min-w-0`), so an over-long row overflows the bar instead of
- * squeezing the gap, and the gap reads its full `gap-*` value at the moment of
- * worst failure. A floor on the gap is an assertion that cannot fail.
+ * Not the gap between the groups — nothing in this header shrinks
+ * (`whitespace-nowrap` throughout, no `min-w-0`), so an over-long row overflows
+ * the bar instead of squeezing the gap, and the gap reads its full `gap-*`
+ * value at the moment of worst failure. A floor on the gap cannot fail.
+ *
+ * Every child, not the two we know about: a fifth control added to the bar has
+ * to enter this sum, or it would overflow the row while this still reported
+ * room. And the gaps have to come off, or "greater than zero" means "fits with
+ * exactly nothing to spare" — which is the state this whole spec exists to
+ * catch.
  */
 const freeSpace = (page: Page) =>
   page.evaluate(() => {
     const bar = document.querySelector('header > div') as HTMLElement
-    const [mark, group] = [...bar.children] as HTMLElement[]
+    const children = [...bar.children] as HTMLElement[]
     const style = getComputedStyle(bar)
     const content = bar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-    return Math.round(
-      content - mark.getBoundingClientRect().width - group.getBoundingClientRect().width,
-    )
+    const used = children.reduce((total, el) => total + el.getBoundingClientRect().width, 0)
+    const gaps = parseFloat(style.columnGap) * Math.max(0, children.length - 1)
+    return Math.round(content - used - gaps)
   })
 
 test('the header fits every phone width in every language', async ({ page }, testInfo) => {
@@ -47,6 +53,9 @@ test('the header fits every phone width in every language', async ({ page }, tes
     testInfo.project.name !== 'mobile-chromium',
     'viewport is set per case; the other project would assert identical widths',
   )
+  // 17 loads of a force-dynamic, DB-backed route. The default 30s is close
+  // enough that a cold runner would report this guard as a timeout.
+  test.setTimeout(120_000)
 
   for (const locale of LOCALES) {
     // One load per language, then resize: the rules under test are media
@@ -66,7 +75,14 @@ test('the header fits every phone width in every language', async ({ page }, tes
       // our two fonts, so its width comes from whatever font the OS supplies —
       // different on CI, on an iPhone, on Android. Headroom is a requirement
       // here, not a test artifact.
-      expect(await freeSpace(page), `${locale} has no room left at ${width}px`).toBeGreaterThan(0)
+      //
+      // 8px is about twice the drift measured between this repo's macOS and
+      // Linux CI runs. Anything tighter fits on the machine it was tuned on
+      // and overflows on the other, which is exactly how this shipped twice.
+      expect(
+        await freeSpace(page),
+        `${locale} has too little room left at ${width}px`,
+      ).toBeGreaterThanOrEqual(8)
     }
   }
 })
@@ -90,5 +106,33 @@ test('the phone shows the short label but still answers to the full one', async 
   const box = (await cta.boundingBox())!
   expect(box.x + box.width, 'the upload button is cut off at the right edge').toBeLessThanOrEqual(
     390,
+  )
+
+  // The mark carries `aria-hidden`, so the wordmark is the home link's only
+  // name. Hiding it with `display:none` to reclaim its width left the link
+  // nameless on every phone; `sr-only` keeps the name and costs no width.
+  await expect(page.locator('header').getByRole('link', { name: 'ONE TRIBE' })).toBeAttached()
+})
+
+test('the wordmark comes back once there is room', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 800 })
+  await page.goto('/en')
+
+  // The other half of the responsive lockup. Without this, deleting the
+  // `sm:` half ships a bare beam mark at every width and the phone sweep
+  // above stays green (docs/00 D8 — no tests written to pass).
+  // By width, not `toBeVisible`: `sr-only` leaves a clipped 1×1 box that
+  // Playwright still calls visible, so dropping the `sm:` half would slip past
+  // a visibility check while shipping a bare beam mark.
+  const wordmark = page.locator('header').getByText('ONE TRIBE')
+  expect(
+    (await wordmark.boundingBox())!.width,
+    'the wordmark is still screen-reader-only',
+  ).toBeGreaterThan(50)
+
+  // And the full call to action returns with it.
+  await expect(page.locator('header').getByRole('link', { name: 'add your moment' })).toHaveText(
+    'add your moment',
+    { useInnerText: true },
   )
 })

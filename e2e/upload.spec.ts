@@ -77,8 +77,7 @@ test('the wall info button reaches the policy links without scrolling (D51)', as
   // own centre is the topmost element there. Playwright's click has to scroll
   // and re-hit-test, and on the phone project that dance kept landing on the
   // hero underneath even though the button was on top the whole time.
-  const topmostIsButton = await page.evaluate(() => {
-    const el = document.querySelector('[aria-label="site info"]')!
+  const topmostIsButton = await info.evaluate((el) => {
     const box = el.getBoundingClientRect()
     const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
     return !!hit && (hit === el || el.contains(hit))
@@ -131,12 +130,26 @@ test('the floating button covers no policy text (D51)', async ({ page }) => {
     'the unofficial-project notice reaches over the info button',
   ).toBeGreaterThanOrEqual(topBox.x + topBox.width)
 
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  // Scroll until the footer is actually the thing at the bottom of the screen.
+  // A single scrollTo is not enough: reaching the bottom trips the wall's
+  // sentinel, the page grows underneath, and the footer slides back off — at
+  // which point no link is anywhere near the button and the loop below would
+  // report success without ever having put the two together.
+  // By role: Next's dev error overlay ships a <footer> of its own.
+  const footer = page.getByRole('contentinfo')
+  await expect
+    .poll(async () => {
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+      const box = await footer.boundingBox()
+      const height = page.viewportSize()!.height
+      return box ? Math.round(box.y + box.height - height) : Infinity
+    })
+    .toBeLessThanOrEqual(2)
 
   const button = (await page.getByRole('button', { name: 'site info' }).boundingBox())!
 
   // Measured in the page so every link is included, laid out or not.
-  const linkRects = await page.locator('footer a').evaluateAll((els) =>
+  const linkRects = await footer.getByRole('link').evaluateAll((els) =>
     els.map((el) => {
       const { x, y, width, height } = el.getBoundingClientRect()
       return { text: el.textContent ?? '', x, y, width, height }

@@ -46,6 +46,14 @@
   }
 }
 
+/* Room under the footer's links for a floating control to sit without eating
+ * their taps — only on the pages that actually float one. The footer ships on
+ * every route; SiteInfoFab only on the wall, so a padding baked into the
+ * footer would leave ten other pages with dead space under their last link. */
+body:has(.hide-under-modal) footer {
+  padding-bottom: calc(var(--spacing) * 24);
+}
+
 /* Pulse dot — live-signal accent, used only by the wall live feed
  * (see PulseDot). Applied via animate-[pulse-dot_…]; the
  * motion-reduce variant turns it off for reduced-motion users. */

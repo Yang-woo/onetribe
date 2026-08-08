@@ -7,12 +7,10 @@ import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 export async function SiteFooter() {
   const t = await getTranslations('footer')
   return (
-    // pb clears the wall's info button, which floats 2rem above the viewport
-    // bottom at 1rem from the left edge (docs/00 D51). Without the room, the
-    // footer's own links sit under it at full scroll and it eats their taps.
-    // Static room beats hiding the button on scroll: no observer, no state,
-    // and nothing to get the timing wrong.
-    <footer className="mt-16 border-t border-line px-4 pb-24 pt-8 text-sm text-muted">
+    // The wall page adds bottom room here so its floating info button doesn't
+    // land on these links — see globals.css. Static room beats hiding the
+    // button on scroll: no observer, no state, no timing to get wrong.
+    <footer className="mt-16 border-t border-line px-4 py-8 text-sm text-muted">
       <div className="mx-auto flex max-w-6xl flex-col gap-3">
         <p>{t('disclaimer')}</p>
         <nav className="flex flex-wrap gap-4">
