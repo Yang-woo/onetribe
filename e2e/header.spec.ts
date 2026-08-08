@@ -12,28 +12,45 @@ import { expect, test } from '@playwright/test'
  */
 const WIDTHS = [320, 360, 375, 390, 412, 430]
 
+/**
+ * Room left in the bar: its content box minus the two groups in it. Negative
+ * means they have already collided.
+ *
+ * Not the gap between them — nothing in this header shrinks (`whitespace-nowrap`
+ * throughout, no `min-w-0`), so an over-long row overflows the bar instead of
+ * squeezing the gap, and the gap reads its full `gap-*` value at the moment of
+ * worst failure. A floor on the gap is an assertion that cannot fail.
+ */
+const freeSpace = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => {
+    const bar = document.querySelector('header > div') as HTMLElement
+    const [mark, group] = [...bar.children] as HTMLElement[]
+    const style = getComputedStyle(bar)
+    const content = bar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+    return Math.round(
+      content - mark.getBoundingClientRect().width - group.getBoundingClientRect().width,
+    )
+  })
+
 test('the header fits every phone width without scrolling the page sideways', async ({ page }) => {
+  // One load, then resize: the rules under test are media queries, so nothing
+  // here is decided at navigation time.
+  await page.goto('/en')
+
   for (const width of WIDTHS) {
     await page.setViewportSize({ width, height: 800 })
-    await page.goto('/en')
 
-    const { overflow, slack } = await page.evaluate(() => {
-      const bar = document.querySelector('header > div') as HTMLElement
-      const [mark, group] = [...bar.children] as HTMLElement[]
-      return {
-        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        // Gap between the mark and the right-hand group: the room left before
-        // the two collide. `scrollWidth` cannot show this — it only grows once
-        // the overflow has already happened.
-        slack: group.getBoundingClientRect().left - mark.getBoundingClientRect().right,
-      }
-    })
-
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    )
     expect(overflow, `the page scrolls sideways at ${width}px`).toBe(0)
-    // A few px of margin, not zero: the same markup measures wider under CI's
-    // Linux fonts than on macOS, and a header that fits exactly on one machine
-    // is a header that overflows on the other.
-    expect(slack, `the header has no room left at ${width}px`).toBeGreaterThanOrEqual(4)
+
+    // Room to spare, not a bare fit. The select is as wide as its widest option
+    // and several are native names (简体中文, 한국어) with no glyphs in our two
+    // fonts, so its width comes from whatever font the OS supplies — different
+    // on CI, on an iPhone, on Android. Headroom is a requirement here, not a
+    // test artifact.
+    expect(await freeSpace(page), `the header has no room left at ${width}px`).toBeGreaterThan(0)
   }
 })
 
