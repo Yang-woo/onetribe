@@ -144,8 +144,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             park in — without it the button covers the first word of a legal
             notice on a phone (docs/00 D51). Margin, not padding: padding keeps
             the box full width, and that invisible strip swallows the taps
-            aimed at the button underneath it. */}
-        <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint max-sm:mx-14">
+            aimed at the button underneath it. Sized to clear the button by
+            8px and no more — the text is centred, so every pixel of inset
+            costs two from a column that is only 200px wide on a 320 phone. */}
+        <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint max-sm:mx-10">
           {tFooter('disclaimer')}
         </p>
       </section>
