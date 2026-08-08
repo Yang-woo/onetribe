@@ -1,6 +1,6 @@
-import { screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderWithIntl } from '@/test-utils'
+import { installIntersectionObserver, renderWithIntl } from '@/test-utils'
 import { describe, expect, test, vi } from 'vitest'
 import { SITE_LINKS } from '@/lib/site-links'
 import { SUPPORT_ANCHOR } from '@/lib/support'
@@ -30,7 +30,7 @@ describe('SiteInfoFab', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 
-  test('opening it exposes every footer link, locale-prefixed, plus the disclaimer', async () => {
+  test('opening it exposes every policy link, locale-prefixed and in order', async () => {
     const user = userEvent.setup()
     renderWithIntl(<SiteInfoFab />)
 
@@ -69,6 +69,49 @@ describe('SiteInfoFab', () => {
     } finally {
       rail.live = true
     }
+  })
+
+  test('stands down once the footer is on screen', async () => {
+    const user = userEvent.setup()
+    const { fireAll, restore } = installIntersectionObserver()
+    try {
+      renderWithIntl(
+        <>
+          <SiteInfoFab />
+          <footer>the real footer</footer>
+        </>,
+      )
+      await user.click(screen.getByRole('button', { name: 'site info' }))
+      expect(screen.getByRole('link', { name: 'about' })).toBeInTheDocument()
+
+      // Reaching the footer both makes the shortcut pointless and would park
+      // the button on top of the footer's own links.
+      await act(async () => {
+        fireAll()
+      })
+
+      expect(screen.queryByRole('button', { name: 'site info' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'about' })).not.toBeInTheDocument()
+    } finally {
+      restore()
+    }
+  })
+
+  test('an open moment owns Escape — the panel is not collateral', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(
+      <>
+        <SiteInfoFab />
+        <div role="dialog" aria-modal="true" aria-label="a moment" />
+      </>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'site info' }))
+    await user.keyboard('{Escape}')
+
+    // The modal's own handler closes the modal; this panel must survive so it
+    // is still there when the reader comes back out.
+    expect(screen.getByRole('link', { name: 'about' })).toBeInTheDocument()
   })
 
   test('Escape closes it and hands focus back to the button', async () => {

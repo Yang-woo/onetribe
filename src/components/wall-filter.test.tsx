@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { momentFixture, renderWithIntl } from '@/test-utils'
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { installIntersectionObserver, momentFixture, renderWithIntl } from '@/test-utils'
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { EditionChip, Moment } from '@/lib/moments'
 import { WallFilter } from './wall-filter'
 
@@ -11,19 +11,12 @@ import { WallFilter } from './wall-filter'
 // replays on back/forward, realtime rescopes to the new filter, and the live
 // signal resets per view.
 
+// Installed, never fired — MemoryWall only needs the constructor to exist.
+let restoreObserver: () => void
 beforeAll(() => {
-  globalThis.IntersectionObserver = class {
-    observe() {}
-    disconnect() {}
-    unobserve() {}
-    takeRecords() {
-      return []
-    }
-    root = null
-    rootMargin = ''
-    thresholds = []
-  } as unknown as typeof IntersectionObserver
+  ;({ restore: restoreObserver } = installIntersectionObserver())
 })
+afterAll(() => restoreObserver())
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/en')

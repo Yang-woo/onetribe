@@ -72,7 +72,8 @@ export function MemoryWall({
   // loop (and an unhandled rejection). The manual "load more" button clears it
   // for a deliberate retry.
   const [failed, setFailed] = useState(false)
-  // Pages appended so far, however they were asked for — see WALL_AUTO_PAGES.
+  // Pages successfully appended, however they were asked for — see
+  // WALL_AUTO_PAGES.
   const [pagesLoaded, setPagesLoaded] = useState(0)
   // The open moment, by id — the lightbox resolves it against the live list on
   // every render (docs/00 D33), so a live insert can't shift the view.
@@ -87,7 +88,6 @@ export function MemoryWall({
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   const loadMore = useCallback(async () => {
-    setPagesLoaded((pages) => pages + 1)
     setLoading(true)
     setFailed(false)
     try {
@@ -100,6 +100,11 @@ export function MemoryWall({
         const seen = new Set(current.map((m) => m.id))
         return [...current, ...next.filter((m) => !seen.has(m.id))]
       })
+      // Counted here, not on entry: WALL_AUTO_PAGES caps pages the wall
+      // actually appended. Counting attempts would let one failed page plus
+      // the manual retry that recovers it retire the sentinel after a single
+      // page — spending the budget on a page the reader never got.
+      setPagesLoaded((pages) => pages + 1)
     } catch {
       // Park auto-loading (see `failed`); the manual button stays for a retry.
       setFailed(true)

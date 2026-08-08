@@ -23,8 +23,25 @@ import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 export function SiteInfoFab() {
   const t = useTranslations('footer')
   const [open, setOpen] = useState(false)
+  const [footerReached, setFooterReached] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // Stand down once the reader has arrived at the footer. Two reasons, and
+  // either alone would be enough: the shortcut has nothing left to shortcut,
+  // and at the very bottom this would sit on top of the footer's own links
+  // (both start 1rem from the left edge) and swallow taps meant for them.
+  useEffect(() => {
+    const footer = document.querySelector('footer')
+    if (!footer) return
+    const observer = new IntersectionObserver(([entry]) => {
+      const reached = entry?.isIntersecting ?? false
+      setFooterReached(reached)
+      if (reached) setOpen(false)
+    })
+    observer.observe(footer)
+    return () => observer.disconnect()
+  }, [])
 
   // The panel has no backdrop of its own, so it needs both dismissals: Esc
   // (focus back to the button, since that's where the user came from) and a
@@ -34,6 +51,11 @@ export function SiteInfoFab() {
     if (!open) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
+      // An open moment owns Escape. Without this both handlers fire on one
+      // press: the modal closes AND the panel the reader deliberately opened
+      // is thrown away — and the focus() below would land on a button that
+      // `hide-under-modal` has set to display:none, doing nothing.
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) return
       setOpen(false)
       buttonRef.current?.focus()
     }
@@ -49,6 +71,8 @@ export function SiteInfoFab() {
   }, [open])
 
   const linkClass = 'text-sm text-muted transition-colors hover:text-paper'
+
+  if (footerReached) return null
 
   return (
     <div

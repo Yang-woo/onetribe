@@ -50,7 +50,10 @@ test('the wall renders with hero, counter and disclaimer', async ({ page }) => {
   await expect(page.getByText('the weekend never happened.')).toBeVisible()
   await expect(page.getByText(/moments? · \d+ (country|countries)/)).toBeVisible()
   // Two copies on this page by design (docs/00 D51) — the footer's, and one
-  // under the counters. `.first()` is the hero one, above the fold.
+  // under the counters. Counted, not `.first()`: this is the home page's only
+  // coverage of the footer disclaimer (policies.spec.ts visits policy routes
+  // only), and `.first()` would keep passing if the footer's copy vanished.
+  await expect(page.getByText(/Unofficial fan project/)).toHaveCount(2)
   await expect(page.getByText(/Unofficial fan project/).first()).toBeVisible()
 })
 
@@ -60,6 +63,15 @@ test('the wall info button reaches the policy links without scrolling (D51)', as
   const info = page.getByRole('button', { name: 'site info' })
   await expect(info).toBeVisible()
   await expect(info).toHaveAttribute('aria-expanded', 'false')
+
+  // `fixed` puts it bottom-left whatever the source order, so the source order
+  // is free to serve the keyboard: ahead of the wall, a reader reaches it right
+  // after the hero instead of after every card — which is the whole point.
+  const beforeWall = await info.evaluate(
+    (el, wall) => !!(el.compareDocumentPosition(wall!) & Node.DOCUMENT_POSITION_FOLLOWING),
+    await page.locator('#wall').elementHandle(),
+  )
+  expect(beforeWall, 'the info button comes after the wall in tab order').toBe(true)
 
   await info.click()
   const panel = page.getByRole('navigation', { name: 'site info' })
@@ -76,13 +88,16 @@ test('the wall info button reaches the policy links without scrolling (D51)', as
 
   // No gutter: the button falls back to the 1rem inset and accepts covering a
   // corner of the bottom-left photo. 1rem, not 0 — the left edge is where iOS
-  // starts its back swipe.
+  // starts its back swipe. Polled, because a plain `expect(value)` does not
+  // retry and would read the pre-resize box; approximate, because Pixel 7's
+  // 2.625 device ratio can hand back 15.99.
   await page.setViewportSize({ width: 390, height: 844 })
-  expect(await leftEdgeOf(info)).toBe(16)
+  await expect.poll(() => leftEdgeOf(info)).toBeCloseTo(16, 0)
 
   // Gutter: it parks beside the wall, off the photos entirely, and stays 3.5rem
   // from them however wide the display gets — never stranded in the black.
   await page.setViewportSize({ width: 1920, height: 1080 })
+  await expect.poll(() => leftEdgeOf(info)).toBeGreaterThan(16)
   const wide = (await info.boundingBox())!
   const wallLeft = await leftEdgeOf(page.locator('#wall'))
   expect(wide.x + wide.width).toBeLessThanOrEqual(wallLeft)

@@ -144,6 +144,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         </p>
       </section>
 
+      {/* Before the wall in DOM order, though `fixed` puts it at the bottom
+          left: a keyboard reader reaches it right after the hero instead of
+          after every card on the wall — one stop before the footer links it
+          exists to stand in for, which would defeat the point. */}
+      <SiteInfoFab />
+
       <div id="wall" className="mx-auto max-w-6xl scroll-mt-16">
         <WallFilter editions={editions} initialSelectedYear={selectedYear}>
           <Suspense key={selectedYear ?? 'all'} fallback={<WallSkeleton />}>
@@ -151,10 +157,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           </Suspense>
         </WallFilter>
       </div>
-
-      {/* Only page that needs it: every other footer is a short scroll away
-          (docs/00 D51). */}
-      <SiteInfoFab />
     </main>
   )
 }

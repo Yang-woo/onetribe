@@ -76,9 +76,17 @@ export function installIntersectionObserver(): { fireAll: () => void; restore: (
   } as unknown as typeof IntersectionObserver
 
   return {
-    fireAll: () => alive.forEach((fire) => fire()),
+    // Snapshot first: a callback that synchronously constructs a replacement
+    // observer would otherwise be swept up in the same pass and deliver two
+    // callbacks for one "scroll".
+    fireAll: () => [...alive.values()].forEach((fire) => fire()),
     restore: () => {
-      globalThis.IntersectionObserver = real
+      // jsdom has no IntersectionObserver, so `real` is undefined there —
+      // assigning it back would leave the global present-but-undefined and
+      // flip `in`-style feature detection to true.
+      if (real === undefined)
+        delete (globalThis as { IntersectionObserver?: unknown }).IntersectionObserver
+      else globalThis.IntersectionObserver = real
     },
   }
 }

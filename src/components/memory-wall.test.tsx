@@ -250,6 +250,47 @@ describe('MemoryWall', () => {
     }
   })
 
+  test('a failed page does not spend the auto-load budget (docs/00 D51)', async () => {
+    const { fireAll, restore } = installIntersectionObserver()
+
+    try {
+      const user = userEvent.setup()
+      let attempt = 0
+      const loadMore = vi.fn(async () => {
+        attempt += 1
+        if (attempt === 1) throw new Error('offline')
+        return Array.from({ length: 40 }, (_, i) => moment(`p${attempt}-${i}`))
+      })
+      renderWithIntl(
+        <MemoryWall
+          initialMoments={Array.from({ length: 40 }, (_, i) => moment(`m${i}`))}
+          loadMoreImpl={loadMore}
+          subscribeImpl={noSubscribe}
+        />,
+      )
+      const scrollSentinelIntoView = async () => {
+        await act(async () => {
+          fireAll()
+        })
+      }
+
+      // page 1 auto-loads and fails — nothing was appended, so nothing spent
+      await scrollSentinelIntoView()
+      expect(loadMore).toHaveBeenCalledTimes(1)
+
+      // the deliberate retry recovers it: that is appended page 1 of 2
+      await user.click(screen.getByRole('button', { name: 'more moments' }))
+      expect(loadMore).toHaveBeenCalledTimes(2)
+
+      // so the sentinel is still live and owes the reader one more page.
+      // Counting the failed attempt would have retired it here.
+      await scrollSentinelIntoView()
+      expect(loadMore).toHaveBeenCalledTimes(3)
+    } finally {
+      restore()
+    }
+  })
+
   // docs/15 §1 — filtered views get an edition header; the live signal counts
   // this session's inserts and only appears once something has landed.
   test('a fully-canceled year with no anthem keeps the generic remembers-the-edition line', () => {
