@@ -45,7 +45,10 @@ export function LocaleSwitcher() {
         const search = typeof window !== 'undefined' ? window.location.search : ''
         router.replace(`${pathname}${search}`, { locale: e.target.value as Locale })
       }}
-      className="rounded-full border border-line bg-black px-2 py-1 text-sm text-muted"
+      // Width comes from the widest option, and several are native names
+      // (简体中文 / 한국어), so this is the header's second-widest item. Smaller
+      // type on phones buys ~16px without truncating anyone's own language.
+      className="rounded-full border border-line bg-black px-1 py-1 text-xs text-muted sm:px-2 sm:text-sm"
     >
       {LOCALES.map((code) => (
         <option key={code} value={code}>
