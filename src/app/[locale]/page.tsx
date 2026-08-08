@@ -142,8 +142,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         {/* max-sm inset keeps the text clear of the wall's info button, which
             is fixed at 1rem from the left edge on screens with no gutter to
             park in — without it the button covers the first word of a legal
-            notice on a phone (docs/00 D51). */}
-        <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint max-sm:px-14">
+            notice on a phone (docs/00 D51). Margin, not padding: padding keeps
+            the box full width, and that invisible strip swallows the taps
+            aimed at the button underneath it. */}
+        <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint max-sm:mx-14">
           {tFooter('disclaimer')}
         </p>
       </section>

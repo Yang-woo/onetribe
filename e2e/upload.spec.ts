@@ -103,20 +103,19 @@ test('the floating button covers no policy text (D51)', async ({ page }) => {
   // notice (docs/05 wants it at the top), and on a phone the button's fixed
   // 1rem-from-the-left band runs straight through it. The notice is inset on
   // small screens to clear it — this is what proves it.
-  // Measured over the text itself, not the paragraph box — the inset is
-  // padding, so the box still starts where it always did.
-  const textLeft = await page
+  // The BOX, not just the glyphs. An inset made of padding leaves the box full
+  // width, and that invisible strip lies over the button and eats taps meant
+  // for it — which is a click the notice silently steals, not just a cosmetic
+  // overlap. Asserting the box covers both.
+  const noticeLeft = (await page
     .getByText(/Unofficial fan project/)
     .first()
-    .evaluate((el) => {
-      const range = document.createRange()
-      range.selectNodeContents(el)
-      return range.getBoundingClientRect().x
-    })
+    .boundingBox())!.x
   const topBox = (await page.getByRole('button', { name: 'site info' }).boundingBox())!
-  expect(textLeft, 'the info button overlaps the unofficial-project notice').toBeGreaterThanOrEqual(
-    topBox.x + topBox.width,
-  )
+  expect(
+    noticeLeft,
+    'the unofficial-project notice reaches over the info button',
+  ).toBeGreaterThanOrEqual(topBox.x + topBox.width)
 
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
 
