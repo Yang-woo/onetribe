@@ -209,6 +209,9 @@ test('the wall info button gets out of the way while a moment is open (D51)', as
   const run = randomUUID().slice(0, 8)
   const caption = `lightbox-e2e-${run}-fab`
 
+  // The card needs a real image even though this test never looks at it: with
+  // no media the figure collapses to the height of its own edition tag, and
+  // that tag then intercepts the click meant for the card.
   const seededId = await seedMemory(service, {
     event_id: await eventIdByYear(service, 2015),
     media_url: svgDataUri(1200, 800, `${run}-fab`),

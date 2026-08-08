@@ -34,6 +34,18 @@
   background-image: linear-gradient(92deg, var(--color-orange), var(--color-red));
 }
 
+/* Floating chrome that must yield to an open modal. z-order alone isn't
+ * enough: a backdrop of bg-black/95 leaves 5% of the element ghosting through
+ * on a near-black ground. Focus and screen readers are already handled by the
+ * modal itself (Tab trap + aria-modal); this closes the visual gap.
+ * Keyed on the ARIA contract rather than a list of our own modals, so nothing
+ * has to opt in and no component has to learn that site chrome exists. */
+@utility hide-under-modal {
+  body:has([role='dialog'][aria-modal='true']) & {
+    display: none;
+  }
+}
+
 /* Pulse dot — live-signal accent, used only by the wall live feed
  * (see PulseDot). Applied via animate-[pulse-dot_…]; the
  * motion-reduce variant turns it off for reduced-motion users. */
@@ -60,14 +72,4 @@ body {
 :lang(ko) {
   word-break: keep-all;
   overflow-wrap: break-word;
-}
-
-/* The wall's info button (SiteInfoFab) hides while a moment modal is open.
- * z-order alone isn't enough: the modal's backdrop is bg-black/95, so 5% of
- * the button still ghosts through on a near-black ground. Focus and screen
- * readers are already handled by the modal itself (Tab trap + aria-modal) —
- * this only closes the visual gap, from a distance so the wall never has to
- * know that a piece of site chrome exists. */
-body:has([role='dialog'][aria-modal='true']) [data-site-info] {
-  display: none;
 }

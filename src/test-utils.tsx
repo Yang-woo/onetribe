@@ -44,3 +44,41 @@ export function momentFixture(id: string, overrides: Partial<Moment> = {}): Mome
     ...overrides,
   }
 }
+
+/**
+ * A stand-in IntersectionObserver that honours `disconnect()`, so a test can
+ * drive "the sentinel came into view" and still see teardown — an observer the
+ * component has torn down stops firing, which is the only way to observe a cap
+ * that works by disconnecting (docs/00 D51).
+ *
+ * `fireAll()` intersects every observer still alive; components that keep one
+ * at a time therefore see exactly one callback. Call `restore()` in a finally.
+ */
+export function installIntersectionObserver(): { fireAll: () => void; restore: () => void } {
+  const alive = new Map<object, () => void>()
+  const real = globalThis.IntersectionObserver
+  globalThis.IntersectionObserver = class {
+    constructor(cb: IntersectionObserverCallback) {
+      const self = this as unknown as IntersectionObserver
+      alive.set(this, () => cb([{ isIntersecting: true } as IntersectionObserverEntry], self))
+    }
+    observe() {}
+    unobserve() {}
+    disconnect() {
+      alive.delete(this)
+    }
+    takeRecords() {
+      return []
+    }
+    root = null
+    rootMargin = ''
+    thresholds = []
+  } as unknown as typeof IntersectionObserver
+
+  return {
+    fireAll: () => alive.forEach((fire) => fire()),
+    restore: () => {
+      globalThis.IntersectionObserver = real
+    },
+  }
+}

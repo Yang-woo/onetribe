@@ -8,6 +8,13 @@ export const SUPPORT_LINKS = {
   githubSponsors: null as string | null, // dropped 2026-07-28 (D15): approved, but donating meant a GitHub account + login — too much friction for a fan audience. Ko-fi is the single rail.
 }
 
+/**
+ * The only way into the donation rails from site chrome (D15): the no-perk
+ * framing on About comes first, never a direct external link. Both the footer
+ * and the wall's info button link here.
+ */
+export const SUPPORT_ANCHOR = '/about#support'
+
 export function hasSupportLinks(): boolean {
   // `||`, not `??`: emptying a rail to '' is the obvious way to switch one off
   // without deleting the key, and `??` would stop at that empty string and hide

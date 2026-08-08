@@ -1,26 +1,20 @@
 import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { momentFixture, renderWithIntl } from '@/test-utils'
-import { beforeAll, describe, expect, test, vi } from 'vitest'
+import { installIntersectionObserver, momentFixture, renderWithIntl } from '@/test-utils'
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
 import type { EditionChip, Moment } from '@/lib/moments'
 import { MemoryWall, WALL_AUTO_PAGES } from './memory-wall'
 
 // Spec: docs/15 §1 — empty state invites the first upload; realtime
 // inserts appear at the top without a reload; no duplicates.
 
+// Installed but never fired for most tests — they only need the constructor to
+// exist. The two that drive the sentinel install their own and fire it.
+let restoreObserver: () => void
 beforeAll(() => {
-  globalThis.IntersectionObserver = class {
-    observe() {}
-    disconnect() {}
-    unobserve() {}
-    takeRecords() {
-      return []
-    }
-    root = null
-    rootMargin = ''
-    thresholds = []
-  } as unknown as typeof IntersectionObserver
+  ;({ restore: restoreObserver } = installIntersectionObserver())
 })
+afterAll(() => restoreObserver())
 
 const moment = momentFixture
 
@@ -162,25 +156,9 @@ describe('MemoryWall', () => {
   })
 
   test('a failed page parks auto-loading so the observer stops re-firing, and recovers on a manual retry', async () => {
-    // A controllable observer (the global mock is a no-op) so we can drive the
-    // sentinel-into-view path directly — that's where the infinite spin lived.
-    const fires: Array<() => void> = []
-    const realIO = globalThis.IntersectionObserver
-    globalThis.IntersectionObserver = class {
-      constructor(cb: IntersectionObserverCallback) {
-        const self = this as unknown as IntersectionObserver
-        fires.push(() => cb([{ isIntersecting: true } as IntersectionObserverEntry], self))
-      }
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-      takeRecords() {
-        return []
-      }
-      root = null
-      rootMargin = ''
-      thresholds = []
-    } as unknown as typeof IntersectionObserver
+    // Drive the sentinel-into-view path directly — that's where the infinite
+    // spin lived.
+    const { fireAll, restore } = installIntersectionObserver()
 
     try {
       const user = (await import('@testing-library/user-event')).default.setup()
@@ -197,7 +175,7 @@ describe('MemoryWall', () => {
           subscribeImpl={noSubscribe}
         />,
       )
-      const scrollSentinelIntoView = () => fires[fires.length - 1]?.()
+      const scrollSentinelIntoView = () => fireAll()
 
       // first intersection loads a page — which fails
       await act(async () => {
@@ -220,36 +198,18 @@ describe('MemoryWall', () => {
       expect(loadMore).toHaveBeenCalledTimes(2)
       expect(screen.getByText('caption-recovered')).toBeInTheDocument()
     } finally {
-      globalThis.IntersectionObserver = realIO
+      restore()
     }
   })
 
   test('the sentinel stops after WALL_AUTO_PAGES — the bottom has to stop retreating', async () => {
-    // This observer honours disconnect(), unlike the one above: the cap works
-    // by tearing the observer down, so a mock that keeps firing a disconnected
-    // one would report a cap that isn't there.
-    const alive = new Map<object, () => void>()
-    const realIO = globalThis.IntersectionObserver
-    globalThis.IntersectionObserver = class {
-      root = null
-      rootMargin = ''
-      thresholds = []
-      constructor(cb: IntersectionObserverCallback) {
-        const self = this as unknown as IntersectionObserver
-        alive.set(this, () => cb([{ isIntersecting: true } as IntersectionObserverEntry], self))
-      }
-      observe() {}
-      unobserve() {}
-      disconnect() {
-        alive.delete(this)
-      }
-      takeRecords() {
-        return []
-      }
-    } as unknown as typeof IntersectionObserver
+    // The cap works by tearing the observer down, so this has to be a stand-in
+    // that honours disconnect() — one that kept firing a disconnected observer
+    // would report a cap that isn't there.
+    const { fireAll, restore } = installIntersectionObserver()
 
     try {
-      const user = (await import('@testing-library/user-event')).default.setup()
+      const user = userEvent.setup()
       let page = 0
       // A full page every time: the wall is never exhausted, so only the cap
       // can stop the auto-loading (docs/00 D51).
@@ -266,7 +226,7 @@ describe('MemoryWall', () => {
       )
       const scrollSentinelIntoView = async () => {
         await act(async () => {
-          alive.forEach((fire) => fire())
+          fireAll()
         })
       }
 
@@ -286,7 +246,7 @@ describe('MemoryWall', () => {
       await scrollSentinelIntoView()
       expect(loadMore).toHaveBeenCalledTimes(WALL_AUTO_PAGES + 1)
     } finally {
-      globalThis.IntersectionObserver = realIO
+      restore()
     }
   })
 

@@ -135,12 +135,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           {t('counterCountries', { countries: counters.countries })}
         </p>
 
-        {/* The unofficial-project notice, above the fold (docs/05 asks for it
-            at the top as well as in the footer). The wall auto-loads, so on
-            this one page the footer copy sits below a bottom that keeps
-            moving — a guardrail nobody can scroll to is a guardrail on paper.
-            Negative margin so it reads as a caption on the counters rather
-            than a fifth peer in the hero's stack. */}
+        {/* docs/05 asks for the notice at the top as well as in the footer,
+            and this is the page where that matters: the footer's copy is many
+            screens below a wall that keeps growing. Negative margin so it
+            reads as a caption on the counters, not a fifth peer in the stack. */}
         <p className="-mt-3 max-w-[46ch] text-xs leading-relaxed text-faint">
           {tFooter('disclaimer')}
         </p>
@@ -154,8 +152,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         </WallFilter>
       </div>
 
-      {/* Only page that needs it: everywhere else the footer is at a bottom
-          you can actually reach (docs/00 D51). */}
+      {/* Only page that needs it: every other footer is a short scroll away
+          (docs/00 D51). */}
       <SiteInfoFab />
     </main>
   )

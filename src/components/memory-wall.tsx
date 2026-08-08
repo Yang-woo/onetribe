@@ -18,11 +18,15 @@ function defaultLoadMore(eventIds?: string[]): LoadMore {
 
 /**
  * Pages the wall appends before the sentinel retires and every further page
- * has to be asked for (docs/00 D51). Uncapped auto-loading has two costs: the
- * page bottom retreats every time you approach it, so anything anchored below
- * the wall is out of reach; and a phone quietly downloads hundreds of photos
- * nobody chose to fetch. The button below the wall still loads forever past
- * this point — the wall stays endless, it just stops being involuntary.
+ * has to be asked for (docs/00 D51). Uncapped, the sentinel appends whenever
+ * it comes into view, which costs twice over: the page bottom retreats every
+ * time you approach it, so the footer below the wall can't be arrived at at
+ * all; and a phone quietly downloads hundreds of photos nobody asked for.
+ * The button below the wall still loads forever past this point — the wall
+ * stays endless, it just stops being involuntary.
+ *
+ * This makes the bottom reachable, not near: on a phone the footer is still
+ * many screens down. That remaining distance is what SiteInfoFab answers.
  */
 export const WALL_AUTO_PAGES = 2
 

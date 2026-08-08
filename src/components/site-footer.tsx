@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
-import { FOOTER_LINKS } from '@/lib/site-links'
-import { hasSupportLinks } from '@/lib/support'
+import { SITE_LINKS } from '@/lib/site-links'
+import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 
 // The disclaimer is a legal guardrail (docs/05) — it renders on every page.
 export async function SiteFooter() {
@@ -11,14 +11,14 @@ export async function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-col gap-3">
         <p>{t('disclaimer')}</p>
         <nav className="flex flex-wrap gap-4">
-          {FOOTER_LINKS.map((key) => (
+          {SITE_LINKS.map((key) => (
             <Link key={key} href={`/${key}`} className="hover:text-paper">
               {t(`links.${key}`)}
             </Link>
           ))}
           {/* Donations enter via About's no-perk framing, never a direct external link (D15). */}
           {hasSupportLinks() && (
-            <Link href="/about#support" className="hover:text-paper">
+            <Link href={SUPPORT_ANCHOR} className="hover:text-paper">
               {t('links.support')}
             </Link>
           )}

@@ -3,14 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { FOOTER_LINKS } from '@/lib/site-links'
-import { hasSupportLinks } from '@/lib/support'
+import { SITE_LINKS } from '@/lib/site-links'
+import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 
 /**
- * Wall info button (docs/00 D51) — the policy links, reachable from anywhere
- * in the feed. The wall keeps appending pages, so the footer sits below a
- * bottom that moves away as you approach it; "scroll to the end" is not an
- * entry point. This is, and it is the wall page's only extra chrome.
+ * The policy links, on the one page where the footer is a long scroll away
+ * (docs/00 D51). The wall's only extra chrome.
  *
  * Bottom-LEFT on purpose. Bottom-right is the primary-action corner and the
  * best thumb reach on a phone — spending it on the least-used links would both
@@ -21,9 +19,6 @@ import { hasSupportLinks } from '@/lib/support'
  * no gutter to use, then hands over to the gutter position once one exists.
  * The distance to the wall stays 3.5rem at every width, so a bigger display
  * pushes it further from the viewport edge, never further from the photos.
- *
- * While a moment modal is open this is hidden outright — see the `:has` rule
- * in globals.css for why z-order alone isn't enough.
  */
 export function SiteInfoFab() {
   const t = useTranslations('footer')
@@ -58,8 +53,7 @@ export function SiteInfoFab() {
   return (
     <div
       ref={rootRef}
-      data-site-info
-      className="fixed bottom-8 left-[max(1rem,calc(50%_-_36rem_-_3.5rem))] z-40"
+      className="hide-under-modal fixed bottom-8 left-[max(1rem,calc(50%_-_36rem_-_3.5rem))] z-40"
     >
       {/* Trigger before panel in DOM order: a keyboard reader Tabs forward
           into the links. `absolute` puts the panel above it on screen anyway,
@@ -86,7 +80,7 @@ export function SiteInfoFab() {
           aria-label={t('info')}
           className="absolute bottom-13 left-0 flex w-58 flex-col gap-2.5 rounded-xl border border-line bg-surface-raised p-4 shadow-[0_18px_48px_rgba(0,0,0,0.6)]"
         >
-          {FOOTER_LINKS.map((key) => (
+          {SITE_LINKS.map((key) => (
             <Link key={key} href={`/${key}`} className={linkClass}>
               {t(`links.${key}`)}
             </Link>
@@ -94,16 +88,10 @@ export function SiteInfoFab() {
           {/* Donations enter via About's no-perk framing, never a direct
               external link (D15) — same rule as the footer. */}
           {hasSupportLinks() && (
-            <Link href="/about#support" className={linkClass}>
+            <Link href={SUPPORT_ANCHOR} className={linkClass}>
               {t('links.support')}
             </Link>
           )}
-          {/* The same legal guardrail the footer carries (docs/05). It also
-              rides at the top of the wall page, where it is read without a
-              tap — this copy is for whoever opens the panel on any other. */}
-          <p className="border-t border-line pt-3 text-[11px] leading-relaxed text-faint">
-            {t('disclaimer')}
-          </p>
         </nav>
       )}
     </div>

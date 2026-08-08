@@ -2,18 +2,22 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithIntl } from '@/test-utils'
 import { describe, expect, test, vi } from 'vitest'
-import { FOOTER_LINKS } from '@/lib/site-links'
+import { SITE_LINKS } from '@/lib/site-links'
+import { SUPPORT_ANCHOR } from '@/lib/support'
 import { SiteInfoFab } from './site-info-fab'
 
 // The live rail is a deploy-time constant (D15), so the only way to exercise
-// the "no rail yet" branch is to stand in for it.
+// the "no rail yet" branch is to stand in for it. Only the gate is stubbed —
+// SUPPORT_ANCHOR stays real, so the href assertions test the shipped value.
 const rail = vi.hoisted(() => ({ live: true }))
-vi.mock('@/lib/support', () => ({ hasSupportLinks: () => rail.live }))
+vi.mock(import('@/lib/support'), async (importOriginal) => ({
+  ...(await importOriginal()),
+  hasSupportLinks: () => rail.live,
+}))
 
-// docs/00 D51 — the wall auto-loads, so the footer is below a bottom that
-// moves away as you approach it. This button is the policy links' only
-// dependable entry point on that page, so what it must never do is lose one,
-// strand itself open, or point at a donation rail that isn't live.
+// docs/00 D51 — on the wall page the footer is many screens down, so this is
+// the policy links' dependable entry point. What it must never do is lose a
+// link, strand itself open, or point at a donation rail that isn't live.
 
 describe('SiteInfoFab', () => {
   test('collapsed by default — the links are not reachable until asked for', () => {
@@ -34,17 +38,11 @@ describe('SiteInfoFab', () => {
 
     // Parity with the footer's set is the whole point of the shared list: a
     // link added to one and not the other is a link the wall page can't reach.
-    const labels: Record<(typeof FOOTER_LINKS)[number], string> = {
-      terms: 'terms',
-      privacy: 'privacy',
-      takedown: 'removals',
-      guidelines: 'guidelines',
-      about: 'about',
-    }
-    for (const key of FOOTER_LINKS) {
-      expect(screen.getByRole('link', { name: labels[key] })).toHaveAttribute('href', `/en/${key}`)
-    }
-    expect(screen.getByText(/Unofficial fan project/)).toBeInTheDocument()
+    // Asserted by href and in order, so an extra or reordered entry fails too.
+    expect(screen.getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual([
+      ...SITE_LINKS.map((key) => `/en/${key}`),
+      `/en${SUPPORT_ANCHOR}`,
+    ])
     expect(screen.getByRole('button', { name: 'site info' })).toHaveAttribute(
       'aria-expanded',
       'true',
@@ -58,7 +56,7 @@ describe('SiteInfoFab', () => {
     // D15: never a direct external link — the no-perk framing comes first.
     expect(screen.getByRole('link', { name: 'support' })).toHaveAttribute(
       'href',
-      '/en/about#support',
+      `/en${SUPPORT_ANCHOR}`,
     )
     unmount()
 

@@ -49,9 +49,8 @@ test('the wall renders with hero, counter and disclaimer', async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/) // locale negotiation redirect (T3.1)
   await expect(page.getByText('the weekend never happened.')).toBeVisible()
   await expect(page.getByText(/moments? · \d+ (country|countries)/)).toBeVisible()
-  // Two copies on this page by design (docs/00 D51): the footer's, and one
-  // under the counters because the wall auto-loads and the footer's sits below
-  // a bottom that keeps moving. `.first()` is the hero one, above the fold.
+  // Two copies on this page by design (docs/00 D51) — the footer's, and one
+  // under the counters. `.first()` is the hero one, above the fold.
   await expect(page.getByText(/Unofficial fan project/).first()).toBeVisible()
 })
 
@@ -69,29 +68,25 @@ test('the wall info button reaches the policy links without scrolling (D51)', as
     '/en/takedown',
   )
 
-  // Never flush to the left edge — that's where iOS starts its back swipe.
-  const box = (await info.boundingBox())!
-  const wallLeft = (await page.locator('#wall').boundingBox())!.x
-  expect(box.x).toBeGreaterThanOrEqual(16)
-  if (wallLeft >= box.width + 16) {
-    // Wide enough for a gutter: the button parks beside the wall, not on it.
-    expect(box.x + box.width).toBeLessThanOrEqual(wallLeft)
-  } else {
-    // A phone has no gutter to use, so it falls back to the 1rem inset and
-    // accepts covering a corner of the bottom-left photo.
-    expect(box.x).toBe(16)
-  }
+  // Both position cases, pinned explicitly rather than branched on whichever
+  // project is running — a conditional assertion can pass by taking the branch
+  // you weren't testing, and at 1280 the two are separated by a scrollbar's
+  // width.
+  const leftEdgeOf = async (locator: typeof info) => (await locator.boundingBox())!.x
 
-  // The gutter branch needs a viewport wider than the 72rem wall plus the
-  // button — neither project is, so ask for one. This is the case the position
-  // was designed for: a big display must not strand the button in black.
+  // No gutter: the button falls back to the 1rem inset and accepts covering a
+  // corner of the bottom-left photo. 1rem, not 0 — the left edge is where iOS
+  // starts its back swipe.
+  await page.setViewportSize({ width: 390, height: 844 })
+  expect(await leftEdgeOf(info)).toBe(16)
+
+  // Gutter: it parks beside the wall, off the photos entirely, and stays 3.5rem
+  // from them however wide the display gets — never stranded in the black.
   await page.setViewportSize({ width: 1920, height: 1080 })
   const wide = (await info.boundingBox())!
-  const wideWallLeft = (await page.locator('#wall').boundingBox())!.x
-  expect(wide.x + wide.width).toBeLessThanOrEqual(wideWallLeft)
-  // Anchored to the wall, not the viewport corner: the gap to the photos is
-  // the same 3.5rem it would be at any width.
-  expect(wideWallLeft - (wide.x + wide.width)).toBeLessThanOrEqual(56)
+  const wallLeft = await leftEdgeOf(page.locator('#wall'))
+  expect(wide.x + wide.width).toBeLessThanOrEqual(wallLeft)
+  expect(wallLeft - (wide.x + wide.width)).toBeLessThanOrEqual(56)
 
   // Esc gives the page back.
   await page.keyboard.press('Escape')
