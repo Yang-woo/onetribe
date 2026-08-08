@@ -73,6 +73,27 @@ test('the wall info button reaches the policy links without scrolling (D51)', as
   )
   expect(beforeWall, 'the info button comes after the wall in tab order').toBe(true)
 
+  // TEMP diagnostic (removed once CI explains itself)
+  console.log(
+    'FABDIAG',
+    JSON.stringify(
+      await page.evaluate(() => {
+        const el = document.querySelector('[aria-label="site info"]') as HTMLElement
+        const w = el.parentElement as HTMLElement
+        const b = el.getBoundingClientRect()
+        const top = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2) as HTMLElement
+        const cs = getComputedStyle(w)
+        return {
+          vw: innerWidth,
+          vh: innerHeight,
+          btn: [Math.round(b.x), Math.round(b.y), Math.round(b.width)],
+          wrapper: { pos: cs.position, z: cs.zIndex, left: cs.left, bottom: cs.bottom },
+          top: top?.tagName + '|' + String(top?.className ?? '').slice(0, 40),
+          sheets: document.styleSheets.length,
+        }
+      }),
+    ),
+  )
   await info.click()
   const panel = page.getByRole('navigation', { name: 'site info' })
   await expect(panel.getByRole('link', { name: 'removals' })).toHaveAttribute(
