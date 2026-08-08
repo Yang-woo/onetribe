@@ -4,6 +4,7 @@
     "subtitle": "Então estamos a construí-lo com memórias.",
     "body": "Cada Defqon, cada palco, cada momento que trouxemos para casa. Acrescenta o teu, na tua língua.",
     "cta": "acrescenta o teu momento",
+    "ctaShort": "acrescenta",
     "browseWall": "percorre o mural ↓",
     "counterMoments": "{moments, plural, one { momento} other { momentos}}",
     "counterCountries": "{countries, plural, one { país} other { países}}"

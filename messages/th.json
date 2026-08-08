@@ -4,6 +4,7 @@
     "subtitle": "เราเลยกำลังสร้างมันขึ้นใหม่จากความทรงจำ",
     "body": "ทุก Defqon ทุกเวที ทุกช่วงเวลาที่เราหอบกลับบ้าน มาเพิ่มของคุณ ในภาษาของคุณเอง",
     "cta": "เพิ่มช่วงเวลาของคุณ",
+    "ctaShort": "เพิ่ม",
     "browseWall": "เลื่อนดูกำแพง ↓",
     "counterMoments": "{moments, plural, other { ช่วงเวลา}}",
     "counterCountries": "{countries, plural, other { ประเทศ}}"

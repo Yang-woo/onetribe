@@ -4,6 +4,7 @@
     "subtitle": "So we’re building it from memory.",
     "body": "Every Defqon, every stage, every moment we ever took home. Add yours, in your own language.",
     "cta": "add your moment",
+    "ctaShort": "add",
     "browseWall": "browse the wall ↓",
     "counterMoments": "{moments, plural, one { moment} other { moments}}",
     "counterCountries": "{countries, plural, one { country} other { countries}}"

@@ -4,6 +4,7 @@
     "subtitle": "jadi kita bangun kembali dari ingatan.",
     "body": "setiap Defqon, setiap panggung, setiap momen yang pernah kita bawa pulang. tambahkan milikmu, dalam bahasamu sendiri.",
     "cta": "bagikan momenmu",
+    "ctaShort": "bagikan",
     "browseWall": "jelajahi dinding ↓",
     "counterMoments": "{moments, plural, other { momen}}",
     "counterCountries": "{countries, plural, other { negara}}"

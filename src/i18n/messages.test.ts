@@ -92,6 +92,26 @@ describe.each(Object.keys(MESSAGES).filter((l) => l !== 'en'))('%s.json', (local
 })
 
 /**
+ * The header shows `hero.ctaShort` on phones and `hero.cta` from `sm` up, with
+ * the full label as the link's accessible name — the header's width budget is
+ * really seventeen budgets, and the full label runs 83px to 191px while most
+ * locales have ~50px to spare (docs/12).
+ *
+ * Keeping the short form a substring of the full one is what makes that legal:
+ * WCAG 2.5.3 asks that the accessible name contain the visible label, so a
+ * speech-input user saying what they can see still hits the button. Nothing in
+ * the app can check this at runtime — a translator picking a synonym would
+ * break it silently.
+ */
+describe.each(Object.keys(MESSAGES))('%s.json header CTA', (locale) => {
+  test('the short label is contained in the full one', () => {
+    const messages = MESSAGES[locale] as { hero: { cta: string; ctaShort: string } }
+    const { cta, ctaShort } = messages.hero
+    expect({ locale, contains: cta.includes(ctaShort) }).toEqual({ locale, contains: true })
+  })
+})
+
+/**
  * The argument-name check above compares text with a regex, which cannot see
  * what the ICU *parser* does. A lone apostrophe is ICU's escape character, so
  * translations that legitimately contain one — nl "foto's", tr "MB'tan" — can

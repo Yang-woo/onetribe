@@ -4,6 +4,7 @@
     "subtitle": "Więc budujemy go z pamięci.",
     "body": "Każdy Defqon, każda scena, każdy moment — wszystko, co zabraliśmy do domu. Dodaj swój, we własnym języku.",
     "cta": "dodaj swój moment",
+    "ctaShort": "dodaj",
     "browseWall": "przeglądaj ścianę ↓",
     "counterMoments": "{moments, plural, one { moment} few { momenty} many { momentów} other { momentu}}",
     "counterCountries": "{countries, plural, one { kraj} few { kraje} many { krajów} other { kraju}}"
