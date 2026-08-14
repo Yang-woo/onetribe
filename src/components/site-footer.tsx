@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
-import { SITE_LINKS } from '@/lib/site-links'
+import { GithubMark } from './github-mark'
+import { SITE_LINKS, SOURCE_LINK } from '@/lib/site-links'
 import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 
 // The disclaimer is a legal guardrail (docs/05) — it renders on every page.
@@ -25,6 +26,19 @@ export async function SiteFooter() {
               {t('links.support')}
             </Link>
           )}
+          {/* The only link here that leaves the site, so it's a plain anchor
+              rather than the locale-aware Link. `ml-auto` eats the row's free
+              space to park it at the far right — and once a narrow screen
+              wraps the row, at the right end of whatever line it lands on. */}
+          <a
+            href={SOURCE_LINK.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto inline-flex items-center gap-1.5 hover:text-paper"
+          >
+            <GithubMark />
+            {SOURCE_LINK.label}
+          </a>
         </nav>
       </div>
     </footer>

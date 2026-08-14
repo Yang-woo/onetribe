@@ -61,6 +61,30 @@ test('the support rail is reachable and its Ko-fi mark actually loads', async ({
     .toBeGreaterThan(0)
 })
 
+test('the footer leads with About and parks the source link at the far right', async ({ page }) => {
+  await page.goto('/en/about')
+  const nav = page.locator('footer nav')
+  const source = nav.getByRole('link', { name: /GitHub/ })
+  await expect(source).toHaveAttribute('href', 'https://github.com/Yang-woo/onetribe')
+
+  // Right-aligned by an auto margin, not by being last in source order — drop
+  // `ml-auto` and this link sits one gap after the policy links instead, which
+  // typecheck, lint and every unit test would still call green. Measured as
+  // flush right edges so it holds in both projects: on a phone the row wraps
+  // and the link lands alone on its own line, still against the right edge.
+  const navBox = (await nav.boundingBox())!
+  const sourceBox = (await source.boundingBox())!
+  expect(navBox.x + navBox.width - (sourceBox.x + sourceBox.width)).toBeLessThanOrEqual(1)
+
+  // D52: About leads the row. Source order is the only thing placing it there,
+  // and the unit test that pins the panel's order builds its expectation from
+  // SITE_LINKS itself, so it follows a reorder instead of failing on one. Move
+  // any entry in front of About and its left edge leaves the nav's.
+  const about = nav.getByRole('link', { name: 'about' })
+  const aboutBox = (await about.boundingBox())!
+  expect(aboutBox.x - navBox.x).toBeLessThanOrEqual(1)
+})
+
 test('every locale sees the binding-language notice', async ({ page }) => {
   // D18: the page is identical for every URL locale and carries one English
   // binding notice (the per-locale enNotice banner was retired).

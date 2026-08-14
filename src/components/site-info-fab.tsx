@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { SITE_LINKS } from '@/lib/site-links'
+import { GithubMark } from './github-mark'
+import { SITE_LINKS, SOURCE_LINK } from '@/lib/site-links'
 import { hasSupportLinks, SUPPORT_ANCHOR } from '@/lib/support'
 
 /**
@@ -97,6 +98,18 @@ export function SiteInfoFab() {
               {t('links.support')}
             </Link>
           )}
+          {/* Last, under a hairline: everything above stays on the site and
+              this one leaves it, so the rule marks the change of destination
+              rather than decorating the panel. */}
+          <a
+            href={SOURCE_LINK.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${linkClass} inline-flex items-center gap-1.5 border-t border-line pt-2.5`}
+          >
+            <GithubMark />
+            {SOURCE_LINK.label}
+          </a>
         </nav>
       )}
     </div>

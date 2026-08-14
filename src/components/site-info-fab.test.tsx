@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithIntl } from '@/test-utils'
 import { describe, expect, test, vi } from 'vitest'
-import { SITE_LINKS } from '@/lib/site-links'
+import { SITE_LINKS, SOURCE_LINK } from '@/lib/site-links'
 import { SUPPORT_ANCHOR } from '@/lib/support'
 import { SiteInfoFab } from './site-info-fab'
 
@@ -38,11 +38,17 @@ describe('SiteInfoFab', () => {
 
     // Parity with the footer's set is the whole point of the shared list: a
     // link added to one and not the other is a link the wall page can't reach.
-    // Asserted by href and in order, so an extra or reordered entry fails too.
+    // Asserted by href and in order, so an extra entry — or a renderer that
+    // reorders the list — fails too.
     expect(screen.getAllByRole('link').map((a) => a.getAttribute('href'))).toEqual([
       ...SITE_LINKS.map((key) => `/en/${key}`),
       `/en${SUPPORT_ANCHOR}`,
+      SOURCE_LINK.url,
     ])
+    // ...but that expectation is built from SITE_LINKS, so it follows any
+    // reorder rather than failing on one. About being first is a decision
+    // (D52 — the one link that says what this site is), so pin it separately.
+    expect(screen.getAllByRole('link')[0]).toHaveAccessibleName('about')
     expect(screen.getByRole('button', { name: 'site info' })).toHaveAttribute(
       'aria-expanded',
       'true',
@@ -69,6 +75,31 @@ describe('SiteInfoFab', () => {
     } finally {
       rail.live = true
     }
+  })
+
+  test('the source link leaves the site — absolute, new tab, no handle back', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<SiteInfoFab />)
+
+    await user.click(screen.getByRole('button', { name: 'site info' }))
+    const source = screen.getByRole('link', { name: SOURCE_LINK.label })
+
+    // Rendered through the locale-aware Link like its neighbours, this would
+    // ship as /en/https://github.com/... — a 404 that still looks like a link.
+    expect(source).toHaveAttribute('href', SOURCE_LINK.url)
+    expect(source).toHaveAttribute('target', '_blank')
+    // target="_blank" hands the opened tab a window.opener pointing back here;
+    // rel is what takes it away. Nothing else in this panel opens a tab, so
+    // dropping it here would go unnoticed by every other test.
+    expect(source.getAttribute('rel')).toContain('noopener')
+
+    // The mark ships and stays decorative. Two mutations, two assertions:
+    // dropping `aria-hidden` is caught by the first (a bare <svg> contributes
+    // nothing to the name, so the second survives it alone), and dropping it
+    // *and* titling the mark — the way an icon usually earns a name — makes
+    // the link announce "GitHub GitHub ↗", which only the second catches.
+    expect(source.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+    expect(source).toHaveAccessibleName(SOURCE_LINK.label)
   })
 
   test('an open moment owns Escape — the panel is not collateral', async () => {
@@ -98,7 +129,7 @@ describe('SiteInfoFab', () => {
     // give up on it, and it's the only case with anything to restore. Escape
     // from the button itself never moved focus in the first place.
     await user.tab()
-    expect(screen.getByRole('link', { name: 'terms' })).toHaveFocus()
+    expect(screen.getByRole('link', { name: 'about' })).toHaveFocus()
 
     await user.keyboard('{Escape}')
 
