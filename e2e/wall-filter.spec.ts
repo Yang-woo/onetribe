@@ -87,3 +87,17 @@ test('back leaves the filter without reloading the page', async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/)
   expect(await page.evaluate(() => (window as unknown as { __kept?: boolean }).__kept)).toBe(true)
 })
+
+/**
+ * The row's scrollbar is hidden (globals.css `no-scrollbar`). Component tests
+ * can't see this — jsdom applies no stylesheet — and neither can a size probe:
+ * headless Chromium draws overlay scrollbars, so the row's gutter measures 0
+ * with or without the utility. What does move is the value the browser
+ * computes for the property, which is 'auto' the moment the class comes off.
+ */
+test('the edition row hides its scrollbar', async ({ page }) => {
+  await page.goto('/en')
+  const row = page.getByRole('navigation', { name: 'editions' })
+  await expect(row).toBeVisible()
+  await expect.poll(() => row.evaluate((el) => getComputedStyle(el).scrollbarWidth)).toBe('none')
+})

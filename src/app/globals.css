@@ -34,6 +34,30 @@
   background-image: linear-gradient(92deg, var(--color-orange), var(--color-red));
 }
 
+/* The edition row scrolls sideways, but its scrollbar carries no signal the
+ * row's own affordances don't already give: touch and trackpad swipe it, and
+ * EditionChips adds a wheel remap plus click-drag for mice. macOS only draws
+ * the bar while a mouse is attached, so it never appeared in development —
+ * meanwhile every Windows visitor got a bright classic bar laid across a
+ * near-black wall. Hidden rather than restyled: there is nothing to recolor
+ * that the row doesn't say better by moving.
+ *
+ * The WebKit fallback lives OUTSIDE the utility on purpose. Nesting
+ * `&::-webkit-scrollbar` inside `@utility` doesn't just drop that rule — the
+ * whole utility vanishes from the output (v4 compiles through Lightning CSS,
+ * which discards blocks containing pseudo-elements it doesn't know), so the
+ * class silently does nothing. As a plain rule it survives. `scrollbar-width`
+ * alone already covers Chrome 121+/Firefox/Safari 18.2+, which is every
+ * browser that was actually showing the bar; the fallback is for older
+ * WebKit. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Floating chrome that must yield to an open modal. z-order alone isn't
  * enough: a backdrop of bg-black/95 leaves 5% of the element ghosting through
  * on a near-black ground. Focus and screen readers are already handled by the

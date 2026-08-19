@@ -15,11 +15,11 @@ export type ChipYear = number | 'all'
  * WallFilter drives it from `onSelect` (docs/00 D13).
  *
  * The row scrolls sideways. Touch and trackpad already swipe it. On desktop
- * we add two mouse affordances (macOS hides the overlay scrollbar, so a mouse
- * otherwise can't reach the older editions): a wheel handler that remaps the
- * vertical wheel to horizontal scroll (yielding to the page at the ends), and
- * click-drag — grab the row and pull. A drag past a few px cancels the click
- * that follows so dragging never fires the filter.
+ * we add two mouse affordances (the scrollbar is hidden — `no-scrollbar` — so
+ * a mouse can't reach the older editions through it): a wheel handler that
+ * remaps the vertical wheel to horizontal scroll (yielding to the page at the
+ * ends), and click-drag — grab the row and pull. A drag past a few px cancels
+ * the click that follows so dragging never fires the filter.
  *
  * Drag tracking uses window-level pointer listeners (not setPointerCapture,
  * which retargets the trailing click and breaks React's delegated handlers)
@@ -129,7 +129,7 @@ export function EditionChips({
     <nav
       ref={scrollerRef}
       aria-label="editions"
-      className="flex cursor-grab select-none gap-2 overflow-x-auto px-4 py-3 active:cursor-grabbing"
+      className="no-scrollbar flex cursor-grab select-none gap-2 overflow-x-auto px-4 py-3 active:cursor-grabbing"
     >
       <Link
         href="/"
