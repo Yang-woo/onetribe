@@ -136,6 +136,21 @@ describe('queue', () => {
     expect(body.recent.some((m: { id: string }) => m.id === reportedId)).toBe(true)
     expect(body.counters.openReports).toBeGreaterThanOrEqual(1)
   })
+
+  // Dropping `hidden_reason` from ADMIN_MEMORY_COLUMNS breaks the visible half
+  // of D55 — every hidden row reads as `(unknown)` and every restore starts
+  // demanding an acknowledgement — while leaving the units and the rest of this
+  // suite green. Only the e2e journey noticed, and the e2e job does not run on
+  // pull requests, so the failure would surface on main after the merge.
+  test('the queue tells the operator why a hidden moment is down', async () => {
+    const id = await createMemory(`admin-reason-${randomUUID().slice(0, 6)}`, 'hidden', 'owner')
+
+    const res = await createAdminQueueHandler(deps())(withAuth(operatorToken))
+    const body = await res.json()
+
+    const row = body.recent.find((m: { id: string }) => m.id === id)
+    expect(row).toMatchObject({ status: 'hidden', hidden_reason: 'owner' })
+  })
 })
 
 describe('actions', () => {

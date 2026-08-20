@@ -75,9 +75,12 @@ describe('memories — read', () => {
     expect(data).toBeNull()
   })
 
+  // 42501 specifically, not "an error happened": a dropped column answers 42703
+  // and would keep a laxer assertion green while the thing being protected no
+  // longer exists.
   test('anon cannot read takedown_token (column privilege)', async () => {
     const { error } = await anon.from('memories').select('id, takedown_token').eq('id', liveId)
-    expect(error).not.toBeNull()
+    expect(error?.code).toBe('42501')
   })
 
   // Unlike author_link or aspect_ratio, this column is deliberately left off
@@ -87,7 +90,7 @@ describe('memories — read', () => {
   // publishing it by habit.
   test('anon cannot read hidden_reason (column privilege)', async () => {
     const { error } = await anon.from('memories').select('id, hidden_reason').eq('id', liveId)
-    expect(error).not.toBeNull()
+    expect(error?.code).toBe('42501')
   })
 })
 

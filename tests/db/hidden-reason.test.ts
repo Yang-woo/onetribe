@@ -272,6 +272,24 @@ describe('while a moment is down, its label cannot change', () => {
     })
   })
 
+  test('three reports do not touch a moment awaiting review', async () => {
+    // The report trigger keeps a guard of its own, and since the column guard
+    // took over protecting the label this is the only thing that guard still
+    // does: a 'flagged' row is the v2 auto-filter's "a human should look at
+    // this", and three reports must not quietly convert it into a plain hide.
+    // Nothing writes 'flagged' yet, so without this the guard could be deleted
+    // with every test still green — and the migration comment claims it.
+    const memoryId = await seed()
+    await service.from('memories').update({ status: 'flagged' }).eq('id', memoryId)
+
+    await reportThreeTimes(memoryId)
+
+    expect(await memoryState(service, memoryId)).toEqual({
+      status: 'flagged',
+      hidden_reason: null,
+    })
+  })
+
   test('an unknown reason is refused even where the CHECK constraint cannot see it', async () => {
     const memoryId = await seed()
     await reportThreeTimes(memoryId)
@@ -389,6 +407,18 @@ describe('restoring is refused, by the database, not by the browser', () => {
     // asking on every row is asking on none — this is the flow that has to stay
     // frictionless for the gate above to mean anything
     expect((await adminAction(admin(memoryId, 'unhide'))).status).toBe(200)
+    expect(await memoryState(service, memoryId)).toEqual({ status: 'live', hidden_reason: null })
+  })
+
+  test('restoring a moment that is already up changes nothing and says so', async () => {
+    // The console holds a snapshot that is routinely minutes old, so this is
+    // the ordinary double-click, not an edge case. Without the early return it
+    // would fall through to the gate and answer a live moment with "nothing
+    // here records who took this down".
+    const memoryId = await seed()
+
+    expect((await adminAction(admin(memoryId, 'unhide'))).status).toBe(200)
+
     expect(await memoryState(service, memoryId)).toEqual({ status: 'live', hidden_reason: null })
   })
 
