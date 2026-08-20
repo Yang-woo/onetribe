@@ -12,7 +12,7 @@ import {
 
 /**
  * /api/memories/remove against the real stack — the passport's standing way to
- * take down its own moment (docs/00 — self-delete). Two things can only be
+ * take down its own moment (docs/00 D54). Two things can only be
  * proven here, not against a stub:
  *
  *  1. the scoped UPDATE really does refuse another passport's moment, and
@@ -70,6 +70,9 @@ describe('passport self-removal', () => {
   test('the owner takes their own moment down, and it leaves every public read', async () => {
     const owner = await newPassport('owner')
     const memoryId = await seedOwned(owner.userId, `own-${randomUUID().slice(0, 8)}`)
+    // a second moment the owner keeps: without it, "the removed id is absent"
+    // also passes for a passport that returns no moments at all
+    const keeperId = await seedOwned(owner.userId, `keeper-${randomUUID().slice(0, 8)}`)
 
     // it starts out visible to the world and to its owner's passport
     const anon = createAnonClient()
@@ -86,7 +89,17 @@ describe('passport self-removal', () => {
     // and gone from the owner's own passport, so the grid can't offer a thumb
     // whose permalink is dead
     const state = await createSupabasePassportBackend(owner.client).load()
-    expect(state?.moments.map((m) => m.id)).not.toContain(memoryId)
+    expect(state?.moments.map((m) => m.id)).toEqual([keeperId])
+  })
+
+  test('a token the real auth server does not know is refused', async () => {
+    const owner = await newPassport('token-check')
+    const memoryId = await seedOwned(owner.userId, `token-${randomUUID().slice(0, 8)}`)
+    // the unit suite proves this against a stub; this proves the stub matches
+    // what GoTrue actually does with junk and with no header at all
+    expect((await handler(removeRequest(memoryId, 'not-a-jwt'))).status).toBe(401)
+    expect((await handler(removeRequest(memoryId))).status).toBe(401)
+    expect(await memoryStatus(service, memoryId)).toBe('live')
   })
 
   test('another passport cannot take it down', async () => {

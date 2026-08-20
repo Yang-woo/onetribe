@@ -4,8 +4,8 @@ import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { createMomentRemoveHandler } from './moments'
 
 /**
- * /api/memories/remove — the passport's "remove this moment" (docs/00 —
- * self-delete). Handler-level: what the gate lets through and what the write
+ * /api/memories/remove — the passport's "remove this moment" (docs/00 D54).
+ * Handler-level: what the gate lets through and what the write
  * is *scoped to*. The real-stack proof that another passport's moment survives
  * is tests/db/moment-remove.test.ts.
  *
@@ -17,7 +17,7 @@ import { createMomentRemoveHandler } from './moments'
 
 function stubDeps({ rows = [{ id: 'm-1' }], error = null as { message: string } | null } = {}) {
   const filters: Record<string, unknown> = {}
-  const calls = { updates: 0, revalidated: [] as string[] }
+  const calls = { updates: 0, revalidated: [] as string[], table: '' }
   const db = {
     auth: {
       getUser: async (token: string) =>
@@ -25,8 +25,9 @@ function stubDeps({ rows = [{ id: 'm-1' }], error = null as { message: string } 
           ? { data: { user: { id: 'user-1' } }, error: null }
           : { data: { user: null }, error: { message: 'invalid token' } },
     },
-    from: () => ({
+    from: (table: string) => ({
       update: (patch: Record<string, unknown>) => {
+        calls.table = table
         calls.updates += 1
         Object.assign(filters, { __patch: patch })
         const chain = {
@@ -68,6 +69,7 @@ describe('moment self-removal', () => {
       removeRequest({ memoryId: '11111111-1111-4111-8111-111111111111' }, 'valid'),
     )
     expect(res.status).toBe(200)
+    expect(calls.table).toBe('memories')
     expect(filters.__patch).toEqual({ status: 'hidden' })
     // the count on the wall header drops by one — without this the moment
     // disappears while the header still counts it (docs/00 D41)

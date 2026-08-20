@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { editionLine } from '@/lib/format'
 import { momentImageSrc, type EditionChip, type Moment } from '@/lib/moments'
 import { MomentMeta } from './moment-meta'
@@ -67,10 +67,11 @@ export function Lightbox({
   onClose: () => void
   onNavigate: (id: string) => void
   /**
-   * Opt-in: renders the owner's "remove this moment" control (docs/00 —
-   * self-delete). Only the passport passes it, because only there does the
-   * viewer provably own what's on screen; the wall shows the same modal with
-   * no such button. Rejecting keeps the moment and surfaces the error here —
+   * Opt-in: renders the owner's "remove this moment" control (docs/00 D54).
+   * Only the passport passes it, because only there does the viewer provably
+   * own what's on screen; the wall shows the same modal with no such button —
+   * a property `memory-wall.test.tsx` pins on the real host, not just here.
+   * Rejecting keeps the moment and surfaces the error here —
    * the host is expected to drop the moment from `moments` on success, which
    * closes the modal through the "open moment left the list" path below.
    */
@@ -306,11 +307,11 @@ export function Lightbox({
 }
 
 /**
- * The owner's way out, two-tap (docs/00 — self-delete). Confirmation is inline
- * rather than `window.confirm` because this lives inside a focus-trapped
- * dialog: a native prompt yanks focus out of the trap, and it hides the very
- * photo the user is deciding about. Quiet by default — a moment's own page is
- * not a moderation console.
+ * The owner's way out, two-tap (docs/00 D54). Confirmation is inline rather
+ * than `window.confirm` because this lives inside a focus-trapped dialog: a
+ * native prompt yanks focus out of the trap, and it hides the very photo the
+ * user is deciding about. Quiet by default — a moment's own page is not a
+ * moderation console.
  */
 function RemoveMoment({
   momentId,
@@ -323,17 +324,51 @@ function RemoveMoment({
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const cancelRef = useRef<HTMLButtonElement>(null)
+  // The question is the accessible description of both answers: focus lands on
+  // a button, and without this the reader hears "keep it, button" with nothing
+  // to keep it FROM.
+  const questionId = useId()
   // The success path unmounts this (the host drops the moment, the modal
-  // closes), so the settle below can land after teardown.
+  // closes), so the settle below can land after teardown. Re-armed in the
+  // effect body, not just initialised — an effect that runs twice (StrictMode,
+  // a future remount) would otherwise leave this permanently dead, and a
+  // failure after that point would show no error and leave the button stuck.
   const alive = useRef(true)
-  useEffect(() => () => void (alive.current = false), [])
+  useEffect(() => {
+    alive.current = true
+    return () => {
+      alive.current = false
+    }
+  }, [])
+
+  // Focus follows the control that replaced the one the user was standing on.
+  // Swapping the trigger for the confirm row (or back) drops focus on <body>,
+  // and the modal's Tab trap only wraps when focus is already on its first or
+  // last child — so from <body> the next Tab walks into the page *behind* the
+  // overlay, which is the exact thing the trap exists to prevent (docs/00 D54,
+  // security/brand review). Skipped on the first render: the modal focuses
+  // itself on open, and ←/→ remounts us with a fresh key.
+  const settled = useRef(false)
+  useEffect(() => {
+    if (!settled.current) {
+      settled.current = true
+      return
+    }
+    // The safe half of a destructive pair is where a keyboard user should land.
+    ;(confirming ? cancelRef : triggerRef).current?.focus()
+  }, [confirming])
 
   if (!confirming) {
     return (
       <div className="mt-1 flex flex-col items-center gap-1">
         <button
+          ref={triggerRef}
           type="button"
           onClick={() => {
+            // Clear a previous failure as we re-arm, or the stale error sits
+            // under a fresh question and reads as its answer.
             setFailed(false)
             setConfirming(true)
           }}
@@ -350,14 +385,25 @@ function RemoveMoment({
     )
   }
 
+  // `aria-disabled` + an early `if (busy) return` in each handler rather than
+  // `disabled`: a disabled button is dropped from the tab order AND loses
+  // focus, so the in-flight moment would throw the user back to <body> — the
+  // same defect the effect above fixes. This keeps the pair focusable while
+  // refusing a second submit. (Written out per handler rather than through a
+  // shared wrapper: a wrapper is *called during render*, so the compiler can no
+  // longer see these as event handlers and rejects the ref access inside.)
   return (
     <div className="mt-1 flex flex-col items-center gap-2">
-      <p className="text-xs text-muted">{t('removeConfirm')}</p>
+      <p id={questionId} className="text-xs text-muted">
+        {t('removeConfirm')}
+      </p>
       <div className="flex items-center gap-2">
         <button
           type="button"
-          disabled={busy}
+          aria-disabled={busy}
+          aria-describedby={questionId}
           onClick={() => {
+            if (busy) return
             setBusy(true)
             setFailed(false)
             void onRemove(momentId)
@@ -372,15 +418,20 @@ function RemoveMoment({
                 if (alive.current) setBusy(false)
               })
           }}
-          className="rounded-full border border-red/45 px-3 py-1 text-xs text-red-strong hover:border-red disabled:opacity-50"
+          className="rounded-full border border-red/45 px-3 py-1 text-xs text-red-strong hover:border-red aria-disabled:opacity-50"
         >
           {t('removeYes')}
         </button>
         <button
+          ref={cancelRef}
           type="button"
-          disabled={busy}
-          onClick={() => setConfirming(false)}
-          className="rounded-full border border-line px-3 py-1 text-xs text-muted hover:text-paper disabled:opacity-50"
+          aria-disabled={busy}
+          aria-describedby={questionId}
+          onClick={() => {
+            if (busy) return
+            setConfirming(false)
+          }}
+          className="rounded-full border border-line px-3 py-1 text-xs text-muted hover:text-paper aria-disabled:opacity-50"
         >
           {t('removeCancel')}
         </button>

@@ -89,7 +89,7 @@ export interface PassportBackend {
   setAttendance(eventId: string, attended: boolean): Promise<void>
   /** Take one of this passport's own moments off the wall — a soft hide, same
    *  as the upload confirmation screen's takedown link, but reachable from the
-   *  passport forever (docs/00 — self-delete). Throws if it didn't happen, so
+   *  passport forever (docs/00 D54). Throws if it didn't happen, so
    *  the UI never claims a removal the server refused. */
   removeMoment(memoryId: string): Promise<void>
   // ── upgrade: keeps the current user id, data carries over ──

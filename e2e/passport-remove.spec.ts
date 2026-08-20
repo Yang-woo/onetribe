@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { eventIdByYear, seedMemory, serviceClient } from './fixtures'
 
 /**
- * Removing your own moment from the passport (docs/00 — self-delete). The
+ * Removing your own moment from the passport (docs/00 D54). The
  * uploader who asked for this had already lost the one-time takedown link from
  * the confirmation screen; the passport is the page they still have.
  *

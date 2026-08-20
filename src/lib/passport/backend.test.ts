@@ -201,7 +201,7 @@ describe('signInEmailVerify — anonymous passport merge', () => {
 })
 
 /**
- * removeMoment — the passport's own takedown (docs/00 — self-delete). The
+ * removeMoment — the passport's own takedown (docs/00 D54). The
  * server-side gate is proven against the real stack in
  * tests/db/moment-remove.test.ts; what only belongs here is the guard that
  * runs before any request, and the shape of the one it does send.
