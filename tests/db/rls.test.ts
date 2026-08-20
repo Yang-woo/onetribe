@@ -79,6 +79,16 @@ describe('memories — read', () => {
     const { error } = await anon.from('memories').select('id, takedown_token').eq('id', liveId)
     expect(error).not.toBeNull()
   })
+
+  // Unlike author_link or aspect_ratio, this column is deliberately left off
+  // the anon grant (docs/00 D55): it says why someone took a moment down, which
+  // is about their intent, not about the photo. The default for a NEW column is
+  // "not granted", so this test is what keeps a future grant sweep from
+  // publishing it by habit.
+  test('anon cannot read hidden_reason (column privilege)', async () => {
+    const { error } = await anon.from('memories').select('id, hidden_reason').eq('id', liveId)
+    expect(error).not.toBeNull()
+  })
 })
 
 describe('memories — write is server-only (D9 P1)', () => {
