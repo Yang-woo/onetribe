@@ -70,7 +70,9 @@ describe('moment self-removal', () => {
     )
     expect(res.status).toBe(200)
     expect(calls.table).toBe('memories')
-    expect(filters.__patch).toEqual({ status: 'hidden' })
+    // the reason travels with the status: an unlabelled hide reads as a filter
+    // mistake in the operator console, one keypress from being undone (D55)
+    expect(filters.__patch).toEqual({ status: 'hidden', hidden_reason: 'owner' })
     // the count on the wall header drops by one — without this the moment
     // disappears while the header still counts it (docs/00 D41)
     expect(calls.revalidated).toEqual([COUNTERS_TAG])

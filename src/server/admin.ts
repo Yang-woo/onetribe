@@ -35,7 +35,7 @@ async function requireAdmin(deps: AdminDeps, req: Request): Promise<Response | n
 // Admin reads use the service role — includes hidden rows on purpose
 // (that's the job) but never takedown_token (nothing here needs it).
 const ADMIN_MEMORY_COLUMNS =
-  'id, caption, media_url, thumb_url, media_kind, embed_url, status, author_name, origin_country, created_at'
+  'id, caption, media_url, thumb_url, media_kind, embed_url, status, hidden_reason, author_name, origin_country, created_at'
 
 export function createAdminQueueHandler(deps: AdminDeps) {
   return async (req: Request): Promise<Response> => {
@@ -125,7 +125,14 @@ export function createAdminActionHandler(deps: ModerationDeps) {
       }
       const { error } = await deps.db
         .from('memories')
-        .update({ status: action === 'hide' ? 'hidden' : 'live' })
+        // Restoring clears the provenance with the status it explains: a live
+        // row carrying "the author removed this" would be a lie, and the next
+        // hide has to write its own reason anyway (docs/00 D55).
+        .update(
+          action === 'hide'
+            ? { status: 'hidden', hidden_reason: 'operator' }
+            : { status: 'live', hidden_reason: null },
+        )
         .eq('id', memoryId)
       if (error) return json(500, { error: error.message })
     } else if (action === 'delete') {

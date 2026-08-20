@@ -21,6 +21,9 @@ interface AdminMemory {
   media_kind: 'image' | 'gif' | 'clip'
   embed_url: string | null
   status: string
+  /** Which path hid this row (docs/00 D55) — null while live, and null on rows
+   *  hidden before the column existed. */
+  hidden_reason: 'owner' | 'report' | 'operator' | 'token' | null
   author_name: string | null
   origin_country: string | null
   created_at: string
@@ -137,6 +140,25 @@ export function AdminPanel() {
     a.status === b.status ? 0 : a.status === 'hidden' ? -1 : 1,
   )
 
+  /**
+   * Restoring is the one action here that can undo somebody else's decision
+   * (docs/00 D55). A moment its author took down sorts to the top of this list
+   * with no reports attached — which is exactly what a false-positive auto-hide
+   * looks like — and `h` is one keypress away. Ask before that specific undo;
+   * every other row keeps the frictionless flow moderation needs.
+   */
+  const restore = (memory: AdminMemory, action: 'hide' | 'unhide') => {
+    if (
+      action === 'unhide' &&
+      (memory.hidden_reason === 'owner' || memory.hidden_reason === 'token')
+    ) {
+      const who = memory.hidden_reason === 'owner' ? 'its author' : 'whoever held its takedown link'
+      if (!window.confirm(`${who} took this moment down, not a filter. Put it back on the wall?`))
+        return
+    }
+    void act(memory.id, action)
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-4 text-sm text-muted">
@@ -179,7 +201,7 @@ export function AdminPanel() {
               tabIndex={0}
               aria-label={memory.caption ?? memory.id}
               onKeyDown={(e) => {
-                if (e.key === 'h') void act(memory.id, hideAction)
+                if (e.key === 'h') restore(memory, hideAction)
                 if (e.key === 'd') void act(memory.id, 'delete')
                 if (e.key === 'o') void act(memory.id, 'dismiss')
               }}
@@ -202,6 +224,19 @@ export function AdminPanel() {
                 <p className="truncate text-sm">{memory.caption ?? '—'}</p>
                 <p className="text-xs text-muted">
                   {memory.status}
+                  {/* why it is down — an author's own removal must not read as
+                      a filter mistake waiting to be undone (docs/00 D55) */}
+                  {memory.hidden_reason ? (
+                    <span
+                      className={
+                        memory.hidden_reason === 'owner' || memory.hidden_reason === 'token'
+                          ? ' text-orange'
+                          : ''
+                      }
+                    >{` (${memory.hidden_reason})`}</span>
+                  ) : (
+                    ''
+                  )}
                   {memory.author_name ? ` · @${memory.author_name}` : ''}
                   {memory.origin_country
                     ? ` · ${countryFlag(memory.origin_country)} ${memory.origin_country}`
@@ -221,7 +256,7 @@ export function AdminPanel() {
               <div className="flex gap-1">
                 <button
                   type="button"
-                  onClick={() => void act(memory.id, hideAction)}
+                  onClick={() => restore(memory, hideAction)}
                   className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
                 >
                   {hideAction}

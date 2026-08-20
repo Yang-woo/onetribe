@@ -62,3 +62,17 @@ export async function memoryStatus(service: SupabaseClient, id: string): Promise
   if (error || !data) throw new Error(`memoryStatus(${id}): ${error?.message}`)
   return data.status
 }
+
+/** Status plus why it is hidden (docs/00 D55) — `{status, hidden_reason}`. */
+export async function memoryState(
+  service: SupabaseClient,
+  id: string,
+): Promise<{ status: string; hidden_reason: string | null }> {
+  const { data, error } = await service
+    .from('memories')
+    .select('status, hidden_reason')
+    .eq('id', id)
+    .single()
+  if (error || !data) throw new Error(`memoryState(${id}): ${error?.message}`)
+  return data as { status: string; hidden_reason: string | null }
+}

@@ -44,7 +44,10 @@ export function createMomentRemoveHandler(deps: MomentRemoveDeps) {
     // caller either.
     const { data, error } = await deps.db
       .from('memories')
-      .update({ status: 'hidden' })
+      // `hidden_reason` is what separates this from a false-positive auto-hide
+      // in the operator console (docs/00 D55) — without it the row invites the
+      // one keypress that puts it back on the wall.
+      .update({ status: 'hidden', hidden_reason: 'owner' })
       .eq('id', parsed.data.memoryId)
       .eq('author_id', auth.user.id)
       .select('id')
