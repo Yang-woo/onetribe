@@ -15,8 +15,12 @@
 --
 --   * memories_hidden_reason_guard  a BEFORE trigger. A row that is already
 --     down keeps the label it went down with, no matter who writes; a row that
---     is back on the wall carries no label at all. No writer can opt out — not
---     a route, not the dashboard, not a future call site nobody has written yet.
+--     is back on the wall carries no label at all. The label is write-once, and
+--     no writer can opt out of that — not a route, not the dashboard, not a
+--     future call site nobody has written yet. (Write-ONCE, not write-only-here:
+--     a first hide may still be written directly, which is what keeps the
+--     currently deployed code working until the app ships. What no one can do
+--     is change an answer that is already on the row.)
 --   * hide_memory()                 the one channel that puts a label on. Every
 --     path goes through it and names itself; the credential (author id or
 --     takedown token) travels in the same statement, so there is no window
@@ -77,6 +81,8 @@ begin
 end;
 $$;
 
+revoke execute on function public.memories_hidden_reason_guard() from public, anon, authenticated;
+
 drop trigger if exists memories_hidden_reason_guard on public.memories;
 create trigger memories_hidden_reason_guard
   before insert or update on public.memories
@@ -116,6 +122,21 @@ begin
   -- looks, so a misspelled path would silently "succeed". Refuse up front.
   if p_reason is null or p_reason not in ('owner', 'report', 'operator', 'token') then
     raise exception 'hide_memory: unknown reason %', p_reason using errcode = '22023';
+  end if;
+
+  -- A NULL credential does not mean "none was given" — it makes its predicate
+  -- vacuously true, so the WHERE below collapses to the id alone. That is the
+  -- difference between `takedown_token = p_token` (NULL matches nothing, by
+  -- three-valued logic) and `p_token is null or takedown_token = p_token`, and
+  -- it is how the first cut of this function let an anonymous caller take any
+  -- moment down by sending a null token. So the label and the proof it stands
+  -- on are tied together here, once, for every caller present and future:
+  -- name 'token' and you must produce one.
+  if p_reason = 'token' and p_token is null then
+    raise exception 'hide_memory: the token path requires a token' using errcode = '22023';
+  end if;
+  if p_reason = 'owner' and p_author_id is null then
+    raise exception 'hide_memory: the owner path requires an author' using errcode = '22023';
   end if;
 
   update public.memories m
@@ -170,10 +191,14 @@ begin
     return;
   end if;
 
-  if v_status <> 'hidden' then
+  if v_status = 'live' then
     return query select 'restored'::text, null::text; -- already up; nothing to undo
     return;
   end if;
+  -- Anything else is off the wall (`memories_read_live` passes 'live' only), so
+  -- it goes through the gate rather than getting a success it did not get: a
+  -- v2 'flagged' row carries no label — the guard clears it for any non-hidden
+  -- status — so it reads as 'unknown' and is restored the same way.
 
   -- 'owner' and 'token' mean a person asked for this moment to come down, and
   -- NULL means nobody recorded who did (rows hidden before this column, or a
@@ -261,6 +286,13 @@ as $$
 declare
   v_matched boolean;
 begin
+  -- No token is a wrong token, not an unconditional takedown. Answered the way
+  -- the takedown page already reads it ("that link is not valid") instead of
+  -- raising at an anonymous caller.
+  if p_token is null then
+    return false;
+  end if;
+
   select h.matched into v_matched
     from public.hide_memory(p_memory_id, 'token', null, p_token) as h;
   -- A matching token still succeeds when the moment is already down (the label

@@ -128,11 +128,17 @@ export function createAdminActionHandler(deps: ModerationDeps) {
       // Through the channel like every other path, so the operator's hand is
       // labelled 'operator' — and so hiding a moment that is already down
       // cannot repaint why it went down (docs/00 D55).
-      const { error } = await deps.db.rpc('hide_memory', {
+      const { data, error } = await deps.db.rpc('hide_memory', {
         p_memory_id: memoryId,
         p_reason: 'operator',
       })
       if (error) return json(500, { error: error.message })
+      // Stale queue snapshot — no row answered. Telling the operator a moment
+      // was taken down when nothing was touched is the same lie `unhide`
+      // refuses to tell below.
+      if (!firstRow<{ matched: boolean }>(data)?.matched) {
+        return json(404, { error: 'not found' })
+      }
     } else if (action === 'unhide') {
       const { data, error } = await deps.db.rpc('restore_memory', {
         p_memory_id: memoryId,

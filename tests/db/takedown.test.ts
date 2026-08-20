@@ -41,6 +41,22 @@ async function statusOf(id: string): Promise<string> {
   return memoryStatus(service, id)
 }
 
+// A WRONG token was tested from the start; a MISSING one never was, and that is
+// the gap a rewrite of this RPC fell straight into: the token predicate became
+// `p_token is null or takedown_token = p_token`, which a null makes vacuously
+// true, so an anonymous caller could take any moment down with an id alone.
+// Absent credentials are their own case — "not the right token" and "no token"
+// fail for different reasons and only one of them was ever exercised.
+test('a missing token takes nothing down', async () => {
+  const { data, error } = await anon.rpc('takedown_memory', {
+    p_memory_id: memoryId,
+    p_token: null,
+  })
+  expect(error).toBeNull()
+  expect(data).toBe(false)
+  expect(await statusOf(memoryId)).toBe('live')
+})
+
 test('an invalid token changes nothing and reports failure', async () => {
   const { data, error } = await anon.rpc('takedown_memory', {
     p_memory_id: memoryId,
