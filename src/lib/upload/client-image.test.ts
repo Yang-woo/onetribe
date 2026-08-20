@@ -163,6 +163,62 @@ describe('prepareForUpload', () => {
   })
 })
 
+/**
+ * The corrupt-output fallback — docs/00 D56. The compressor occasionally
+ * returns a picture of nothing (identical rows from a misaligned pixel
+ * buffer), and until now the pipeline had no opinion about what it got back.
+ * The detector itself is tested against real pixel buffers in
+ * image-integrity.test.ts; what belongs here is what prepareForUpload DOES
+ * with the verdict.
+ */
+describe('prepareForUpload — corrupt compression fallback (D56)', () => {
+  const first = new File([new Uint8Array([1])], 'a.jpg', { type: 'image/jpeg' })
+  const second = new File([new Uint8Array([2])], 'b.jpg', { type: 'image/jpeg' })
+
+  test('a healthy compression is returned without a second decode', async () => {
+    compress.mockResolvedValue(first)
+    expect(await prepareForUpload(photo, async () => true)).toBe(first)
+    // the retry costs a full re-encode of a phone photo — it must not be the
+    // price of every upload
+    expect(compress).toHaveBeenCalledTimes(1)
+  })
+
+  test('a corrupt result is retried once, and the retry is what ships', async () => {
+    compress.mockResolvedValueOnce(first).mockResolvedValueOnce(second)
+    // the failure is intermittent, so the same input usually decodes correctly
+    // the second time
+    const intact = vi.fn(async (f: Blob) => f !== first)
+    expect(await prepareForUpload(photo, intact)).toBe(second)
+    expect(compress).toHaveBeenCalledTimes(2)
+  })
+
+  test('when both attempts are corrupt the untouched original ships', async () => {
+    compress.mockResolvedValue(first)
+    // a bigger file beats a broken photo — and the original is the one thing
+    // the compressor cannot have damaged
+    expect(await prepareForUpload(photo, async () => false)).toBe(photo)
+    expect(compress).toHaveBeenCalledTimes(2)
+  })
+
+  test('an original too big to presign falls back to the compressed output', async () => {
+    // the picker allows a 20MB photo (D47) but the presign ceiling is the
+    // smaller GIF one: sending this original would trade a broken photo for a
+    // rejected upload, which costs the moment entirely
+    const huge = new File([new Uint8Array(1)], 'huge.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(huge, 'size', { value: MAX_GIF_UPLOAD_BYTES + 1 })
+    compress.mockResolvedValue(first)
+    expect(await prepareForUpload(huge, async () => false)).toBe(first)
+  })
+
+  test('GIFs are never judged — they skip the compressor entirely', async () => {
+    const gif = new File([new Uint8Array([0x47])], 'party.gif', { type: 'image/gif' })
+    const intact = vi.fn(async () => false)
+    expect(await prepareForUpload(gif, intact)).toBe(gif)
+    // nothing re-encoded it, so there is no canvas output to distrust
+    expect(intact).not.toHaveBeenCalled()
+  })
+})
+
 describe('share card formats (D47)', () => {
   // The fact "satori draws JPEG and PNG only" is consumed in two shapes: the
   // uploader asks by MIME, the OG route asks by URL. They live next to each
