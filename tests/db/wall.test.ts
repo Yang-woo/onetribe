@@ -122,4 +122,11 @@ test('realtime delivers new live moments to anon without takedown_token', async 
   const liveRow = received.find((row) => probeIds.includes(row.id as string))!
   expect(liveRow.caption).toMatch(/^wall-realtime-/)
   expect('takedown_token' in liveRow).toBe(false) // publication column list holds
+  // and the same for why a moment is down (docs/00 D55). Weaker than it looks:
+  // adding the column to the publication by hand did NOT turn this red, because
+  // the realtime server holds its own copy of the column list and a live patch
+  // does not reach it. On a container that starts from the migrations it would.
+  // The line that actually holds this column private is the anon grant, pinned
+  // in rls.test.ts — this one rides along with takedown_token's.
+  expect('hidden_reason' in liveRow).toBe(false)
 })

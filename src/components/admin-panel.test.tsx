@@ -170,6 +170,12 @@ describe('restoring what somebody else took down', () => {
       { memoryId: 'm-owner', action: 'unhide', acknowledge: 'owner' },
     ])
     await waitFor(() => expect(queueLoads).toBe(2))
+    // and the question goes away with it: left standing over a moment that is
+    // now back on the wall, "its author took this down — put it back?" is a
+    // sentence about a decision that has already been made
+    expect(
+      (await row(OWNER_ROW.caption)).queryByRole('button', { name: 'restore anyway' }),
+    ).toBeNull()
   })
 
   test('cancelling sends nothing and closes the question', async () => {
