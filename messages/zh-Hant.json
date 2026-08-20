@@ -28,6 +28,11 @@
     "watchOnYoutube": "在 YouTube 上觀看 ↗",
     "backToWall": "← 回到牆上",
     "takedownLink": "申請移除",
+    "remove": "撤下這個瞬間",
+    "removeConfirm": "要從牆上撤下嗎？這裡無法復原這個操作。",
+    "removeYes": "是的，撤下它",
+    "removeCancel": "先留著",
+    "removeError": "出了點問題 — 它還在牆上。",
     "showOriginal": "顯示原文",
     "showTranslation": "顯示翻譯",
     "imageAlt": "一個音樂節瞬間"

@@ -28,6 +28,11 @@
     "watchOnYoutube": "obejrzyj na YouTube ↗",
     "backToWall": "← wróć na ścianę",
     "takedownLink": "usuń",
+    "remove": "usuń ten moment",
+    "removeConfirm": "usunąć go ze ściany? tego nie da się tu cofnąć.",
+    "removeYes": "tak, usuń go",
+    "removeCancel": "zostaw",
+    "removeError": "coś poszło nie tak — wciąż jest na ścianie.",
     "showOriginal": "pokaż oryginał",
     "showTranslation": "pokaż tłumaczenie",
     "imageAlt": "chwila z festiwalu"

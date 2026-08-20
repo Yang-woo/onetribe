@@ -28,6 +28,11 @@
     "watchOnYoutube": "YouTube'da izle ↗",
     "backToWall": "← duvara dön",
     "takedownLink": "kaldırma",
+    "remove": "bu anı kaldır",
+    "removeConfirm": "duvardan kaldırılsın mı? buradan geri alınamaz.",
+    "removeYes": "evet, kaldır",
+    "removeCancel": "kalsın",
+    "removeError": "bir şeyler ters gitti — hâlâ duvarda.",
     "showOriginal": "orijinali göster",
     "showTranslation": "çeviriyi göster",
     "imageAlt": "bir festival anı"

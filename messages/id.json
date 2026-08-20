@@ -28,6 +28,11 @@
     "watchOnYoutube": "tonton di YouTube ↗",
     "backToWall": "← kembali ke dinding",
     "takedownLink": "hapus",
+    "remove": "hapus momen ini",
+    "removeConfirm": "hapus dari dinding? tindakan ini tak bisa dibatalkan dari sini.",
+    "removeYes": "ya, hapus",
+    "removeCancel": "biarkan saja",
+    "removeError": "terjadi kesalahan — momennya masih ada di dinding.",
     "showOriginal": "tampilkan aslinya",
     "showTranslation": "tampilkan terjemahan",
     "imageAlt": "momen festival"

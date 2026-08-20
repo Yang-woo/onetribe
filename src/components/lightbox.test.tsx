@@ -344,3 +344,97 @@ describe('Lightbox (moment modal)', () => {
     expect(onClose).toHaveBeenCalled()
   })
 })
+
+/**
+ * The owner's remove control (docs/00 — self-delete). It is opt-in: the same
+ * modal opens from the wall, where the viewer owns nothing, so its mere
+ * presence is a safety property. Destructive and irreversible from here, so it
+ * asks first — and a refused removal must leave the moment where it is rather
+ * than pretending.
+ */
+describe('Lightbox remove control', () => {
+  test('the wall gets no remove control — only a host that passes onRemove', () => {
+    // both modals live in the same document on purpose: "exactly one" below is
+    // then a direct comparison, not two assertions that could drift apart
+    open(0) // wall-style host — no onRemove
+    expect(screen.queryByRole('button', { name: /remove this moment/i })).not.toBeInTheDocument()
+    open(0, [momentFixture('a'), momentFixture('b')], { onRemove: vi.fn() })
+    expect(screen.getAllByRole('button', { name: /remove this moment/i })).toHaveLength(1)
+  })
+
+  test('one tap only arms the confirmation — nothing is removed yet', async () => {
+    const user = userEvent.setup()
+    const onRemove = vi.fn(async () => {})
+    open(0, [momentFixture('a'), momentFixture('b')], { onRemove })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    expect(onRemove).not.toHaveBeenCalled()
+    expect(screen.getByText(/remove it from the wall\?/i)).toBeInTheDocument()
+  })
+
+  test('confirming removes the moment that is actually open', async () => {
+    const user = userEvent.setup()
+    const onRemove = vi.fn(async () => {})
+    // opened at the SECOND moment: an implementation that removes "the first"
+    // or leans on the host's own state would take down the wrong photo
+    open(1, [momentFixture('a'), momentFixture('b')], { onRemove })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    await user.click(screen.getByRole('button', { name: /yes, remove it/i }))
+    expect(onRemove).toHaveBeenCalledWith('b')
+    expect(onRemove).toHaveBeenCalledTimes(1)
+  })
+
+  test('backing out keeps the moment and returns to the quiet link', async () => {
+    const user = userEvent.setup()
+    const onRemove = vi.fn(async () => {})
+    open(0, [momentFixture('a'), momentFixture('b')], { onRemove })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    await user.click(screen.getByRole('button', { name: /keep it/i }))
+    expect(onRemove).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: /yes, remove it/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /remove this moment/i })).toBeInTheDocument()
+  })
+
+  test('a failed removal says so and stays retryable', async () => {
+    const user = userEvent.setup()
+    const onRemove = vi.fn(async () => {
+      throw new Error('404')
+    })
+    open(0, [momentFixture('a'), momentFixture('b')], { onRemove })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    await user.click(screen.getByRole('button', { name: /yes, remove it/i }))
+
+    // the truth the user needs is that the moment is STILL UP — a silent
+    // failure here reads as "removed" and they walk away
+    expect(await screen.findByRole('alert')).toHaveTextContent(/still on the wall/i)
+    // and the way out is still there, not a dead disabled button
+    const retry = screen.getByRole('button', { name: /remove this moment/i })
+    expect(retry).toBeEnabled()
+    await user.click(retry)
+    await user.click(screen.getByRole('button', { name: /yes, remove it/i }))
+    expect(onRemove).toHaveBeenCalledTimes(2)
+  })
+
+  test('navigating disarms a confirmation left open on the previous moment', async () => {
+    const user = userEvent.setup()
+    const onRemove = vi.fn(async () => {})
+    const moments = [momentFixture('a'), momentFixture('b')]
+    const view = (openId: string) => (
+      <Lightbox
+        moments={moments}
+        openId={openId}
+        onClose={vi.fn()}
+        onNavigate={vi.fn()}
+        onRemove={onRemove}
+        translateImpl={async () => null}
+        translateDelayMs={0}
+      />
+    )
+    const { rerender } = renderWithIntl(view('a'))
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    expect(screen.getByRole('button', { name: /yes, remove it/i })).toBeInTheDocument()
+
+    rerender(withIntl(view('b')))
+    // an armed "yes, remove it" carried onto the next photo is a loaded gun
+    expect(screen.queryByRole('button', { name: /yes, remove it/i })).not.toBeInTheDocument()
+  })
+})

@@ -87,6 +87,11 @@ export interface PassportBackend {
     next: ProfileDefaults,
   ): Promise<{ displayName: string | null; instagram: string | null; homeCountry: string | null }>
   setAttendance(eventId: string, attended: boolean): Promise<void>
+  /** Take one of this passport's own moments off the wall — a soft hide, same
+   *  as the upload confirmation screen's takedown link, but reachable from the
+   *  passport forever (docs/00 — self-delete). Throws if it didn't happen, so
+   *  the UI never claims a removal the server refused. */
+  removeMoment(memoryId: string): Promise<void>
   // ── upgrade: keeps the current user id, data carries over ──
   linkEmailStart(email: string): Promise<void>
   linkEmailVerify(email: string, code: string): Promise<PassportIdentity>
@@ -292,6 +297,20 @@ export function createSupabasePassportBackend(
           .eq('event_id', eventId)
         if (error) throw new Error(error.message)
       }
+    },
+
+    async removeMoment(memoryId) {
+      const { data } = await client.auth.getSession()
+      const token = data.session?.access_token
+      if (!token) throw new Error('no passport session')
+      const res = await fetch('/api/memories/remove', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ memoryId }),
+      })
+      // Includes 404 (not this passport's moment) — from the caller's side
+      // "it isn't gone" is the only distinction that matters.
+      if (!res.ok) throw new Error(`moment removal failed (${res.status})`)
     },
 
     async linkEmailStart(email) {

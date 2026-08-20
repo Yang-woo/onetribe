@@ -26,10 +26,15 @@ const editions: EditionChip[] = [
 
 const ANON_IDENTITY: PassportIdentity = { email: null, isAnonymous: true }
 
-function fakeBackend(initial: PassportState | null): PassportBackend & { toggles: string[] } {
+function fakeBackend(
+  initial: PassportState | null,
+): PassportBackend & { toggles: string[]; removed: string[]; removeFails: boolean } {
   let state = initial
   const backend = {
     toggles: [] as string[],
+    removed: [] as string[],
+    /** flip to make the server refuse — someone else's moment, or a 500 */
+    removeFails: false,
     async load() {
       return state
     },
@@ -67,6 +72,10 @@ function fakeBackend(initial: PassportState | null): PassportBackend & { toggles
     },
     async setAttendance(eventId: string, attended: boolean) {
       backend.toggles.push(`${eventId}:${attended}`)
+    },
+    async removeMoment(memoryId: string) {
+      if (backend.removeFails) throw new Error('moment removal failed (404)')
+      backend.removed.push(memoryId)
     },
     async linkEmailStart() {},
     async linkEmailVerify(email: string) {
@@ -259,6 +268,72 @@ describe('Passport', () => {
       'href',
       '/en/m/m1',
     )
+  })
+
+  /**
+   * The standing way out of a mistaken upload (docs/00 — self-delete). Before
+   * this the only self-serve path was the one-time token link on the upload
+   * confirmation screen; scroll past it and the owner had to ask the operator.
+   */
+  test('removing an own moment takes it out of the grid and closes the modal', async () => {
+    const user = userEvent.setup()
+    const backend = fakeBackend({
+      userId: 'u1',
+      displayName: null,
+      instagram: null,
+      homeCountry: null,
+      attendedEventIds: [],
+      moments: [
+        momentFixture('m1', { caption: 'my own moment', event_id: 'e2024' }),
+        momentFixture('m2', { caption: 'my other moment', event_id: 'e2025' }),
+      ],
+      identity: ANON_IDENTITY,
+    })
+    renderWithIntl(<Passport editions={editions} backend={backend} />)
+
+    await user.click(await screen.findByRole('button', { name: 'my other moment' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: /remove this moment/i }))
+    await user.click(within(dialog).getByRole('button', { name: /yes, remove it/i }))
+
+    // the one that was open, not the first in the grid
+    expect(backend.removed).toEqual(['m2'])
+    // the grid stops offering a thumb whose permalink is now dead…
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'my other moment' })).not.toBeInTheDocument(),
+    )
+    expect(screen.getByRole('button', { name: 'my own moment' })).toBeInTheDocument()
+    // …the count in the heading follows…
+    expect(screen.getByText('my moments (1)')).toBeInTheDocument()
+    // …and the modal doesn't hang open on a moment that no longer exists
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  test('a refused removal leaves the grid exactly as it was', async () => {
+    const user = userEvent.setup()
+    const backend = fakeBackend({
+      userId: 'u1',
+      displayName: null,
+      instagram: null,
+      homeCountry: null,
+      attendedEventIds: [],
+      moments: [momentFixture('m1', { caption: 'my own moment', event_id: 'e2024' })],
+      identity: ANON_IDENTITY,
+    })
+    backend.removeFails = true
+    renderWithIntl(<Passport editions={editions} backend={backend} />)
+
+    await user.click(await screen.findByRole('button', { name: 'my own moment' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: /remove this moment/i }))
+    await user.click(within(dialog).getByRole('button', { name: /yes, remove it/i }))
+
+    // dropping it optimistically would show a passport that disagrees with the
+    // wall — the moment is still public, so it stays in the grid and the modal
+    // says what happened
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(/still on the wall/i)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('my moments (1)')).toBeInTheDocument()
   })
 
   test('the journey view carries the keep-this-passport section (D16)', async () => {
