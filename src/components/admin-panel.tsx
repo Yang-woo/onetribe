@@ -53,6 +53,7 @@ export function AdminPanel() {
   const [tab, setTab] = useState<'reports' | 'recent'>('reports')
   const [denied, setDenied] = useState(false)
   const [confirming, setConfirming] = useState<{ id: string; reason: Overruled } | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const loadQueue = useCallback(async (accessToken: string) => {
     const res = await fetch('/api/admin/queue', {
@@ -114,6 +115,11 @@ export function AdminPanel() {
       return
     }
     setConfirming(null)
+    // Everything else that failed has to say so. Reloading a queue that comes
+    // back looking identical is indistinguishable from "the reload hasn't
+    // landed yet" — and this route now answers 404 for a row that vanished
+    // under a snapshot this console is always holding.
+    setActionError(res.ok ? null : `${action} failed — ${res.status}`)
     await loadQueue(token)
   }
 
@@ -182,6 +188,12 @@ export function AdminPanel() {
           open reports <strong className="text-orange">{queue.counters.openReports}</strong>
         </span>
       </div>
+
+      {actionError && (
+        <p role="alert" className="text-sm text-warning">
+          {actionError}
+        </p>
+      )}
 
       <div className="flex gap-2">
         {(['reports', 'recent'] as const).map((name) => (

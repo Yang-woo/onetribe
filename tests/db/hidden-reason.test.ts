@@ -392,6 +392,29 @@ describe('restoring is refused, by the database, not by the browser', () => {
     expect(await memoryState(service, memoryId)).toEqual({ status: 'live', hidden_reason: null })
   })
 
+  test('a row that is off the wall for any other reason is not a silent no-op', async () => {
+    // 'flagged' is the v2 auto-filter's state and nothing writes it yet, but
+    // `memories_read_live` keeps it off the wall all the same. Answering
+    // "restored" while leaving it down would be a false success in the
+    // function's contract — the kind that surfaces later as a button that
+    // quietly does nothing.
+    const memoryId = await seed()
+    await service.from('memories').update({ status: 'flagged' }).eq('id', memoryId)
+
+    const refused = await adminAction(admin(memoryId, 'unhide'))
+    expect(refused.status).toBe(409)
+    expect((await refused.json()).reason).toBe('unknown')
+
+    expect((await adminAction(admin(memoryId, 'unhide', 'unknown'))).status).toBe(200)
+    expect(await memoryState(service, memoryId)).toEqual({ status: 'live', hidden_reason: null })
+  })
+
+  test('hiding a moment that is already gone says so too', async () => {
+    // the sibling of the unhide case below: a stale snapshot clicked either way
+    // gets the same honest answer
+    expect((await adminAction(admin(randomUUID(), 'hide'))).status).toBe(404)
+  })
+
   test('restoring a moment that is already gone says so', async () => {
     const res = await adminAction(admin(randomUUID(), 'unhide'))
     expect(res.status).toBe(404)
@@ -429,6 +452,39 @@ describe('what a restore adjudicates — and what it does not', () => {
     // the repeat-infringer trail (docs/09 D) and hand out a clean slate as a
     // side effect of overruling the author — two things nobody asked for.
     expect(await reportCount(memoryId)).toBe(3)
+  })
+})
+
+describe('a label only stands on the proof it names', () => {
+  // A NULL credential is not "no credential given" — it makes its own predicate
+  // vacuously true. Tying each label to its proof inside the channel is what
+  // keeps that from being a per-caller thing to remember, which is exactly what
+  // the caller in front of it forgot.
+  test.each([
+    ['token', { p_reason: 'token' }],
+    ['owner', { p_reason: 'owner' }],
+  ])('%s cannot be claimed without one', async (_label, args) => {
+    const memoryId = await seed()
+
+    const { error } = await service.rpc('hide_memory', { p_memory_id: memoryId, ...args })
+
+    expect(error?.code).toBe('22023')
+    expect(await memoryState(service, memoryId)).toEqual({ status: 'live', hidden_reason: null })
+  })
+
+  test('anon cannot take a moment down through the one RPC it is allowed to call', async () => {
+    const memoryId = await seed()
+
+    // The whole public attack surface: an id anyone can read off the wall, the
+    // anon key that ships in the browser bundle, and no token at all.
+    const { data, error } = await anon.rpc('takedown_memory', {
+      p_memory_id: memoryId,
+      p_token: null,
+    })
+
+    expect(error).toBeNull()
+    expect(data).toBe(false)
+    expect(await memoryState(service, memoryId)).toEqual({ status: 'live', hidden_reason: null })
   })
 })
 

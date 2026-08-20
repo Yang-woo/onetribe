@@ -36,6 +36,8 @@ const writes: Array<{ memoryId: string; action: string; acknowledge?: string }> 
 let queueLoads = 0
 /** What `/api/admin/action` answers next — one entry per call, then 200s. */
 let refusals: Array<{ reason: string } | null> = []
+/** Non-409 failures to answer with, same one-per-call shape. */
+let statuses: number[] = []
 
 function memory(row: Row) {
   return {
@@ -67,9 +69,15 @@ async function mountWith(rows: Row[]) {
       }
       writes.push(JSON.parse(String(init?.body)))
       const refusal = refusals.shift()
-      return refusal
-        ? new Response(JSON.stringify({ error: 'confirm required', ...refusal }), { status: 409 })
-        : new Response(JSON.stringify({ ok: true }), { status: 200 })
+      if (refusal) {
+        return new Response(JSON.stringify({ error: 'confirm required', ...refusal }), {
+          status: 409,
+        })
+      }
+      const status = statuses.shift() ?? 200
+      return new Response(JSON.stringify(status === 200 ? { ok: true } : { error: 'nope' }), {
+        status,
+      })
     }),
   )
   render(<AdminPanel />)
@@ -85,6 +93,7 @@ async function row(caption: string) {
 beforeEach(() => {
   writes.length = 0
   refusals = []
+  statuses = []
   queueLoads = 0
 })
 afterEach(() => {
@@ -193,6 +202,23 @@ describe('restoring what somebody else took down', () => {
 
     await userEvent.keyboard('{Escape}')
     expect(within(item).queryByRole('button', { name: 'restore anyway' })).toBeNull()
+  })
+
+  test('a failure that is not the question still says something', async () => {
+    // The 409 is the only refusal with a UI. Everything else — a 404 for a row
+    // that vanished under this snapshot, a 500 — used to reload a queue that
+    // came back looking identical, which is what "the reload hasn't landed
+    // yet" also looks like.
+    statuses = [404]
+    await mountWith([OWNER_ROW])
+    await userEvent.click(
+      await (await row(OWNER_ROW.caption)).findByRole('button', { name: 'unhide' }),
+    )
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('unhide failed — 404')
+    expect(
+      (await row(OWNER_ROW.caption)).queryByRole('button', { name: 'restore anyway' }),
+    ).toBeNull()
   })
 
   test('a moderation hide the server does not refuse restores in one click', async () => {
