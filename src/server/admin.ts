@@ -89,15 +89,26 @@ const actionSchema = z.object({
   // hide: take down · unhide: restore after review · delete: remove for good
   // dismiss: keep it up, clear its reports (the "OK" key — docs/15 §5)
   action: z.enum(['hide', 'unhide', 'delete', 'dismiss']),
+  // unhide only — which decision the operator is overruling. `restore_memory`
+  // refuses to put back a moment its author (or a takedown-link holder) took
+  // down, and refuses rows whose provenance was never recorded, until the
+  // caller names the label it saw. Naming it is also the compare-and-set: a
+  // label that changed since the console drew the row is refused again rather
+  // than overruled blind (docs/00 D55).
+  acknowledge: z.enum(['owner', 'token', 'unknown']).optional(),
 })
 
+/** A `returns table (…)` function arrives as a one-row array through PostgREST. */
+function firstRow<T>(data: unknown): T | null {
+  return (Array.isArray(data) ? (data[0] as T | undefined) : (data as T | undefined)) ?? null
+}
+
 /**
- * Clear a moment's reports — shared by `dismiss` and `unhide` (docs/09 B). Both
- * restore a moment to a clean state, which must also reset the 3-strike auto-hide
- * counter: leaving the distinct reporter_hints on the row lets the very next
- * report (even a re-report) hide it again, so a griefer could loop it
- * (docs/09 A-2). So unhide == restore + dismiss. Returns a 500 Response on
- * failure, else null.
+ * Clear a moment's reports — the "OK" key (docs/09 B, docs/15 §5). Restoring
+ * clears them too, but that half now happens inside `restore_memory`: it has to
+ * be in the same transaction as the status flip, and it has to be skipped for
+ * the rows an operator restores without having adjudicated anything (docs/00
+ * D55). Returns a 500 Response on failure, else null.
  */
 async function clearReports(db: SupabaseClient, memoryId: string): Promise<Response | null> {
   const { error } = await db.from('reports').delete().eq('memory_id', memoryId)
@@ -111,30 +122,33 @@ export function createAdminActionHandler(deps: ModerationDeps) {
 
     const parsed = actionSchema.safeParse(await parseBody(req))
     if (!parsed.success) return json(400, { error: 'invalid request' })
-    const { memoryId, action } = parsed.data
+    const { memoryId, action, acknowledge } = parsed.data
 
-    if (action === 'hide' || action === 'unhide') {
-      // unhide clears reports BEFORE flipping to 'live'. The auto-hide trigger
-      // only fires on status='live', so clearing first (while still hidden)
-      // means a report landing mid-restore can't re-trip the 3-strike threshold
-      // and then have its trail wiped by the clear — which would silently leave
-      // the moment hidden with 0 reports (code review). hide never clears.
-      if (action === 'unhide') {
-        const failure = await clearReports(deps.db, memoryId)
-        if (failure) return failure
-      }
-      const { error } = await deps.db
-        .from('memories')
-        // Restoring clears the provenance with the status it explains: a live
-        // row carrying "the author removed this" would be a lie, and the next
-        // hide has to write its own reason anyway (docs/00 D55).
-        .update(
-          action === 'hide'
-            ? { status: 'hidden', hidden_reason: 'operator' }
-            : { status: 'live', hidden_reason: null },
-        )
-        .eq('id', memoryId)
+    if (action === 'hide') {
+      // Through the channel like every other path, so the operator's hand is
+      // labelled 'operator' — and so hiding a moment that is already down
+      // cannot repaint why it went down (docs/00 D55).
+      const { error } = await deps.db.rpc('hide_memory', {
+        p_memory_id: memoryId,
+        p_reason: 'operator',
+      })
       if (error) return json(500, { error: error.message })
+    } else if (action === 'unhide') {
+      const { data, error } = await deps.db.rpc('restore_memory', {
+        p_memory_id: memoryId,
+        p_acknowledge: acknowledge ?? null,
+      })
+      if (error) return json(500, { error: error.message })
+      const result = firstRow<{ outcome: string; reason: string | null }>(data)
+      // 409, not 403: the operator may do this — but only by saying what they
+      // are overruling. The console turns this into a question; a console that
+      // never asks simply cannot restore these rows, which is the whole point
+      // of the gate living here instead of in the browser.
+      if (result?.outcome === 'confirm') {
+        return json(409, { error: 'confirm required', reason: result.reason })
+      }
+      // Stale queue snapshot — the row is gone. Saying "ok" would be a lie.
+      if (!result || result.outcome === 'missing') return json(404, { error: 'not found' })
     } else if (action === 'delete') {
       // Media refs must be read before the row goes — with the row deleted
       // the object is unreachable (nothing else stores the key).

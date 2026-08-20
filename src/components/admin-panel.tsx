@@ -8,7 +8,7 @@ import { inputClass } from './ui'
 
 /**
  * Operator console — docs/15 §5. Post-moderation only: everything here is
- * already (or was) live. Keyboard on a focused row: h=hide d=delete o=OK.
+ * already (or was) live. Keyboard on a focused row: h=hide/unhide d=delete o=OK.
  * Operator-only surface → English copy on purpose (not part of the
  * user-facing i18n contract).
  */
@@ -21,12 +21,21 @@ interface AdminMemory {
   media_kind: 'image' | 'gif' | 'clip'
   embed_url: string | null
   status: string
-  /** Which path hid this row (docs/00 D55) — null while live, and null on rows
-   *  hidden before the column existed. */
+  /** Which path took this row down (docs/00 D55) — null while live, and null on
+   *  rows hidden before the column existed, which is "unknown", not "none". */
   hidden_reason: 'owner' | 'report' | 'operator' | 'token' | null
   author_name: string | null
   origin_country: string | null
   created_at: string
+}
+
+/** The labels `restore_memory` refuses without being told what it is overruling. */
+type Overruled = 'owner' | 'token' | 'unknown'
+
+const OVERRULED_BY: Record<Overruled, string> = {
+  owner: 'Its author took this moment down, not a filter.',
+  token: 'Whoever held its takedown link took this moment down, not a filter.',
+  unknown: 'Nothing here records who took this moment down.',
 }
 
 interface QueueData {
@@ -43,6 +52,7 @@ export function AdminPanel() {
   const [queue, setQueue] = useState<QueueData | null>(null)
   const [tab, setTab] = useState<'reports' | 'recent'>('reports')
   const [denied, setDenied] = useState(false)
+  const [confirming, setConfirming] = useState<{ id: string; reason: Overruled } | null>(null)
 
   const loadQueue = useCallback(async (accessToken: string) => {
     const res = await fetch('/api/admin/queue', {
@@ -78,13 +88,32 @@ export function AdminPanel() {
     await loadQueue(data.session.access_token)
   }
 
-  async function act(memoryId: string, action: 'hide' | 'unhide' | 'delete' | 'dismiss') {
+  /**
+   * Restoring is the one action here that can undo somebody else's decision
+   * (docs/00 D55), and the server is what refuses it: `unhide` on a moment its
+   * author took down comes back 409 with the label to overrule. So the question
+   * below is asked ABOUT THE SERVER'S ANSWER, not about the row we drew — this
+   * queue is a snapshot and is routinely minutes old. Answering it re-sends the
+   * same action with that label; a console that never asked would simply never
+   * restore those rows.
+   */
+  async function act(
+    memoryId: string,
+    action: 'hide' | 'unhide' | 'delete' | 'dismiss',
+    acknowledge?: Overruled,
+  ) {
     if (!token) return
-    await fetch('/api/admin/action', {
+    const res = await fetch('/api/admin/action', {
       method: 'POST',
       headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ memoryId, action }),
+      body: JSON.stringify({ memoryId, action, ...(acknowledge ? { acknowledge } : {}) }),
     })
+    if (res.status === 409) {
+      const body = (await res.json().catch(() => null)) as { reason?: Overruled } | null
+      setConfirming({ id: memoryId, reason: body?.reason ?? 'unknown' })
+      return
+    }
+    setConfirming(null)
     await loadQueue(token)
   }
 
@@ -140,25 +169,6 @@ export function AdminPanel() {
     a.status === b.status ? 0 : a.status === 'hidden' ? -1 : 1,
   )
 
-  /**
-   * Restoring is the one action here that can undo somebody else's decision
-   * (docs/00 D55). A moment its author took down sorts to the top of this list
-   * with no reports attached — which is exactly what a false-positive auto-hide
-   * looks like — and `h` is one keypress away. Ask before that specific undo;
-   * every other row keeps the frictionless flow moderation needs.
-   */
-  const restore = (memory: AdminMemory, action: 'hide' | 'unhide') => {
-    if (
-      action === 'unhide' &&
-      (memory.hidden_reason === 'owner' || memory.hidden_reason === 'token')
-    ) {
-      const who = memory.hidden_reason === 'owner' ? 'its author' : 'whoever held its takedown link'
-      if (!window.confirm(`${who} took this moment down, not a filter. Put it back on the wall?`))
-        return
-    }
-    void act(memory.id, action)
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-4 text-sm text-muted">
@@ -189,19 +199,31 @@ export function AdminPanel() {
       </div>
 
       <p className="text-xs text-muted">
-        keyboard on a focused row: h = hide · d = delete · o = OK
+        {/* `h` is a toggle: on a row that is already down it RESTORES. Saying
+            "hide" made the destructive direction the one nobody read. */}
+        keyboard on a focused row: h = hide/unhide · d = delete · o = OK
       </p>
 
       <ul className="flex flex-col gap-2">
         {ordered.map((memory) => {
           const hideAction = memory.status === 'hidden' ? 'unhide' : 'hide'
+          const asking = confirming?.id === memory.id ? confirming.reason : null
           return (
             <li
               key={memory.id}
               tabIndex={0}
               aria-label={memory.caption ?? memory.id}
               onKeyDown={(e) => {
-                if (e.key === 'h') restore(memory, hideAction)
+                if (e.key === 'Escape') {
+                  setConfirming(null)
+                  return
+                }
+                // While this row is asking, the shortcuts stop answering it.
+                // The reflex that opened the question must not be the reflex
+                // that confirms overruling the person who took this down —
+                // that is what a default-OK dialog gets wrong.
+                if (asking) return
+                if (e.key === 'h') void act(memory.id, hideAction)
                 if (e.key === 'd') void act(memory.id, 'delete')
                 if (e.key === 'o') void act(memory.id, 'dismiss')
               }}
@@ -224,19 +246,20 @@ export function AdminPanel() {
                 <p className="truncate text-sm">{memory.caption ?? '—'}</p>
                 <p className="text-xs text-muted">
                   {memory.status}
-                  {/* why it is down — an author's own removal must not read as
-                      a filter mistake waiting to be undone (docs/00 D55) */}
-                  {memory.hidden_reason ? (
-                    <span
-                      className={
-                        memory.hidden_reason === 'owner' || memory.hidden_reason === 'token'
-                          ? ' text-orange'
-                          : ''
-                      }
-                    >{` (${memory.hidden_reason})`}</span>
-                  ) : (
-                    ''
-                  )}
+                  {/* Why it is down — an author's own removal must not read as a
+                      filter mistake waiting to be undone (docs/00 D55). A hidden
+                      row with no label is 'unknown', not blank: blank is what
+                      made those rows look safe to put back. Orange marks exactly
+                      the labels the server will refuse. */}
+                  {memory.status === 'hidden'
+                    ? (() => {
+                        const label = memory.hidden_reason ?? 'unknown'
+                        const overruled = label !== 'report' && label !== 'operator'
+                        return (
+                          <span className={overruled ? 'text-orange' : ''}>{` (${label})`}</span>
+                        )
+                      })()
+                    : ''}
                   {memory.author_name ? ` · @${memory.author_name}` : ''}
                   {memory.origin_country
                     ? ` · ${countryFlag(memory.origin_country)} ${memory.origin_country}`
@@ -252,11 +275,36 @@ export function AdminPanel() {
                     open video ↗
                   </a>
                 )}
+                {asking && (
+                  // In the row rather than a browser dialog: a dialog's default
+                  // button is OK, so the Enter that follows a keyboard shortcut
+                  // confirms the destructive direction without anyone reading
+                  // it. Here the only way through is to hit this button.
+                  <div role="alert" className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                    <span className="text-orange">
+                      {OVERRULED_BY[asking]} Put it back on the public wall?
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => void act(memory.id, 'unhide', asking)}
+                      className="rounded-full border border-orange px-2 py-0.5 text-orange"
+                    >
+                      restore anyway
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirming(null)}
+                      className="rounded-full border border-line px-2 py-0.5 text-muted"
+                    >
+                      cancel
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="flex gap-1">
                 <button
                   type="button"
-                  onClick={() => restore(memory, hideAction)}
+                  onClick={() => void act(memory.id, hideAction)}
                   className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:text-paper"
                 >
                   {hideAction}

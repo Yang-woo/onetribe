@@ -65,8 +65,16 @@ function withAuth(token?: string, body?: unknown): Request {
   })
 }
 
-async function createMemory(caption: string, status: 'live' | 'hidden' = 'live') {
-  const id = await seedMemory(service, { event_id: eventId, caption, status })
+// A hidden fixture has to say WHY it is hidden: `restore_memory` refuses to put
+// back a moment whose provenance was never recorded, the same way it refuses an
+// author's own takedown (docs/00 D55). A bare `status: 'hidden'` is exactly the
+// pre-migration row that refusal exists for.
+async function createMemory(
+  caption: string,
+  status: 'live' | 'hidden' = 'live',
+  hidden_reason: 'owner' | 'report' | 'operator' | 'token' | null = null,
+) {
+  const id = await seedMemory(service, { event_id: eventId, caption, status, hidden_reason })
   fixtureIds.push(id)
   return id
 }
@@ -159,7 +167,11 @@ describe('actions', () => {
   })
 
   test('unhide clears the reports that hid it, so a single re-report cannot instantly re-hide it', async () => {
-    const id = await createMemory(`admin-unhide-clear-${randomUUID().slice(0, 6)}`, 'hidden')
+    const id = await createMemory(
+      `admin-unhide-clear-${randomUUID().slice(0, 6)}`,
+      'hidden',
+      'report',
+    )
     // the three distinct hints that tripped the auto-hide threshold sit on the row
     await service
       .from('reports')
