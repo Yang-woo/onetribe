@@ -16,6 +16,7 @@ import {
   THUMB_QUALITY,
   THUMB_TARGET_BYTES,
 } from './constants'
+import { fitsWithoutCompression, looksIntact } from './image-integrity'
 
 /**
  * Client-side media preparation — docs/17 T2.2.
@@ -98,7 +99,11 @@ export function canvasSupportsWebp(): boolean {
  * GIFs return before this and stay GIFs — animation outranks the card, which
  * has never had a photo for them.
  */
-export async function prepareForUpload(file: File): Promise<File> {
+export async function prepareForUpload(
+  file: File,
+  /** test seam — the real impl decodes the output in a canvas (docs/00 D56) */
+  intact: (f: Blob) => Promise<boolean> = looksIntact,
+): Promise<File> {
   if (skipsClientCompression(file.type)) return file
   // The output is the source format unless the card can't draw it, so a PNG in
   // means a PNG out — and PNG is the one output with no quality knob. The
@@ -110,16 +115,30 @@ export async function prepareForUpload(file: File): Promise<File> {
   // resolution, iterate) exactly as it did before docs/00 D47; the pins apply
   // to formats where quality alone can converge.
   const outputsPng = file.type === 'image/png'
-  return imageCompression(file, {
-    ...BASE_COMPRESSION,
-    maxSizeMB: TARGET_IMAGE_BYTES / (1024 * 1024),
-    maxWidthOrHeight: IMAGE_MAX_DIM,
-    initialQuality: IMAGE_QUALITY,
-    // Quality-only convergence: never trade away pixels the viewer paid for by
-    // uploading a bigger original (docs/00 D47).
-    ...(outputsPng ? {} : { alwaysKeepResolution: true, maxIteration: IMAGE_MAX_ITERATIONS }),
-    ...(shareCardCanRender(file.type) ? {} : { fileType: SHARE_CARD_FALLBACK_MIME }),
-  })
+  const compress = () =>
+    imageCompression(file, {
+      ...BASE_COMPRESSION,
+      maxSizeMB: TARGET_IMAGE_BYTES / (1024 * 1024),
+      maxWidthOrHeight: IMAGE_MAX_DIM,
+      initialQuality: IMAGE_QUALITY,
+      // Quality-only convergence: never trade away pixels the viewer paid for by
+      // uploading a bigger original (docs/00 D47).
+      ...(outputsPng ? {} : { alwaysKeepResolution: true, maxIteration: IMAGE_MAX_ITERATIONS }),
+      ...(shareCardCanRender(file.type) ? {} : { fileType: SHARE_CARD_FALLBACK_MIME }),
+    })
+
+  // The compressor occasionally hands back a picture of nothing — rows of
+  // identical stripes from a misaligned pixel buffer (docs/00 D56). It is
+  // intermittent, so a second decode almost always lands; if it doesn't, the
+  // untouched original beats a broken photo, as long as the server will take
+  // it. Falling all the way back to the corrupted output is still the last
+  // resort: refusing the upload would cost the moment entirely, and the
+  // moment is the point.
+  const first = await compress()
+  if (await intact(first)) return first
+  const second = await compress()
+  if (await intact(second)) return second
+  return fitsWithoutCompression(file) ? file : second
 }
 
 /**
