@@ -94,6 +94,33 @@ describe('MemoryWall', () => {
     expect(within(dialog).queryByText('caption-fresh')).not.toBeInTheDocument()
   })
 
+  /**
+   * The public wall must never offer the owner-only removal (docs/00 D54).
+   * `onRemove` is opt-in on Lightbox precisely so this host can leave it off —
+   * but "the prop is optional" is a fact about Lightbox, and the property that
+   * matters is a fact about THIS component. Asserting it on a stand-in host
+   * (Lightbox rendered without the prop) leaves the real one free to grow the
+   * button and every test still green.
+   */
+  test("the wall modal offers no way to remove someone else's moment", async () => {
+    const user = userEvent.setup()
+    renderWithIntl(
+      <MemoryWall
+        initialMoments={[moment('a'), moment('b')]}
+        loadMoreImpl={noLoadMore}
+        subscribeImpl={noSubscribe}
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: 'caption-a' }))
+    const dialog = screen.getByRole('dialog')
+    // the modal really did open with its usual controls — so a missing remove
+    // button is an absence, not a failure to render anything at all
+    expect(within(dialog).getByRole('button', { name: 'close' })).toBeInTheDocument()
+    expect(
+      within(dialog).queryByRole('button', { name: /remove this moment/i }),
+    ).not.toBeInTheDocument()
+  })
+
   test('lightbox next/prev navigates by id mapping', async () => {
     const user = userEvent.setup()
     renderWithIntl(

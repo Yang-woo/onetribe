@@ -271,7 +271,7 @@ describe('Passport', () => {
   })
 
   /**
-   * The standing way out of a mistaken upload (docs/00 — self-delete). Before
+   * The standing way out of a mistaken upload (docs/00 D54). Before
    * this the only self-serve path was the one-time token link on the upload
    * confirmation screen; scroll past it and the owner had to ask the operator.
    */

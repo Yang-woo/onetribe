@@ -346,7 +346,7 @@ describe('Lightbox (moment modal)', () => {
 })
 
 /**
- * The owner's remove control (docs/00 — self-delete). It is opt-in: the same
+ * The owner's remove control (docs/00 D54). It is opt-in: the same
  * modal opens from the wall, where the viewer owns nothing, so its mere
  * presence is a safety property. Destructive and irreversible from here, so it
  * asks first — and a refused removal must leave the moment where it is rather
@@ -436,5 +436,100 @@ describe('Lightbox remove control', () => {
     rerender(withIntl(view('b')))
     // an armed "yes, remove it" carried onto the next photo is a loaded gun
     expect(screen.queryByRole('button', { name: /yes, remove it/i })).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * Focus and the confirmation (docs/00 D54 review). The modal is a focus trap,
+ * and the trap only wraps when focus is already on its first or last child —
+ * so any transition that drops focus on <body> hands the next Tab to the page
+ * behind the overlay. Swapping the trigger for the confirm row is exactly such
+ * a transition, and it also decides whether a screen reader ever hears the
+ * question.
+ */
+describe('Lightbox remove control — focus and a11y', () => {
+  const armed = async () => {
+    const user = userEvent.setup()
+    const onRemove = vi.fn(async () => {})
+    open(0, [momentFixture('a'), momentFixture('b')], { onRemove })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    return { user, onRemove }
+  }
+
+  test('arming moves focus to the safe answer, inside the dialog', async () => {
+    await armed()
+    const keep = screen.getByRole('button', { name: /keep it/i })
+    expect(document.activeElement).toBe(keep)
+    // the property that actually matters — <body> would be outside it
+    expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true)
+  })
+
+  test('the question is the accessible description of both answers', async () => {
+    await armed()
+    // otherwise a reader hears "keep it, button" with nothing to keep it from
+    const question = screen.getByText(/remove it from the wall\?/i)
+    for (const name of [/yes, remove it/i, /keep it/i]) {
+      expect(screen.getByRole('button', { name })).toHaveAttribute('aria-describedby', question.id)
+    }
+    expect(question.id).toBeTruthy()
+  })
+
+  test('backing out returns focus to the trigger, not to the document', async () => {
+    const { user } = await armed()
+    await user.click(screen.getByRole('button', { name: /keep it/i }))
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: /remove this moment/i }))
+  })
+
+  test('a failed removal returns focus to the trigger it re-renders', async () => {
+    const user = userEvent.setup()
+    open(0, [momentFixture('a'), momentFixture('b')], {
+      onRemove: async () => {
+        throw new Error('404')
+      },
+    })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    await user.click(screen.getByRole('button', { name: /yes, remove it/i }))
+    const retry = await screen.findByRole('button', { name: /remove this moment/i })
+    expect(document.activeElement).toBe(retry)
+  })
+
+  test('an in-flight removal keeps focus in the dialog and refuses a second tap', async () => {
+    const user = userEvent.setup()
+    // never settles: the request is still in flight for the whole test
+    const onRemove = vi.fn(() => new Promise<void>(() => {}))
+    open(0, [momentFixture('a'), momentFixture('b')], { onRemove })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    const yes = screen.getByRole('button', { name: /yes, remove it/i })
+    await user.click(yes)
+
+    // `disabled` would drop it from the tab order AND blur it — back to <body>
+    expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true)
+    expect(yes).toHaveAttribute('aria-disabled', 'true')
+    // an impatient double-tap must not fire a second removal
+    await user.click(yes)
+    await user.click(yes)
+    expect(onRemove).toHaveBeenCalledTimes(1)
+    // and cancelling mid-flight can't strand the request behind a closed panel
+    await user.click(screen.getByRole('button', { name: /keep it/i }))
+    expect(screen.getByRole('button', { name: /yes, remove it/i })).toBeInTheDocument()
+  })
+
+  test('re-arming after a failure clears the stale error', async () => {
+    const user = userEvent.setup()
+    let fail = true
+    open(0, [momentFixture('a'), momentFixture('b')], {
+      onRemove: async () => {
+        if (fail) throw new Error('404')
+      },
+    })
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    await user.click(screen.getByRole('button', { name: /yes, remove it/i }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+
+    fail = false
+    await user.click(screen.getByRole('button', { name: /remove this moment/i }))
+    // a stale "it's still on the wall" sitting under a fresh question reads as
+    // the answer to that question
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

@@ -4,7 +4,7 @@ import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { json, parseBody, requireBearerUser } from '@/lib/server/http'
 
 /**
- * Uploader self-removal from the passport (docs/00 — "delete your own moments").
+ * Uploader self-removal from the passport (docs/00 D54).
  *
  * Before this, the only self-serve way down was the secret `/t/[id]/[token]`
  * link on the upload confirmation screen: scroll past that screen and the
