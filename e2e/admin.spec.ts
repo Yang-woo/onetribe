@@ -41,15 +41,18 @@ test('the operator hides a reported moment and it leaves the wall', async ({ pag
     .insert({
       event_id: await eventIdByYear(service, 2015),
       media_kind: 'image',
-      media_url: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+      // unique for the same reason the caption is: media_url carries a UNIQUE
+      // index (migration 20260725000200), so a constant here makes the two
+      // projects race for one row — the loser gets 23505 — and any leftover
+      // row from a killed run blocks the spec forever after.
+      media_url: `https://i.ytimg.com/vi/${caption}/hqdefault.jpg`,
       caption,
       rights_confirmed: true,
       status: 'live',
     })
     .select('id')
     .single()
-  // Say so here. Unchecked, a refused seed (the media_url above is a constant,
-  // so one leftover row blocks it forever) surfaces 20 lines down as a missing
+  // Say so here. Unchecked, a refused seed surfaces 20 lines down as a missing
   // card — which reads as a bug in the public wall.
   if (error) throw error
 
