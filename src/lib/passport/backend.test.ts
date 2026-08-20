@@ -199,3 +199,52 @@ describe('signInEmailVerify — anonymous passport merge', () => {
     expect(opts.signal).toBeInstanceOf(AbortSignal)
   })
 })
+
+/**
+ * removeMoment — the passport's own takedown (docs/00 — self-delete). The
+ * server-side gate is proven against the real stack in
+ * tests/db/moment-remove.test.ts; what only belongs here is the guard that
+ * runs before any request, and the shape of the one it does send.
+ */
+describe('removeMoment', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  function sessionlessClient(): SupabaseClient {
+    return { auth: { getSession: async () => ({ data: { session: null } }) } } as SupabaseClient
+  }
+
+  test('sends the memory id under the passport bearer', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'irrelevant'))
+
+    await backend.removeMoment('moment-1')
+
+    const [url, opts] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    expect(url).toBe('/api/memories/remove')
+    expect((opts.headers as Record<string, string>).authorization).toBe('Bearer anon-token')
+    expect(JSON.parse(opts.body as string)).toEqual({ memoryId: 'moment-1' })
+  })
+
+  test('a refusal rejects — the grid must not drop a moment that is still up', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 404 })),
+    )
+    const backend = createSupabasePassportBackend(fakeClient(anonSession(), 'irrelevant'))
+    await expect(backend.removeMoment('someone-elses')).rejects.toThrow(/404/)
+  })
+
+  test('no session throws before asking the server at all', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const backend = createSupabasePassportBackend(sessionlessClient())
+    // an unauthenticated POST would just 401; failing here keeps the reason
+    // honest ("you have no passport") instead of blaming the server
+    await expect(backend.removeMoment('moment-1')).rejects.toThrow(/no passport session/)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+})

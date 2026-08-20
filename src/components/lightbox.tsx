@@ -49,6 +49,7 @@ export function Lightbox({
   editionById,
   onClose,
   onNavigate,
+  onRemove,
   translateImpl = defaultTranslate,
   translateDelayMs = TRANSLATE_DEBOUNCE_MS,
 }: {
@@ -65,6 +66,15 @@ export function Lightbox({
   editionById?: Map<string, EditionChip>
   onClose: () => void
   onNavigate: (id: string) => void
+  /**
+   * Opt-in: renders the owner's "remove this moment" control (docs/00 —
+   * self-delete). Only the passport passes it, because only there does the
+   * viewer provably own what's on screen; the wall shows the same modal with
+   * no such button. Rejecting keeps the moment and surfaces the error here —
+   * the host is expected to drop the moment from `moments` on success, which
+   * closes the modal through the "open moment left the list" path below.
+   */
+  onRemove?: (momentId: string) => Promise<void>
   /** test seam — the real impl hits /api/translate */
   translateImpl?: TranslateImpl
   /** test seam — the debounce window before a caption is translated */
@@ -284,7 +294,96 @@ export function Lightbox({
             />
           )}
           <MomentMeta moment={moment} center />
+          {onRemove && (
+            // Keyed on the moment so ←/→ never carries a half-armed confirm
+            // (or a stale error) onto the next photo.
+            <RemoveMoment key={moment.id} momentId={moment.id} onRemove={onRemove} />
+          )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The owner's way out, two-tap (docs/00 — self-delete). Confirmation is inline
+ * rather than `window.confirm` because this lives inside a focus-trapped
+ * dialog: a native prompt yanks focus out of the trap, and it hides the very
+ * photo the user is deciding about. Quiet by default — a moment's own page is
+ * not a moderation console.
+ */
+function RemoveMoment({
+  momentId,
+  onRemove,
+}: {
+  momentId: string
+  onRemove: (momentId: string) => Promise<void>
+}) {
+  const t = useTranslations('moment')
+  const [confirming, setConfirming] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
+  // The success path unmounts this (the host drops the moment, the modal
+  // closes), so the settle below can land after teardown.
+  const alive = useRef(true)
+  useEffect(() => () => void (alive.current = false), [])
+
+  if (!confirming) {
+    return (
+      <div className="mt-1 flex flex-col items-center gap-1">
+        <button
+          type="button"
+          onClick={() => {
+            setFailed(false)
+            setConfirming(true)
+          }}
+          className="text-xs text-faint underline-offset-2 hover:text-red-strong hover:underline"
+        >
+          {t('remove')}
+        </button>
+        {failed && (
+          <p role="alert" className="text-xs text-red-strong">
+            {t('removeError')}
+          </p>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-1 flex flex-col items-center gap-2">
+      <p className="text-xs text-muted">{t('removeConfirm')}</p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true)
+            setFailed(false)
+            void onRemove(momentId)
+              .catch(() => {
+                if (!alive.current) return
+                // Back to the quiet link with the error beside it: the moment
+                // is still up, so the control must stay usable for a retry.
+                setConfirming(false)
+                setFailed(true)
+              })
+              .finally(() => {
+                if (alive.current) setBusy(false)
+              })
+          }}
+          className="rounded-full border border-red/45 px-3 py-1 text-xs text-red-strong hover:border-red disabled:opacity-50"
+        >
+          {t('removeYes')}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => setConfirming(false)}
+          className="rounded-full border border-line px-3 py-1 text-xs text-muted hover:text-paper disabled:opacity-50"
+        >
+          {t('removeCancel')}
+        </button>
       </div>
     </div>
   )

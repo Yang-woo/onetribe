@@ -28,6 +28,11 @@
     "watchOnYoutube": "ดูบน YouTube ↗",
     "backToWall": "← กลับไปที่กำแพง",
     "takedownLink": "ขอลบ",
+    "remove": "ลบช่วงเวลานี้",
+    "removeConfirm": "ลบออกจากกำแพงไหม? ย้อนกลับจากตรงนี้ไม่ได้",
+    "removeYes": "ใช่ ลบเลย",
+    "removeCancel": "เก็บไว้",
+    "removeError": "เกิดข้อผิดพลาด — มันยังอยู่บนกำแพง",
     "showOriginal": "ดูต้นฉบับ",
     "showTranslation": "ดูคำแปล",
     "imageAlt": "ช่วงเวลาในเทศกาล"

@@ -28,6 +28,11 @@
     "watchOnYoutube": "ver en YouTube ↗",
     "backToWall": "← volver al muro",
     "takedownLink": "retirar",
+    "remove": "retirar este momento",
+    "removeConfirm": "¿retirarlo del muro? esto no se puede deshacer desde aquí.",
+    "removeYes": "sí, retíralo",
+    "removeCancel": "conservarlo",
+    "removeError": "algo salió mal — sigue en el muro.",
     "showOriginal": "ver original",
     "showTranslation": "ver traducción",
     "imageAlt": "un momento del festival"

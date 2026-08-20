@@ -28,6 +28,11 @@
     "watchOnYoutube": "auf YouTube ansehen ↗",
     "backToWall": "← zurück zur Wand",
     "takedownLink": "entfernen",
+    "remove": "diesen Moment entfernen",
+    "removeConfirm": "von der Wand entfernen? das lässt sich hier nicht rückgängig machen.",
+    "removeYes": "ja, entfernen",
+    "removeCancel": "behalten",
+    "removeError": "etwas ist schiefgelaufen — er ist noch auf der Wand.",
     "showOriginal": "Original anzeigen",
     "showTranslation": "Übersetzung anzeigen",
     "imageAlt": "ein Festivalmoment"

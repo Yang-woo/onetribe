@@ -28,6 +28,11 @@
     "watchOnYoutube": "xem trên YouTube ↗",
     "backToWall": "← quay lại bức tường",
     "takedownLink": "gỡ bỏ",
+    "remove": "gỡ khoảnh khắc này",
+    "removeConfirm": "gỡ khỏi bức tường? không thể hoàn tác từ đây.",
+    "removeYes": "vâng, gỡ xuống",
+    "removeCancel": "giữ lại",
+    "removeError": "đã xảy ra lỗi — nó vẫn còn trên tường.",
     "showOriginal": "xem bản gốc",
     "showTranslation": "xem bản dịch",
     "imageAlt": "một khoảnh khắc lễ hội"

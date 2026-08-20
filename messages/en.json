@@ -28,6 +28,11 @@
     "watchOnYoutube": "watch on YouTube ↗",
     "backToWall": "← back to the wall",
     "takedownLink": "removal",
+    "remove": "remove this moment",
+    "removeConfirm": "remove it from the wall? this can’t be undone here.",
+    "removeYes": "yes, remove it",
+    "removeCancel": "keep it",
+    "removeError": "something went wrong — it’s still on the wall.",
     "showOriginal": "show original",
     "showTranslation": "show translation",
     "imageAlt": "a festival moment"

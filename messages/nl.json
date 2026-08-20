@@ -28,6 +28,11 @@
     "watchOnYoutube": "bekijk op YouTube ↗",
     "backToWall": "← terug naar de muur",
     "takedownLink": "verwijderen",
+    "remove": "dit moment weghalen",
+    "removeConfirm": "van de muur weghalen? dit kan hier niet ongedaan worden gemaakt.",
+    "removeYes": "ja, haal het weg",
+    "removeCancel": "laten staan",
+    "removeError": "er ging iets mis — het staat nog op de muur.",
     "showOriginal": "origineel tonen",
     "showTranslation": "vertaling tonen",
     "imageAlt": "een festivalmoment"

@@ -28,6 +28,11 @@
     "watchOnYoutube": "se på YouTube ↗",
     "backToWall": "← tillbaka till väggen",
     "takedownLink": "ta bort",
+    "remove": "ta bort det här minnet",
+    "removeConfirm": "ta bort det från väggen? det går inte att ångra härifrån.",
+    "removeYes": "ja, ta bort det",
+    "removeCancel": "behåll det",
+    "removeError": "något gick fel — det finns kvar på väggen.",
     "showOriginal": "visa original",
     "showTranslation": "visa översättning",
     "imageAlt": "ett festivalögonblick"

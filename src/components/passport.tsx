@@ -167,6 +167,18 @@ export function Passport({
     }
   }
 
+  /**
+   * Drop a moment the owner took down. Only on success — a rejection travels
+   * back to the modal, which keeps the moment up and offers a retry rather
+   * than showing a grid that lies about what's on the wall. The moment leaving
+   * this list is what closes the modal (the Lightbox notices its open id is
+   * gone), so there's no second "and also close" to forget.
+   */
+  async function remove(momentId: string) {
+    await api.removeMoment(momentId)
+    setState((s) => (s ? { ...s, moments: s.moments.filter((m) => m.id !== momentId) } : s))
+  }
+
   return (
     <section className="flex flex-col gap-8">
       <header className="flex flex-col gap-1.5">
@@ -220,7 +232,10 @@ export function Passport({
           </div>
         )}
         {/* Same modal as the wall (docs/00 D32) — "view details ↗" carries on to
-            /m/[id]. RLS returns live rows only, so every thumb has a live permalink. */}
+            /m/[id]. RLS returns live rows only, so every thumb has a live permalink.
+            Unlike the wall it also carries `onRemove`: here the viewer owns what's
+            on screen, so this is the standing way out of a mistaken upload — the
+            confirmation screen's token link is a one-time pass that's easy to lose. */}
         {openId && (
           <Lightbox
             moments={moments}
@@ -228,6 +243,7 @@ export function Passport({
             editionById={editionById}
             onClose={() => setOpenId(null)}
             onNavigate={setOpenId}
+            onRemove={remove}
           />
         )}
       </section>
