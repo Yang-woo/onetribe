@@ -84,12 +84,14 @@ test('the operator hides a reported moment and it leaves the wall', async ({ pag
 
 /**
  * Restoring is the one action in this console that can undo somebody else's
- * decision (docs/00 D55). A moment its author took down sorts to the top of the
- * list with no reports attached — indistinguishable, before `hidden_reason`,
- * from a false-positive auto-hide — and `h` is one keypress from putting it
- * back on the public wall.
+ * decision (docs/00 D55). The refusal lives in `restore_memory` and tests/db
+ * proves it there; the console's half is pinned in admin-panel.test.tsx against
+ * a stubbed fetch. What only a browser can show is that the two halves meet:
+ * a real click, a real 409 off the real route, and the moment still down.
  */
-test('an author’s own removal is labelled, and restoring it asks first', async ({ page }) => {
+test('an author’s own removal is labelled, and restoring it takes two answers', async ({
+  page,
+}) => {
   const service = serviceClient()
   const caption = `owner-hidden-${randomUUID().slice(0, 8)}`
 
@@ -119,30 +121,16 @@ test('an author’s own removal is labelled, and restoring it asks first', async
     // the operator can see WHY it is down before deciding anything
     await expect(row).toContainText('(owner)')
 
-    // Count the writes rather than watching the row: the console reloads its
-    // queue asynchronously, so "the button still says unhide" is true for a
-    // moment even when the write DID go out — an assertion that passes for a
-    // console with no prompt at all.
-    let writes = 0
-    page.on('request', (req) => {
-      if (req.method() === 'POST' && req.url().includes('/api/admin/action')) writes++
-    })
-
-    // dismissing the prompt must send nothing
-    page.once('dialog', (dialog) => dialog.dismiss())
+    // First answer: the plain action. The server refuses it — and the moment
+    // is still off the wall while the question is on screen.
     await row.getByRole('button', { name: 'unhide' }).click()
+    await expect(row).toContainText('Its author took this moment down')
+    expect(
+      (await service.from('memories').select('status').eq('id', memory!.id).single()).data,
+    ).toEqual({ status: 'hidden' })
 
-    // accepting goes through — the gate is a question, not a lock. Waiting on
-    // the response is also the settle point for the dismissal above: if that
-    // click had leaked a write, this count would be 2.
-    page.once('dialog', (dialog) => dialog.accept())
-    await Promise.all([
-      page.waitForResponse(
-        (res) => res.url().includes('/api/admin/action') && res.request().method() === 'POST',
-      ),
-      row.getByRole('button', { name: 'unhide' }).click(),
-    ])
-    expect(writes).toBe(1)
+    // Second answer: the one that names what is being overruled.
+    await row.getByRole('button', { name: 'restore anyway' }).click()
     await expect(row.getByRole('button', { name: 'hide', exact: true })).toBeVisible()
     const restored = await service
       .from('memories')

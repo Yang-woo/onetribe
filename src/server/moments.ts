@@ -37,24 +37,28 @@ export function createMomentRemoveHandler(deps: MomentRemoveDeps) {
     const parsed = removeSchema.safeParse(await parseBody(req))
     if (!parsed.success) return json(400, { error: 'invalid request' })
 
-    // Ownership lives in the WHERE clause rather than a read-then-write: there
-    // is no window between checking the author and hiding the row, and a
-    // moment belonging to someone else simply matches nothing. author_id is
-    // NULL on moments whose owner deleted their account, so those match no
-    // caller either.
-    const { data, error } = await deps.db
-      .from('memories')
-      // `hidden_reason` is what separates this from a false-positive auto-hide
-      // in the operator console (docs/00 D55) — without it the row invites the
-      // one keypress that puts it back on the wall.
-      .update({ status: 'hidden', hidden_reason: 'owner' })
-      .eq('id', parsed.data.memoryId)
-      .eq('author_id', auth.user.id)
-      .select('id')
+    // Ownership is an argument to the write, not a read before it: `hide_memory`
+    // puts `author_id = <caller>` in the same WHERE clause that hides the row,
+    // so there is no window between proving who you are and the moment going
+    // down, and a moment belonging to someone else simply matches nothing.
+    // author_id is NULL on moments whose owner deleted their account, so those
+    // match no caller either.
+    //
+    // Going through that function rather than writing the row here is what
+    // makes the 'owner' label mean something: it is the only channel that can
+    // set one, and a moment that is already down keeps the label it went down
+    // with (docs/00 D55). Removing your own already-reported moment therefore
+    // still succeeds — it just doesn't repaint why it is off the wall.
+    const { data, error } = await deps.db.rpc('hide_memory', {
+      p_memory_id: parsed.data.memoryId,
+      p_reason: 'owner',
+      p_author_id: auth.user.id,
+    })
     if (error) return json(500, { error: 'could not remove the moment' })
     // Not theirs and not there are the same answer on purpose — a 403 for
     // someone else's id would confirm that id exists.
-    if (!data?.length) return json(404, { error: 'not found' })
+    const matched = (Array.isArray(data) ? data[0] : data)?.matched === true
+    if (!matched) return json(404, { error: 'not found' })
 
     // Best-effort like the other takedown sites: the row is already hidden, so
     // a cache miss must not turn a completed removal into an error.

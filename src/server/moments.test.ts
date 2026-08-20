@@ -5,48 +5,49 @@ import { createMomentRemoveHandler } from './moments'
 
 /**
  * /api/memories/remove — the passport's "remove this moment" (docs/00 D54).
- * Handler-level: what the gate lets through and what the write
- * is *scoped to*. The real-stack proof that another passport's moment survives
- * is tests/db/moment-remove.test.ts.
+ * Handler-level: what the gate lets through, and what the write is *scoped to*.
+ * The real-stack proof that another passport's moment survives is
+ * tests/db/moment-remove.test.ts.
  *
- * The stub records the filters the update was narrowed by, because the whole
- * safety property here is a WHERE clause: drop `.eq('author_id', …)` and every
- * test below still passes on the happy path while the route becomes a way to
- * take down anyone's moment.
+ * The stub records the RPC arguments, because the whole safety property here is
+ * one of them: drop `p_author_id` and every happy path below still passes while
+ * the route becomes a way to take down anyone's moment. It also refuses to hand
+ * out a query builder at all — going back to a direct `update` would slip out of
+ * the one channel that owns `hidden_reason` (docs/00 D55), and that is a change
+ * no assertion about arguments would notice.
  */
 
-function stubDeps({ rows = [{ id: 'm-1' }], error = null as { message: string } | null } = {}) {
-  const filters: Record<string, unknown> = {}
-  const calls = { updates: 0, revalidated: [] as string[], table: '' }
+const CALLER = 'user-1'
+
+function stubDeps({
+  matched = true,
+  reason = 'owner' as string | null,
+  error = null as { message: string } | null,
+} = {}) {
+  const calls = {
+    rpc: [] as Array<{ fn: string; args: Record<string, unknown> }>,
+    revalidated: [] as string[],
+  }
   const db = {
     auth: {
       getUser: async (token: string) =>
         token === 'valid'
-          ? { data: { user: { id: 'user-1' } }, error: null }
+          ? { data: { user: { id: CALLER } }, error: null }
           : { data: { user: null }, error: { message: 'invalid token' } },
     },
-    from: (table: string) => ({
-      update: (patch: Record<string, unknown>) => {
-        calls.table = table
-        calls.updates += 1
-        Object.assign(filters, { __patch: patch })
-        const chain = {
-          eq: (column: string, value: unknown) => {
-            filters[column] = value
-            return chain
-          },
-          select: async () => ({ data: error ? null : rows, error }),
-        }
-        return chain
-      },
-    }),
+    rpc: async (fn: string, args: Record<string, unknown>) => {
+      calls.rpc.push({ fn, args })
+      return error ? { data: null, error } : { data: [{ matched, reason }], error: null }
+    },
+    from: (table: string) => {
+      throw new Error(`removal must go through hide_memory, not a direct write to ${table}`)
+    },
   }
   return {
     deps: {
       db: db as unknown as SupabaseClient,
       revalidate: (tag: string) => calls.revalidated.push(tag),
     },
-    filters,
     calls,
   }
 }
@@ -62,36 +63,37 @@ function removeRequest(body: unknown, token?: string): Request {
   })
 }
 
+const A_MOMENT = '11111111-1111-4111-8111-111111111111'
+
 describe('moment self-removal', () => {
   test('hides the moment and drops the wall counter cache', async () => {
-    const { deps, filters, calls } = stubDeps()
+    const { deps, calls } = stubDeps()
     const res = await createMomentRemoveHandler(deps)(
-      removeRequest({ memoryId: '11111111-1111-4111-8111-111111111111' }, 'valid'),
+      removeRequest({ memoryId: A_MOMENT }, 'valid'),
     )
     expect(res.status).toBe(200)
-    expect(calls.table).toBe('memories')
+    expect(calls.rpc).toHaveLength(1)
+    expect(calls.rpc[0].fn).toBe('hide_memory')
     // the reason travels with the status: an unlabelled hide reads as a filter
     // mistake in the operator console, one keypress from being undone (D55)
-    expect(filters.__patch).toEqual({ status: 'hidden', hidden_reason: 'owner' })
+    expect(calls.rpc[0].args.p_reason).toBe('owner')
     // the count on the wall header drops by one — without this the moment
     // disappears while the header still counts it (docs/00 D41)
     expect(calls.revalidated).toEqual([COUNTERS_TAG])
   })
 
   test('the write is scoped to BOTH the id and the calling passport', async () => {
-    const { deps, filters } = stubDeps()
-    await createMomentRemoveHandler(deps)(
-      removeRequest({ memoryId: '11111111-1111-4111-8111-111111111111' }, 'valid'),
-    )
-    // ownership is part of the statement, not a prior read: no window between
-    // checking the author and hiding the row
-    expect(filters.id).toBe('11111111-1111-4111-8111-111111111111')
-    expect(filters.author_id).toBe('user-1')
+    const { deps, calls } = stubDeps()
+    await createMomentRemoveHandler(deps)(removeRequest({ memoryId: A_MOMENT }, 'valid'))
+    // ownership is an argument to the write, not a prior read: no window
+    // between checking the author and hiding the row
+    expect(calls.rpc[0].args.p_memory_id).toBe(A_MOMENT)
+    expect(calls.rpc[0].args.p_author_id).toBe(CALLER)
   })
 
   test('someone else’s moment reads as 404, not 403', async () => {
-    // the scoped update matched nothing — which is also what a bogus id does
-    const { deps, calls } = stubDeps({ rows: [] })
+    // the scoped write matched nothing — which is also what a bogus id does
+    const { deps, calls } = stubDeps({ matched: false, reason: null })
     const res = await createMomentRemoveHandler(deps)(
       removeRequest({ memoryId: '22222222-2222-4222-8222-222222222222' }, 'valid'),
     )
@@ -102,22 +104,33 @@ describe('moment self-removal', () => {
     expect(calls.revalidated).toEqual([])
   })
 
+  test('a moment that is already down still reads as removed', async () => {
+    // Their moment, already hidden — by three reports, say. The channel keeps
+    // the label it went down with and reports `matched`, so the owner is told
+    // the truth ("it is off the wall") instead of "not found", and the console
+    // still sees why it is down. A `matched === false` reading of "no row
+    // changed" would turn this into a 404.
+    const { deps } = stubDeps({ matched: true, reason: 'report' })
+    const res = await createMomentRemoveHandler(deps)(
+      removeRequest({ memoryId: A_MOMENT }, 'valid'),
+    )
+    expect(res.status).toBe(200)
+  })
+
   test('no bearer token → 401 before anything is written', async () => {
     const { deps, calls } = stubDeps()
-    const res = await createMomentRemoveHandler(deps)(
-      removeRequest({ memoryId: '11111111-1111-4111-8111-111111111111' }),
-    )
+    const res = await createMomentRemoveHandler(deps)(removeRequest({ memoryId: A_MOMENT }))
     expect(res.status).toBe(401)
-    expect(calls.updates).toBe(0)
+    expect(calls.rpc).toHaveLength(0)
   })
 
   test('an unrecognized token → 401 before anything is written', async () => {
     const { deps, calls } = stubDeps()
     const res = await createMomentRemoveHandler(deps)(
-      removeRequest({ memoryId: '11111111-1111-4111-8111-111111111111' }, 'forged'),
+      removeRequest({ memoryId: A_MOMENT }, 'forged'),
     )
     expect(res.status).toBe(401)
-    expect(calls.updates).toBe(0)
+    expect(calls.rpc).toHaveLength(0)
   })
 
   test.each([
@@ -128,13 +141,13 @@ describe('moment self-removal', () => {
     const { deps, calls } = stubDeps()
     const res = await createMomentRemoveHandler(deps)(removeRequest(body, 'valid'))
     expect(res.status).toBe(400)
-    expect(calls.updates).toBe(0)
+    expect(calls.rpc).toHaveLength(0)
   })
 
   test('a database failure is a 500 and does not claim success', async () => {
     const { deps, calls } = stubDeps({ error: { message: 'connection reset' } })
     const res = await createMomentRemoveHandler(deps)(
-      removeRequest({ memoryId: '11111111-1111-4111-8111-111111111111' }, 'valid'),
+      removeRequest({ memoryId: A_MOMENT }, 'valid'),
     )
     expect(res.status).toBe(500)
     // the moment is still up, so the cached count is still right
@@ -150,7 +163,7 @@ describe('moment self-removal', () => {
       revalidate: vi.fn(() => {
         throw new Error('cache unreachable')
       }),
-    })(removeRequest({ memoryId: '11111111-1111-4111-8111-111111111111' }, 'valid'))
+    })(removeRequest({ memoryId: A_MOMENT }, 'valid'))
     expect(res.status).toBe(200)
   })
 })
