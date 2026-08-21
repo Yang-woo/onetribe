@@ -145,13 +145,24 @@ export function createAdminActionHandler(deps: ModerationDeps) {
         p_acknowledge: acknowledge ?? null,
       })
       if (error) return json(500, { error: error.message })
-      const result = firstRow<{ outcome: string; reason: string | null }>(data)
+      const result = firstRow<{
+        outcome: string
+        reason: string | null
+        report_count: number
+      }>(data)
       // 409, not 403: the operator may do this — but only by saying what they
       // are overruling. The console turns this into a question; a console that
       // never asks simply cannot restore these rows, which is the whole point
       // of the gate living here instead of in the browser.
       if (result?.outcome === 'confirm') {
-        return json(409, { error: 'confirm required', reason: result.reason })
+        // `reports` rides along so the question can say what else is on the
+        // moment: these restores deliberately leave the reports in place, which
+        // means one more takes it back down (docs/00 D55).
+        return json(409, {
+          error: 'confirm required',
+          reason: result.reason,
+          reports: result.report_count,
+        })
       }
       // Stale queue snapshot — the row is gone. Saying "ok" would be a lie.
       if (!result || result.outcome === 'missing') return json(404, { error: 'not found' })

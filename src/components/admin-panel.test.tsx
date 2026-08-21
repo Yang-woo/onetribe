@@ -35,7 +35,7 @@ interface Row {
 const writes: Array<{ memoryId: string; action: string; acknowledge?: string }> = []
 let queueLoads = 0
 /** What `/api/admin/action` answers next — one entry per call, then 200s. */
-let refusals: Array<{ reason: string } | null> = []
+let refusals: Array<{ reason: string; reports?: number } | null> = []
 /** Non-409 failures to answer with, same one-per-call shape. */
 let statuses: number[] = []
 
@@ -176,6 +176,45 @@ describe('restoring what somebody else took down', () => {
     expect(
       (await row(OWNER_ROW.caption)).queryByRole('button', { name: 'restore anyway' }),
     ).toBeNull()
+  })
+
+  test('the question says what else is on the moment, and what that means', async () => {
+    // Restoring this kind does not clear the reports, so the operator is
+    // putting a moment back that is one report from going down again. Nothing
+    // else in this console shows a per-row report count.
+    refusals = [{ reason: 'owner', reports: 3 }]
+    await mountWith([OWNER_ROW])
+    await userEvent.click(
+      await (await row(OWNER_ROW.caption)).findByRole('button', { name: 'unhide' }),
+    )
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Reports on it: 3 of 3.')
+    expect(alert).toHaveTextContent('The next one takes it down again.')
+  })
+
+  test('a count below the threshold states itself without the warning', async () => {
+    refusals = [{ reason: 'owner', reports: 2 }]
+    await mountWith([OWNER_ROW])
+    await userEvent.click(
+      await (await row(OWNER_ROW.caption)).findByRole('button', { name: 'unhide' }),
+    )
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Reports on it: 2 of 3.')
+    expect(alert).not.toHaveTextContent('takes it down again')
+  })
+
+  test('nothing is said about reports when there are none', async () => {
+    refusals = [{ reason: 'owner', reports: 0 }]
+    await mountWith([OWNER_ROW])
+    await userEvent.click(
+      await (await row(OWNER_ROW.caption)).findByRole('button', { name: 'unhide' }),
+    )
+
+    // an operator who reads "Reports on it: 0 of 3" on every single restore
+    // stops reading the sentence that matters
+    expect(await screen.findByRole('alert')).not.toHaveTextContent('Reports on it')
   })
 
   test('cancelling sends nothing and closes the question', async () => {

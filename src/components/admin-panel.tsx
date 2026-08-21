@@ -38,6 +38,19 @@ const OVERRULED_BY: Record<Overruled, string> = {
   unknown: 'Nothing here records who took this moment down.',
 }
 
+/**
+ * What else is sitting on the moment. Restoring one of these does not clear its
+ * reports (nobody adjudicated them — docs/00 D55), so a moment put back over
+ * three reporters goes down again on the next one. The operator has no per-row
+ * report count anywhere else in this console, so without this the safety net
+ * firing later reads as the restore having silently failed.
+ */
+function reportNote(count: number): string {
+  if (count <= 0) return ''
+  const at = `Reports on it: ${count} of 3.`
+  return count >= 3 ? `${at} The next one takes it down again.` : at
+}
+
 interface QueueData {
   reports: Array<{ id: string; reason: string; created_at: string; memories: AdminMemory | null }>
   recent: AdminMemory[]
@@ -52,7 +65,11 @@ export function AdminPanel() {
   const [queue, setQueue] = useState<QueueData | null>(null)
   const [tab, setTab] = useState<'reports' | 'recent'>('reports')
   const [denied, setDenied] = useState(false)
-  const [confirming, setConfirming] = useState<{ id: string; reason: Overruled } | null>(null)
+  const [confirming, setConfirming] = useState<{
+    id: string
+    reason: Overruled
+    reports: number
+  } | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
 
   const loadQueue = useCallback(async (accessToken: string) => {
@@ -110,8 +127,15 @@ export function AdminPanel() {
       body: JSON.stringify({ memoryId, action, ...(acknowledge ? { acknowledge } : {}) }),
     })
     if (res.status === 409) {
-      const body = (await res.json().catch(() => null)) as { reason?: Overruled } | null
-      setConfirming({ id: memoryId, reason: body?.reason ?? 'unknown' })
+      const body = (await res.json().catch(() => null)) as {
+        reason?: Overruled
+        reports?: number
+      } | null
+      setConfirming({
+        id: memoryId,
+        reason: body?.reason ?? 'unknown',
+        reports: body?.reports ?? 0,
+      })
       return
     }
     setConfirming(null)
@@ -219,7 +243,7 @@ export function AdminPanel() {
       <ul className="flex flex-col gap-2">
         {ordered.map((memory) => {
           const hideAction = memory.status === 'hidden' ? 'unhide' : 'hide'
-          const asking = confirming?.id === memory.id ? confirming.reason : null
+          const asking = confirming?.id === memory.id ? confirming : null
           return (
             <li
               key={memory.id}
@@ -239,7 +263,7 @@ export function AdminPanel() {
                 if (e.key === 'd') void act(memory.id, 'delete')
                 if (e.key === 'o') void act(memory.id, 'dismiss')
               }}
-              className="flex items-center gap-3 rounded-lg border border-line p-2 focus:border-orange"
+              className="flex flex-wrap items-center gap-3 rounded-lg border border-line p-2 focus:border-orange"
             >
               {(() => {
                 const thumb = momentImageSrc(memory, { preferThumb: true })
@@ -287,31 +311,6 @@ export function AdminPanel() {
                     open video ↗
                   </a>
                 )}
-                {asking && (
-                  // In the row rather than a browser dialog: a dialog's default
-                  // button is OK, so the Enter that follows a keyboard shortcut
-                  // confirms the destructive direction without anyone reading
-                  // it. Here the only way through is to hit this button.
-                  <div role="alert" className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                    <span className="text-orange">
-                      {OVERRULED_BY[asking]} Put it back on the public wall?
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => void act(memory.id, 'unhide', asking)}
-                      className="rounded-full border border-orange px-2 py-0.5 text-orange"
-                    >
-                      restore anyway
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirming(null)}
-                      className="rounded-full border border-line px-2 py-0.5 text-muted"
-                    >
-                      cancel
-                    </button>
-                  </div>
-                )}
               </div>
               <div className="flex gap-1">
                 <button
@@ -336,6 +335,34 @@ export function AdminPanel() {
                   OK
                 </button>
               </div>
+              {asking && (
+                // In the row rather than a browser dialog: a dialog's default
+                // button is OK, so the Enter that follows a keyboard shortcut
+                // confirms the destructive direction without anyone reading
+                // it. Here the only way through is to hit this button.
+                <div role="alert" className="flex basis-full flex-wrap items-center gap-2 text-xs">
+                  <span className="text-orange">
+                    {[OVERRULED_BY[asking.reason], reportNote(asking.reports)]
+                      .filter(Boolean)
+                      .join(' ')}{' '}
+                    Put it back on the public wall?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void act(memory.id, 'unhide', asking.reason)}
+                    className="rounded-full border border-orange px-2 py-0.5 text-orange"
+                  >
+                    restore anyway
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirming(null)}
+                    className="rounded-full border border-line px-2 py-0.5 text-muted"
+                  >
+                    cancel
+                  </button>
+                </div>
+              )}
             </li>
           )
         })}

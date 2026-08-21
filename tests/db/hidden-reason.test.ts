@@ -333,13 +333,43 @@ describe('restoring is refused, by the database, not by the browser', () => {
     const res = await adminAction(admin(memoryId, 'unhide'))
 
     expect(res.status).toBe(409)
-    expect(await res.json()).toEqual({ error: 'confirm required', reason: 'owner' })
+    expect(await res.json()).toEqual({ error: 'confirm required', reason: 'owner', reports: 0 })
     // and the moment is still off the wall — a refusal that half-applied would
     // be worse than none
     expect(await memoryState(service, memoryId)).toEqual({
       status: 'hidden',
       hidden_reason: 'owner',
     })
+  })
+
+  test('the refusal says what else is sitting on the moment', async () => {
+    const memoryId = await hiddenByOwner()
+    await reportOnce(memoryId, 'a')
+    await reportOnce(memoryId, 'b')
+    // …plus one the auto-hide would never count. Counting rows instead of
+    // distinct reporters would say 3 here and promise the operator a re-hide
+    // that the trigger will not perform.
+    await service.from('reports').insert({ memory_id: memoryId, reason: 'spam' })
+
+    const res = await adminAction(admin(memoryId, 'unhide'))
+
+    expect(res.status).toBe(409)
+    // Restoring this one leaves the reports in place on purpose, so the
+    // operator is putting a moment back that two reporters are already on —
+    // nothing else in the console tells them that.
+    expect(await res.json()).toEqual({
+      error: 'confirm required',
+      reason: 'owner',
+      reports: 2,
+    })
+  })
+
+  test('a moment nobody reported says so with a zero, not with silence', async () => {
+    const memoryId = await hiddenByOwner()
+
+    const res = await adminAction(admin(memoryId, 'unhide'))
+
+    expect((await res.json()).reports).toBe(0)
   })
 
   test('acknowledging the wrong thing is refused too', async () => {
@@ -350,7 +380,7 @@ describe('restoring is refused, by the database, not by the browser', () => {
     const res = await adminAction(admin(memoryId, 'unhide', 'token'))
 
     expect(res.status).toBe(409)
-    expect(await res.json()).toEqual({ error: 'confirm required', reason: 'owner' })
+    expect(await res.json()).toEqual({ error: 'confirm required', reason: 'owner', reports: 0 })
   })
 
   test('naming it restores it — the gate is a question, not a lock', async () => {
