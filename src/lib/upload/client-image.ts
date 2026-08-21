@@ -23,8 +23,14 @@ import { looksIntact } from './image-integrity'
  * Photos are canvas re-encoded: that both compresses toward the size target
  * (docs/15 §2, docs/00 D47) and strips ALL metadata including GPS EXIF
  * (docs/00 D9 P6 — festival photos carry location data). GIFs skip the canvas
- * here so the uploaded original keeps its animation, and carry no EXIF to
- * begin with.
+ * here so the uploaded original keeps its animation, which means this path
+ * strips nothing from them: the format has no EXIF segment, but the branch is
+ * chosen on the type the picker reports, not on the bytes.
+ *
+ * The strip is a promise to people using the site, not a boundary: the server
+ * signs a length and a content-type and never looks at the pixels, so anything
+ * driving the API directly can upload whatever it likes. The only coordinates
+ * at stake there are the caller's own.
  *
  * A separate small static thumbnail (prepareThumb) is generated per upload so
  * the wall grid stops fetching full-size media (docs/00 D21).
@@ -139,12 +145,23 @@ export async function prepareForUpload(
   // the share-card format conversion and the size and resolution ceilings of
   // D47 are applied. One false positive would have published someone's location.
   //
-  // So a wrong verdict now costs a wasted re-encode and nothing else, which is
-  // what lets the check be decisive. If the second attempt looks broken too we
-  // upload it anyway: refusing would cost the moment entirely, and the moment is
-  // the point.
+  // So a wrong verdict costs a wasted re-encode, and the retry is caught: a
+  // second pass that dies — out of memory on a 20MB photo, a worker that went
+  // away — must not take the moment with it. `first` is a compressed file with
+  // the same guarantees, just one we distrust the look of, and a photo that
+  // looks wrong beats no photo at all. Without that catch the wizard's own
+  // recovery re-runs the same failing path and the upload ends as an error,
+  // which is the outcome this whole decision exists to avoid.
+  //
+  // If the second attempt looks broken too we upload it anyway, for the same
+  // reason: refusing costs the moment entirely, and the moment is the point.
   const first = await compress()
-  return (await intact(first)) ? first : compress()
+  if (await intact(first)) return first
+  try {
+    return await compress()
+  } catch {
+    return first
+  }
 }
 
 /**
@@ -183,8 +200,18 @@ export async function prepareThumb(
   // compression already reaches the wall grid through here — which is how the
   // reported moment came out broken in both places. Gating prepareForUpload
   // covers that case; this covers the one where only the thumbnail loses.
+  //
+  // Same catch as the full-size path, and it matters more here: the wizard
+  // swallows a thumbnail failure into `null`, so a throwing retry would silently
+  // drop the thumbnail and put a full-size photo behind that wall card — which
+  // is the cost D21 exists to avoid.
   const first = await compress()
-  return (await intact(first)) ? first : compress()
+  if (await intact(first)) return first
+  try {
+    return await compress()
+  } catch {
+    return first
+  }
 }
 
 /**

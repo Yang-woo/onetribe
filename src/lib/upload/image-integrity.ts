@@ -47,9 +47,12 @@ export const FLAT_DETAIL = 0.5
  *
  * Measured against the population it actually runs on rather than against
  * invented images: the shipped function, bundled and run in Chromium and WebKit
- * over all 221 photos on the production wall, scored the 220 good ones between
- * 0.58 and 1.72 (median 0.93) and the broken one at 0. Not one of them came
- * within 58× of this number, and none fell through the flatness escape either.
+ * over all 221 photos on the production wall, put none of the 220 good ones
+ * below 0.61 full-size or 0.58 as thumbnails (median 0.93 either way), and the
+ * broken one at 0 (0.0016 as a thumbnail). Nothing came within 58× of this
+ * number, and none fell through the flatness escape. These are a min over a
+ * max, so they cannot exceed 1 — an earlier draft of this comment quoted a
+ * range topping out at 1.72, which was the pre-symmetric measurement.
  *
  * Synthetic graphics are a different story and the number does not pretend
  * otherwise: a noiseless vertical-beam render, or a pure horizontal gradient,
@@ -57,7 +60,16 @@ export const FLAT_DETAIL = 0.5
  * tell apart from rows a bug made identical. That costs a wasted re-encode and
  * nothing else (see prepareForUpload), which is what allows a threshold this
  * decisive. Add a little sensor noise — a photograph of a striped fence — and
- * the same shape scores 0.066.
+ * the same shape scores 0.066. Lineup posters, ticket screenshots and flat
+ * gradient banners are therefore expected to be retried every time, with the
+ * retry certain to reach the same verdict: a batch of five such files costs
+ * twenty compressions rather than five. Photographs cost nothing extra.
+ *
+ * Known limit, measured: the sample is taken at SAMPLE_WIDTH, so whether a
+ * one-pixel stripe survives the downscale depends on the source resolution.
+ * 2400×1800 — the reported photo — is caught; 2560×1920 carrying the same shape
+ * reads as flat and passes. "Cannot tell" is defined as intact, so this fails
+ * toward publishing rather than toward blocking.
  */
 export const DEGENERATE_RATIO = 0.01
 
@@ -75,6 +87,13 @@ export function detailRatio(
   height: number,
 ): number | null {
   if (width < 2 || height < 2) return null
+  // A buffer that does not hold the frame it claims reads past the end, and the
+  // resulting NaN slips through the flatness escape below (`NaN < FLAT_DETAIL`
+  // is false) to come back as "broken" — the exact inverse of this module's
+  // contract that a check it could not perform reads as intact. `looksIntact`
+  // always passes matching dimensions; this function is exported and called
+  // directly by tests.
+  if (rgba.length < width * height * 4) return null
   // Rec. 601 luma, integer weights — this only ever feeds a ratio, so the exact
   // coefficients matter less than using ONE channel that tracks brightness
   // (a per-channel sum would let a colour shift stand in for structure).
@@ -128,14 +147,29 @@ export async function looksIntact(file: Blob): Promise<boolean> {
       if (!context) return true
       // The default smoothing is what makes the sample honest: it averages the
       // source rather than point-sampling it, so a stripe pattern survives
-      // downscaling instead of aliasing into something else. Verified on the
-      // real artifact in Chromium, WebKit and Firefox — all three keep the
-      // signal (the axis reads 0 in every one of them).
+      // downscaling instead of aliasing into something else. Measured by hand
+      // on the real artifact in Chromium, WebKit and Firefox — all three keep
+      // the signal — but CI installs Chromium only, so the other two are a
+      // one-time observation rather than a standing guarantee.
+      //
+      // Cost of this whole call, over 40 real photos: median 14ms in Chromium,
+      // 25ms in WebKit (p95 23/39). An upload pays it twice — once for the
+      // photo, once for the thumbnail — on top of the ~0.5s compression stall
+      // D50 measured and chose to leave alone. Handing the downscale to the
+      // decoder instead (`createImageBitmap(file, { resizeWidth })`) was tried
+      // and is SLOWER in both engines: 16ms and 31ms.
       context.drawImage(bitmap, 0, 0, width, height)
       const { data } = context.getImageData(0, 0, width, height)
       return ratioLooksIntact(detailRatio(data, width, height))
     } finally {
-      bitmap.close()
+      // Not allowed to throw: this is the one place where an exception would
+      // replace a computed `false` with the outer catch's `true`, turning a
+      // corruption we DID detect into a clean bill of health.
+      try {
+        bitmap.close()
+      } catch {
+        // nothing to release, nothing to do
+      }
     }
   } catch {
     return true

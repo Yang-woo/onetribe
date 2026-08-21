@@ -716,3 +716,59 @@ describe('UploadWizard', () => {
     })
   })
 })
+
+/**
+ * The recovery path after a failed prepare — docs/00 D56, D9 P6.
+ *
+ * `prepare` is kicked off when files are picked, so a rejection there has to be
+ * recovered at submit. This is the last place left in the app that decides what
+ * bytes go up, and the tempting fix — "compression failed, just send the
+ * original" — reinstates exactly the bug D56 was pulled for: the canvas pass is
+ * the only thing that strips GPS EXIF, so the picked file is the one file that
+ * must never reach R2. Swapping this branch for `p.file` left all 495 tests
+ * green before this one existed.
+ */
+test('a prepare that failed is re-run, never swapped for the picked file', async () => {
+  const user = userEvent.setup()
+  const picked = gifFile('a.gif')
+  const recompressed = new File([new Uint8Array([0x52])], 'a.gif', { type: 'image/gif' })
+
+  let attempts = 0
+  const prepareImpl = vi.fn(async () => {
+    attempts += 1
+    if (attempts === 1) throw new Error('canvas went away')
+    return recompressed
+  })
+
+  const bodies: BodyInit[] = []
+  const fetchStub = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+    const href = String(url)
+    if (href.endsWith('/api/upload/presign'))
+      return Response.json({
+        uploads: [{ key: 'm/2026/k1.gif', uploadUrl: 'https://put.test/k1', headers: {} }],
+        session: 'sess-token',
+      })
+    if (href.startsWith('https://put.test/')) {
+      if (init?.body) bodies.push(init.body)
+      return new Response(null, { status: 200 })
+    }
+    if (href.endsWith('/api/memories'))
+      return Response.json({ moments: [{ id: 'mid-1', takedownToken: 'tok-1' }] }, { status: 201 })
+    throw new Error(`unexpected fetch ${href}`)
+  })
+  vi.stubGlobal('fetch', fetchStub)
+
+  renderWizard({ prepareImpl })
+  await user.upload(screen.getByLabelText('photos'), [picked])
+  await user.click(screen.getByRole('radio', { name: '2023' }))
+  await user.click(screen.getByRole('button', { name: 'next' }))
+  await user.click(screen.getByRole('checkbox'))
+  await user.click(screen.getByRole('button', { name: 'share my moment' }))
+
+  await screen.findByRole('heading', { name: /on the wall/ })
+  // once eagerly (it threw), once in the recovery — not zero, and not skipped
+  expect(prepareImpl).toHaveBeenCalledTimes(2)
+  expect(bodies).toHaveLength(1)
+  expect(bodies[0]).toBe(recompressed)
+  expect(bodies[0]).not.toBe(picked)
+})

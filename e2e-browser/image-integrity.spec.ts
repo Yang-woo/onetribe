@@ -18,12 +18,17 @@ import ts from 'typescript'
  * assertion will fail loudly rather than quietly testing nothing.
  */
 
+// The path is relative to the repo root, which is where both `yarn test:browser`
+// and CI run from. A wrong one throws here rather than quietly testing nothing.
 function shippedModuleScript(): string {
   const source = readFileSync('src/lib/upload/image-integrity.ts', 'utf8')
   const { outputText } = ts.transpileModule(source, {
     compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS },
   })
-  if (/\brequire\s*\(/.test(outputText)) {
+  // Both spellings: `import()` survives transpilation to CommonJS under some
+  // target/helper combinations, so screening only for `require` would let a
+  // module that no longer loads slip through as a test that proves nothing.
+  if (/\b(require|import)\s*\(/.test(outputText)) {
     throw new Error('image-integrity.ts grew an import — this harness can no longer load it')
   }
   return `window.II = (function () { const exports = {}; ${outputText}; return exports })()`
@@ -33,7 +38,11 @@ function shippedModuleScript(): string {
 const CASES = ['normal', 'rowRepeat', 'colRepeat', 'flat'] as const
 
 test('the shipped check judges real encoded files in a real browser', async ({ page }) => {
-  await page.goto('/en')
+  // about:blank on purpose: this module has no imports and no DOM of its own,
+  // so binding it to the app would make a pure-logic test fail whenever the
+  // wall does — and would keep it out of the job that gates pull requests,
+  // which is where the only coverage of this function's body needs to live.
+  await page.goto('about:blank')
   await page.addScriptTag({ content: shippedModuleScript() })
 
   const results = await page.evaluate(async (cases) => {

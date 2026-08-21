@@ -1,6 +1,7 @@
 import imageCompression from 'browser-image-compression'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { imageAspectRatio, prepareForUpload, prepareThumb, validateFiles } from './client-image'
+import { looksIntact } from './image-integrity'
 import {
   ALLOWED_MIME,
   IMAGE_MAX_DIM,
@@ -27,6 +28,10 @@ import {
 // keep a photo from being shrunk to hit a size target (D47) and the EXIF strip
 // that keeps GPS out of a festival photo (D9 P6).
 vi.mock('browser-image-compression', () => ({ default: vi.fn() }))
+// Spied rather than stubbed out: the tests at the bottom assert that the
+// pipeline reaches for THIS function by default, which is the one thing an
+// injected seam can never show.
+vi.mock('./image-integrity', () => ({ looksIntact: vi.fn(async () => true) }))
 const compress = vi.mocked(imageCompression)
 const photo = new File([new Uint8Array([0xff, 0xd8])], 'crowd.jpg', { type: 'image/jpeg' })
 
@@ -195,6 +200,16 @@ describe('prepareForUpload — corrupt compression fallback (D56)', () => {
     expect(compress).toHaveBeenCalledTimes(2)
   })
 
+  test('a retry that dies keeps the first result rather than the moment', async () => {
+    // A second re-encode of a 20MB phone photo can run the tab out of memory.
+    // Letting that reject would send the wizard's recovery path down the same
+    // failing route and end the upload as an error — losing the moment, which is
+    // the one outcome this decision refuses. `first` is a compressed file with
+    // every guarantee intact; we just distrust how it looks.
+    compress.mockResolvedValueOnce(first).mockRejectedValueOnce(new Error('out of memory'))
+    await expect(prepareForUpload(photo, async () => false)).resolves.toBe(first)
+  })
+
   test('when both attempts look corrupt it still ships a COMPRESSED file', async () => {
     compress.mockResolvedValueOnce(first).mockResolvedValueOnce(second)
     const result = await prepareForUpload(photo, async () => false)
@@ -216,6 +231,8 @@ describe('prepareForUpload — corrupt compression fallback (D56)', () => {
         preserveExif: false,
         maxSizeMB: TARGET_IMAGE_BYTES / (1024 * 1024),
         maxWidthOrHeight: IMAGE_MAX_DIM,
+        alwaysKeepResolution: true,
+        maxIteration: IMAGE_MAX_ITERATIONS,
       })
     }
   })
@@ -351,5 +368,41 @@ describe('imageAspectRatio (docs/00 D32, best-effort)', () => {
 
     globalRef.createImageBitmap = vi.fn(async () => ({ width: 0, height: 0, close: vi.fn() }))
     expect(await imageAspectRatio(file)).toBeNull()
+  })
+})
+
+/**
+ * That the pipeline is actually WIRED to the detector — docs/00 D56.
+ *
+ * Every test above injects the `intact` seam, and the ones that do not are no
+ * help: jsdom has no `createImageBitmap`, so the real `looksIntact` returns
+ * `true` before it touches a canvas and is indistinguishable from a stub that
+ * always agrees. Replacing both defaults with `async () => true` left the whole
+ * suite green — the feature could be cut loose from the pipeline and nothing
+ * would say so. These two tests are what notices.
+ */
+describe('the detector is what the pipeline defaults to (D56)', () => {
+  const out = new File([new Uint8Array([9])], 'out.jpg', { type: 'image/jpeg' })
+
+  test('prepareForUpload judges its own compressed output', async () => {
+    compress.mockResolvedValue(out)
+    const spy = vi.mocked(looksIntact)
+    spy.mockResolvedValue(true)
+
+    await prepareForUpload(photo) // no seam — this is the production call shape
+
+    // the compressed output, not the file the uploader picked: judging the
+    // input would tell us nothing about what the canvas produced
+    expect(spy).toHaveBeenCalledWith(out)
+  })
+
+  test('prepareThumb judges its own compressed output', async () => {
+    compress.mockResolvedValue(out)
+    const spy = vi.mocked(looksIntact)
+    spy.mockResolvedValue(true)
+
+    await prepareThumb(photo, true)
+
+    expect(spy).toHaveBeenCalledWith(out)
   })
 })
