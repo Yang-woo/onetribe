@@ -158,7 +158,8 @@ grant execute on function public.hide_memory(uuid, text, uuid, uuid) to service_
 -- ── the one channel that restores, and the refusal that lives in it ─────────
 
 -- Outcomes: 'missing' (no such row), 'confirm' (refused — `reason` says what
--- the caller would be overruling), 'restored'.
+-- the caller would be overruling and `report_count` what else is sitting on the
+-- moment), 'restored'.
 --
 -- The refusal is here rather than in the console because a gate in the browser
 -- is not a gate: the route did not read hidden_reason at all, so a client that
@@ -166,11 +167,16 @@ grant execute on function public.hide_memory(uuid, text, uuid, uuid) to service_
 -- always does — restored an author's takedown with a 200. Naming the label
 -- back is also a compare-and-set: acknowledge 'owner' on a row that has since
 -- become something else is refused again rather than applied blind.
+-- The return type gains a column, and `create or replace` cannot change one
+-- (42P13), so the old shape has to go first for this file to stay replayable.
+-- Grants are re-asserted below, which a drop would otherwise take with it.
+drop function if exists public.restore_memory(uuid, text);
+
 create or replace function public.restore_memory(
   p_memory_id uuid,
   p_acknowledge text default null
 )
-returns table (outcome text, reason text)
+returns table (outcome text, reason text, report_count int)
 language plpgsql
 security definer
 set search_path = public
@@ -179,6 +185,7 @@ declare
   v_status mod_status;
   v_reason text;
   v_label text;
+  v_reports int;
 begin
   select m.status, m.hidden_reason
     into v_status, v_reason
@@ -187,12 +194,12 @@ begin
      for update; -- also serialises against a report landing mid-restore
 
   if not found then
-    return query select 'missing'::text, null::text;
+    return query select 'missing'::text, null::text, 0;
     return;
   end if;
 
   if v_status = 'live' then
-    return query select 'restored'::text, null::text; -- already up; nothing to undo
+    return query select 'restored'::text, null::text, 0; -- already up; nothing to undo
     return;
   end if;
   -- Anything else is off the wall (`memories_read_live` passes 'live' only), so
@@ -210,7 +217,18 @@ begin
   v_label := coalesce(v_reason, 'unknown');
   if v_label in ('owner', 'token', 'unknown')
      and (p_acknowledge is null or p_acknowledge <> v_label) then
-    return query select 'confirm'::text, v_label;
+    -- What else is on this moment, counted the way the auto-hide counts it (the
+    -- expression is handle_report_threshold's — keep the two in step). Restoring
+    -- one of these does NOT clear reports, on purpose, so a moment put back over
+    -- three reporters goes down again on the next one. That is the safety net
+    -- working, but the operator cannot see it coming: the console shows no
+    -- report count per row. Hand it to them with the question.
+    select count(distinct reporter_hint)
+      into v_reports
+      from public.reports
+     where memory_id = p_memory_id
+       and reporter_hint is not null;
+    return query select 'confirm'::text, v_label, v_reports;
     return;
   end if;
 
@@ -229,7 +247,7 @@ begin
 
   update public.memories set status = 'live' where id = p_memory_id;
 
-  return query select 'restored'::text, v_label;
+  return query select 'restored'::text, v_label, 0;
 end;
 $$;
 
