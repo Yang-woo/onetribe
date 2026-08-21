@@ -2,31 +2,31 @@ import { describe, expect, test } from 'vitest'
 import {
   DEGENERATE_RATIO,
   detailRatio,
-  fitsWithoutCompression,
-  looksIntact,
+  FLAT_DETAIL,
   ratioLooksIntact,
+  SAMPLE_WIDTH,
 } from './image-integrity'
-import { MAX_PRESIGN_BYTES } from './constants'
 
 /**
- * The detector from docs/00 D56, against exact pixel buffers.
+ * The judgement, against exact pixel buffers — docs/00 D56. The browser half
+ * (decode → canvas → read back) cannot run in jsdom and is exercised on real
+ * encoded files in e2e/image-integrity.spec.ts; what lives here is the
+ * arithmetic that decides.
  *
- * The case that matters is the one that actually shipped to the wall: every
- * row identical, which is a picture of nothing but is NOT flat — the reported
- * photo measured sd=22, so anything built on "is this image blank" waves it
- * through. These buffers reproduce that shape rather than describing it.
- *
- * The browser half (decode → draw → read back) needs a canvas, which jsdom has
- * no implementation of; `looksIntact` is therefore asserted here only on the
- * contract it must honour when it CANNOT measure.
+ * The shapes below are the ones measured off the real artifact: the stored
+ * broken photo is one distinct row repeated 1800 times with every column pair
+ * still differing. `rows` builds exactly that.
  */
 
-/** RGBA buffer from a per-pixel luma function. */
-function buffer(width: number, height: number, luma: (x: number, y: number) => number) {
+const W = SAMPLE_WIDTH
+const H = 48
+
+/** RGBA buffer from a luma function — grey, so all three channels agree. */
+function buffer(at: (x: number, y: number) => number, width = W, height = H) {
   const data = new Uint8ClampedArray(width * height * 4)
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const v = Math.max(0, Math.min(255, Math.round(luma(x, y))))
+      const v = Math.max(0, Math.min(255, Math.round(at(x, y))))
       const i = (y * width + x) * 4
       data[i] = data[i + 1] = data[i + 2] = v
       data[i + 3] = 255
@@ -35,113 +35,101 @@ function buffer(width: number, height: number, luma: (x: number, y: number) => n
   return data
 }
 
-function stddev(data: Uint8ClampedArray) {
-  const values: number[] = []
-  for (let i = 0; i < data.length; i += 4) values.push(data[i])
-  const mean = values.reduce((a, b) => a + b, 0) / values.length
-  return Math.sqrt(values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length)
-}
-
-// A deterministic stand-in for photographic noise — structure on both axes.
-const photo = (x: number, y: number) =>
-  128 + 60 * Math.sin(x / 3) + 40 * Math.cos(y / 4) + ((x * 7 + y * 13) % 17)
-
-// The corruption: one row of real variation, repeated down the whole image.
-const stripes = (x: number) => 128 + 31 * Math.sin(x / 2.5) + ((x * 11) % 13)
+// deterministic, and busy enough on both axes to be an ordinary photograph
+const noise = (x: number, y: number) => ((x * 73 + y * 149) % 97) * 2.6
 
 describe('detailRatio', () => {
-  test('a picture with structure on both axes reads as ordinary', () => {
-    const ratio = detailRatio(buffer(64, 48, photo), 64, 48)
+  test('an ordinary image is busy on both axes', () => {
+    const ratio = detailRatio(buffer(noise), W, H)
     expect(ratio).not.toBeNull()
-    // the field measurements put real photographs at 0.67–1.68 (median 0.98)
-    expect(ratio!).toBeGreaterThan(DEGENERATE_RATIO)
+    expect(ratio!).toBeGreaterThan(DEGENERATE_RATIO * 10)
+    expect(ratioLooksIntact(ratio)).toBe(true)
   })
 
-  test('identical rows read as degenerate — and are NOT flat', () => {
-    const data = buffer(64, 48, (x) => stripes(x))
-    // the trap this check exists for: a standard-deviation test sees an
-    // ordinary photograph here (the real one measured sd=22) and passes it
-    expect(stddev(data)).toBeGreaterThan(15)
-
-    const ratio = detailRatio(data, 64, 48)
+  test('identical rows read as degenerate — the shape the real artifact has', () => {
+    // every row the same, every column different: measured off the stored
+    // 2400×1800 file, which has exactly one distinct row and 2399 differing
+    // column pairs
+    const ratio = detailRatio(
+      buffer((x) => noise(x, 0)),
+      W,
+      H,
+    )
     expect(ratio).toBe(0)
     expect(ratioLooksIntact(ratio)).toBe(false)
   })
 
-  test('a solid colour is unjudgeable, not broken', () => {
-    // both axes are zero, so the ratio carries no information — and a blank
-    // image is a legitimate thing to upload
+  test('identical COLUMNS read as degenerate too', () => {
+    // The compressor transposes when it applies EXIF orientation itself
+    // (orientations 5–8, which includes an ordinary portrait phone photo), so
+    // the same misalignment can land on the other axis. A one-sided test — the
+    // first version of this — calls a vertical gradient perfectly healthy.
     const ratio = detailRatio(
-      buffer(64, 48, () => 200),
-      64,
-      48,
+      buffer((_x, y) => noise(0, y)),
+      W,
+      H,
     )
-    expect(ratio).toBeNull()
-    expect(ratioLooksIntact(ratio)).toBe(true)
+    expect(ratio).toBe(0)
+    expect(ratioLooksIntact(ratio)).toBe(false)
   })
 
-  test('a nearly-flat gradient is unjudgeable rather than condemned', () => {
-    // horizontal detail below FLAT_DETAIL: real, but far too little to draw a
-    // conclusion from. Condemning this would discard good compressions.
-    const ratio = detailRatio(
-      buffer(64, 48, (x) => 128 + x * 0.1),
-      64,
-      48,
-    )
-    expect(ratio).toBeNull()
-  })
-
-  test('an anisotropic but real photo survives', () => {
-    // vertical fence posts against a plain sky: genuinely much more horizontal
-    // detail than vertical. It must clear the bar, or the check would tax a
-    // whole class of legitimate photos
-    const ratio = detailRatio(
-      buffer(64, 48, (x, y) => 128 + 60 * Math.sin(x / 2) + 2 * Math.sin(y / 5)),
-      64,
-      48,
-    )
-    expect(ratio).not.toBeNull()
-    expect(ratioLooksIntact(ratio)).toBe(true)
-  })
-
-  // A documented limit, not an oversight. Identical COLUMNS read as
-  // unjudgeable, so this detector would not catch that mirror image. It is not
-  // a shape this pipeline can produce — the failure is a row-stride
-  // misalignment while drawing, which repeats rows; a canvas has no path that
-  // transposes. Widening the test to min/max of both axes would catch it, at
-  // the price of taxing genuinely anisotropic photos (the fence-post case
-  // above), so the check stays pointed at the failure that actually shipped.
-  test('identical columns are NOT judged — the detector is aimed at one axis', () => {
-    const data = buffer(64, 48, (_x, y) => stripes(y))
-    expect(detailRatio(data, 64, 48)).toBeNull()
-  })
-
-  test('a buffer too small to have neighbours is unjudgeable', () => {
+  test('a flat image is not evidence of anything', () => {
+    // both axes quiet: nothing to compare, and "I cannot tell" must not read as
+    // "broken" or every near-black night sky would be retried forever
     expect(
       detailRatio(
-        buffer(1, 1, () => 10),
-        1,
-        1,
+        buffer(() => 40),
+        W,
+        H,
       ),
     ).toBeNull()
+    expect(ratioLooksIntact(null)).toBe(true)
   })
-})
 
-describe('looksIntact', () => {
-  test('resolves true when it cannot measure at all', async () => {
-    // jsdom has no createImageBitmap. A check that blocked uploads it failed to
-    // perform would be worse than the bug it exists to catch.
-    expect(typeof createImageBitmap).not.toBe('function')
-    await expect(looksIntact(new Blob(['not an image']))).resolves.toBe(true)
+  test('flatness is judged on the busier axis, not on both', () => {
+    // A quiet-but-not-flat stripe pattern: rows identical, columns varying by
+    // just over the flatness floor. Requiring BOTH axes to clear FLAT_DETAIL
+    // would return null here — and null means "intact", so the corruption
+    // would walk straight through on any image that is not also bright.
+    const step = FLAT_DETAIL * 4
+    const ratio = detailRatio(
+      buffer((x) => 40 + (x % 2) * step),
+      W,
+      H,
+    )
+    expect(ratio).toBe(0)
+    expect(ratioLooksIntact(ratio)).toBe(false)
   })
-})
 
-describe('fitsWithoutCompression', () => {
-  test('the fallback is bounded by the presign ceiling, not the picker cap', () => {
-    // a photo may be PICKED at up to 20MB (docs/00 D47) but the server's
-    // presign ceiling is the smaller GIF one — sending the original blindly
-    // would trade a broken photo for a rejected upload
-    expect(fitsWithoutCompression({ size: MAX_PRESIGN_BYTES } as Blob)).toBe(true)
-    expect(fitsWithoutCompression({ size: MAX_PRESIGN_BYTES + 1 } as Blob)).toBe(false)
+  test('a sample too small to have neighbours says so', () => {
+    expect(detailRatio(buffer(noise, 1, 1), 1, 1)).toBeNull()
+    expect(detailRatio(buffer(noise, 1, 8), 1, 8)).toBeNull()
+  })
+
+  test('the ratio is symmetric — neither axis is privileged', () => {
+    // rows-degenerate and columns-degenerate must score the same, or the check
+    // protects one orientation better than the other
+    const rows = detailRatio(
+      buffer((x) => noise(x, 0)),
+      W,
+      W,
+    )
+    const cols = detailRatio(
+      buffer((_x, y) => noise(y, 0)),
+      W,
+      W,
+    )
+    expect(rows).toBe(cols)
+  })
+
+  test('a merely anisotropic image is not called broken', () => {
+    // twice as much detail across as down is a normal photograph, and the real
+    // wall's 220 photos never came below 0.58
+    const ratio = detailRatio(
+      buffer((x, y) => noise(x, y) * 0.5 + noise(x, 0) * 0.5),
+      W,
+      H,
+    )
+    expect(ratio!).toBeGreaterThan(DEGENERATE_RATIO * 20)
   })
 })

@@ -16,7 +16,7 @@ import {
   THUMB_QUALITY,
   THUMB_TARGET_BYTES,
 } from './constants'
-import { fitsWithoutCompression, looksIntact } from './image-integrity'
+import { looksIntact } from './image-integrity'
 
 /**
  * Client-side media preparation — docs/17 T2.2.
@@ -127,18 +127,24 @@ export async function prepareForUpload(
       ...(shareCardCanRender(file.type) ? {} : { fileType: SHARE_CARD_FALLBACK_MIME }),
     })
 
-  // The compressor occasionally hands back a picture of nothing — rows of
-  // identical stripes from a misaligned pixel buffer (docs/00 D56). It is
-  // intermittent, so a second decode almost always lands; if it doesn't, the
-  // untouched original beats a broken photo, as long as the server will take
-  // it. Falling all the way back to the corrupted output is still the last
-  // resort: refusing the upload would cost the moment entirely, and the
-  // moment is the point.
+  // The compressor occasionally hands back a picture of nothing — one axis of
+  // identical pixels from a misaligned buffer (docs/00 D56). It is intermittent,
+  // so running it again almost always lands.
+  //
+  // The retry goes back THROUGH the compressor rather than around it, and that
+  // is the whole point. Handing back `file` was the first attempt's answer and
+  // it was wrong twice over: this canvas pass is the only place GPS EXIF is
+  // stripped (D9 P6 — measured: a photo carrying coordinates comes out of here
+  // with none, and the untouched original still has them), and it is also where
+  // the share-card format conversion and the size and resolution ceilings of
+  // D47 are applied. One false positive would have published someone's location.
+  //
+  // So a wrong verdict now costs a wasted re-encode and nothing else, which is
+  // what lets the check be decisive. If the second attempt looks broken too we
+  // upload it anyway: refusing would cost the moment entirely, and the moment is
+  // the point.
   const first = await compress()
-  if (await intact(first)) return first
-  const second = await compress()
-  if (await intact(second)) return second
-  return fitsWithoutCompression(file) ? file : second
+  return (await intact(first)) ? first : compress()
 }
 
 /**
@@ -152,19 +158,33 @@ export async function prepareForUpload(
  * no second-best format here — a browser that can't encode WebP rejects rather
  * than spending a full compression on bytes the wizard would drop anyway.
  */
-export async function prepareThumb(file: File, webp = canvasSupportsWebp()): Promise<File> {
+export async function prepareThumb(
+  file: File,
+  webp = canvasSupportsWebp(),
+  /** test seam — the real impl decodes the output in a canvas (docs/00 D56) */
+  intact: (f: Blob) => Promise<boolean> = looksIntact,
+): Promise<File> {
   // JPEG when the canvas can't encode WebP rather than no thumbnail at all:
   // that branch is every iPhone (see THUMB_MIMES), and giving up there put a
   // full-size photo behind each of those wall cards.
   const fileType: ThumbMime = webp ? THUMB_MIME : 'image/jpeg'
-  return imageCompression(file, {
-    ...BASE_COMPRESSION,
-    maxSizeMB: THUMB_TARGET_BYTES / (1024 * 1024),
-    maxWidthOrHeight: THUMB_MAX_DIM,
-    fileType,
-    initialQuality: THUMB_QUALITY,
-    alwaysKeepResolution: true,
-  })
+  const compress = () =>
+    imageCompression(file, {
+      ...BASE_COMPRESSION,
+      maxSizeMB: THUMB_TARGET_BYTES / (1024 * 1024),
+      maxWidthOrHeight: THUMB_MAX_DIM,
+      fileType,
+      initialQuality: THUMB_QUALITY,
+      alwaysKeepResolution: true,
+    })
+
+  // Its own canvas pass, so its own draw of the dice (docs/00 D56). The wizard
+  // builds this from the COMPRESSED output, not the original, so a corrupt
+  // compression already reaches the wall grid through here — which is how the
+  // reported moment came out broken in both places. Gating prepareForUpload
+  // covers that case; this covers the one where only the thumbnail loses.
+  const first = await compress()
+  return (await intact(first)) ? first : compress()
 }
 
 /**
