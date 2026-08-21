@@ -164,12 +164,15 @@ describe('prepareForUpload', () => {
 })
 
 /**
- * The corrupt-output fallback — docs/00 D56. The compressor occasionally
- * returns a picture of nothing (identical rows from a misaligned pixel
- * buffer), and until now the pipeline had no opinion about what it got back.
- * The detector itself is tested against real pixel buffers in
- * image-integrity.test.ts; what belongs here is what prepareForUpload DOES
- * with the verdict.
+ * What the pipeline DOES with a corrupt verdict — docs/00 D56. The judgement
+ * itself is tested against exact buffers in image-integrity.test.ts and against
+ * real encoded files in e2e/image-integrity.spec.ts; this is the wiring.
+ *
+ * The invariant that matters most here is negative: the fallback must never be
+ * the user's own file. That canvas pass is the only place GPS EXIF is stripped
+ * (D9 P6), so returning the original to dodge a corrupt output would publish a
+ * festival photo's coordinates — and quietly drop D47's format conversion and
+ * size ceilings with it. The first version of this did exactly that.
  */
 describe('prepareForUpload — corrupt compression fallback (D56)', () => {
   const first = new File([new Uint8Array([1])], 'a.jpg', { type: 'image/jpeg' })
@@ -179,7 +182,7 @@ describe('prepareForUpload — corrupt compression fallback (D56)', () => {
     compress.mockResolvedValue(first)
     expect(await prepareForUpload(photo, async () => true)).toBe(first)
     // the retry costs a full re-encode of a phone photo — it must not be the
-    // price of every upload
+    // price of every upload (docs/00 D50 measured that stall and left it alone)
     expect(compress).toHaveBeenCalledTimes(1)
   })
 
@@ -192,22 +195,29 @@ describe('prepareForUpload — corrupt compression fallback (D56)', () => {
     expect(compress).toHaveBeenCalledTimes(2)
   })
 
-  test('when both attempts are corrupt the untouched original ships', async () => {
-    compress.mockResolvedValue(first)
-    // a bigger file beats a broken photo — and the original is the one thing
-    // the compressor cannot have damaged
-    expect(await prepareForUpload(photo, async () => false)).toBe(photo)
+  test('when both attempts look corrupt it still ships a COMPRESSED file', async () => {
+    compress.mockResolvedValueOnce(first).mockResolvedValueOnce(second)
+    const result = await prepareForUpload(photo, async () => false)
+    // never the original: it is the one file in this function that still
+    // carries the uploader's GPS coordinates
+    expect(result).not.toBe(photo)
+    expect(result).toBe(second)
     expect(compress).toHaveBeenCalledTimes(2)
   })
 
-  test('an original too big to presign falls back to the compressed output', async () => {
-    // the picker allows a 20MB photo (D47) but the presign ceiling is the
-    // smaller GIF one: sending this original would trade a broken photo for a
-    // rejected upload, which costs the moment entirely
-    const huge = new File([new Uint8Array(1)], 'huge.jpg', { type: 'image/jpeg' })
-    Object.defineProperty(huge, 'size', { value: MAX_GIF_UPLOAD_BYTES + 1 })
+  test('every attempt goes through the same EXIF-stripping options', async () => {
     compress.mockResolvedValue(first)
-    expect(await prepareForUpload(huge, async () => false)).toBe(first)
+    await prepareForUpload(photo, async () => false)
+    expect(compress).toHaveBeenCalledTimes(2)
+    // the retry is a re-entry into the pipeline, not a way around it — both
+    // calls carry the privacy guarantee and D47's ceilings
+    for (const [, options] of compress.mock.calls) {
+      expect(options).toMatchObject({
+        preserveExif: false,
+        maxSizeMB: TARGET_IMAGE_BYTES / (1024 * 1024),
+        maxWidthOrHeight: IMAGE_MAX_DIM,
+      })
+    }
   })
 
   test('GIFs are never judged — they skip the compressor entirely', async () => {
@@ -216,6 +226,33 @@ describe('prepareForUpload — corrupt compression fallback (D56)', () => {
     expect(await prepareForUpload(gif, intact)).toBe(gif)
     // nothing re-encoded it, so there is no canvas output to distrust
     expect(intact).not.toHaveBeenCalled()
+  })
+})
+
+describe('prepareThumb — corrupt compression fallback (D56)', () => {
+  const first = new File([new Uint8Array([1])], 'a.webp', { type: 'image/webp' })
+  const second = new File([new Uint8Array([2])], 'b.webp', { type: 'image/webp' })
+
+  test('a healthy thumbnail is returned as-is', async () => {
+    compress.mockResolvedValue(first)
+    expect(await prepareThumb(photo, true, async () => true)).toBe(first)
+    expect(compress).toHaveBeenCalledTimes(1)
+  })
+
+  test('its own canvas pass gets its own retry', async () => {
+    // the wizard builds this from the compressed output, so a corrupt
+    // compression already reaches the grid through here — but the thumbnail can
+    // also lose on its own, and the grid is the surface people actually see
+    compress.mockResolvedValueOnce(first).mockResolvedValueOnce(second)
+    expect(await prepareThumb(photo, true, async (f) => f !== first)).toBe(second)
+    expect(compress).toHaveBeenCalledTimes(2)
+  })
+
+  test('a thumbnail that stays corrupt is still a thumbnail, never the source', async () => {
+    compress.mockResolvedValueOnce(first).mockResolvedValueOnce(second)
+    const result = await prepareThumb(photo, true, async () => false)
+    expect(result).not.toBe(photo)
+    expect(result).toBe(second)
   })
 })
 

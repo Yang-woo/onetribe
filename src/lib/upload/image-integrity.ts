@@ -1,56 +1,73 @@
-import { MAX_PRESIGN_BYTES } from './constants'
-
 /**
  * Did the canvas draw a picture, or garbage? — docs/00 D56.
  *
- * A photo that came in through the Reddit launch landed on the wall as a
- * column of identical vertical stripes: every row of pixels was the same,
- * because the pixel buffer had been drawn into the canvas misaligned. R2
- * answered 200, the row was valid, the thumbnail was broken the same way, and
- * the server never looks at what a picture contains — so nothing anywhere
- * noticed. The same person's next upload two minutes later was fine, so this
- * is an intermittent decode failure inside the client compression step, not a
- * broken file.
+ * A photo that came in through the Reddit launch landed on the wall as a column
+ * of vertical stripes. Pulled apart afterwards, the stored 2400×1800 file has
+ * exactly ONE distinct row repeated 1800 times, while all 2399 column pairs
+ * differ: the pixel buffer went into the canvas misaligned. R2 answered 200, the
+ * row was valid, the thumbnail was made from that same output so it broke too,
+ * and the server never looks at what a picture contains — so nothing anywhere
+ * noticed. The same person's next upload two minutes later was fine, which makes
+ * this an intermittent decode failure inside the client compression step rather
+ * than a broken file.
  *
- * The tell is that the corruption is *structured*: rows repeat exactly, so
- * vertically adjacent pixels never differ, while horizontally adjacent ones
- * still do. A flatness test (standard deviation) does not catch it — the
- * reported photo measured sd=22, which is an ordinary-looking photograph.
+ * The tell is that the corruption is *structured*: one axis carries no
+ * information at all while the other still does. A flatness test (standard
+ * deviation) does not catch it — the reported photo measured sd=22, an ordinary
+ * looking photograph. Neither does file size, which was the first thing tried
+ * after this shipped: the broken photo encodes to 1.85 bits per pixel, ABOVE the
+ * 1.10 median of the 220 real photos on the wall, because vertical stripes are
+ * horizontally high-frequency and JPEG spends more bits on them, not fewer.
  *
- * False positives are cheap here and that shapes the thresholds: a photo
- * wrongly judged broken is uploaded as its ORIGINAL instead of its compressed
- * version — same picture, more bytes. So the check is deliberately timid about
- * calling something broken, and the fallback is free to be decisive.
+ * Both axes are judged, not just one. The compressor transposes the image when
+ * it applies EXIF orientation itself (`followExifOrientation` swaps width and
+ * height for orientations 5–8, and orientation 6 is an ordinary portrait phone
+ * photo), so the same misalignment can just as well come out as identical
+ * COLUMNS. Measured: a vertical gradient — the transposed shape — passes a
+ * one-axis test and fails this one.
  */
 
-/** Width the sample is drawn at. Small enough to be free, big enough to have
- *  structure — the ratio below is scale-invariant, not a pixel comparison. */
+/**
+ * Width the sample is drawn at. Small enough to be free, big enough to have
+ * structure — the ratio below is scale-invariant, not a pixel comparison.
+ */
 export const SAMPLE_WIDTH = 64
 
 /**
- * Below this, vertical detail has effectively vanished while horizontal detail
- * survives — the signature above. Real photographs measured 0.67–1.68 (median
- * 0.98); the corrupted one measured 0. Two orders of magnitude below the
- * observed floor, because a legitimate photo CAN be anisotropic (vertical fence
- * posts against a plain sky) and paying bytes for one is fine while discarding
- * a good compression for many is not.
- */
-export const DEGENERATE_RATIO = 0.01
-
-/**
- * Mean absolute neighbour difference below which the image is simply flat — a
- * solid colour, a blank export. Both axes are ~0 there, so the ratio carries no
- * information and this function must not pretend otherwise.
+ * Below this, both axes are so quiet that their ratio is noise — a solid colour,
+ * a blank export, a near-black night sky. Judged on the BUSIER axis: requiring
+ * both to clear it would let a broken image (one axis at 0) read as "flat" and
+ * escape, which is the hole a one-sided version of this check had.
  */
 export const FLAT_DETAIL = 0.5
 
 /**
- * Vertical detail ÷ horizontal detail over an RGBA buffer, or null when the
- * image is too flat (or too small) for the ratio to mean anything.
+ * Below this, one axis has effectively vanished while the other survives — the
+ * signature above.
+ *
+ * Measured against the population it actually runs on rather than against
+ * invented images: the shipped function, bundled and run in Chromium and WebKit
+ * over all 221 photos on the production wall, scored the 220 good ones between
+ * 0.58 and 1.72 (median 0.93) and the broken one at 0. Not one of them came
+ * within 58× of this number, and none fell through the flatness escape either.
+ *
+ * Synthetic graphics are a different story and the number does not pretend
+ * otherwise: a noiseless vertical-beam render, or a pure horizontal gradient,
+ * scores exactly 0 — because their rows really ARE identical, which no test can
+ * tell apart from rows a bug made identical. That costs a wasted re-encode and
+ * nothing else (see prepareForUpload), which is what allows a threshold this
+ * decisive. Add a little sensor noise — a photograph of a striped fence — and
+ * the same shape scores 0.066.
+ */
+export const DEGENERATE_RATIO = 0.01
+
+/**
+ * Detail on the quieter axis ÷ detail on the busier one, or null when the image
+ * is too flat (or too small) for the ratio to mean anything.
  *
  * Pure so it can be tested against exact pixel buffers — the browser half of
- * this (decode, draw, read back) is what a real file exercises, and jsdom has
- * no canvas to run it in.
+ * this (decode, draw, read back) is what a real file exercises, and jsdom has no
+ * canvas to run it in.
  */
 export function detailRatio(
   rgba: Uint8ClampedArray | Uint8Array,
@@ -75,16 +92,12 @@ export function detailRatio(
       if (y + 1 < height) vertical += Math.abs(luma[p + width] - luma[p])
     }
   }
-  const hPairs = (width - 1) * height
-  const vPairs = width * (height - 1)
-  const h = horizontal / hPairs
-  const v = vertical / vPairs
+  const h = horizontal / ((width - 1) * height)
+  const v = vertical / (width * (height - 1))
 
-  // A flat image is not evidence of anything. Judged on the horizontal axis
-  // because that is the one the observed corruption leaves intact: requiring
-  // both would let a broken image (v = 0) read as "flat" and escape.
-  if (h < FLAT_DETAIL) return null
-  return v / h
+  const busier = Math.max(h, v)
+  if (busier < FLAT_DETAIL) return null
+  return Math.min(h, v) / busier
 }
 
 /** `detailRatio` says nothing is wrong (including when it cannot tell). */
@@ -95,8 +108,12 @@ export function ratioLooksIntact(ratio: number | null): boolean {
 /**
  * Draw `file` small and measure it. Best-effort by construction: anything this
  * cannot do — no canvas, an undecodable file, a tainted read — resolves `true`.
- * A check that blocks uploads it failed to perform would be worse than the bug
+ * A check that blocked uploads it failed to perform would be worse than the bug
  * it exists to catch.
+ *
+ * That default is also why the e2e asserts the sample was actually TAKEN: every
+ * "intact" here is either a measurement or a shrug, and the two look identical
+ * from the outside.
  */
 export async function looksIntact(file: Blob): Promise<boolean> {
   try {
@@ -111,7 +128,9 @@ export async function looksIntact(file: Blob): Promise<boolean> {
       if (!context) return true
       // The default smoothing is what makes the sample honest: it averages the
       // source rather than point-sampling it, so a stripe pattern survives
-      // downscaling instead of aliasing into something else.
+      // downscaling instead of aliasing into something else. Verified on the
+      // real artifact in Chromium, WebKit and Firefox — all three keep the
+      // signal (the axis reads 0 in every one of them).
       context.drawImage(bitmap, 0, 0, width, height)
       const { data } = context.getImageData(0, 0, width, height)
       return ratioLooksIntact(detailRatio(data, width, height))
@@ -130,14 +149,4 @@ function makeCanvas(width: number, height: number): OffscreenCanvas | HTMLCanvas
   canvas.width = width
   canvas.height = height
   return canvas
-}
-
-/**
- * Can this file be uploaded as-is? The fallback path hands the ORIGINAL to the
- * server, and the server's presign ceiling is the GIF one — smaller than the
- * per-type cap a picked photo was validated against, so "the user was allowed
- * to pick it" does not mean "we may send it uncompressed".
- */
-export function fitsWithoutCompression(file: Blob): boolean {
-  return file.size <= MAX_PRESIGN_BYTES
 }
