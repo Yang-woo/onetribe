@@ -29,6 +29,14 @@ jobs:
       - run: yarn format
       - run: yarn test
 
+      # Browser-only logic that no amount of jsdom can exercise — a real decoder,
+      # canvas and codec (docs/00 D56). Needs a browser but NOT the app, so it
+      # belongs in the job that gates pull requests: the e2e job below runs on
+      # `push` only, and by then a merge has already deployed.
+      - name: Install Chromium for the browser unit tests
+        run: npx playwright install --with-deps chromium
+      - run: yarn test:browser
+
       # DB/RLS integration tests against a real local Supabase (docs/00 D8).
       - name: Log in to Docker Hub (raises the image-pull rate limit — skipped without secrets)
         if: env.DOCKERHUB_TOKEN != ''

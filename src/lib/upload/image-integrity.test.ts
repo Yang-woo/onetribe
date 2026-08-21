@@ -1,8 +1,8 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import {
-  DEGENERATE_RATIO,
   detailRatio,
   FLAT_DETAIL,
+  looksIntact,
   ratioLooksIntact,
   SAMPLE_WIDTH,
 } from './image-integrity'
@@ -42,7 +42,7 @@ describe('detailRatio', () => {
   test('an ordinary image is busy on both axes', () => {
     const ratio = detailRatio(buffer(noise), W, H)
     expect(ratio).not.toBeNull()
-    expect(ratio!).toBeGreaterThan(DEGENERATE_RATIO * 10)
+    expect(ratio!).toBeGreaterThan(0.5)
     expect(ratioLooksIntact(ratio)).toBe(true)
   })
 
@@ -101,9 +101,19 @@ describe('detailRatio', () => {
     expect(ratioLooksIntact(ratio)).toBe(false)
   })
 
-  test('a sample too small to have neighbours says so', () => {
+  test('a sample too small to have neighbours says so — on either axis', () => {
     expect(detailRatio(buffer(noise, 1, 1), 1, 1)).toBeNull()
     expect(detailRatio(buffer(noise, 1, 8), 1, 8)).toBeNull()
+    // and the height half of that guard, which the two cases above both miss
+    expect(detailRatio(buffer(noise, 8, 1), 8, 1)).toBeNull()
+  })
+
+  test('a buffer smaller than the frame it claims reads as "cannot tell"', () => {
+    // Reading past the end yields NaN, and NaN slips through the flatness
+    // escape (`NaN < FLAT_DETAIL` is false) to come back as "broken" — the
+    // inverse of this module's contract. Exported and called directly, so the
+    // dimensions are not guaranteed to match the way looksIntact makes them.
+    expect(detailRatio(buffer(noise, W, H).slice(0, 64), W, H)).toBeNull()
   })
 
   test('the ratio is symmetric — neither axis is privileged', () => {
@@ -130,6 +140,88 @@ describe('detailRatio', () => {
       W,
       H,
     )
-    expect(ratio!).toBeGreaterThan(DEGENERATE_RATIO * 20)
+    expect(ratio!).toBeGreaterThan(0.4)
+  })
+})
+
+/**
+ * `looksIntact` answers `true` for anything it could not do, and that shrug is
+ * load-bearing: flip any of these branches and a browser without the canvas
+ * this needs would re-compress every single upload, doubling the stall D50
+ * measured and decided to leave alone. jsdom has none of the APIs, so each
+ * branch has to be stood up here — the browser-side path is covered for real in
+ * e2e-browser/image-integrity.spec.ts.
+ */
+describe('looksIntact — what it does when it cannot look', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  const blob = new Blob([new Uint8Array([1, 2, 3])], { type: 'image/jpeg' })
+  const bitmap = { width: 640, height: 480, close: () => {} }
+
+  test('no createImageBitmap at all → intact', async () => {
+    // jsdom's own state, and the reason none of the pipeline tests exercise the
+    // real function: it leaves before touching a canvas
+    expect(typeof createImageBitmap).toBe('undefined')
+    expect(await looksIntact(blob)).toBe(true)
+  })
+
+  test('no canvas to draw into → intact', async () => {
+    vi.stubGlobal('createImageBitmap', async () => bitmap)
+    vi.stubGlobal('OffscreenCanvas', undefined)
+    vi.stubGlobal('document', undefined)
+    expect(await looksIntact(blob)).toBe(true)
+  })
+
+  test('a canvas that hands back no 2d context → intact', async () => {
+    vi.stubGlobal('createImageBitmap', async () => bitmap)
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        getContext() {
+          return null
+        }
+      },
+    )
+    expect(await looksIntact(blob)).toBe(true)
+  })
+
+  test('an undecodable file → intact', async () => {
+    vi.stubGlobal('createImageBitmap', async () => {
+      throw new Error('not an image')
+    })
+    expect(await looksIntact(blob)).toBe(true)
+  })
+
+  test('a verdict already reached survives a failing bitmap.close()', async () => {
+    // the one direction that would turn a corruption we DID detect into a clean
+    // bill of health, by letting the outer catch answer instead
+    const rows = new Uint8ClampedArray(SAMPLE_WIDTH * 8 * 4)
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < SAMPLE_WIDTH; x++) {
+        const i = (y * SAMPLE_WIDTH + x) * 4
+        const v = (x * 97) % 251
+        rows[i] = rows[i + 1] = rows[i + 2] = v
+        rows[i + 3] = 255
+      }
+    }
+    vi.stubGlobal('createImageBitmap', async () => ({
+      width: SAMPLE_WIDTH,
+      height: 8,
+      close: () => {
+        throw new Error('already detached')
+      },
+    }))
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        getContext() {
+          return {
+            drawImage: () => {},
+            getImageData: () => ({ data: rows, width: SAMPLE_WIDTH, height: 8 }),
+          }
+        }
+      },
+    )
+    expect(await looksIntact(blob)).toBe(false)
   })
 })
