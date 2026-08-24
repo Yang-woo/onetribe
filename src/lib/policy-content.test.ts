@@ -25,9 +25,19 @@ describe('policy constants', () => {
  * for the ones made without an account, which the passport cannot reach.
  */
 describe('takedown copy names every route out (D54)', () => {
-  const takedown = POLICIES.takedown.sections.flatMap((s) => s.paragraphs).join(' ')
-  const ownContent = POLICIES.terms.sections[1].paragraphs.join(' ')
-  const rights = POLICIES.privacy.sections[3].paragraphs.join(' ')
+  /**
+   * By heading, not by index: with `sections[3]` a section inserted above
+   * privacy §4 turns this green while the rights paragraph itself has lost the
+   * route — which is the exact failure the test exists to catch.
+   */
+  const section = (slug: keyof typeof POLICIES, heading: string) => {
+    const found = POLICIES[slug].sections.find((s) => s.heading === heading)
+    if (!found) throw new Error(`${slug} lost its "${heading}" section`)
+    return found.paragraphs.join(' ')
+  }
+  const takedown = section('takedown', 'You uploaded it and want it gone?')
+  const ownContent = section('terms', '2. Your content')
+  const rights = section('privacy', '4. Your rights (GDPR)')
 
   test.each([
     ['takedown', takedown],

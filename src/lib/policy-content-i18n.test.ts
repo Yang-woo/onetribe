@@ -89,6 +89,17 @@ const PASSPORT_WORD: Record<Locale, string> = {
   ko: '여권',
 }
 
+/**
+ * Two languages name it with a word that is also a fragment of common ones —
+ * German "angepasst", "passiert"; Swedish "anpassa", "passar". A plain
+ * substring check would let a regen that dropped the reference pass on any of
+ * them, so those two are matched as whole words instead.
+ */
+const IN_COPY: Partial<Record<Locale, RegExp>> = {
+  de: /\bPass\b/i,
+  sv: /\bpass(et)?\b/i,
+}
+
 describe('the way out of a lost deletion link (D54)', () => {
   /** By heading, not by index — a reordered doc should fail loudly, not silently pass. */
   const at = (slug: keyof typeof POLICIES, heading: string, paragraph: number) => {
@@ -106,8 +117,10 @@ describe('the way out of a lost deletion link (D54)', () => {
     const word = PASSPORT_WORD[locale].toLowerCase()
     const ui = (await import(`../../messages/${locale}.json`)).default.passport.title
     expect(ui.toLowerCase(), `${locale}: table drifted from the passport page`).toContain(word)
+    const inCopy = IN_COPY[locale]
     for (const [where, pick] of places) {
-      expect(pick(locale).toLowerCase(), `${locale} ${where}`).toContain(word)
+      if (inCopy) expect(pick(locale), `${locale} ${where}`).toMatch(inCopy)
+      else expect(pick(locale).toLowerCase(), `${locale} ${where}`).toContain(word)
     }
   })
 

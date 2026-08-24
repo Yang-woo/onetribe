@@ -94,7 +94,7 @@ async function patchDoc(
   priorEn: LocalizedDoc | undefined,
   priorLoc: LocalizedDoc | undefined,
   tr: (s: string) => Promise<string>,
-  note: (what: string) => void,
+  note: (what: string, strings?: number) => void,
 ): Promise<LocalizedDoc> {
   const alignable =
     priorEn &&
@@ -102,7 +102,12 @@ async function patchDoc(
     priorEn.sections.length === doc.sections.length &&
     priorLoc.sections.length === doc.sections.length
   if (!alignable) {
-    note(`${doc.slug}: whole doc (no aligned prior)`)
+    // Counted, not listed as one line: this branch is the single largest loss
+    // the tool can inflict, and a report of "1" would hide it behind the
+    // smallest possible number.
+    const strings =
+      1 + doc.sections.reduce((n, s) => n + (s.heading ? 1 : 0) + s.paragraphs.length, 0)
+    note(`${doc.slug}: whole doc, ${strings} strings (no aligned prior)`, strings)
     return translateDoc(doc, tr)
   }
 
@@ -187,6 +192,31 @@ async function main() {
     priorAbout = mod.ABOUT_I18N as unknown as typeof priorAbout
   }
 
+  // --only-missing reuses a locale on section-count SHAPE alone, while the EN
+  // entry is rewritten from source on every run. Run it after editing copy and
+  // the baseline silently advances past translations that were never redone:
+  // the committed EN then matches the source, so a later --patch reports
+  // "nothing changed" for all 16 locales and the stale legal text becomes
+  // unreachable through the documented workflow. Tests do not see it either —
+  // the EN entry is verbatim and the copy check only samples one paragraph.
+  if (onlyMissing) {
+    const enChanged =
+      slugs.some(
+        (slug) =>
+          JSON.stringify(priorPolicy[DEFAULT_LOCALE]?.[slug]) !==
+          JSON.stringify(stripDoc(POLICIES[slug])),
+      ) ||
+      JSON.stringify(priorAbout[DEFAULT_LOCALE]) !==
+        JSON.stringify({ title: ABOUT.title, paragraphs: [...ABOUT.paragraphs] })
+    if (enChanged) {
+      throw new Error(
+        'policy-content.ts has moved past the committed translations — run --patch first.\n' +
+          '--only-missing would advance the EN baseline without re-translating the edited\n' +
+          'strings, and no later run could tell they were stale.',
+      )
+    }
+  }
+
   // --patch keeps the committed locale ORDER too. LOCALES has been reordered
   // since the last full regen, so emitting in LOCALES order would rewrite the
   // whole file — 645 moved lines around 51 real ones, on the one kind of change
@@ -220,7 +250,11 @@ async function main() {
 
     if (patch) {
       const changed: string[] = []
-      const note = (what: string) => changed.push(what)
+      let strings = 0
+      const note = (what: string, n = 1) => {
+        changed.push(what)
+        strings += n
+      }
       const priorEnDocs = priorPolicy[DEFAULT_LOCALE]
       const docs: Record<string, LocalizedDoc> = {}
       for (const slug of slugs) {
@@ -244,15 +278,15 @@ async function main() {
         paragraphs.push(await tr(para))
       }
       const title =
-        alignedAbout && priorEnAbout.title === ABOUT.title
+        priorEnAbout?.title === ABOUT.title && pAbout
           ? pAbout.title
           : (note('about: title'), await tr(ABOUT.title))
       aboutOut[locale] = { title, paragraphs }
 
-      patched += changed.length
+      patched += strings
       process.stderr.write(
-        changed.length
-          ? `${locale}: re-translated ${changed.length} — ${changed.join(', ')}\n`
+        strings
+          ? `${locale}: re-translated ${strings} — ${changed.join(', ')}\n`
           : `${locale}: nothing changed\n`,
       )
       continue
