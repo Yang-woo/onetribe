@@ -33,7 +33,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Your content",
           "paragraphs": [
             "When you upload a photo or GIF, or link a video (\"Memory\"), you confirm that: you captured it yourself and hold the rights to share it; it was taken at a music event you attended; you grant One Tribe a non-exclusive, worldwide, royalty-free license to host, display, resize, and translate its caption to run this site, and to feature it — credited to your display name or handle — on One Tribe’s own social accounts. That is the whole license: we never sell it, sub-license it, or use it in advertising. Tell us and we will remove it from those accounts and not feature it again.",
-            "You keep ownership. You can delete your Memory at any time — from your Passport if you were signed in when you uploaded it, or with the deletion link you received."
+            "You keep ownership. You can delete your Memory at any time — from the Passport that holds it, or with the deletion link you received."
           ]
         },
         {
@@ -90,7 +90,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Your rights (GDPR)",
           "paragraphs": [
-            "Access, rectification, erasure, restriction, objection, portability. You can remove your Memories from your Passport, and delete the Passport itself on the same page — any moments you leave behind stay on the wall, anonymized, each with its own delete link. Email privacy@onetribe.world for anything else. You may also complain to your local data-protection authority."
+            "Access, rectification, erasure, restriction, objection, portability. You can remove your Memories from your Passport, and delete the Passport itself on the same page — any moments you leave behind stay on the wall, anonymized, each with its own deletion link. Email privacy@onetribe.world for anything else. You may also complain to your local data-protection authority."
           ]
         },
         {
@@ -103,7 +103,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Retention",
           "paragraphs": [
-            "Published Memories stay until you delete them or a valid request removes them. A Memory you remove disappears from the site immediately, and we keep the hidden copy only to handle disputes and repeat-infringer claims. If you want it erased permanently, email us and we will do that within 30 days."
+            "Published Memories stay until you delete them or a valid request removes them. Anything removed — by you, or on someone else’s request — disappears from the site immediately; we keep the hidden copy only to handle disputes and repeat-infringer claims, and only for as long as such a claim could still be raised. If you want it erased permanently, email us and we will do that within 30 days."
           ]
         },
         {
@@ -125,7 +125,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "You uploaded it and want it gone?",
           "paragraphs": [
-            "Open it in your Passport and remove it there — that works even if you lost your link. If you uploaded without an account, use the deletion link you received, or email us. Either way it disappears from the wall immediately."
+            "Open it in your Passport and remove it there — on the browser you uploaded from, or on any device if you connected an email. That works even if you lost your link. If your Passport cannot reach it, use the deletion link you received, or email us. The Passport and the link remove it from the wall immediately; by email, within 48 hours. What happens to the hidden copy afterwards is in the privacy policy."
           ]
         },
         {
@@ -200,7 +200,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Je inhoud",
           "paragraphs": [
             "Wanneer je een foto of GIF uploadt, of een link naar een video plaatst (“Herinnering”), bevestig je dat: je deze zelf hebt gemaakt en de rechten hebt om deze te delen; deze is gemaakt tijdens een muziekevenement dat je hebt bijgewoond; je One Tribe een niet-exclusieve, wereldwijde, royaltyvrije licentie verleent om de foto te hosten, weer te geven, het formaat aan te passen en het bijschrift te vertalen om deze website te laten draaien, en om haar — met vermelding van je weergavenaam of handle — te tonen op de eigen socialmedia-accounts van One Tribe. Dat is de volledige licentie: we verkopen je Herinnering nooit, geven er geen sublicentie op en gebruiken haar niet in advertenties. Laat het ons weten en we halen haar van die accounts af en tonen haar niet opnieuw.",
-            "Je behoudt het eigendom. Je kunt je Herinnering op elk moment verwijderen — vanuit je paspoort als je was ingelogd toen je het uploadde, of via de verwijderlink die je hebt ontvangen."
+            "Je blijft eigenaar. Je kunt je Herinnering op elk moment verwijderen — vanuit het paspoort waarin het is opgeslagen, of via de verwijderingslink die je hebt ontvangen."
           ]
         },
         {
@@ -257,7 +257,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Je rechten (AVG)",
           "paragraphs": [
-            "Toegang, correctie, verwijdering, beperking, bezwaar, overdraagbaarheid. Je kunt je Herinneringen uit je paspoort verwijderen en het paspoort zelf op dezelfde pagina wissen — alle momenten die je achterlaat, blijven op de muur staan, geanonimiseerd, elk met een eigen verwijderlink. Stuur een e-mail naar privacy@onetribe.world voor al het overige. Je kunt ook een klacht indienen bij je lokale autoriteit voor gegevensbescherming."
+            "Toegang, rectificatie, verwijdering, beperking, bezwaar, overdraagbaarheid. Je kunt je Herinneringen uit je paspoort verwijderen en het paspoort zelf op dezelfde pagina wissen — alle momenten die je achterlaat, blijven anoniem op de muur staan, elk met een eigen verwijderingslink. Stuur een e-mail naar privacy@onetribe.world voor al het overige. Je kunt ook een klacht indienen bij je lokale gegevensbeschermingsautoriteit."
           ]
         },
         {
@@ -270,7 +270,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Bewaartermijn",
           "paragraphs": [
-            "Gepubliceerde herinneringen blijven staan totdat je ze verwijdert of totdat ze op basis van een geldig verzoek worden verwijderd. Een herinnering die je verwijdert, verdwijnt onmiddellijk van de site, en we bewaren de verborgen kopie uitsluitend om geschillen en claims tegen herhaaldelijke overtreders af te handelen. Als je wilt dat deze definitief wordt gewist, stuur ons dan een e-mail en wij zullen dit binnen 30 dagen doen."
+            "Gepubliceerde Herinneringen blijven staan totdat je ze verwijdert of totdat ze op basis van een geldig verzoek worden verwijderd. Alles wat wordt verwijderd — door jou of op verzoek van iemand anders — verdwijnt onmiddellijk van de site; we bewaren de verborgen kopie uitsluitend om geschillen en claims tegen herhaaldelijke inbreukmakers af te handelen, en alleen zolang een dergelijke claim nog kan worden ingediend. Als je wilt dat het definitief wordt gewist, stuur ons dan een e-mail en wij zullen dat binnen 30 dagen doen."
           ]
         },
         {
@@ -292,7 +292,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Heb je het geüpload en wil je het nu weer verwijderen?",
           "paragraphs": [
-            "Open het in je paspoort en verwijder het daar — dat werkt zelfs als je de link kwijt bent. Als je het zonder account hebt geüpload, gebruik dan de verwijderlink die je hebt ontvangen, of stuur ons een e-mail. In beide gevallen verdwijnt het onmiddellijk van de muur."
+            "Open het in je paspoort en verwijder het daar — in de browser waarmee je het hebt geüpload, of op elk apparaat als je een e-mailadres hebt gekoppeld. Dat werkt zelfs als je je link kwijt bent. Als je paspoort er geen toegang toe heeft, gebruik dan de verwijderingslink die je hebt ontvangen, of stuur ons een e-mail. Via het paspoort en de link wordt het onmiddellijk van de muur verwijderd; via e-mail gebeurt dit binnen 48 uur. Wat er daarna met de verborgen kopie gebeurt, staat in het privacybeleid."
           ]
         },
         {
@@ -367,7 +367,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Ihre Inhalte",
           "paragraphs": [
             "Wenn Sie ein Foto oder ein GIF hochladen oder ein Video verlinken („Erinnerung“), bestätigen Sie, dass: Sie das Material selbst aufgenommen haben und über die Rechte zur Weitergabe verfügen; es bei einer Musikveranstaltung aufgenommen wurde, an der Sie teilgenommen haben; Sie gewähren One Tribe eine nicht-exklusive, weltweite, gebührenfreie Lizenz zum Hosten, Anzeigen, Anpassen der Größe und Übersetzen der Bildunterschrift, um diese Website zu betreiben, sowie um sie — mit Nennung Ihres Anzeigenamens oder Handles — auf den eigenen Social-Media-Konten von One Tribe vorzustellen. Das ist der gesamte Umfang der Lizenz: Wir verkaufen Ihre Erinnerung nicht, vergeben keine Unterlizenzen und nutzen sie nicht für Werbung. Sagen Sie uns Bescheid, und wir entfernen sie von diesen Konten und zeigen sie dort nicht erneut.",
-            "Sie behalten das Eigentumsrecht. Sie können Ihre Erinnerung jederzeit löschen – entweder über Ihren Pass, sofern Sie beim Hochladen angemeldet waren, oder über den Löschlink, den Sie erhalten haben."
+            "Sie behalten das Eigentumsrecht. Sie können Ihre Erinnerung jederzeit löschen – entweder über den Pass, in dem sie gespeichert ist, oder über den Löschlink, den Sie erhalten haben."
           ]
         },
         {
@@ -424,7 +424,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Ihre Rechte (DSGVO)",
           "paragraphs": [
-            "Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch, Datenübertragbarkeit. Sie können Ihre Erinnerungen aus Ihrem Pass entfernen und den Pass selbst auf derselben Seite löschen – alle Momente, die Sie zurücklassen, bleiben anonymisiert an der Wand erhalten, jeweils mit einem eigenen Löschlink. Bei weiteren Fragen senden Sie bitte eine E-Mail an privacy@onetribe.world. Sie können auch eine Beschwerde bei Ihrer lokalen Datenschutzbehörde einreichen."
+            "Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch, Datenübertragbarkeit. Sie können Ihre Erinnerungen aus Ihrem Pass entfernen und den Pass selbst auf derselben Seite löschen – alle Momente, die Sie zurücklassen, bleiben anonymisiert an der Wand erhalten, jeweils mit einem eigenen Löschlink. Bei weiteren Fragen senden Sie bitte eine E-Mail an privacy@onetribe.world. Sie können sich auch bei Ihrer lokalen Datenschutzbehörde beschweren."
           ]
         },
         {
@@ -437,7 +437,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Aufbewahrung",
           "paragraphs": [
-            "Veröffentlichte Erinnerungen bleiben so lange bestehen, bis Sie sie löschen oder sie aufgrund einer berechtigten Anfrage entfernt werden. Eine von Ihnen gelöschte Erinnerung verschwindet sofort von der Website, und wir bewahren die ausgeblendete Kopie nur auf, um Streitfälle und Ansprüche von Wiederholungstätern zu bearbeiten. Wenn Sie möchten, dass sie dauerhaft gelöscht wird, senden Sie uns eine E-Mail, und wir werden dies innerhalb von 30 Tagen erledigen."
+            "Veröffentlichte Erinnerungen bleiben so lange bestehen, bis Sie sie löschen oder sie aufgrund einer gültigen Anfrage entfernt werden. Alles, was entfernt wird – sei es durch Sie selbst oder auf Antrag einer anderen Person – verschwindet sofort von der Website; wir bewahren die versteckte Kopie nur zur Bearbeitung von Streitfällen und Ansprüchen wegen wiederholter Rechtsverletzungen auf, und zwar nur so lange, wie ein solcher Anspruch noch geltend gemacht werden könnte. Wenn Sie möchten, dass sie dauerhaft gelöscht wird, senden Sie uns eine E-Mail, und wir werden dies innerhalb von 30 Tagen erledigen."
           ]
         },
         {
@@ -459,7 +459,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Du hast es hochgeladen und möchtest es jetzt wieder löschen?",
           "paragraphs": [
-            "Öffne es in deinem Pass und lösche es dort – das funktioniert auch, wenn du den Link verloren hast. Wenn du den Beitrag ohne Konto hochgeladen hast, nutze den Löschlink, den du erhalten hast, oder schreibe uns eine E-Mail. In beiden Fällen verschwindet der Beitrag sofort von der Wand."
+            "Öffnen Sie es in Ihrem Pass und löschen Sie es dort – in dem Browser, über den Sie es hochgeladen haben, oder auf einem beliebigen Gerät, sofern Sie eine E-Mail-Adresse hinterlegt haben. Das funktioniert auch, wenn Sie Ihren Link verloren haben. Falls Ihr Pass darauf nicht zugreifen kann, verwenden Sie den Löschlink, den Sie erhalten haben, oder senden Sie uns eine E-Mail. Über den Pass und den Link wird die Erinnerung sofort von der Wand entfernt; per E-Mail erfolgt die Löschung innerhalb von 48 Stunden. Was anschließend mit der versteckten Kopie geschieht, ist in der Datenschutzerklärung geregelt."
           ]
         },
         {
@@ -534,7 +534,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Tu contenido",
           "paragraphs": [
             "Al subir una foto o un GIF, o al enlazar un vídeo («Recuerdo»), confirmas que: lo has capturado tú mismo y tienes los derechos para compartirlo; fue tomado en un evento musical al que asististe; concedes a One Tribe una licencia no exclusiva, mundial y libre de regalías para alojar, mostrar, redimensionar y traducir su pie de foto con el fin de gestionar este sitio web, y para difundirlo —con tu nombre visible o tu usuario como crédito— en las cuentas de redes sociales del propio One Tribe. Esa es toda la licencia: nunca vendemos tu Recuerdo, no lo sublicenciamos ni lo usamos en publicidad. Dínoslo y lo retiraremos de esas cuentas y no volveremos a difundirlo.",
-            "La propiedad sigue siendo tuya. Puedes eliminar tu «Recuerdo» en cualquier momento: desde tu pasaporte si habías iniciado sesión cuando la subiste, o mediante el enlace de eliminación que has recibido."
+            "La propiedad sigue siendo tuya. Puedes eliminar tu «Recuerdo» en cualquier momento, ya sea desde el pasaporte en el que se almacena o mediante el enlace de eliminación que has recibido."
           ]
         },
         {
@@ -604,7 +604,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Retención",
           "paragraphs": [
-            "Los «Recuerdos» publicados permanecen hasta que los elimines o hasta que una solicitud válida los elimine. Un «Recuerdo» que elimines desaparecerá del sitio web de inmediato, y conservaremos la copia oculta únicamente para gestionar disputas y reclamaciones por infracciones reiteradas. Si deseas que se borre de forma permanente, envíanos un correo electrónico y lo haremos en un plazo de 30 días."
+            "Los «Recuerdos» publicados permanecen en la plataforma hasta que los elimines tú mismo o hasta que una solicitud válida los elimine. Cualquier contenido eliminado —ya sea por ti o a petición de otra persona— desaparece del sitio web de inmediato; conservamos la copia oculta únicamente para gestionar disputas y reclamaciones por infracciones reiteradas, y solo mientras sea posible presentar dicha reclamación. Si deseas que se borre de forma permanente, envíanos un correo electrónico y lo haremos en un plazo de 30 días."
           ]
         },
         {
@@ -626,7 +626,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "¿Lo has subido y quieres borrarlo?",
           "paragraphs": [
-            "Ábrelo en tu pasaporte y elimínalo desde allí; esto funciona incluso si has perdido el enlace. Si lo has subido sin tener una cuenta, utiliza el enlace de eliminación que has recibido o envíanos un correo electrónico. En cualquier caso, desaparecerá del muro de inmediato."
+            "Ábrelo en tu pasaporte y elimínalo desde allí —en el navegador desde el que lo subiste o en cualquier dispositivo si has vinculado una dirección de correo electrónico—. Esto funciona incluso si has perdido el enlace. Si tu pasaporte no puede acceder a él, utiliza el enlace de eliminación que has recibido o envíanos un correo electrónico. El pasaporte y el enlace lo eliminan del muro de inmediato; por correo electrónico, en un plazo de 48 horas. Lo que ocurre después con la copia oculta se explica en la política de privacidad."
           ]
         },
         {
@@ -701,7 +701,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Votre contenu",
           "paragraphs": [
             "Lorsque vous publiez une photo ou un GIF, ou que vous ajoutez un lien vers une vidéo (« Souvenir »), vous confirmez que : vous en êtes l'auteur et que vous détenez les droits nécessaires pour la partager ; elle a été prise lors d'un événement musical auquel vous avez assisté ; vous accordez à One Tribe une licence non exclusive, mondiale et libre de droits pour héberger, afficher, redimensionner et traduire sa légende afin d’exploiter ce site, ainsi que pour le mettre en avant — en créditant votre nom affiché ou votre pseudo — sur les comptes de réseaux sociaux de One Tribe. C’est là toute la licence : nous ne vendons jamais votre Souvenir, ne le sous-licencions pas et ne l’utilisons pas à des fins publicitaires. Dites-le-nous et nous le retirerons de ces comptes sans le republier.",
-            "Vous en restez le propriétaire. Vous pouvez supprimer votre « Souvenir » à tout moment : depuis votre passeport si vous étiez connecté(e) au moment de son téléchargement, ou à l'aide du lien de suppression que vous avez reçu."
+            "Vous en conservez la propriété. Vous pouvez supprimer votre « Souvenir » à tout moment, soit depuis le passeport qui le contient, soit à l'aide du lien de suppression que vous avez reçu."
           ]
         },
         {
@@ -758,7 +758,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Vos droits (RGPD)",
           "paragraphs": [
-            "Accès, rectification, effacement, limitation du traitement, opposition, portabilité. Vous pouvez supprimer vos « Souvenirs » de votre « passeport » et supprimer le « passeport » lui-même depuis cette même page — les moments que vous laissez derrière vous restent affichés sur le mur, sous forme anonymisée, chacun accompagné de son propre lien de suppression. Envoyez un e-mail à privacy@onetribe.world pour toute autre question. Vous pouvez également déposer une réclamation auprès de l’autorité locale chargée de la protection des données."
+            "Accès, rectification, effacement, limitation du traitement, opposition, portabilité. Vous pouvez supprimer vos « Souvenirs » de votre passeport, et supprimer le passeport lui-même depuis cette même page — les moments que vous laissez derrière vous restent affichés sur le mur, sous forme anonymisée, chacun accompagné de son propre lien de suppression. Envoyez un e-mail à privacy@onetribe.world pour toute autre question. Vous pouvez également déposer une réclamation auprès de l'autorité locale chargée de la protection des données."
           ]
         },
         {
@@ -771,7 +771,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Conservation des données",
           "paragraphs": [
-            "Les « Souvenirs » publiés restent en ligne jusqu’à ce que vous les supprimiez ou qu’une demande valide entraîne leur suppression. Un « Souvenir » que vous supprimez disparaît immédiatement du site, et nous conservons uniquement la copie masquée afin de traiter les litiges et les plaintes concernant les auteurs de violations répétées. Si vous souhaitez qu’il soit effacé définitivement, envoyez-nous un e-mail et nous procéderons à cette suppression dans un délai de 30 jours."
+            "Les « Souvenirs » publiés restent en ligne jusqu’à ce que vous les supprimiez ou qu’une demande valide entraîne leur suppression. Tout contenu supprimé — par vous-même ou à la demande d'une tierce personne — disparaît immédiatement du site ; nous conservons la copie cachée uniquement pour traiter les litiges et les plaintes concernant les contrevenants récidivistes, et uniquement tant qu’une telle plainte pourrait encore être déposée. Si vous souhaitez qu'il soit effacé définitivement, envoyez-nous un e-mail et nous procéderons à cette suppression dans un délai de 30 jours."
           ]
         },
         {
@@ -793,7 +793,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Vous l'avez mis en ligne et vous voulez le supprimer ?",
           "paragraphs": [
-            "Ouvrez-le dans votre passeport et supprimez-le à partir de là — cela fonctionne même si vous avez perdu votre lien. Si vous l'avez publié sans compte, utilisez le lien de suppression que vous avez reçu ou envoyez-nous un e-mail. Dans tous les cas, il disparaîtra immédiatement du mur."
+            "Ouvrez-le dans votre passeport et supprimez-le à partir de là — depuis le navigateur à partir duquel vous l’avez mis en ligne, ou depuis n'importe quel appareil si vous avez associé une adresse e-mail. Cela fonctionne même si vous avez perdu votre lien. Si votre passeport ne parvient pas à y accéder, utilisez le lien de suppression que vous avez reçu, ou envoyez-nous un e-mail. Le passeport et le lien le suppriment immédiatement du mur ; par e-mail, la suppression intervient dans les 48 heures. Le sort réservé à la copie cachée par la suite est décrit dans la politique de confidentialité."
           ]
         },
         {
@@ -868,7 +868,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. I tuoi contenuti",
           "paragraphs": [
             "Quando carichi una foto o una GIF, oppure inserisci il link a un video (“Ricordo”), confermi che: l’hai scattata o registrata tu stesso e ne detieni i diritti di condivisione; è stata scattata o registrata durante un evento musicale a cui hai partecipato; concedi a One Tribe una licenza non esclusiva, valida in tutto il mondo e esente da royalty per ospitare, visualizzare, ridimensionare e tradurre la didascalia ai fini del funzionamento di questo sito, e per pubblicarlo — con il tuo nome visualizzato o il tuo handle come credito — sugli account social di One Tribe. La licenza è tutta qui: non vendiamo il tuo Ricordo, non lo concediamo in sublicenza e non lo usiamo nella pubblicità. Basta dircelo e lo rimuoveremo da quegli account senza ripubblicarlo.",
-            "La proprietà rimane tua. Puoi eliminare il tuo Ricordo in qualsiasi momento: dal tuo passaporto, se avevi effettuato l'accesso al momento del caricamento, oppure tramite il link di eliminazione che hai ricevuto."
+            "La proprietà rimane tua. Puoi cancellare il tuo Ricordo in qualsiasi momento, dal passaporto in cui è conservato oppure tramite il link di cancellazione che hai ricevuto."
           ]
         },
         {
@@ -925,7 +925,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. I tuoi diritti (GDPR)",
           "paragraphs": [
-            "Accesso, rettifica, cancellazione, limitazione del trattamento, opposizione, portabilità. Puoi rimuovere i tuoi “Ricordi” dal tuo passaporto ed eliminare il passaporto stesso dalla stessa pagina: tutti i momenti che lasci alle spalle rimangono sul muro, in forma anonima, ciascuno con il proprio link di cancellazione. Per qualsiasi altra richiesta, invia un’e-mail a privacy@onetribe.world. Puoi inoltre presentare un reclamo all’autorità locale per la protezione dei dati."
+            "Accesso, rettifica, cancellazione, limitazione, opposizione, portabilità. Puoi rimuovere i tuoi “Ricordi” dal tuo passaporto ed eliminare il passaporto stesso dalla stessa pagina: tutti i momenti che lasci alle spalle rimangono sul muro, in forma anonima, ciascuno con il proprio link di cancellazione. Per qualsiasi altra richiesta, invia un’e-mail all’indirizzo privacy@onetribe.world. È inoltre possibile presentare un reclamo all’autorità locale garante della protezione dei dati."
           ]
         },
         {
@@ -938,7 +938,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Conservazione dei dati",
           "paragraphs": [
-            "I Ricordi pubblicati rimangono sul sito finché non li elimini o non vengano rimossi in seguito a una richiesta valida. Un Ricordo che elimini scompare immediatamente dal sito; conserviamo la copia nascosta solo per gestire eventuali controversie e reclami relativi a infrazioni ripetute. Se desideri che venga cancellato definitivamente, inviaci un’e-mail e provvederemo a farlo entro 30 giorni."
+            "I Ricordi pubblicati rimangono sul sito finché non li elimini o finché non vengono rimossi in seguito a una richiesta valida. Qualsiasi contenuto rimosso — da te o su richiesta di qualcun altro — scompare immediatamente dal sito; conserviamo la copia nascosta solo per gestire eventuali controversie e reclami relativi a violazioni ripetute, e solo per il periodo in cui tale reclamo possa ancora essere presentato. Se desideri che venga cancellato definitivamente, inviaci un'e-mail e provvederemo a farlo entro 30 giorni."
           ]
         },
         {
@@ -960,7 +960,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "L'hai caricato e ora vuoi eliminarlo?",
           "paragraphs": [
-            "Aprilo nel tuo passaporto e cancellalo da lì: funziona anche se hai perso il link. Se l’hai caricato senza un account, usa il link di cancellazione che hai ricevuto oppure inviaci un’e-mail. In entrambi i casi, scomparirà immediatamente dal muro."
+            "Aprilo nel tuo passaporto e cancellalo da lì — sul browser da cui l’hai caricato, oppure su qualsiasi dispositivo se hai associato un indirizzo e-mail. Funziona anche se hai perso il link. Se il tuo passaporto non riesce a raggiungerlo, usa il link di cancellazione che hai ricevuto oppure inviaci un’e-mail. Il passaporto e il link lo rimuovono immediatamente dal muro; tramite e-mail, entro 48 ore. Cosa succede in seguito alla copia nascosta è indicato nell’informativa sulla privacy."
           ]
         },
         {
@@ -1035,7 +1035,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. O seu conteúdo",
           "paragraphs": [
             "Ao carregares uma fotografia ou um GIF, ou ao partilhares um vídeo («Memória»), confirmas que: foste tu próprio que o captaste e deténs os direitos para o partilhar; foi captado num evento musical em que estiveste presente; concedes ao One Tribe uma licença não exclusiva, mundial e isenta de royalties para alojar, exibir, redimensionar e traduzir a sua legenda para o funcionamento deste site, e para a destacar — com o teu nome visível ou identificador como crédito — nas contas de redes sociais do próprio One Tribe. A licença é apenas esta: nunca vendemos a tua Memória, não a sublicenciamos nem a usamos em publicidade. Basta dizeres-nos e retiramo-la dessas contas e não voltamos a destacá-la.",
-            "A propriedade continua a ser sua. Pode eliminar a sua Memória a qualquer momento — a partir do seu passaporte, se estivesse com a conta ativa quando a carregou, ou através do link de eliminação que recebeu."
+            "A propriedade continua a ser sua. Pode eliminar a sua Memória a qualquer momento — a partir do passaporte onde está armazenada ou através do link de eliminação que recebeu."
           ]
         },
         {
@@ -1092,7 +1092,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Os seus direitos (RGPD)",
           "paragraphs": [
-            "Acesso, retificação, apagamento, limitação, oposição, portabilidade. Pode remover as suas Memórias do seu passaporte e eliminar o próprio passaporte nessa mesma página — quaisquer momentos que deixe para trás permanecem no mural, anonimizados, cada um com o seu próprio link para eliminar. Envie um e-mail para privacy@onetribe.world para qualquer outra questão. Também pode apresentar uma reclamação junto da autoridade local de proteção de dados."
+            "Acesso, retificação, apagamento, limitação, oposição, portabilidade. Pode remover as suas Memórias do seu passaporte e eliminar o próprio passaporte nessa mesma página — quaisquer momentos que deixe para trás permanecem no mural, anonimizados, cada um com o seu próprio link de eliminação. Envie um e-mail para privacy@onetribe.world para qualquer outra questão. Pode também apresentar uma reclamação junto da autoridade local de proteção de dados."
           ]
         },
         {
@@ -1105,7 +1105,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Retenção",
           "paragraphs": [
-            "As Memórias publicadas permanecem até que as elimine ou até que uma solicitação válida as remova. Uma Memória que eliminar desaparece do site imediatamente, e mantemos a cópia oculta apenas para tratar de litígios e reclamações relativas a infratores reincidentes. Se desejar que seja apagada definitivamente, envie-nos um e-mail e trataremos disso no prazo de 30 dias."
+            "As Memórias publicadas permanecem até que as elimine ou até que uma solicitação válida as remova. Qualquer conteúdo removido — por si ou a pedido de outra pessoa — desaparece imediatamente do site; mantemos a cópia oculta apenas para tratar de litígios e reclamações relativas a infratores reincidentes, e apenas enquanto tal reclamação ainda puder ser apresentada. Se pretender que seja apagado definitivamente, envie-nos um e-mail e trataremos disso no prazo de 30 dias."
           ]
         },
         {
@@ -1127,7 +1127,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Carregaste o ficheiro e agora queres apagá-lo?",
           "paragraphs": [
-            "Abra-o no seu passaporte e elimine-o a partir daí — isto funciona mesmo que tenha perdido o link. Se o publicou sem uma conta, utilize o link de eliminação que recebeu ou envie-nos um e-mail. Seja como for, desaparecerá do mural imediatamente."
+            "Abra-o no seu passaporte e elimine-o a partir daí — no navegador a partir do qual fez o upload ou em qualquer dispositivo, caso tenha associado um endereço de e-mail. Isto funciona mesmo que tenha perdido o link. Se o seu passaporte não conseguir aceder à Memória, utilize o link de eliminação que recebeu ou envie-nos um e-mail. O passaporte e o link removem-no do mural imediatamente; por e-mail, no prazo de 48 horas. O que acontece à cópia oculta posteriormente está descrito na política de privacidade."
           ]
         },
         {
@@ -1201,8 +1201,8 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. コンテンツについて",
           "paragraphs": [
-            "写真やGIFをアップロードしたり、動画（「メモリー」）へのリンクを貼ったりする場合、以下の事項を確認したものとみなされます：そのコンテンツはご自身で撮影したものであり、共有する権利を有していること；そのコンテンツは、ご自身が参加した音楽イベントで撮影されたものであること； また、本サイトを運営するため、および表示名またはハンドルをクレジットとして明記したうえで One Tribe 自身のソーシャルメディアアカウントで紹介するために、One Tribeに対し、そのコンテンツをホスト、表示、サイズ変更、およびキャプションの翻訳を行うための非独占的、全世界的、ロイヤリティフリーのライセンスを付与するものとします。ライセンスの範囲はこれだけです。お客様のメモリーを販売したり、再許諾したり、広告に使用したりすることは一切ありません。ご連絡いただければ、これらのアカウントから削除し、再び紹介することはありません。",
-            "所有権は引き続きあなたにあります。「思い出」はいつでも削除できます。アップロード時にログインしていた場合は「パスポート」から、それ以外の場合は受け取った削除リンクを使用して削除できます。"
+            "写真やGIFをアップロードしたり、動画（「思い出」）へのリンクを貼ったりする場合、以下の事項を確認したものとみなされます：そのコンテンツはご自身で撮影したものであり、共有する権利を有していること；そのコンテンツは、ご自身が参加した音楽イベントで撮影されたものであること； また、本サイトを運営するため、および表示名またはハンドルをクレジットとして明記したうえで One Tribe 自身のソーシャルメディアアカウントで紹介するために、One Tribeに対し、そのコンテンツをホスト、表示、サイズ変更、およびキャプションの翻訳を行うための非独占的、全世界的、ロイヤリティフリーのライセンスを付与するものとします。ライセンスの範囲はこれだけです。お客様のメモリーを販売したり、再許諾したり、広告に使用したりすることは一切ありません。ご連絡いただければ、これらのアカウントから削除し、再び紹介することはありません。",
+            "所有権は引き続きお客様にあります。保存されているパスポートから、あるいは受け取った削除リンクを使って、いつでも「思い出」を削除することができます。"
           ]
         },
         {
@@ -1214,7 +1214,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. モデレーション",
           "paragraphs": [
-            "投稿されたコンテンツは、すぐに壁に表示されます。当社は公開後の最近の投稿や通報内容を審査し、独自の判断でコンテンツを非表示または削除する場合があります。権利者やプライバシーに関する要請には迅速に対応しており（削除要請についてはこちらをご覧ください）、すべての「Memory」には通報用のリンクが用意されています。"
+            "投稿されたコンテンツは、すぐに壁に表示されます。当社は公開後の最近の投稿や通報内容を審査し、独自の判断でコンテンツを非表示または削除する場合があります。権利者やプライバシーに関する要請には迅速に対応しており（削除要請についてはこちらをご覧ください）、すべての「思い出」には通報用のリンクが用意されています。"
           ]
         },
         {
@@ -1259,7 +1259,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. お客様の権利（GDPR）",
           "paragraphs": [
-            "アクセス、訂正、消去、処理の制限、異議申立て、データポータビリティ。「パスポート」から「思い出」を削除したり、同じページから「パスポート」自体を削除したりすることができます。残された「思い出」は、匿名化された状態で壁に残り、それぞれに削除リンクが付いています。 その他ご不明な点がございましたら、privacy@onetribe.world までメールでお問い合わせください。また、お住まいの地域のデータ保護当局に苦情を申し立てることも可能です。"
+            "アクセス、訂正、消去、処理の制限、異議申立て、データポータビリティ。パスポートから「思い出」を削除したり、同じページからパスポート自体を削除したりすることができます。残された「思い出」は、匿名化された状態で壁に残り、それぞれに削除用リンクが付いています。 その他ご不明な点がございましたら、privacy@onetribe.world までメールでお問い合わせください。また、お住まいの地域のデータ保護当局に苦情を申し立てることも可能です。"
           ]
         },
         {
@@ -1272,7 +1272,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. データの保持",
           "paragraphs": [
-            "公開された「思い出」は、ユーザーが削除するか、有効な削除要請によって削除されるまで残ります。ユーザーが削除した「思い出」はサイトから直ちに消去されますが、紛争や反復的な権利侵害の申し立てに対応するため、非公開のコピーのみを保管します。完全に削除したい場合は、メールにてご連絡ください。30日以内に削除いたします。"
+            "公開された「思い出」は、ユーザーが削除するか、正当な要請により削除されるまでサイトに残ります。 ユーザー自身による削除、または他者からの要請による削除が行われたコンテンツは、直ちにサイトに表示されなくなります。当社は、紛争や繰り返しの権利侵害に関する申し立てに対処するためのみ、非公開のコピーを保管しますが、その保管期間は、そのような申し立てが提起され得る期間に限定されます。完全に削除をご希望の場合は、メールにてご連絡ください。30日以内に削除いたします。"
           ]
         },
         {
@@ -1294,7 +1294,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "アップロードしたのに、削除したいんですか？",
           "paragraphs": [
-            "「パスポート」で開いて、そこから削除してください。リンクを紛失した場合でもこの方法で削除できます。アカウントなしでアップロードした場合は、受け取った削除リンクを使用するか、弊社までメールでお問い合わせください。どちらの方法でも、壁から即座に削除されます。"
+            "パスポートで開いて、そこで削除してください。アップロードしたブラウザでも、メールを連携している場合はどのデバイスからでも削除できます。リンクを紛失した場合でもこの方法で削除できます。パスポートからアクセスできない場合は、受け取った削除リンクを使用するか、弊社までメールでお問い合わせください。 パスポートやリンクを使用すると、壁から即座に削除されます。メールでの削除の場合は、48時間以内に削除されます。削除後の非公開コピーについては、プライバシーポリシーに記載されています。"
           ]
         },
         {
@@ -1369,7 +1369,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. 귀하의 콘텐츠",
           "paragraphs": [
             "사진이나 GIF를 업로드하거나 동영상(“메모리”)을 링크할 때, 귀하는 다음 사항을 확인하는 것으로 간주됩니다: 해당 콘텐츠를 직접 촬영했으며 공유할 권리를 보유하고 있음; 해당 콘텐츠가 귀하가 참석한 음악 행사에서 촬영된 것임; 귀하는 본 사이트를 운영하기 위해, 그리고 표시 이름 또는 핸들을 출처로 밝혀 One Tribe의 소셜 계정에 소개하기 위해 One Tribe에 해당 콘텐츠를 호스팅, 표시, 크기 조정 및 캡션 번역할 수 있는 비독점적, 전 세계적, 로열티 없는 라이선스를 부여합니다. 라이선스의 범위는 여기까지입니다. 귀하의 메모리를 판매하거나 재라이선스하거나 광고에 사용하지 않습니다. 알려주시면 해당 계정에서 내리고 다시 소개하지 않습니다.",
-            "소유권은 귀하에게 있습니다. 메모리는 언제든지 삭제할 수 있습니다. 업로드 당시 로그인 상태였다면 여권에서 삭제할 수 있으며, 그렇지 않은 경우 수신한 삭제 링크를 통해 삭제할 수 있습니다."
+            "소유권은 귀하에게 있습니다. 메모리는 이를 보관하고 있는 여권에서, 또는 수신한 삭제 링크를 통해 언제든지 삭제할 수 있습니다."
           ]
         },
         {
@@ -1426,7 +1426,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. 귀하의 권리 (GDPR)",
           "paragraphs": [
-            "열람, 정정, 삭제, 처리 제한, 이의 제기, 데이터 이동권. 여권에서 ‘메모리’를 제거하고, 같은 페이지에서 여권 자체를 삭제할 수 있습니다. 남겨진 모든 순간은 익명 처리된 상태로 벽에 남아 있으며, 각각 삭제 링크가 제공됩니다. 그 외 문의 사항이 있으시면 privacy@onetribe.world로 이메일을 보내주십시오. 또한 해당 지역의 데이터 보호 당국에 이의를 제기할 수도 있습니다."
+            "열람, 정정, 삭제, 처리 제한, 이의 제기, 데이터 이동권. 여권에서 ‘메모리’를 제거하고, 같은 페이지에서 여권 자체를 삭제할 수 있습니다. 남겨진 모든 순간은 익명 처리된 상태로 벽에 남아 있으며, 각각 별도의 삭제 링크가 제공됩니다. 그 외 문의 사항이 있으시면 privacy@onetribe.world로 이메일을 보내주십시오. 또한 해당 지역의 개인정보 보호 당국에 이의를 제기할 수도 있습니다."
           ]
         },
         {
@@ -1439,7 +1439,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. 데이터 보관",
           "paragraphs": [
-            "게시된 ‘메모리’는 사용자가 직접 삭제하거나 유효한 요청에 따라 삭제될 때까지 유지됩니다. 사용자가 삭제한 ‘메모리’는 사이트에서 즉시 사라지며, 당사는 분쟁 및 반복적 저작권 침해 주장 처리를 위해 숨겨진 사본만 보관합니다. 영구적으로 삭제하기를 원하시면 이메일을 보내주시면 30일 이내에 처리해 드리겠습니다."
+            "게시된 ‘메모리’은 사용자가 직접 삭제하거나 유효한 요청에 따라 제거될 때까지 사이트에 남아 있습니다. 사용자가 직접 삭제하거나 타인의 요청에 따라 삭제된 모든 내용은 사이트에서 즉시 사라집니다. 당사는 분쟁 및 반복 침해자 관련 청구를 처리하기 위한 목적으로만 숨겨진 사본을 보관하며, 해당 청구가 제기될 수 있는 기간 동안에만 이를 유지합니다. 영구적으로 삭제하기를 원하시면 이메일을 보내주시면 30일 이내에 처리해 드리겠습니다."
           ]
         },
         {
@@ -1461,7 +1461,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "업로드해 놓고 이제 지우고 싶으신가요?",
           "paragraphs": [
-            "여권에서 해당 게시물을 열어 거기서 삭제하세요. 링크를 잃어버린 경우에도 이 방법으로 삭제할 수 있습니다. 계정 없이 게시물을 업로드한 경우, 수신한 삭제 링크를 사용하거나 저희에게 이메일을 보내주세요. 어느 방법을 사용하든 게시물은 즉시 벽에서 사라집니다."
+            "여권에서 해당 메모리를 열어 삭제하세요. 메모리를 업로드했던 브라우저에서 삭제하거나, 이메일을 연동한 경우 어떤 기기에서든 삭제할 수 있습니다. 링크를 분실한 경우에도 이 방법으로 삭제할 수 있습니다. 여권에서 해당 메모리에 접근할 수 없는 경우, 수신한 삭제 링크를 사용하거나 당사로 이메일을 보내주십시오. 여권과 링크를 통해 삭제하면 벽에서 즉시 삭제되며, 이메일을 통해 요청할 경우 48시간 이내에 삭제됩니다. 이후 숨겨진 사본의 처리 방식은 개인정보 처리방침에 명시되어 있습니다."
           ]
         },
         {
@@ -1536,7 +1536,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Twoje treści",
           "paragraphs": [
             "Przesyłając zdjęcie lub plik GIF albo zamieszczając link do filmu („Wspomnienie”), potwierdzasz, że: sam je wykonałeś i posiadasz prawa do jego udostępniania; zostało ono zarejestrowane podczas wydarzenia muzycznego, w którym brałeś udział; udzielasz One Tribe niewyłącznej, ogólnoświatowej, bezpłatnej licencji na hostowanie, wyświetlanie, zmianę rozmiaru oraz tłumaczenie opisu w celu prowadzenia tej strony, a także na prezentowanie go — z podaniem Twojej nazwy wyświetlanej lub nicka — na własnych kontach One Tribe w mediach społecznościowych. To cała licencja: nigdy nie sprzedajemy Twojego Wspomnienia, nie udzielamy sublicencji ani nie wykorzystujemy go w reklamach. Wystarczy dać nam znać, a usuniemy je z tych kont i nie pokażemy ponownie.",
-            "Właścicielem pozostajesz Ty. Możesz usunąć swoje Wspomnienie w dowolnym momencie — ze swojego paszportu, jeśli byłeś zalogowany podczas jego przesyłania, lub za pomocą otrzymanego linku do usunięcia."
+            "Właścicielem pozostajesz Ty. Możesz usunąć swoje Wspomnienie w dowolnym momencie — z paszportu, w którym jest przechowywane, lub za pomocą otrzymanego linku do usunięcia."
           ]
         },
         {
@@ -1593,7 +1593,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Twoje prawa (RODO)",
           "paragraphs": [
-            "Dostęp, sprostowanie, usunięcie, ograniczenie przetwarzania, sprzeciw, prawo do przenoszenia danych. Możesz usunąć swoje „Wspomnienia” ze swojego paszportu oraz usunąć sam paszport na tej samej stronie — wszystkie pozostawione przez Ciebie chwile pozostaną na ścianie w formie zanonimizowanej, a każda z nich będzie miała własny link do usunięcia. W przypadku jakichkolwiek innych pytań prosimy o kontakt pod adresem privacy@onetribe.world. Można również złożyć skargę do lokalnego organu ochrony danych."
+            "Dostęp, sprostowanie, usunięcie, ograniczenie przetwarzania, sprzeciw, prawo do przenoszenia danych. Możesz usunąć swoje „Wspomnienia” z paszportu oraz usunąć sam paszport na tej samej stronie — wszystkie pozostawione przez Ciebie chwile pozostaną na ścianie w formie zanonimizowanej, a każda z nich będzie miała własny link do usunięcia. W przypadku innych spraw prosimy o kontakt pod adresem privacy@onetribe.world. Możesz również złożyć skargę do lokalnego organu ochrony danych."
           ]
         },
         {
@@ -1606,7 +1606,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Przechowywanie danych",
           "paragraphs": [
-            "Opublikowane wspomnienia pozostają w serwisie do momentu ich usunięcia przez użytkownika lub na podstawie uzasadnionego wniosku. Usunięte przez użytkownika wspomnienie natychmiast znika z serwisu, a my zachowujemy jego ukrytą kopię wyłącznie w celu rozstrzygania sporów i rozpatrywania zgłoszeń dotyczących powtarzających się naruszeń. Jeśli chcesz, aby zostało ono trwale usunięte, wyślij do nas wiadomość e-mail, a my zajmiemy się tym w ciągu 30 dni."
+            "Opublikowane Wspomnienia pozostają na stronie do momentu ich usunięcia przez Ciebie lub na skutek ważnego wniosku o ich usunięcie. Wszelkie treści usunięte — przez Ciebie lub na wniosek innej osoby — natychmiast znikają z serwisu; przechowujemy ukrytą kopię wyłącznie w celu rozstrzygania sporów i rozpatrywania roszczeń dotyczących powtarzających się naruszeń oraz tylko tak długo, jak długo takie roszczenie może zostać zgłoszone. Jeśli chcesz, aby treść została trwale usunięta, wyślij do nas wiadomość e-mail, a zrobimy to w ciągu 30 dni."
           ]
         },
         {
@@ -1628,7 +1628,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Wrzuciłeś to i chcesz to usunąć?",
           "paragraphs": [
-            "Otwórz to w swoim paszporcie i usuń stamtąd — to działa nawet wtedy, gdy zgubiłeś link. Jeśli przesłałeś je bez konta, skorzystaj z otrzymanego linku do usunięcia lub napisz do nas e-mail. Tak czy inaczej, wspomnienie natychmiast zniknie ze ściany."
+            "Otwórz je w swoim paszporcie i usuń je tam — w przeglądarce, z której je przesłałeś, lub na dowolnym urządzeniu, jeśli podałeś adres e-mail. Działa to nawet wtedy, gdy zgubiłeś link. Jeśli Twój paszport nie może uzyskać do niego dostępu, skorzystaj z otrzymanego linku do usunięcia lub wyślij do nas wiadomość e-mail. Paszport i link usuwają je ze ściany natychmiast; w przypadku zgłoszenia przez e-mail — w ciągu 48 godzin. Informacje o tym, co dzieje się później z ukrytą kopią, znajdują się w polityce prywatności."
           ]
         },
         {
@@ -1703,7 +1703,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Ditt innehåll",
           "paragraphs": [
             "När du laddar upp en bild eller en GIF, eller länkar till en video (”Minne”), bekräftar du att: du själv har tagit det och har rätt att dela det; det togs vid ett musikevenemang som du deltog i; du beviljar One Tribe en icke-exklusiv, världsomspännande och royaltyfri licens att lagra, visa, ändra storlek på och översätta bildtexten för att driva denna webbplats, och att lyfta fram det — med ditt visningsnamn eller användarnamn som kredit — på One Tribes egna konton i sociala medier. Det är hela licensen: vi säljer aldrig ditt Minne, vidarelicensierar det inte och använder det inte i reklam. Säg bara till, så tar vi bort det från de kontona och visar det inte igen.",
-            "Du behåller äganderätten. Du kan radera ditt Minne när som helst – antingen från ditt pass om du var inloggad när du laddade upp det, eller via den raderingslänk du fått."
+            "Du behåller äganderätten. Du kan radera ditt Minne när som helst – antingen från det pass där det lagras eller via den raderingslänk du har fått."
           ]
         },
         {
@@ -1760,7 +1760,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Dina rättigheter (GDPR)",
           "paragraphs": [
-            "Rätt till insyn, rättelse, radering, begränsning, invändning, dataportabilitet. Du kan ta bort dina Minnen från ditt pass och radera själva passet på samma sida – alla ögonblick du lämnar kvar finns kvar på väggen, anonymiserade, och varje ögonblick har en egen länk för radering. Skicka ett e-postmeddelande till privacy@onetribe.world om du har några övriga frågor. Du kan även lämna in ett klagomål till din lokala dataskyddsmyndighet."
+            "Rätt till insyn, rättelse, radering, begränsning, invändning och dataportabilitet. Du kan ta bort dina Minnen från ditt pass och radera själva passet på samma sida – alla ögonblick du lämnar kvar finns kvar på väggen, anonymiserade, och varje ögonblick har en egen länk för radering. Skicka ett e-postmeddelande till privacy@onetribe.world om du har några andra frågor. Du kan också lämna in ett klagomål till din lokala dataskyddsmyndighet."
           ]
         },
         {
@@ -1773,7 +1773,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Kvarhållande",
           "paragraphs": [
-            "Publicerade minnen finns kvar tills du raderar dem eller tills de tas bort genom en giltig begäran. Ett minne som du tar bort försvinner omedelbart från webbplatsen, och vi behåller endast den dolda kopian för att kunna hantera tvister och anmälningar om upprepade intrång. Om du vill att det ska raderas permanent kan du skicka ett e-postmeddelande till oss, så gör vi det inom 30 dagar."
+            "Publicerade Minnen finns kvar tills du raderar dem eller tills de tas bort genom en giltig begäran. Allt som tas bort – av dig eller på begäran av någon annan – försvinner omedelbart från webbplatsen; vi behåller den dolda kopian endast för att hantera tvister och anmälningar om upprepade överträdelser, och endast så länge som en sådan anmälan fortfarande kan göras. Om du vill att den ska raderas permanent, skicka ett e-postmeddelande till oss så gör vi det inom 30 dagar."
           ]
         },
         {
@@ -1795,7 +1795,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Har du laddat upp den och vill ta bort den?",
           "paragraphs": [
-            "Öppna det i ditt pass och ta bort det där – det fungerar även om du har tappat bort länken. Om du laddade upp det utan att ha ett konto kan du använda den raderingslänk du fick, eller skicka ett e-postmeddelande till oss. Oavsett vilket försvinner det omedelbart från väggen."
+            "Öppna den i ditt pass och ta bort den där – i den webbläsare som du laddade upp den från, eller på vilken enhet som helst om du har kopplat en e-postadress till den. Det fungerar även om du har tappat bort länken. Om ditt pass inte kan nå den, använd den borttagningslänk du fått eller skicka ett e-postmeddelande till oss. Passet och länken tar bort den från väggen omedelbart; via e-post inom 48 timmar. Vad som händer med den dolda kopian därefter framgår av integritetspolicyn."
           ]
         },
         {
@@ -1870,7 +1870,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. İçeriğiniz",
           "paragraphs": [
             "Bir fotoğraf veya GIF yüklediğinizde ya da bir videoya bağlantı verdiğinizde (“Anı”), şunları teyit etmiş olursunuz: bu içeriği kendiniz çekmişsiniz ve paylaşma haklarına sahipsiniz; içerik, katıldığınız bir müzik etkinliğinde çekilmiştir; One Tribe’a, bu siteyi işletmek ve görünen adınız veya kullanıcı adınız künye olarak belirtilerek içeriği One Tribe’ın kendi sosyal medya hesaplarında paylaşmak amacıyla, içeriği barındırma, görüntüleme, boyutunu değiştirme ve açıklamalarını çevirme konusunda münhasır olmayan, dünya çapında geçerli ve telifsiz bir lisans verdiğinizi. Lisansın kapsamı bundan ibarettir: Anınızı asla satmaz, alt lisans vermez ve reklamlarda kullanmayız. Bize haber vermeniz yeterli; içeriği o hesaplardan kaldırır ve bir daha paylaşmayız.",
-            "Mülkiyet hakkı size aittir. Anılarınızı istediğiniz zaman silebilirsiniz — yüklediğiniz sırada oturum açmışsanız pasaportunuzdan, aksi takdirde aldığınız silme bağlantısını kullanarak."
+            "Mülkiyet hakkı size aittir. Anılarınızı istediğiniz zaman silebilirsiniz — ya onları barındıran pasaporttan ya da aldığınız silme bağlantısını kullanarak."
           ]
         },
         {
@@ -1927,7 +1927,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Haklarınız (GDPR)",
           "paragraphs": [
-            "Erişim, düzeltme, silme, işleme sınırlandırma, itiraz, veri taşınabilirliği. pasaportunuzdan Anılarınızı kaldırabilir ve aynı sayfadan pasaportu da silebilirsiniz — geride bıraktığınız anlar, anonimleştirilmiş olarak duvarda kalır ve her birinin kendi silme bağlantısı bulunur. Diğer her türlü konuda privacy@onetribe.world adresine e-posta gönderebilirsiniz. Ayrıca, yerel veri koruma kurumuna da şikayette bulunabilirsiniz."
+            "Erişim, düzeltme, silme, kısıtlama, itiraz, taşınabilirlik. Anılarınızı pasaportunuzdan kaldırabilir ve aynı sayfadan pasaportu da silebilirsiniz — geride bıraktığınız anlar, kimlik bilgileri gizlenmiş olarak duvarda kalır ve her birinin kendine ait bir silme bağlantısı bulunur. Diğer her türlü konuda privacy@onetribe.world adresine e-posta gönderebilirsiniz. Ayrıca, yerel veri koruma kurumuna da şikayette bulunabilirsiniz."
           ]
         },
         {
@@ -1940,7 +1940,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Veri saklama",
           "paragraphs": [
-            "Yayınlanan Anılar, siz silene kadar veya geçerli bir talep üzerine kaldırılana kadar sitede kalır. Sildiğiniz bir Anı, siteden hemen kaybolur; gizli kopyasını ise yalnızca ihtilafları ve tekrarlı ihlal iddialarını ele almak amacıyla saklarız. Kalıcı olarak silinmesini istiyorsanız, bize e-posta gönderin; 30 gün içinde bunu gerçekleştireceğiz."
+            "Yayınlanan Anılar, siz silene kadar veya geçerli bir talep üzerine kaldırılana kadar sitede kalır. Sizin tarafınızdan veya başka birinin talebi üzerine kaldırılan her şey siteden anında silinir; gizli kopyayı yalnızca ihtilafları ve tekrarlı ihlal iddialarını ele almak amacıyla ve bu tür bir iddianın hala ileri sürülebileceği süre boyunca saklarız. Kalıcı olarak silinmesini istiyorsanız, bize e-posta gönderin; 30 gün içinde bunu gerçekleştireceğiz."
           ]
         },
         {
@@ -1962,7 +1962,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Onu yüklediniz ve artık silinmesini mi istiyorsunuz?",
           "paragraphs": [
-            "Bunu pasaportunuzda açın ve oradan silin — bağlantınızı kaybetmiş olsanız bile bu yöntem işe yarar. Hesap oluşturmadan yükleme yaptıysanız, aldığınız silme bağlantısını kullanın ya da bize e-posta gönderin. Her iki durumda da gönderi duvardan hemen kaybolur."
+            "Bunu pasaportunuzda açın ve oradan silin — yüklemeyi yaptığınız tarayıcıda ya da e-posta adresinizi bağladıysanız herhangi bir cihazda. Bu, bağlantınızı kaybetmiş olsanız bile işe yarar. Pasaportunuz buna erişemiyorsa, aldığınız silme bağlantısını kullanın ya da bize e-posta gönderin. Pasaport ve bağlantı, içeriği duvardan anında kaldırır; e-posta yoluyla ise 48 saat içinde kaldırılır. Gizlenen kopyanın daha sonra ne olacağı, gizlilik politikasında belirtilmiştir."
           ]
         },
         {
@@ -2037,7 +2037,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. 您的内容",
           "paragraphs": [
             "当您上传照片或GIF，或分享视频链接（“回忆”）时，您确认：该内容由您亲自拍摄且拥有分享权；该内容拍摄于您参加的音乐活动； 您授予 One Tribe 一项非独占性、全球范围、免版税的许可，允许其托管、展示、调整尺寸并翻译相关文字说明，该许可用于运营本网站，并可在 One Tribe 自有的社交媒体账号上展示该内容，同时标注您的显示名称或账号作为署名。许可范围仅限于此：我们绝不出售、转授权，也不会将其用于广告。只要告诉我们，我们就会从这些账号中删除，并且不再展示。",
-            "您保留所有权。您可以随时删除您的“回忆”——如果您在上传时已登录，可直接从“护照”中删除；否则，可通过您收到的删除链接进行删除。"
+            "您拥有所有权。您可以随时删除您的“回忆”——无论是从存储它的“护照”中删除，还是通过您收到的删除链接进行删除。"
           ]
         },
         {
@@ -2094,7 +2094,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. 您的权利（《通用数据保护条例》（GDPR））",
           "paragraphs": [
-            "访问、更正、删除、限制、异议、数据可携权。您可以在同一页面上将您的“回忆”从“护照”中移除，并删除“护照”本身——您留下的任何瞬间都会以匿名形式保留在墙上，每个瞬间都附有独立的删除链接。 如有其他问题，请发送邮件至 privacy@onetribe.world。您也可以向当地数据保护机构提出投诉。"
+            "访问、更正、删除、限制处理、反对、数据可携权。您可以在同一页面上将“回忆”从“护照”中移除，并删除“护照”本身——您留下的任何瞬间都会以匿名形式保留在墙上，每条回忆都配有专属的删除链接。 如有其他问题，请发送电子邮件至 privacy@onetribe.world。您也可以向当地数据保护机构提出投诉。"
           ]
         },
         {
@@ -2107,7 +2107,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. 数据保留",
           "paragraphs": [
-            "已发布的“回忆”将一直保留，直到您将其删除或收到有效的删除请求为止。您删除的“回忆”会立即从网站上消失，而我们仅保留一份隐藏副本，用于处理争议和针对重复侵权者的申诉。如果您希望将其永久删除，请发送电子邮件给我们，我们将在30天内完成删除。"
+            "已发布的回忆将一直保留，直到您将其删除或收到有效的删除请求为止。 无论是由您删除，还是应他人请求删除的内容，都会立即从网站上消失；我们保留隐藏副本，仅用于处理争议和针对重复侵权者的申诉，且仅在此类申诉仍可提出的期限内保留。如果您希望永久删除该内容，请发送电子邮件联系我们，我们将在 30 天内完成删除。"
           ]
         },
         {
@@ -2129,7 +2129,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "您上传了它，现在又想删掉吗？",
           "paragraphs": [
-            "在“护照”中打开它并将其删除——即使您丢失了链接，此方法依然有效。如果您是在未登录账户的情况下上传的，请使用收到的删除链接，或发送电子邮件给我们。无论采用哪种方式，该内容都会立即从墙上消失。"
+            "在您的“护照”中打开它，并在那里将其删除——无论是在您上传时使用的浏览器上，还是在已关联邮箱的任何设备上。即使您丢失了链接，此方法依然有效。如果您的“护照”无法访问该内容，请使用您收到的删除链接，或发送电子邮件联系我们。 通过“护照”或链接删除后，该内容将立即从墙上移除；若通过电子邮件删除，则需 48 小时内完成。此后隐藏副本的处理方式详见隐私政策。"
           ]
         },
         {
@@ -2204,7 +2204,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. 您的內容",
           "paragraphs": [
             "當您上傳照片或 GIF，或分享影片連結（「回憶」）時，您確認：該內容由您親自拍攝且擁有分享權；該內容拍攝於您參加的音樂活動；您授予 One Tribe 一項非獨占、全球範圍、免權利金的授權，允許其代管、展示、調整尺寸並翻譯相關文字說明，該授權用於營運本網站，並可在 One Tribe 自有的社群媒體帳號上分享該內容，同時標註您的顯示名稱或帳號作為署名。授權範圍僅止於此：我們絕不出售、再授權，也不會將其用於廣告。只要告訴我們，我們就會從這些帳號移除，且不再分享。",
-            "您仍保有所有權。您可以隨時刪除您的「回憶」——若您在上傳時已登入，可直接從您的「護照」中刪除；否則，也可透過您收到的刪除連結進行刪除。"
+            "您仍保有所有權。您可以隨時刪除您的「回憶」——無論是從儲存該「回憶」的「護照」中刪除，還是透過您收到的刪除連結進行刪除。"
           ]
         },
         {
@@ -2261,7 +2261,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. 您的權利（GDPR 一般資料保護規則）",
           "paragraphs": [
-            "存取、更正、刪除、限制、異議、資料可攜權。您可以在同一頁面上將「回憶」從「護照」中移除，並刪除「護照」本身——您留下的任何時刻都會以匿名形式保留在牆上，且每則回憶皆附有專屬的刪除連結。 如有其他問題，請發送電子郵件至 privacy@onetribe.world。您亦可向當地資料保護主管機關提出申訴。"
+            "存取、更正、刪除、限制、異議、資料可攜權。您可以在同一頁面上將您的「回憶」從「護照」中移除，並刪除「護照」本身——您留下的任何時刻都會以匿名形式保留在牆上，每則回憶均附有專屬的刪除連結。 如有其他問題，請電郵至 privacy@onetribe.world。您亦可向當地資料保護主管機關提出申訴。"
           ]
         },
         {
@@ -2274,7 +2274,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. 資料保留",
           "paragraphs": [
-            "已發佈的「回憶」將持續保留，直到您刪除它們，或有有效的移除請求為止。您移除的「回憶」會立即從網站上消失，而我們僅會保留隱藏副本，以處理爭議及針對重複侵權者的申訴。若您希望永久刪除該內容，請透過電子郵件聯絡我們，我們將於 30 天內為您處理。"
+            "已發布的回憶將持續保留，直到您刪除它們，或有有效的請求將其移除為止。 任何被移除的內容——無論是由您自行移除，或是應他人要求移除——都會立即從網站上消失；我們保留隱藏副本，僅用於處理爭議及針對重複侵權者的申訴，且保留時間僅限於此類申訴仍可提出之期間。若您希望永久刪除該內容，請透過電子郵件聯絡我們，我們將於 30 天內為您處理。"
           ]
         },
         {
@@ -2296,7 +2296,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "您上傳了它，現在又想刪掉嗎？",
           "paragraphs": [
-            "請在您的「護照」中開啟該內容並從那裡刪除——即使您遺失了連結，此方法依然有效。若您是未登入帳號的情況下上傳的，請使用您收到的刪除連結，或寄電子郵件給我們。無論採用哪種方式，該內容都會立即從牆上消失。"
+            "請在您的「護照」中開啟該內容並於該處刪除——無論是您最初上傳的瀏覽器，或是您已綁定電子郵件的任何裝置皆可。即使您遺失了該連結，此方法依然有效。若您的「護照」無法存取該內容，請使用您收到的刪除連結，或透過電子郵件聯絡我們。 透過「護照」或連結刪除後，內容會立即從牆上移除；若透過電子郵件處理，則會在 48 小時內完成。關於隱藏副本後續的處理方式，請參閱隱私權政策。"
           ]
         },
         {
@@ -2371,7 +2371,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Konten Anda",
           "paragraphs": [
             "Saat Anda mengunggah foto atau GIF, atau menyertakan tautan video (“Memory”), Anda menyatakan bahwa: Anda sendiri yang mengambilnya dan memiliki hak untuk membagikannya; foto atau video tersebut diambil pada acara musik yang Anda hadiri; Anda memberikan lisensi non-eksklusif, berlaku di seluruh dunia, dan bebas royalti kepada One Tribe untuk menghosting, menampilkan, mengubah ukuran, dan menerjemahkan keterangan foto tersebut guna mengoperasikan situs ini, serta untuk menampilkannya — dengan mencantumkan nama tampilan atau handle Anda sebagai kredit — di akun media sosial milik One Tribe sendiri. Hanya itu isi lisensinya: kami tidak pernah menjual Memory Anda, memberikan sublisensi, atau menggunakannya dalam iklan. Cukup beri tahu kami, dan kami akan menghapusnya dari akun-akun tersebut dan tidak menampilkannya lagi.",
-            "Anda tetap memegang hak kepemilikan. Anda dapat menghapus Memory Anda kapan saja — dari paspor Anda jika Anda sedang masuk saat mengunggahnya, atau melalui tautan penghapusan yang Anda terima."
+            "Anda tetap memegang hak kepemilikan. Anda dapat menghapus Memory Anda kapan saja — baik dari paspor yang menyimpannya, maupun melalui tautan penghapusan yang telah Anda terima."
           ]
         },
         {
@@ -2428,7 +2428,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Hak-hak Anda (GDPR)",
           "paragraphs": [
-            "Akses, koreksi, penghapusan, pembatasan, keberatan, portabilitas. Anda dapat menghapus Memories Anda dari paspor Anda, dan menghapus paspor itu sendiri di halaman yang sama — momen apa pun yang Anda tinggalkan akan tetap ada di dinding, dalam bentuk anonim, masing-masing dilengkapi tautan hapus tersendiri. Kirim email ke privacy@onetribe.world untuk hal-hal lain. Anda juga dapat mengajukan keluhan kepada otoritas perlindungan data setempat."
+            "Akses, koreksi, penghapusan, pembatasan, keberatan, portabilitas. Anda dapat menghapus Memories Anda dari paspor, serta menghapus paspor itu sendiri di halaman yang sama — momen-momen yang Anda tinggalkan akan tetap ada di dinding, dalam bentuk anonim, masing-masing dilengkapi tautan penghapusan tersendiri. Kirim email ke privacy@onetribe.world untuk hal lain apa pun. Anda juga dapat mengajukan keluhan kepada otoritas perlindungan data setempat."
           ]
         },
         {
@@ -2441,7 +2441,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Retensi",
           "paragraphs": [
-            "Memory yang dipublikasikan akan tetap ada sampai Anda menghapusnya atau dihapus berdasarkan permintaan yang sah. Memory yang Anda hapus akan langsung menghilang dari situs ini, dan kami hanya menyimpan salinannya yang tersembunyi untuk menangani sengketa dan klaim terkait pelanggar berulang. Jika Anda ingin Memory tersebut dihapus secara permanen, kirimkan email kepada kami dan kami akan melakukannya dalam waktu 30 hari."
+            "Memory yang dipublikasikan akan tetap ada sampai Anda menghapusnya atau dihapus berdasarkan permintaan yang sah. Apa pun yang dihapus — baik oleh Anda maupun atas permintaan pihak lain — akan langsung hilang dari situs; kami menyimpan salinan tersembunyi tersebut hanya untuk menangani sengketa dan klaim pelanggaran berulang, dan hanya selama klaim tersebut masih dapat diajukan. Jika Anda ingin konten tersebut dihapus secara permanen, kirimkan email kepada kami dan kami akan melakukannya dalam waktu 30 hari."
           ]
         },
         {
@@ -2463,7 +2463,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Anda mengunggahnya dan ingin menghapusnya?",
           "paragraphs": [
-            "Buka di paspor Anda dan hapus di sana — cara ini tetap bisa dilakukan meskipun Anda kehilangan tautannya. Jika Anda mengunggahnya tanpa akun, gunakan tautan penghapusan yang Anda terima, atau kirimkan email kepada kami. Apa pun caranya, postingan tersebut akan langsung hilang dari dinding."
+            "Buka Memory tersebut di paspor Anda dan hapus di sana — di browser yang Anda gunakan untuk mengunggahnya, atau di perangkat apa pun jika Anda telah menghubungkannya dengan alamat email. Cara ini tetap bisa dilakukan meskipun Anda kehilangan tautannya. Jika paspor Anda tidak dapat mengaksesnya, gunakan tautan penghapusan yang Anda terima, atau kirimkan email kepada kami. Paspor dan tautan tersebut akan menghapusnya dari dinding secara langsung; melalui email, dalam waktu 48 jam. Apa yang terjadi pada salinan tersembunyi setelahnya tercantum dalam kebijakan privasi."
           ]
         },
         {
@@ -2537,8 +2537,8 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "2. เนื้อหาของคุณ",
           "paragraphs": [
-            "เมื่อคุณอัปโหลดรูปภาพหรือ GIF หรือใส่ลิงก์วิดีโอ (“Memory”) คุณยืนยันว่า: คุณเป็นผู้ที่ถ่ายหรือสร้างมันขึ้นเองและถือสิทธิ์ในการแบ่งปัน; มันถูกถ่ายหรือสร้างขึ้นที่งานดนตรีที่คุณเข้าร่วม; คุณให้สิทธิ์แก่ One Tribe ในรูปแบบใบอนุญาตที่ไม่ผูกขาด ทั่วโลก และไม่ต้องจ่ายค่าลิขสิทธิ์ เพื่อจัดเก็บ แสดง ปรับขนาด และแปลคำอธิบายของเนื้อหาดังกล่าว โดยใช้เพื่อดำเนินการเว็บไซต์นี้ และเพื่อนำเสนอเนื้อหานั้นบนบัญชีโซเชียลมีเดียของ One Tribe เอง โดยให้เครดิตเป็นชื่อที่แสดงหรือแฮนเดิลของคุณ ใบอนุญาตมีเพียงเท่านี้ เราไม่ขาย ไม่ให้สิทธิ์ช่วง และไม่ใช้เนื้อหาของคุณในโฆษณา เพียงแจ้งให้เราทราบ เราจะนำออกจากบัญชีเหล่านั้นและจะไม่นำเสนออีก",
-            "คุณยังคงเป็นเจ้าของข้อมูลนั้น คุณสามารถลบความทรงจำของคุณได้ทุกเมื่อ — จากพาสปอร์ตของคุณ หากได้เข้าสู่ระบบขณะอัปโหลด หรือผ่านลิงก์การลบที่คุณได้รับ"
+            "เมื่อคุณอัปโหลดรูปภาพหรือ GIF หรือใส่ลิงก์วิดีโอ (“ความทรงจำ”) คุณยืนยันว่า: คุณเป็นผู้ที่ถ่ายหรือสร้างมันขึ้นเองและถือสิทธิ์ในการแบ่งปัน; มันถูกถ่ายหรือสร้างขึ้นที่งานดนตรีที่คุณเข้าร่วม; คุณให้สิทธิ์แก่ One Tribe ในรูปแบบใบอนุญาตที่ไม่ผูกขาด ทั่วโลก และไม่ต้องจ่ายค่าลิขสิทธิ์ เพื่อจัดเก็บ แสดง ปรับขนาด และแปลคำอธิบายของเนื้อหาดังกล่าว โดยใช้เพื่อดำเนินการเว็บไซต์นี้ และเพื่อนำเสนอเนื้อหานั้นบนบัญชีโซเชียลมีเดียของ One Tribe เอง โดยให้เครดิตเป็นชื่อที่แสดงหรือแฮนเดิลของคุณ ใบอนุญาตมีเพียงเท่านี้ เราไม่ขาย ไม่ให้สิทธิ์ช่วง และไม่ใช้เนื้อหาของคุณในโฆษณา เพียงแจ้งให้เราทราบ เราจะนำออกจากบัญชีเหล่านั้นและจะไม่นำเสนออีก",
+            "คุณยังคงเป็นเจ้าของข้อมูลนั้น คุณสามารถลบความทรงจำของคุณได้ทุกเมื่อ — ทั้งจากพาสปอร์ตที่เก็บข้อมูลนั้นไว้ หรือผ่านลิงก์การลบที่คุณได้รับ"
           ]
         },
         {
@@ -2550,7 +2550,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. การกลั่นกรองเนื้อหา",
           "paragraphs": [
-            "เนื้อหาที่อัปโหลดจะปรากฏบนกำแพงทันที เราจะตรวจสอบเนื้อหาที่อัปโหลดล่าสุดและรายงานหลังจากเผยแพร่ และอาจซ่อนหรือลบเนื้อหาใด ๆ ตามดุลยพินิจของเรา เราจะดำเนินการตามคำขอจากผู้ถือสิทธิ์และคำขอเกี่ยวกับความเป็นส่วนตัวอย่างรวดเร็ว (ดูส่วนการลบเนื้อหา) และทุก Memory มีลิงก์สำหรับรายงาน"
+            "เนื้อหาที่อัปโหลดจะปรากฏบนกำแพงทันที เราจะตรวจสอบเนื้อหาที่อัปโหลดล่าสุดและรายงานหลังจากเผยแพร่ และอาจซ่อนหรือลบเนื้อหาใด ๆ ตามดุลยพินิจของเรา เราจะดำเนินการตามคำขอจากผู้ถือสิทธิ์และคำขอเกี่ยวกับความเป็นส่วนตัวอย่างรวดเร็ว (ดูส่วนการลบเนื้อหา) และทุกความทรงจำมีลิงก์สำหรับรายงาน"
           ]
         },
         {
@@ -2595,7 +2595,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. สิทธิของคุณ (GDPR)",
           "paragraphs": [
-            "การเข้าถึง การแก้ไข การลบ การจำกัด การคัดค้าน การโอนย้ายข้อมูล คุณสามารถลบความทรงจำของคุณออกจากพาสปอร์ต และลบพาสปอร์ตเองได้ในหน้าเดียวกัน — ทุกช่วงเวลาที่คุณทิ้งไว้จะยังคงอยู่บนกำแพง ในรูปแบบที่ไม่ระบุตัวตน และแต่ละช่วงเวลาจะมีลิงก์ลบของตัวเอง ส่งอีเมลไปยัง privacy@onetribe.world สำหรับเรื่องอื่นๆ คุณยังสามารถยื่นคำร้องต่อหน่วยงานคุ้มครองข้อมูลส่วนบุคคลในท้องถิ่นได้"
+            "การเข้าถึง การแก้ไข การลบ การจำกัด การคัดค้าน การโอนย้ายข้อมูล คุณสามารถลบความทรงจำของคุณออกจากพาสปอร์ต และลบพาสปอร์ตเองได้บนหน้าเดียวกัน — ทุกช่วงเวลาที่คุณทิ้งไว้จะยังคงอยู่บนกำแพง ในรูปแบบที่ไม่ระบุตัวตน และแต่ละช่วงเวลาจะมีลิงก์การลบของตัวเอง ส่งอีเมลไปยัง privacy@onetribe.world สำหรับเรื่องอื่น ๆ คุณยังสามารถร้องเรียนไปยังหน่วยงานคุ้มครองข้อมูลส่วนบุคคลในท้องถิ่นได้"
           ]
         },
         {
@@ -2608,7 +2608,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. การเก็บรักษาข้อมูล",
           "paragraphs": [
-            "ความทรงจำที่เผยแพร่จะยังคงอยู่จนกว่าคุณจะลบมันหรือมีคำขอที่ถูกต้องให้ลบมัน ความทรงจำที่คุณลบจะหายไปจากเว็บไซต์ทันที และเราจะเก็บสำเนาที่ซ่อนไว้เพียงเพื่อจัดการกับข้อพิพาทและข้อร้องเรียนเกี่ยวกับผู้ละเมิดซ้ำ หากคุณต้องการให้มันถูกลบอย่างถาวร โปรดส่งอีเมลให้เรา และเราจะดำเนินการภายใน 30 วัน"
+            "ความทรงจำที่เผยแพร่จะยังคงอยู่จนกว่าคุณจะลบมันหรือมีคำขอที่ถูกต้องให้ลบมันออกไป เนื้อหาใดๆ ที่ถูกลบ — ไม่ว่าจะโดยคุณเองหรือตามคำขอของผู้อื่น — จะหายไปจากเว็บไซต์ทันที; เราเก็บสำเนาที่ซ่อนไว้เพียงเพื่อจัดการข้อพิพาทและข้อกล่าวหาผู้ละเมิดซ้ำ และเก็บไว้เพียงจนกว่าข้อกล่าวหาดังกล่าวจะยังสามารถถูกยกขึ้นได้ หากคุณต้องการให้เนื้อหาถูกลบอย่างถาวร โปรดส่งอีเมลให้เรา และเราจะดำเนินการภายใน 30 วัน"
           ]
         },
         {
@@ -2630,7 +2630,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "คุณได้อัปโหลดมันแล้ว แต่ต้องการลบมันออกใช่ไหม?",
           "paragraphs": [
-            "เปิดมันในพาสปอร์ตของคุณและลบมันไปจากที่นั่น — วิธีนี้ใช้ได้แม้คุณจะสูญเสียลิงก์ไปแล้วก็ตาม หากคุณอัปโหลดโดยไม่ใช้บัญชี ให้ใช้ลิงก์การลบที่คุณได้รับ หรือส่งอีเมลให้เรา ไม่ว่าจะใช้วิธีใด มันก็จะหายไปจากกำแพงทันที"
+            "เปิดมันในพาสปอร์ตของคุณและลบมันไปจากที่นั่น — ในเบราว์เซอร์ที่คุณใช้เพื่ออัปโหลด หรือบนอุปกรณ์ใดก็ตามหากคุณได้เชื่อมต่ออีเมลไว้ วิธีนี้ใช้ได้แม้คุณจะสูญเสียลิงก์ไปแล้วก็ตาม หากพาสปอร์ตของคุณไม่สามารถเข้าถึงได้ ให้ใช้ลิงก์การลบที่คุณได้รับ หรือส่งอีเมลให้เรา พาสปอร์ตและลิงก์จะลบเนื้อหาออกจากกำแพงทันที ส่วนการลบผ่านอีเมลจะเสร็จสิ้นภายใน 48 ชั่วโมง ส่วนสิ่งที่เกิดขึ้นกับสำเนาที่ซ่อนไว้หลังจากนั้น ระบุไว้ในนโยบายความเป็นส่วนตัว"
           ]
         },
         {
@@ -2705,7 +2705,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
           "heading": "2. Nội dung của bạn",
           "paragraphs": [
             "Khi bạn tải lên một bức ảnh hoặc tệp GIF, hoặc chia sẻ liên kết video (“Ký ức”), bạn xác nhận rằng: chính bạn là người đã ghi lại nội dung đó và sở hữu quyền chia sẻ nó; nội dung đó được ghi lại tại một sự kiện âm nhạc mà bạn đã tham dự; bạn cấp cho One Tribe giấy phép không độc quyền, trên toàn thế giới, miễn phí bản quyền để lưu trữ, hiển thị, điều chỉnh kích thước và dịch chú thích của nội dung đó, nhằm vận hành trang web này, và để giới thiệu nội dung đó — có ghi nguồn bằng tên hiển thị hoặc tên tài khoản của bạn — trên các tài khoản mạng xã hội của chính One Tribe. Giấy phép chỉ gồm bấy nhiêu: chúng tôi không bao giờ bán Ký ức của bạn, không cấp phép lại và không dùng nó trong quảng cáo. Bạn chỉ cần báo cho chúng tôi, chúng tôi sẽ gỡ khỏi các tài khoản đó và không giới thiệu lại.",
-            "Bạn vẫn giữ quyền sở hữu. Bạn có thể xóa Ký ức của mình bất cứ lúc nào — từ hộ chiếu của bạn nếu bạn đã đăng nhập khi tải lên, hoặc thông qua liên kết xóa mà bạn đã nhận được."
+            "Bạn vẫn giữ quyền sở hữu. Bạn có thể xóa Ký ức của mình bất cứ lúc nào — từ hộ chiếu đang lưu trữ nó, hoặc thông qua liên kết xóa mà bạn đã nhận được."
           ]
         },
         {
@@ -2762,7 +2762,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "4. Các quyền của bạn (GDPR)",
           "paragraphs": [
-            "Quyền truy cập, chỉnh sửa, xóa, hạn chế, phản đối, di chuyển dữ liệu. Bạn có thể xóa các “Ký ức” khỏi hộ chiếu của mình và xóa chính hộ chiếu đó ngay trên cùng một trang — bất kỳ khoảnh khắc nào bạn để lại sẽ vẫn hiển thị trên tường, được ẩn danh, và mỗi khoảnh khắc đều có liên kết xóa riêng. Vui lòng gửi email đến privacy@onetribe.world nếu có bất kỳ thắc mắc nào khác. Bạn cũng có thể khiếu nại đến cơ quan bảo vệ dữ liệu địa phương."
+            "Quyền truy cập, chỉnh sửa, xóa, hạn chế, phản đối, di chuyển dữ liệu. Bạn có thể xóa các Ký ức khỏi hộ chiếu của mình và xóa chính hộ chiếu đó ngay trên cùng một trang — bất kỳ khoảnh khắc nào bạn để lại vẫn sẽ được hiển thị trên tường, dưới dạng ẩn danh, mỗi khoảnh khắc đều có liên kết xóa riêng. Vui lòng gửi email đến privacy@onetribe.world nếu có bất kỳ thắc mắc nào khác. Bạn cũng có thể gửi khiếu nại đến cơ quan bảo vệ dữ liệu địa phương."
           ]
         },
         {
@@ -2775,7 +2775,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "6. Lưu giữ dữ liệu",
           "paragraphs": [
-            "Các Ký ức đã được đăng sẽ tồn tại cho đến khi bạn xóa chúng hoặc có yêu cầu hợp lệ yêu cầu xóa chúng. Một Ký ức mà bạn xóa sẽ biến mất khỏi trang web ngay lập tức, và chúng tôi chỉ lưu giữ bản sao ẩn để xử lý các tranh chấp và khiếu nại liên quan đến người vi phạm nhiều lần. Nếu bạn muốn xóa vĩnh viễn, hãy gửi email cho chúng tôi và chúng tôi sẽ thực hiện việc đó trong vòng 30 ngày."
+            "Các Ký ức sẽ tồn tại cho đến khi bạn xóa chúng hoặc có yêu cầu hợp lệ yêu cầu gỡ bỏ chúng. Bất kỳ nội dung nào bị xóa — do bạn thực hiện hoặc theo yêu cầu của người khác — sẽ biến mất khỏi trang web ngay lập tức; chúng tôi chỉ lưu giữ bản sao ẩn để xử lý các tranh chấp và khiếu nại về vi phạm lặp lại, và chỉ trong thời gian mà khiếu nại đó vẫn có thể được đưa ra. Nếu bạn muốn xóa vĩnh viễn, hãy gửi email cho chúng tôi và chúng tôi sẽ thực hiện việc đó trong vòng 30 ngày."
           ]
         },
         {
@@ -2797,7 +2797,7 @@ export const POLICY_I18N: Record<Locale, Record<PolicyDoc['slug'], LocalizedDoc>
         {
           "heading": "Bạn đã tải lên rồi mà giờ lại muốn xóa nó đi à?",
           "paragraphs": [
-            "Hãy mở nó trong hộ chiếu của bạn và xóa nó tại đó — cách này vẫn hiệu quả ngay cả khi bạn đã mất liên kết. Nếu bạn đã tải lên mà không có tài khoản, hãy sử dụng liên kết xóa mà bạn đã nhận được, hoặc gửi email cho chúng tôi. Dù bằng cách nào, bài đăng đó cũng sẽ biến mất khỏi bức tường ngay lập tức."
+            "Hãy mở Ký ức đó trong hộ chiếu của bạn và xóa nó tại đó — trên trình duyệt mà bạn đã tải lên từ đó, hoặc trên bất kỳ thiết bị nào nếu bạn đã liên kết với tài khoản email. Cách này vẫn hiệu quả ngay cả khi bạn đã mất liên kết. Nếu hộ chiếu của bạn không thể truy cập được Ký ức đó, hãy sử dụng liên kết xóa mà bạn đã nhận được, hoặc gửi email cho chúng tôi. Hộ chiếu và liên kết sẽ xóa nội dung đó khỏi bức tường ngay lập tức; qua email, việc xóa sẽ được thực hiện trong vòng 48 giờ. Những gì xảy ra với bản sao ẩn sau đó được nêu rõ trong chính sách bảo mật."
           ]
         },
         {

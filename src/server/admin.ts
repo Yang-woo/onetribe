@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { json, parseBody, requireBearerUser } from '@/lib/server/http'
+import { captionHash } from '@/lib/translate'
 import type { StorageAdapter } from '@/lib/storage'
 
 /**
@@ -171,7 +172,7 @@ export function createAdminActionHandler(deps: ModerationDeps) {
       // the object is unreachable (nothing else stores the key).
       const { data: memory } = await deps.db
         .from('memories')
-        .select('media_url, thumb_url')
+        .select('media_url, thumb_url, caption')
         .eq('id', memoryId)
         .maybeSingle()
       const { error } = await deps.db.from('memories').delete().eq('id', memoryId)
@@ -186,6 +187,23 @@ export function createAdminActionHandler(deps: ModerationDeps) {
           await deps.storage.deleteObject(key)
         } catch (err) {
           console.error(`admin delete: media object cleanup failed for ${key}`, err)
+        }
+      }
+      // The caption's translations outlive the row otherwise: `translations` is
+      // keyed by a hash of the TEXT, not by memory id, and anon holds a select
+      // grant on it (docs/16). Privacy §6 promises erasure on request, and a
+      // caption naming a person would keep answering in 16 languages without
+      // this. The hash is shared by design, so a live Memory with a
+      // byte-identical caption pays one re-translation — cheap, and self-
+      // healing on next view. Best-effort like the object delete: the row is
+      // already gone, and a cache miss is not worth a 500.
+      if (memory?.caption?.trim()) {
+        const { error: cacheError } = await deps.db
+          .from('translations')
+          .delete()
+          .eq('source_hash', captionHash(memory.caption))
+        if (cacheError) {
+          console.error(`admin delete: translation cache cleanup failed`, cacheError)
         }
       }
     } else {

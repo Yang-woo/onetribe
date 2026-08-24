@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { captionHash } from '@/lib/translate'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { createAdminActionHandler, createAdminQueueHandler } from '@/server/admin'
 import type { StorageAdapter } from '@/lib/storage'
@@ -243,6 +244,50 @@ describe('actions', () => {
     expect(count).toBe(0)
     // The media object went with the row (docs/00 D9-c — no orphan left behind).
     expect(deletedKeys).toContain(`${caption}.jpg`)
+  })
+
+  test('delete erases the caption out of the translation cache too', async () => {
+    // `translations` is keyed by a hash of the caption, not by memory id, and
+    // anon can read it — so without this the translated caption keeps answering
+    // in every language after the Memory is gone, which is exactly what privacy
+    // §6 now promises it will not do.
+    const caption = `admin-delete-cache-${randomUUID().slice(0, 6)}`
+    const id = await createMemory(caption)
+    const source_hash = captionHash(caption)
+    await service.from('translations').insert([
+      { source_hash, target_lang: 'ko', text: 'ko', provider: 'test' },
+      { source_hash, target_lang: 'de', text: 'de', provider: 'test' },
+    ])
+
+    await createAdminActionHandler(deps())(
+      withAuth(operatorToken, { memoryId: id, action: 'delete' }),
+    )
+
+    const { count } = await service
+      .from('translations')
+      .select('*', { count: 'exact', head: true })
+      .eq('source_hash', source_hash)
+    expect(count).toBe(0)
+  })
+
+  test('hide keeps the caption translations — it is reversible, and erasure is not', async () => {
+    const caption = `admin-hide-cache-${randomUUID().slice(0, 6)}`
+    const id = await createMemory(caption)
+    const source_hash = captionHash(caption)
+    await service
+      .from('translations')
+      .insert({ source_hash, target_lang: 'ko', text: 'ko', provider: 'test' })
+
+    await createAdminActionHandler(deps())(
+      withAuth(operatorToken, { memoryId: id, action: 'hide' }),
+    )
+
+    const { count } = await service
+      .from('translations')
+      .select('*', { count: 'exact', head: true })
+      .eq('source_hash', source_hash)
+    expect(count).toBe(1)
+    await service.from('translations').delete().eq('source_hash', source_hash)
   })
 
   test('hide leaves the storage object alone (reversible action)', async () => {
