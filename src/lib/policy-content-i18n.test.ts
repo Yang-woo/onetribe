@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { POLICY_I18N, ABOUT_I18N } from './policy-content-i18n'
-import { POLICIES, ABOUT } from './policy-content'
+import { POLICIES, ABOUT, type PolicyDoc } from './policy-content'
 import { LOCALES, type Locale } from './locales'
 
 /**
@@ -129,6 +129,54 @@ describe('the way out of a lost deletion link (D54)', () => {
     // German regen keep the English name. None of the localized words contain it.
     for (const [where, pick] of places) {
       expect(pick(locale), `${locale} ${where}`).not.toMatch(/passport/i)
+    }
+  })
+})
+
+/**
+ * One defined term per contract. Japanese carried three names for it at once —
+ * 「メモリー」 in the ToS §2 definition, 「思い出」 in privacy, 「Memory」 in ToS §4 —
+ * and Thai the same, which is how a term ends up defined in one clause and
+ * never used again. Checking every place the term appears (not one sample) is
+ * what makes a split fail: a locale that renames it in one clause loses it in
+ * the others.
+ */
+const MEMORY_WORD: Record<Locale, string> = {
+  en: 'Memor',
+  nl: 'Herinnering',
+  de: 'Erinnerung',
+  es: 'Recuerdo',
+  fr: 'Souvenir',
+  it: 'Ricord',
+  pt: 'Memór',
+  pl: 'spomnie', // stem: Wspomnienie / Wspomnienia / wspomnień
+  sv: 'Minne',
+  tr: 'Anı',
+  id: 'Memor',
+  th: 'ความทรงจำ',
+  vi: 'Ký ức',
+  zh: '回忆',
+  'zh-Hant': '回憶',
+  ja: '思い出',
+  ko: '메모리',
+}
+
+describe('one name for a Memory, in every clause that names it', () => {
+  const PLACES: [PolicyDoc['slug'], string, number][] = [
+    ['terms', '2. Your content', 0],
+    ['terms', '2. Your content', 1],
+    ['terms', '4. Moderation', 0],
+    ['privacy', '2. What we collect', 0],
+    ['privacy', '6. Retention', 0],
+  ]
+
+  test.each(LOCALES)('%s uses one word throughout', (locale) => {
+    const word = MEMORY_WORD[locale].toLowerCase()
+    for (const [slug, heading, paragraph] of PLACES) {
+      const index = POLICIES[slug].sections.findIndex((s) => s.heading === heading)
+      expect(index, `${slug} lost its "${heading}" section`).toBeGreaterThanOrEqual(0)
+      const text = POLICY_I18N[locale][slug].sections[index].paragraphs[paragraph]
+      expect(text.toLowerCase(), `${locale} ${slug} "${heading}" ¶${paragraph}`).toContain(word)
     }
   })
 })

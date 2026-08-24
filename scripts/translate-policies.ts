@@ -52,6 +52,14 @@ const onlyMissing = process.argv.includes('--only-missing')
 // Alignment is by index, so a section whose paragraph COUNT changed cannot be
 // matched up string-by-string; that section is re-translated whole. Everything
 // re-translated is printed, because that list is the hand-review surface.
+//
+// Granularity is the PARAGRAPH, not the sentence: edit one sentence and the
+// whole paragraph comes back re-machined, including sentences whose English
+// never moved. That drifts wording that was settled — a review of this tool
+// caught `gültigen Anfrage` → `berechtigten Anfrage` and `ważnego żądania` →
+// `uzasadnionego wniosku`, both nudging "formally valid request" toward
+// "request with merit" in a sentence nobody edited. Read the whole paragraph
+// when reviewing, not just the clause you changed.
 const patch = process.argv.includes('--patch')
 if (patch && onlyMissing) throw new Error('--patch and --only-missing are different jobs; pick one')
 
