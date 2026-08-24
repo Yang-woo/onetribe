@@ -9,7 +9,7 @@
  */
 
 /** ISO date shown as "last updated" across every policy page. */
-export const POLICY_LAST_UPDATED = '2026-07-29'
+export const POLICY_LAST_UPDATED = '2026-08-24'
 
 /** Public site domain (D14) — display strings derive from this one literal. */
 export const SITE_DOMAIN = 'onetribe.world'
@@ -43,7 +43,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
         heading: '2. Your content',
         paragraphs: [
           'When you upload a photo or GIF, or link a video ("Memory"), you confirm that: you captured it yourself and hold the rights to share it; it was taken at a music event you attended; you grant One Tribe a non-exclusive, worldwide, royalty-free license to host, display, resize, and translate its caption to run this site, and to feature it — credited to your display name or handle — on One Tribe’s own social accounts. That is the whole license: we never sell it, sub-license it, or use it in advertising. Tell us and we will remove it from those accounts and not feature it again.',
-          'You keep ownership. You can delete your Memory at any time using your deletion link.',
+          'You keep ownership. You can delete your Memory at any time — from your Passport if you were signed in when you uploaded it, or with the deletion link you received.',
         ],
       },
       {
@@ -101,7 +101,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '4. Your rights (GDPR)',
         paragraphs: [
-          `Access, rectification, erasure, restriction, objection, portability. You can delete your passport yourself on the passport page — your moments stay on the wall, anonymized, each with its own delete link. Email ${POLICY_CONTACT_EMAIL} for anything else. You may also complain to your local data-protection authority.`,
+          `Access, rectification, erasure, restriction, objection, portability. You can remove your Memories from your Passport, and delete the Passport itself on the same page — any moments you leave behind stay on the wall, anonymized, each with its own delete link. Email ${POLICY_CONTACT_EMAIL} for anything else. You may also complain to your local data-protection authority.`,
         ],
       },
       {
@@ -114,7 +114,7 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       {
         heading: '6. Retention',
         paragraphs: [
-          'Published Memories stay until you delete them or a valid request removes them. Deleted content is purged from active systems within 30 days.',
+          'Published Memories stay until you delete them or a valid request removes them. A Memory you remove disappears from the site immediately, and we keep the hidden copy only to handle disputes and repeat-infringer claims. If you want it erased permanently, email us and we will do that within 30 days.',
         ],
       },
       {
@@ -134,7 +134,9 @@ export const POLICIES: Record<PolicyDoc['slug'], PolicyDoc> = {
       },
       {
         heading: 'You uploaded it and want it gone?',
-        paragraphs: ['Use the deletion link you received, or email us — removed immediately.'],
+        paragraphs: [
+          'Open it in your Passport and remove it there — that works even if you lost your link. If you uploaded without an account, use the deletion link you received, or email us. Either way it disappears from the wall immediately.',
+        ],
       },
       {
         heading: 'You’re in a photo and don’t want to be?',
