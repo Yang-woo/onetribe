@@ -1,5 +1,6 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, test, vi } from 'vitest'
+import { Link } from '@/i18n/navigation'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { MomentThumb } from './moment-thumb'
 
@@ -12,6 +13,14 @@ import { MomentThumb } from './moment-thumb'
 const TAG = '2024 — Power of the Tribe'
 
 describe('MomentThumb', () => {
+  test('premise: in this harness a bare Link does not prevent a click by itself', () => {
+    // The next two tests read preventDefault off fireEvent's return value. That
+    // means "our handler" only while Next's Link has no router here to prevent
+    // the click on its own — if the harness ever gains one, this goes red first.
+    renderWithIntl(<Link href="/x">bare</Link>)
+    expect(fireEvent.click(screen.getByRole('link', { name: 'bare' }))).toBe(true)
+  })
+
   test('the image links to the moment page, and a plain click opens the modal in place', () => {
     const onOpen = vi.fn()
     renderWithIntl(<MomentThumb moment={momentFixture('a')} onOpen={onOpen} />)

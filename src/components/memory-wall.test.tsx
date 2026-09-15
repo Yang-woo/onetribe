@@ -82,7 +82,7 @@ describe('MemoryWall', () => {
       />,
     )
 
-    // open the moment 'a' (its card button is named by the caption)
+    // open the moment 'a' (its card link is named by the caption)
     await user.click(screen.getByRole('link', { name: 'caption-a' }))
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).getByText('caption-a')).toBeInTheDocument()

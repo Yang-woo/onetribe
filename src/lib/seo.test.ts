@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import robots from '@/app/robots'
 import { LOCALES } from './locales'
@@ -9,8 +11,8 @@ import {
   serializeJsonLd,
   siteJsonLd,
   sitemapEntries,
-  websiteJsonLd,
 } from './seo'
+import { SUPPORT_LINKS } from './support'
 
 // Spec: docs/04 (hreflang = the SEO core) + docs/00 D23 (canonical host,
 // sitemap discovery, structured data). Everything here renders into signals
@@ -137,20 +139,32 @@ describe('serializeJsonLd', () => {
   })
 })
 
-describe('websiteJsonLd', () => {
-  test('describes the site with every supported language', () => {
-    const data = websiteJsonLd('a memory wall') as Record<string, unknown>
-    expect(data['@type']).toBe('WebSite')
-    expect(data.url).toBe('https://onetribe.world')
-    expect(data.description).toBe('a memory wall')
-    expect(data.inLanguage).toEqual([...LOCALES])
-  })
-})
-
 describe('siteJsonLd', () => {
   const nodes = () =>
     (siteJsonLd('a memory wall') as { '@graph': Record<string, unknown>[] })['@graph']
   const node = (type: string) => nodes().find((n) => n['@type'] === type)!
+
+  test('one @context for the graph; the website describes every supported language', () => {
+    expect((siteJsonLd('a memory wall') as Record<string, unknown>)['@context']).toBe(
+      'https://schema.org',
+    )
+    const site = node('WebSite')
+    expect(site.url).toBe('https://onetribe.world')
+    expect(site.description).toBe('a memory wall')
+    expect(site.inLanguage).toEqual([...LOCALES])
+  })
+
+  test('a switched-off donation rail drops out of sameAs rather than leaving a null', () => {
+    const kofi = SUPPORT_LINKS.kofi
+    SUPPORT_LINKS.kofi = null
+    try {
+      const sameAs = node('Organization').sameAs as unknown[]
+      expect(sameAs).not.toContain(null)
+      expect(sameAs).toHaveLength(4)
+    } finally {
+      SUPPORT_LINKS.kofi = kofi
+    }
+  })
 
   test('the website points at the organization by @id — one entity, not a second one', () => {
     const org = node('Organization')
@@ -168,9 +182,12 @@ describe('siteJsonLd', () => {
     ])
   })
 
-  test('logo and contact resolve on the live site', () => {
+  test('the logo is a file public/ actually serves; contact is the policy address', () => {
     const org = node('Organization')
     expect(org.logo).toBe('https://onetribe.world/icon-512.png')
+    // renaming or dropping the icon must fail here, not ship a dead logo URL
+    const { pathname } = new URL(org.logo as string)
+    expect(existsSync(join(process.cwd(), 'public', pathname))).toBe(true)
     expect(org.email).toBe('privacy@onetribe.world')
   })
 })

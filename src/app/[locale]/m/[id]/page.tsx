@@ -65,6 +65,8 @@ export async function generateMetadata({
     openGraph: {
       siteName: 'one tribe',
       title: `${title} — one tribe`,
+      // Caption only, unlike the meta description: a share card already shows
+      // the edition line as its title, so the facts would just repeat it.
       description: moment.caption ?? undefined,
       images: [{ url: `${base}/api/og/${id}`, width: 1200, height: 630 }],
     },

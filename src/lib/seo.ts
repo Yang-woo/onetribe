@@ -115,7 +115,7 @@ function organizationId(): string {
  * not NGO: a fan project isn't a registered non-profit, and the data must not
  * claim more than the site does.
  */
-export function organizationJsonLd(): object {
+function organizationJsonLd(): object {
   return {
     '@type': 'Organization',
     '@id': organizationId(),
@@ -127,7 +127,8 @@ export function organizationJsonLd(): object {
   }
 }
 
-export function websiteJsonLd(description: string): object {
+// Not exported: without the graph's @context this node is not valid on its own.
+function websiteJsonLd(description: string): object {
   return {
     '@type': 'WebSite',
     '@id': `${siteUrl()}/#website`,

@@ -50,9 +50,9 @@ export function MomentThumb({
 
   return (
     <figure className="mb-3 break-inside-avoid overflow-hidden rounded-lg bg-surface">
-      {/* The decorative tag and hover affordances sit OUTSIDE the open button,
+      {/* The decorative tag and hover affordances sit OUTSIDE the open link,
           as siblings in this positioning/hover context. Keeping them out
-          of the button leaves it with no competing visible text, so its
+          of the link leaves it with no competing visible text, so its
           accessible name (the caption) matches — WCAG 2.5.3 (label in name). */}
       <div className="group relative overflow-hidden">
         <Link

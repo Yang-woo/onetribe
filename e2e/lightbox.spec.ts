@@ -127,12 +127,15 @@ test('the modal letterboxes a photo instead of cropping it', async ({ page }) =>
     await page.goto('/en')
 
     for (const shape of SHAPES) {
-      // Both the card's open button and the modal itself are labelled with the
+      // Both the card's open link and the modal itself are labelled with the
       // caption (MomentThumb / Lightbox). Naming the dialog also keeps this off
       // Next's dev-overlay, which is a role=dialog in a shadow root that
       // Playwright's selectors happily pierce.
       const caption = captionFor(shape.key)
       await page.getByRole('link', { name: caption }).click()
+      // The card is a real link since D59: a click that navigated instead of
+      // opening the modal should fail here, not as a missing dialog below.
+      await expect(page).toHaveURL(/\/en$/)
       const modal = page.getByRole('dialog', { name: caption })
       const photo = modal.locator('img')
       await expect(photo).toHaveAttribute('data-loaded', 'true')
@@ -187,6 +190,7 @@ test('the shimmer holds the photo’s box while the bytes are still coming', asy
     await page.route(held, () => {})
     await page.goto('/en')
     await page.getByRole('link', { name: caption }).click()
+    await expect(page).toHaveURL(/\/en$/)
 
     const modal = page.getByRole('dialog', { name: caption })
     await expect(modal.locator('img')).toHaveAttribute('data-loaded', 'false')
@@ -226,6 +230,7 @@ test('the wall info button gets out of the way while a moment is open (D51)', as
     await expect(info).toBeVisible()
 
     await page.getByRole('link', { name: caption }).click()
+    await expect(page).toHaveURL(/\/en$/)
     await expect(page.getByRole('dialog', { name: caption })).toBeVisible()
 
     // Only a real browser can see this: the modal's backdrop is bg-black/95,
