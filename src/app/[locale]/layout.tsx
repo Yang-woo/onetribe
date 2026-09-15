@@ -51,6 +51,11 @@ export async function generateMetadata({
       images: [{ url: `${base}/api/og/site`, width: 1200, height: 630 }],
     },
     twitter: { card: 'summary_large_image' },
+    // Naver Search Advisor ownership check (docs/00 D60). A public token by
+    // design — it is meant to sit in every page's HTML.
+    verification: {
+      other: { 'naver-site-verification': '13ff988349676731ad93e1cc6c7391934a340798' },
+    },
   }
 }
 
