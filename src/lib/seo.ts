@@ -1,4 +1,6 @@
 import type { MetadataRoute } from 'next'
+import { countryName } from '@/lib/country'
+import { instagramHandle } from '@/lib/format'
 import { LOCALES, type Locale } from '@/lib/locales'
 import { POLICY_CONTACT_EMAIL } from '@/lib/policy-content'
 import { SOURCE_LINK } from '@/lib/site-links'
@@ -181,4 +183,33 @@ export function momentJsonLd(
       : {}),
     mainEntityOfPage: localeUrl(locale, `/m/${moment.id}`),
   }
+}
+
+/**
+ * Meta description for a moment page, built only from what that page shows:
+ * caption, edition line, name, @handle, country — in that order. Most moments
+ * have no caption (docs/00 D58: 187 of 222), and with no description a search
+ * snippet falls back to the header's language list (docs/00 D59). Joining
+ * facts adds no copy to translate; the country is named by Intl in the
+ * reader's locale, as the page names it.
+ */
+export function momentDescription(
+  moment: {
+    caption: string | null
+    author_name: string | null
+    author_link: string | null
+    origin_country: string | null
+  },
+  eventLine: string | null | undefined,
+  locale: string,
+): string | undefined {
+  const handle = instagramHandle(moment.author_link)
+  const parts = [
+    moment.caption,
+    eventLine,
+    moment.author_name,
+    handle && `@${handle}`,
+    moment.origin_country && countryName(moment.origin_country, locale),
+  ].filter(Boolean)
+  return parts.length > 0 ? parts.join(' · ') : undefined
 }

@@ -19,7 +19,7 @@ import {
   type Moment,
   type MomentEvent,
 } from '@/lib/moments'
-import { localeAlternates, momentJsonLd } from '@/lib/seo'
+import { localeAlternates, momentDescription, momentJsonLd } from '@/lib/seo'
 import { siteUrl } from '@/lib/site-url'
 import { createServiceRoleClient } from '@/lib/server/supabase'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
@@ -60,7 +60,7 @@ export async function generateMetadata({
     // The layout template appends the brand — plain title here avoids
     // "… — one tribe — one tribe".
     title,
-    description: moment.caption ?? undefined,
+    description: momentDescription(moment, eventLine(moment.events), locale),
     alternates: localeAlternates(`/m/${id}`, isLocale(locale) ? locale : DEFAULT_LOCALE),
     openGraph: {
       siteName: 'one tribe',
@@ -154,7 +154,11 @@ export default async function MomentPage({
       )}
 
       <div className="flex flex-col gap-1">
-        {moment.events && <p className="text-sm text-muted">{eventLine(moment.events)}</p>}
+        {/* The page's heading is the line it already shows — same look, but a
+            crawler reading the HTML finds no h1 otherwise (docs/00 D59). */}
+        {moment.events && (
+          <h1 className="text-sm font-normal text-muted">{eventLine(moment.events)}</h1>
+        )}
         {moment.caption && (
           <CaptionToggle
             original={moment.caption}

@@ -66,7 +66,7 @@ test('an uploader removes their own moment from the passport', async ({ page }) 
     await expect(page.getByText('my moments (2)')).toBeVisible()
 
     // open the one that was a mistake and take it down
-    await page.getByRole('button', { name: caption }).click()
+    await page.getByRole('link', { name: caption }).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toBeVisible()
     await dialog.getByRole('button', { name: 'remove this moment' }).click()
@@ -74,8 +74,8 @@ test('an uploader removes their own moment from the passport', async ({ page }) 
 
     // the modal closes because the moment left the list — no separate "close"
     await expect(page.getByRole('dialog')).toBeHidden()
-    await expect(page.getByRole('button', { name: caption })).toBeHidden()
-    await expect(page.getByRole('button', { name: keeper })).toBeVisible()
+    await expect(page.getByRole('link', { name: caption })).toBeHidden()
+    await expect(page.getByRole('link', { name: keeper })).toBeVisible()
     await expect(page.getByText('my moments (1)')).toBeVisible()
 
     // hidden, not deleted (docs/09 C) — and it stays gone across a reload,
@@ -88,7 +88,7 @@ test('an uploader removes their own moment from the passport', async ({ page }) 
     expect(row?.status).toBe('hidden')
     await page.reload()
     await expect(page.getByText('my moments (1)')).toBeVisible()
-    await expect(page.getByRole('button', { name: caption })).toBeHidden()
+    await expect(page.getByRole('link', { name: caption })).toBeHidden()
   } finally {
     const ids = [memoryId, keeperId].filter(Boolean) as string[]
     if (ids.length) await service.from('memories').delete().in('id', ids)

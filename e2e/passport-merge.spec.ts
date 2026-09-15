@@ -67,7 +67,7 @@ test('an anonymous stamp and moment fold into the account signed into', async ({
 
   // it belongs to B right now — this is what the merge has to move
   await page.goto('/en/passport')
-  await expect(page.getByRole('button', { name: caption })).toBeVisible()
+  await expect(page.getByRole('link', { name: caption })).toBeVisible()
 
   // ── sign into the existing account A from B → merge (no stay-behind confirm) ──
   await page.getByRole('button', { name: 'i already have a passport' }).click()
@@ -92,5 +92,5 @@ test('an anonymous stamp and moment fold into the account signed into', async ({
   )
   // ...and B's moment is now in A's passport — reassigned server-side, re-read
   // after the merge, and visible to A's own session under RLS
-  await expect(page.getByRole('button', { name: caption })).toBeVisible()
+  await expect(page.getByRole('link', { name: caption })).toBeVisible()
 })

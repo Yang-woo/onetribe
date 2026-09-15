@@ -4,6 +4,7 @@ import { LOCALES } from './locales'
 import {
   canonicalHostRedirect,
   localeAlternates,
+  momentDescription,
   momentJsonLd,
   serializeJsonLd,
   siteJsonLd,
@@ -171,6 +172,40 @@ describe('siteJsonLd', () => {
     const org = node('Organization')
     expect(org.logo).toBe('https://onetribe.world/icon-512.png')
     expect(org.email).toBe('privacy@onetribe.world')
+  })
+})
+
+describe('momentDescription', () => {
+  const bare = { caption: null, author_name: null, author_link: null, origin_country: null }
+  const line = 'Biddinghuizen · 2024 · Defqon.1 — Power of the Tribe'
+
+  test('a caption-less moment is described by the facts its page shows, in page order', () => {
+    expect(
+      momentDescription(
+        {
+          ...bare,
+          author_name: 'raver',
+          author_link: 'https://instagram.com/raver_ig',
+          origin_country: 'KR',
+        },
+        line,
+        'en',
+      ),
+    ).toBe(`${line} · raver · @raver_ig · South Korea`)
+  })
+
+  test('the caption leads — the uploader, before our metadata', () => {
+    expect(momentDescription({ ...bare, caption: 'we are one tribe' }, line, 'en')).toBe(
+      `we are one tribe · ${line}`,
+    )
+  })
+
+  test('the country is named in the reader language, as the page names it', () => {
+    expect(momentDescription({ ...bare, origin_country: 'NL' }, null, 'de')).toBe('Niederlande')
+  })
+
+  test('nothing to say → no description tag at all, not an empty one', () => {
+    expect(momentDescription(bare, null, 'en')).toBeUndefined()
   })
 })
 

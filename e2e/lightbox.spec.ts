@@ -132,7 +132,7 @@ test('the modal letterboxes a photo instead of cropping it', async ({ page }) =>
       // Next's dev-overlay, which is a role=dialog in a shadow root that
       // Playwright's selectors happily pierce.
       const caption = captionFor(shape.key)
-      await page.getByRole('button', { name: caption }).click()
+      await page.getByRole('link', { name: caption }).click()
       const modal = page.getByRole('dialog', { name: caption })
       const photo = modal.locator('img')
       await expect(photo).toHaveAttribute('data-loaded', 'true')
@@ -186,7 +186,7 @@ test('the shimmer holds the photo’s box while the bytes are still coming', asy
     // Never fulfilled: the modal stays in its loading state for the whole test.
     await page.route(held, () => {})
     await page.goto('/en')
-    await page.getByRole('button', { name: caption }).click()
+    await page.getByRole('link', { name: caption }).click()
 
     const modal = page.getByRole('dialog', { name: caption })
     await expect(modal.locator('img')).toHaveAttribute('data-loaded', 'false')
@@ -225,7 +225,7 @@ test('the wall info button gets out of the way while a moment is open (D51)', as
     const info = page.getByRole('button', { name: 'site info' })
     await expect(info).toBeVisible()
 
-    await page.getByRole('button', { name: caption }).click()
+    await page.getByRole('link', { name: caption }).click()
     await expect(page.getByRole('dialog', { name: caption })).toBeVisible()
 
     // Only a real browser can see this: the modal's backdrop is bg-black/95,

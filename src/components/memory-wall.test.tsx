@@ -83,7 +83,7 @@ describe('MemoryWall', () => {
     )
 
     // open the moment 'a' (its card button is named by the caption)
-    await user.click(screen.getByRole('button', { name: 'caption-a' }))
+    await user.click(screen.getByRole('link', { name: 'caption-a' }))
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).getByText('caption-a')).toBeInTheDocument()
 
@@ -111,7 +111,7 @@ describe('MemoryWall', () => {
         subscribeImpl={noSubscribe}
       />,
     )
-    await user.click(screen.getByRole('button', { name: 'caption-a' }))
+    await user.click(screen.getByRole('link', { name: 'caption-a' }))
     const dialog = screen.getByRole('dialog')
     // the modal really did open with its usual controls — so a missing remove
     // button is an absence, not a failure to render anything at all
@@ -130,7 +130,7 @@ describe('MemoryWall', () => {
         subscribeImpl={noSubscribe}
       />,
     )
-    await user.click(screen.getByRole('button', { name: 'caption-a' }))
+    await user.click(screen.getByRole('link', { name: 'caption-a' }))
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).getByText('caption-a')).toBeInTheDocument()
 

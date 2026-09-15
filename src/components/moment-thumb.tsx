@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { momentImageSrc, type Moment } from '@/lib/moments'
 import { MomentMeta } from './moment-meta'
 import { SkeletonImage } from './skeleton-image'
@@ -11,10 +12,13 @@ import { SkeletonImage } from './skeleton-image'
  * (aria-hidden) and its wording belongs to the caller, not here. The alt still
  * carries the caption.
  *
- * The image is the click target: `onOpen` makes it a button that opens the
- * moment modal, with a desktop hover affordance. The author `@handle` is a
- * *separate* Instagram link so it's reachable without opening the modal
- * (docs/00 — wall Instagram link, distinct hit areas).
+ * The image is the click target and a real link to the moment's own page. The
+ * href is for crawlers and new tabs — it was a button, which left every /m/
+ * page with no link pointing at it from anywhere on the site (docs/00 D59). A
+ * plain click is intercepted to open the moment modal in place, the same
+ * progressive-enhancement rule as the edition chips (D13). The author
+ * `@handle` is a *separate* Instagram link so it's reachable without opening
+ * the modal (docs/00 — wall Instagram link, distinct hit areas).
  */
 export function MomentThumb({
   moment,
@@ -51,9 +55,17 @@ export function MomentThumb({
           of the button leaves it with no competing visible text, so its
           accessible name (the caption) matches — WCAG 2.5.3 (label in name). */}
       <div className="group relative overflow-hidden">
-        <button
-          type="button"
-          onClick={onOpen}
+        <Link
+          href={`/m/${moment.id}`}
+          // forty cards to a page: prefetching each would be forty dynamic
+          // renders of pages the modal makes unnecessary
+          prefetch={false}
+          onClick={(e) => {
+            // modified clicks mean "open the page in a new tab" — leave the href alone
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+            e.preventDefault()
+            onOpen()
+          }}
           aria-label={moment.caption ?? tm('openMoment')}
           className="block w-full"
         >
@@ -65,7 +77,7 @@ export function MomentThumb({
             fit="width"
             className="transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none"
           />
-        </button>
+        </Link>
         {tagEl}
         {/* Desktop hover affordance (pointer devices): a faint scrim + an
             expand glyph so the card visibly invites a click. Hidden on touch,

@@ -227,7 +227,7 @@ describe('Passport', () => {
     expect(screen.getByText('my own moment')).toBeInTheDocument()
     // the card tag is the YEAR only here — the anthem name ("2024 Power of the
     // Tribe", as on the wall) would just repeat what the stamps below already say
-    const card = screen.getByRole('button', { name: 'my own moment' }).closest('figure')!
+    const card = screen.getByRole('link', { name: 'my own moment' }).closest('figure')!
     expect(within(card).getByText('2024')).toBeInTheDocument()
     expect(within(card).queryByText(/Power of the Tribe/)).not.toBeInTheDocument()
     // with moments present, the grid ends in a "+ add a moment" tile to /upload
@@ -251,7 +251,7 @@ describe('Passport', () => {
     })
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 
-    await user.click(await screen.findByRole('button', { name: 'my other moment' }))
+    await user.click(await screen.findByRole('link', { name: 'my other moment' }))
 
     const dialog = await screen.findByRole('dialog')
     // the tapped moment opens (not just any of them), with its edition line —
@@ -291,7 +291,7 @@ describe('Passport', () => {
     })
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 
-    await user.click(await screen.findByRole('button', { name: 'my other moment' }))
+    await user.click(await screen.findByRole('link', { name: 'my other moment' }))
     const dialog = await screen.findByRole('dialog')
     await user.click(within(dialog).getByRole('button', { name: /remove this moment/i }))
     await user.click(within(dialog).getByRole('button', { name: /yes, remove it/i }))
@@ -300,9 +300,9 @@ describe('Passport', () => {
     expect(backend.removed).toEqual(['m2'])
     // the grid stops offering a thumb whose permalink is now dead…
     await waitFor(() =>
-      expect(screen.queryByRole('button', { name: 'my other moment' })).not.toBeInTheDocument(),
+      expect(screen.queryByRole('link', { name: 'my other moment' })).not.toBeInTheDocument(),
     )
-    expect(screen.getByRole('button', { name: 'my own moment' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'my own moment' })).toBeInTheDocument()
     // …the count in the heading follows…
     expect(screen.getByText('my moments (1)')).toBeInTheDocument()
     // …and the modal doesn't hang open on a moment that no longer exists
@@ -323,7 +323,7 @@ describe('Passport', () => {
     backend.removeFails = true
     renderWithIntl(<Passport editions={editions} backend={backend} />)
 
-    await user.click(await screen.findByRole('button', { name: 'my own moment' }))
+    await user.click(await screen.findByRole('link', { name: 'my own moment' }))
     const dialog = await screen.findByRole('dialog')
     await user.click(within(dialog).getByRole('button', { name: /remove this moment/i }))
     await user.click(within(dialog).getByRole('button', { name: /yes, remove it/i }))

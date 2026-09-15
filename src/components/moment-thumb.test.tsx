@@ -1,5 +1,4 @@
-import { screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, test, vi } from 'vitest'
 import { momentFixture, renderWithIntl } from '@/test-utils'
 import { MomentThumb } from './moment-thumb'
@@ -7,17 +6,34 @@ import { MomentThumb } from './moment-thumb'
 // Spec: docs/15 §1 + wall UX pass — the image opens the moment modal, while the
 // @handle is a SEPARATE Instagram link (distinct hit areas). The corner tag is
 // caller-supplied text: the wall spells the anthem out, the passport shows the year.
+// docs/00 D59 — the image is a real link to /m/[id], so crawlers reach moment
+// pages from the wall; the modal is a click interception on top of it.
 
 const TAG = '2024 — Power of the Tribe'
 
 describe('MomentThumb', () => {
-  test('the image is a button that opens the moment (onOpen), named by the caption', async () => {
-    const user = userEvent.setup()
+  test('the image links to the moment page, and a plain click opens the modal in place', () => {
     const onOpen = vi.fn()
     renderWithIntl(<MomentThumb moment={momentFixture('a')} onOpen={onOpen} />)
 
-    await user.click(screen.getByRole('button', { name: 'caption-a' }))
+    const link = screen.getByRole('link', { name: 'caption-a' })
+    expect(link).toHaveAttribute('href', '/en/m/a')
+    // fireEvent returns false when a handler called preventDefault — the wall
+    // must not navigate away underneath the modal it just opened
+    expect(fireEvent.click(link)).toBe(false)
     expect(onOpen).toHaveBeenCalledTimes(1)
+  })
+
+  test('a modified click keeps the browser default — a new tab, no modal', () => {
+    const onOpen = vi.fn()
+    renderWithIntl(<MomentThumb moment={momentFixture('a')} onOpen={onOpen} />)
+    const link = screen.getByRole('link', { name: 'caption-a' })
+
+    for (const modifier of ['metaKey', 'ctrlKey', 'shiftKey', 'altKey'] as const) {
+      // prevented would be false: the href is what a cmd-click opens
+      expect(fireEvent.click(link, { [modifier]: true })).toBe(true)
+    }
+    expect(onOpen).not.toHaveBeenCalled()
   })
 
   test('the display name is a separate Instagram link — not inside the open trigger', () => {
@@ -38,9 +54,9 @@ describe('MomentThumb', () => {
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveTextContent('raver')
     expect(link).not.toHaveTextContent('@raver')
-    // distinct hit area: the link must not be nested in the open button (an <a>
-    // inside a <button> would be invalid and would swallow the Instagram click).
-    expect(screen.getByRole('button', { name: 'caption-a' }).contains(link)).toBe(false)
+    // distinct hit area: nested links are invalid HTML, and the outer one would
+    // swallow the Instagram click.
+    expect(screen.getByRole('link', { name: 'caption-a' }).contains(link)).toBe(false)
   })
 
   test('the display name is plain text when the uploader gave no handle', () => {
@@ -50,7 +66,7 @@ describe('MomentThumb', () => {
         onOpen={() => {}}
       />,
     )
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Instagram/ })).not.toBeInTheDocument()
     expect(screen.getByText('raver')).toBeInTheDocument()
   })
 
@@ -68,14 +84,14 @@ describe('MomentThumb', () => {
     expect(imageArea.querySelectorAll(':scope > span')).toHaveLength(2)
   })
 
-  test('renders the tag verbatim, outside the open button (WCAG 2.5.3)', () => {
+  test('renders the tag verbatim, outside the open link (WCAG 2.5.3)', () => {
     renderWithIntl(<MomentThumb moment={momentFixture('a')} tag={TAG} onOpen={() => {}} />)
-    // The tag sits OUTSIDE the open button so it never competes with the
-    // button's accessible name (the caption) — label-content-name-mismatch. It
-    // used to render inside the button, dragging the tag into the label.
+    // The tag sits OUTSIDE the open link so it never competes with the link's
+    // accessible name (the caption) — label-content-name-mismatch. It used to
+    // render inside the trigger, dragging the tag into the label.
     const tag = screen.getByText(TAG)
-    const button = screen.getByRole('button', { name: 'caption-a' })
-    expect(button.contains(tag)).toBe(false)
+    const trigger = screen.getByRole('link', { name: 'caption-a' })
+    expect(trigger.contains(tag)).toBe(false)
   })
 
   test('reserves the stored aspect ratio on the image (zero-shift skeleton, D32)', () => {
