@@ -34,7 +34,7 @@ afterAll(async () => {
   await service.from('memories').delete().in('id', [liveId, hiddenId])
 })
 
-describe('sitemap.xml source', () => {
+describe('sitemap source (per-locale files, docs/00 D60)', () => {
   test('live moments are listed; hidden moments never leak', async () => {
     // any locale file reads the same rows (docs/00 D60 — one file per locale)
     const entries = await sitemap({ id: Promise.resolve('ko') })

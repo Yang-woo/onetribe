@@ -18,8 +18,11 @@ describe('middleware', () => {
   test('crawl files on the canonical host pass through — no redirect', () => {
     for (const path of ['/sitemap/ko.xml', '/robots.txt']) {
       const res = middleware(new NextRequest(`https://onetribe.world${path}`))
-      // NextResponse.next() carries no Location — it did not i18n-rewrite either.
+      // passed through — not redirected and not rewritten. A rewrite carries no
+      // Location either, so that check alone can't tell the two apart (D60).
       expect(res.headers.get('location')).toBeNull()
+      expect(res.headers.get('x-middleware-rewrite')).toBeNull()
+      expect(res.headers.get('x-middleware-next')).toBe('1')
     }
   })
 
