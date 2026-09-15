@@ -16,16 +16,28 @@ describe('middleware', () => {
   afterEach(() => vi.unstubAllEnvs())
 
   test('crawl files on the canonical host pass through — no redirect', () => {
-    for (const path of ['/sitemap.xml', '/robots.txt']) {
+    for (const path of ['/sitemap/ko.xml', '/robots.txt']) {
       const res = middleware(new NextRequest(`https://onetribe.world${path}`))
       // NextResponse.next() carries no Location — it did not i18n-rewrite either.
       expect(res.headers.get('location')).toBeNull()
     }
   })
 
+  test('/sitemap.xml is rewritten to the index route — not redirected, not localized (D60)', () => {
+    const res = middleware(new NextRequest('https://onetribe.world/sitemap.xml'))
+    // a redirect would move the URL GSC and Bing hold; a rewrite keeps it
+    expect(res.headers.get('location')).toBeNull()
+    expect(res.headers.get('x-middleware-rewrite')).toBe('https://onetribe.world/sitemap-index.xml')
+  })
+
   test('a non-canonical host 308s crawl files to the canonical host', () => {
     const res = middleware(new NextRequest('https://www.onetribe.world/sitemap.xml'))
     expect(res.status).toBe(308)
     expect(res.headers.get('location')).toBe('https://onetribe.world/sitemap.xml')
+
+    // the per-locale files too (D60) — a www submission must land on the canonical host
+    const locale = middleware(new NextRequest('https://www.onetribe.world/sitemap/ko.xml'))
+    expect(locale.status).toBe(308)
+    expect(locale.headers.get('location')).toBe('https://onetribe.world/sitemap/ko.xml')
   })
 })

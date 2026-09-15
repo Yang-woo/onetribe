@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { isLocale, LOCALES } from '@/lib/locales'
 import { sitemapEntries } from '@/lib/seo'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
@@ -6,10 +7,27 @@ import { supabaseServerAnon } from '@/lib/supabase/server-anon'
  * Discovery for /m/[id] (docs/00 D23): the wall is a newest-first stream,
  * so older moments drift out of internal-link reach — the sitemap keeps
  * every public moment one hop away. ANON client: RLS hides hidden rows.
+ *
+ * One file per locale at /sitemap/{locale}.xml (docs/00 D60). /sitemap.xml
+ * answers with the index over them: app/sitemap-index.xml/route.ts, rewritten
+ * in by the middleware, because this file still claims /sitemap.xml at build.
  */
 export const revalidate = 3600
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export async function generateSitemaps() {
+  return LOCALES.map((locale) => ({ id: locale }))
+}
+
+export default async function sitemap({
+  id,
+}: {
+  id: Promise<string>
+}): Promise<MetadataRoute.Sitemap> {
+  const locale = await id
+  // Only the ids above are generated, but a request can name any — an unknown
+  // one gets an empty file, never another locale's URLs.
+  if (!isLocale(locale)) return []
+
   // Soft-fail to the static entries: build environments without Supabase
   // env (CI) prerender pages-only, and a DB hiccup must degrade the
   // sitemap, not 500 it — the hourly revalidate fills moments back in.
@@ -26,5 +44,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // fall through with the static entries
     }
   }
-  return sitemapEntries(moments)
+  return sitemapEntries(moments, locale)
 }

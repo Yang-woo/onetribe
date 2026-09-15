@@ -11,6 +11,7 @@ import {
   serializeJsonLd,
   siteJsonLd,
   sitemapEntries,
+  sitemapIndexXml,
 } from './seo'
 import { SUPPORT_LINKS } from './support'
 
@@ -85,36 +86,67 @@ describe('sitemapEntries', () => {
     { id: '9f2b7c1e-0000-4000-8000-000000000002', created_at: '2026-06-28T09:30:00Z' },
   ]
 
-  test('static pages and moments are all present, admin is not', () => {
-    const entries = sitemapEntries(moments)
+  const languagesOf = (entry: { alternates?: { languages?: unknown } }) =>
+    entry.alternates?.languages as Record<string, string>
+
+  test('a locale file lists that locale’s static pages and moments, and never admin', () => {
+    const entries = sitemapEntries(moments, 'ko')
     const urls = entries.map((e) => e.url)
-    expect(urls).toContain('https://onetribe.world/en')
-    expect(urls).toContain('https://onetribe.world/en/privacy')
-    expect(urls).toContain(`https://onetribe.world/en/m/${moments[0].id}`)
+    expect(urls).toContain('https://onetribe.world/ko')
+    expect(urls).toContain('https://onetribe.world/ko/privacy')
+    expect(urls).toContain(`https://onetribe.world/ko/m/${moments[0].id}`)
+    expect(urls.every((u) => u.startsWith('https://onetribe.world/ko'))).toBe(true)
     expect(urls.some((u) => u.includes('/admin'))).toBe(false)
     expect(entries).toHaveLength(8 + moments.length)
   })
 
-  test('every entry carries the full hreflang cluster', () => {
-    const entries = sitemapEntries(moments)
-    for (const entry of entries) {
-      const languages = entry.alternates?.languages as Record<string, string>
-      expect(Object.keys(languages)).toHaveLength(LOCALES.length + 1)
-      expect(languages['x-default']).toMatch(/^https:\/\/onetribe\.world\/en/)
+  test('across the files every language version is an entry of its own (Google: a <url> per URL)', () => {
+    const files = LOCALES.map((locale) => sitemapEntries(moments, locale))
+    const listed = new Set(files.flat().map((e) => e.url))
+    expect(listed.size).toBe(LOCALES.length * (8 + moments.length))
+    // the D23 shape listed /ko only as an alternate — no URL may live only there
+    const named = files
+      .flat()
+      .flatMap((e) => Object.entries(languagesOf(e)))
+      .filter(([lang]) => lang !== 'x-default')
+      .map(([, url]) => url)
+    expect(named.filter((url) => !listed.has(url))).toEqual([])
+  })
+
+  test('every entry carries the full hreflang cluster, itself included', () => {
+    for (const locale of LOCALES) {
+      for (const entry of sitemapEntries(moments, locale)) {
+        const languages = languagesOf(entry)
+        expect(Object.keys(languages)).toHaveLength(LOCALES.length + 1)
+        expect(languages[locale]).toBe(entry.url)
+        expect(languages['x-default']).toMatch(/^https:\/\/onetribe\.world\/en/)
+      }
     }
   })
 
   test('moments carry lastModified from created_at', () => {
-    const entries = sitemapEntries(moments)
+    const entries = sitemapEntries(moments, 'en')
     const moment = entries.find((e) => e.url.endsWith(moments[1].id))
     expect(moment?.lastModified).toEqual(new Date(moments[1].created_at))
   })
 
-  test('the home page outranks the rest', () => {
-    const entries = sitemapEntries([])
-    const home = entries.find((e) => e.url === 'https://onetribe.world/en')
+  test('the home page outranks the rest in each file', () => {
+    const entries = sitemapEntries([], 'ja')
+    const home = entries.find((e) => e.url === 'https://onetribe.world/ja')
     expect(home?.priority).toBe(1)
     expect(entries.filter((e) => e.priority === 1)).toHaveLength(1)
+  })
+})
+
+describe('sitemapIndexXml', () => {
+  test('/sitemap.xml indexes one file per locale, on the canonical host', () => {
+    const xml = sitemapIndexXml()
+    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true)
+    expect(xml).toContain('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
+    expect(locs).toHaveLength(LOCALES.length)
+    expect(locs).toContain('https://onetribe.world/sitemap/ko.xml')
+    expect(locs).toContain('https://onetribe.world/sitemap/zh-Hant.xml')
   })
 })
 

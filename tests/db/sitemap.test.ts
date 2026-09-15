@@ -36,9 +36,10 @@ afterAll(async () => {
 
 describe('sitemap.xml source', () => {
   test('live moments are listed; hidden moments never leak', async () => {
-    const entries = await sitemap()
+    // any locale file reads the same rows (docs/00 D60 — one file per locale)
+    const entries = await sitemap({ id: Promise.resolve('ko') })
     const urls = entries.map((e) => e.url)
-    expect(urls.some((u) => u.endsWith(`/m/${liveId}`))).toBe(true)
+    expect(urls.some((u) => u.endsWith(`/ko/m/${liveId}`))).toBe(true)
     expect(urls.some((u) => u.endsWith(`/m/${hiddenId}`))).toBe(false)
   })
 })

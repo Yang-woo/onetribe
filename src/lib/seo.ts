@@ -66,25 +66,50 @@ const SITEMAP_PATHS = [
 ] as const
 
 /**
- * One entry per path (the x-default /en URL) carrying all language
- * alternates — the full hreflang cluster without 17× the URL count.
+ * One locale's sitemap file (docs/00 D60). Google wants a separate <url> for
+ * every URL — an hreflang alternate alone does not list a page — so each
+ * language version is its own entry, still carrying the whole cluster
+ * including itself. It used to be /en entries only, which left the other 16
+ * locales (every /ko page included) listed nowhere but as alternates.
+ *
+ * Split by locale rather than one big file: seventeen URLs per moment would
+ * push a single sitemap past its 50 MB limit around 1,300 moments, and a
+ * locale file lets Naver be given /ko on its own.
  */
 export function sitemapEntries(
   moments: { id: string; created_at: string }[],
+  locale: Locale,
 ): MetadataRoute.Sitemap {
   return [
     ...SITEMAP_PATHS.map((path) => ({
-      url: localeUrl('en', path),
+      url: localeUrl(locale, path),
       alternates: { languages: languageUrls(path) },
       changeFrequency: path === '/' ? ('daily' as const) : ('monthly' as const),
       priority: path === '/' ? 1 : 0.5,
     })),
     ...moments.map((moment) => ({
-      url: localeUrl('en', `/m/${moment.id}`),
+      url: localeUrl(locale, `/m/${moment.id}`),
       lastModified: new Date(moment.created_at),
       alternates: { languages: languageUrls(`/m/${moment.id}`) },
     })),
   ]
+}
+
+/**
+ * /sitemap.xml as an index over the locale files — the URL GSC and Bing were
+ * given in D23 stays valid, and robots.txt keeps pointing at it.
+ */
+export function sitemapIndexXml(): string {
+  const files = LOCALES.map(
+    (locale) => `<sitemap><loc>${siteUrl()}/sitemap/${locale}.xml</loc></sitemap>`,
+  )
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...files,
+    '</sitemapindex>',
+    '',
+  ].join('\n')
 }
 
 /** schema.org JSON-LD serialized with `<` escaped, so it is </script>-safe. */

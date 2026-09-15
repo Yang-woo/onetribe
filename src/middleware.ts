@@ -12,10 +12,16 @@ export default function middleware(request: NextRequest) {
   const canonical = canonicalHostRedirect(request.nextUrl)
   if (canonical) return NextResponse.redirect(canonical, 308)
   // Crawl files aren't localized — run only the canonical-host check on them,
-  // never i18n routing, so /sitemap.xml and /robots.txt pass through untouched
-  // (they're in the matcher below so www/*.vercel.app still get the 308 — D23).
+  // never i18n routing (they're in the matcher below so www/*.vercel.app still
+  // get the 308 — D23).
   const { pathname } = request.nextUrl
-  if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
+  // /sitemap.xml is the URL GSC and Bing hold, but app/sitemap.ts claims that
+  // path even when it splits into per-locale files, and a route beside it fails
+  // the build — so the index lives at its own route and is rewritten in (D60).
+  if (pathname === '/sitemap.xml') {
+    return NextResponse.rewrite(new URL('/sitemap-index.xml', request.url))
+  }
+  if (pathname === '/robots.txt' || pathname.startsWith('/sitemap/')) {
     return NextResponse.next()
   }
   return handleI18nRouting(request)
@@ -25,5 +31,5 @@ export const config = {
   // Localize all pages; skip API routes, Next internals and static files.
   // Crawl files are listed explicitly so the canonical-host 308 reaches them —
   // the dotted-path exclusion above otherwise skips them (docs/00 D23).
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)', '/sitemap.xml', '/robots.txt'],
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)', '/sitemap.xml', '/sitemap/:path*', '/robots.txt'],
 }
