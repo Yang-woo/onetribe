@@ -1,6 +1,9 @@
 import type { MetadataRoute } from 'next'
 import { LOCALES, type Locale } from '@/lib/locales'
+import { POLICY_CONTACT_EMAIL } from '@/lib/policy-content'
+import { SOURCE_LINK } from '@/lib/site-links'
 import { siteUrl } from '@/lib/site-url'
+import { SUPPORT_LINKS } from '@/lib/support'
 
 /**
  * hreflang alternates + self-referencing canonical per page — the SEO core
@@ -87,14 +90,59 @@ export function serializeJsonLd(data: object): string {
   return JSON.stringify(data).replace(/</g, '\\u003c')
 }
 
+/**
+ * Profiles the project itself owns (docs/00 D28) — IG/Threads carry the
+ * underscore variant because `onetribeworld` was taken there. YouTube is
+ * held, not run, but it is still ours. Ko-fi and the source repo join from
+ * their own constants so a switched-off rail drops out of the claim too.
+ */
+const OWNED_PROFILES = [
+  'https://www.instagram.com/onetribe_world/',
+  'https://www.threads.com/@onetribe_world',
+  'https://www.youtube.com/@onetribeworld',
+] as const
+
+function organizationId(): string {
+  return `${siteUrl()}/#organization`
+}
+
+/**
+ * The project as one entity (GEO/LLMO): "one tribe" is also Q-dance's brand
+ * language (docs/00 D2), so the name alone can't tell models which one this
+ * is — sameAs ties every surface we run to this domain. Plain Organization,
+ * not NGO: a fan project isn't a registered non-profit, and the data must not
+ * claim more than the site does.
+ */
+export function organizationJsonLd(): object {
+  return {
+    '@type': 'Organization',
+    '@id': organizationId(),
+    name: 'one tribe',
+    url: siteUrl(),
+    logo: `${siteUrl()}/icon-512.png`,
+    email: POLICY_CONTACT_EMAIL,
+    sameAs: [...OWNED_PROFILES, SOURCE_LINK.url, SUPPORT_LINKS.kofi].filter(Boolean),
+  }
+}
+
 export function websiteJsonLd(description: string): object {
   return {
-    '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${siteUrl()}/#website`,
     name: 'one tribe',
     url: siteUrl(),
     description,
     inLanguage: [...LOCALES],
+    // by reference — a second inline Organization would split the entity
+    publisher: { '@id': organizationId() },
+  }
+}
+
+/** Home page graph: the organization declared once, the website pointing at it. */
+export function siteJsonLd(description: string): object {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [organizationJsonLd(), websiteJsonLd(description)],
   }
 }
 

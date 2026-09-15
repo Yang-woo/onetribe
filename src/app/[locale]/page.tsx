@@ -11,7 +11,7 @@ import { Link } from '@/i18n/navigation'
 import { isLocale } from '@/lib/locales'
 import { fetchMoments, parseEditionYear, wallFilterFor, type EditionChip } from '@/lib/moments'
 import { getCachedCounters, getCachedEditions } from '@/lib/moments-cache'
-import { localeAlternates, websiteJsonLd } from '@/lib/seo'
+import { localeAlternates, siteJsonLd } from '@/lib/seo'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 // Landing + wall in one page — the wall must feel alive on first paint
@@ -69,7 +69,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
 
   return (
     <main className="flex-1">
-      <JsonLd data={websiteJsonLd(t('body'))} />
+      <JsonLd data={siteJsonLd(t('body'))} />
       <section className="relative isolate mx-auto flex max-w-[960px] flex-col items-center gap-7 px-6 pb-[72px] pt-[88px] text-center">
         <div
           aria-hidden="true"

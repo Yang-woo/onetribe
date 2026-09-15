@@ -6,6 +6,7 @@ import {
   localeAlternates,
   momentJsonLd,
   serializeJsonLd,
+  siteJsonLd,
   sitemapEntries,
   websiteJsonLd,
 } from './seo'
@@ -142,6 +143,34 @@ describe('websiteJsonLd', () => {
     expect(data.url).toBe('https://onetribe.world')
     expect(data.description).toBe('a memory wall')
     expect(data.inLanguage).toEqual([...LOCALES])
+  })
+})
+
+describe('siteJsonLd', () => {
+  const nodes = () =>
+    (siteJsonLd('a memory wall') as { '@graph': Record<string, unknown>[] })['@graph']
+  const node = (type: string) => nodes().find((n) => n['@type'] === type)!
+
+  test('the website points at the organization by @id — one entity, not a second one', () => {
+    const org = node('Organization')
+    expect(org['@id']).toBe('https://onetribe.world/#organization')
+    expect(node('WebSite').publisher).toEqual({ '@id': org['@id'] })
+  })
+
+  test('sameAs claims exactly the profiles the project owns (docs/00 D15, D28)', () => {
+    expect(node('Organization').sameAs).toEqual([
+      'https://www.instagram.com/onetribe_world/',
+      'https://www.threads.com/@onetribe_world',
+      'https://www.youtube.com/@onetribeworld',
+      'https://github.com/Yang-woo/onetribe',
+      'https://ko-fi.com/onetribeworld',
+    ])
+  })
+
+  test('logo and contact resolve on the live site', () => {
+    const org = node('Organization')
+    expect(org.logo).toBe('https://onetribe.world/icon-512.png')
+    expect(org.email).toBe('privacy@onetribe.world')
   })
 })
 
