@@ -21,7 +21,7 @@ export default function middleware(request: NextRequest) {
   if (pathname === '/sitemap.xml') {
     return NextResponse.rewrite(new URL('/sitemap-index.xml', request.url))
   }
-  if (pathname === '/robots.txt' || pathname.startsWith('/sitemap/')) {
+  if (pathname === '/robots.txt' || pathname === '/llms.txt' || pathname.startsWith('/sitemap/')) {
     return NextResponse.next()
   }
   return handleI18nRouting(request)
@@ -31,5 +31,11 @@ export const config = {
   // Localize all pages; skip API routes, Next internals and static files.
   // Crawl files are listed explicitly so the canonical-host 308 reaches them —
   // the dotted-path exclusion above otherwise skips them (docs/00 D23).
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)', '/sitemap.xml', '/sitemap/:path*', '/robots.txt'],
+  matcher: [
+    '/((?!api|_next|_vercel|.*\\..*).*)',
+    '/sitemap.xml',
+    '/sitemap/:path*',
+    '/robots.txt',
+    '/llms.txt',
+  ],
 }

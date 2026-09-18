@@ -7,6 +7,7 @@ import { CloudflareAnalytics } from '@/components/cloudflare-analytics'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { routing } from '@/i18n/routing'
+import { HOME_TITLE, siteOpenGraph } from '@/lib/seo'
 import { siteUrl } from '@/lib/site-url'
 import '../globals.css'
 
@@ -41,15 +42,12 @@ export async function generateMetadata({
   const base = siteUrl()
   return {
     metadataBase: new URL(base),
-    title: { default: 'one tribe', template: '%s — one tribe' },
+    title: { default: HOME_TITLE, template: '%s — one tribe' },
     description: t('body'),
-    openGraph: {
-      siteName: 'one tribe',
-      type: 'website',
-      title: 'one tribe',
-      description: t('body'),
-      images: [{ url: `${base}/api/og/site`, width: 1200, height: 630 }],
-    },
+    // og:title stays the bare name on purpose: the share card already carries
+    // the wordmark, and one spelling of the name everywhere is what ties the
+    // entity together for models (docs/00 D59).
+    openGraph: siteOpenGraph(t('body')),
     twitter: { card: 'summary_large_image' },
     // Naver Search Advisor ownership check (docs/00 D60). A public token by
     // design — it is meant to sit in every page's HTML.

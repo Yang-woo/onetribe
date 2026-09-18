@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
+import { JsonLd } from '@/components/json-ld'
 import { MultilingualArticle, type LocalizedContent } from '@/components/multilingual-article'
 import { secondaryButtonClass } from '@/components/ui'
 import { ABOUT_SUPPORT } from '@/lib/policy-content'
 import { ABOUT_I18N } from '@/lib/policy-content-i18n'
 import { SUPPORT_LINKS, hasSupportLinks } from '@/lib/support'
-import { isLocale, LOCALES, type Locale } from '@/lib/locales'
-import { localeAlternates } from '@/lib/seo'
+import { DEFAULT_LOCALE, isLocale, LOCALES, type Locale } from '@/lib/locales'
+import { aboutPageJsonLd, localeAlternates } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,9 @@ export async function generateMetadata({
 const supportButtonClass =
   'inline-flex items-center gap-2 rounded-full border border-orange px-6 py-3 font-medium text-orange transition-colors hover:bg-orange/10'
 
-export default function AboutPage() {
+export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  const current = isLocale(locale) ? locale : DEFAULT_LOCALE
   // Every language stacked (docs/00 D18); the support CTA renders once below.
   const byLocale = Object.fromEntries(
     LOCALES.map((locale) => [
@@ -47,56 +50,62 @@ export default function AboutPage() {
   ) as Record<Locale, LocalizedContent>
 
   return (
-    <MultilingualArticle heading={ABOUT_I18N.en.title} byLocale={byLocale}>
-      {hasSupportLinks() && (
-        <section id="support" className="mt-12 scroll-mt-16 border-t border-line pt-8">
-          <h2 className="mb-4 font-display text-2xl lowercase tracking-tight">
-            {ABOUT_SUPPORT.title}
-          </h2>
-          <p className="text-paper/90">{ABOUT_SUPPORT.body}</p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            {SUPPORT_LINKS.kofi && (
-              <a
-                href={SUPPORT_LINKS.kofi}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={supportButtonClass}
-              >
-                {/* alt="" — decorative, so the accessible name stays the label alone
+    <>
+      {/* The page that says who runs this is the one answer engines weigh for
+          "who is speaking", and it carried no structured data at all — this
+          ties it to the organization declared on the home page (docs/00 D59). */}
+      <JsonLd data={aboutPageJsonLd(current, ABOUT_I18N[current].title)} />
+      <MultilingualArticle heading={ABOUT_I18N.en.title} byLocale={byLocale}>
+        {hasSupportLinks() && (
+          <section id="support" className="mt-12 scroll-mt-16 border-t border-line pt-8">
+            <h2 className="mb-4 font-display text-2xl lowercase tracking-tight">
+              {ABOUT_SUPPORT.title}
+            </h2>
+            <p className="text-paper/90">{ABOUT_SUPPORT.body}</p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {SUPPORT_LINKS.kofi && (
+                <a
+                  href={SUPPORT_LINKS.kofi}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={supportButtonClass}
+                >
+                  {/* alt="" — decorative, so the accessible name stays the label alone
                     (WCAG 2.5.3). loading="lazy" is load-bearing, not habit: React's
                     SSR renderer preloads any plain-src <img> that is not lazy, and a
                     20px decoration below a 17-locale wall of text must never compete
                     with the font preloads. e2e pins both. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/kofi-cup.png"
-                  alt=""
-                  width={25}
-                  height={20}
-                  loading="lazy"
-                  className="h-5 w-auto"
-                />
-                buy the server a coffee ↗
-              </a>
-            )}
-            {/* Deliberate dead path: githubSponsors is null (docs/00 D15, dropped
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/kofi-cup.png"
+                    alt=""
+                    width={25}
+                    height={20}
+                    loading="lazy"
+                    className="h-5 w-auto"
+                  />
+                  buy the server a coffee ↗
+                </a>
+              )}
+              {/* Deliberate dead path: githubSponsors is null (docs/00 D15, dropped
                 2026-07-28) and this branch renders nothing today. It is kept as the
                 one-line re-enable point, and it takes the house secondary recipe —
                 so a revived second rail ships quieter than the Ko-fi primary by
                 design, not by the sizing this file used to fork. */}
-            {SUPPORT_LINKS.githubSponsors && (
-              <a
-                href={SUPPORT_LINKS.githubSponsors}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={secondaryButtonClass}
-              >
-                github sponsors ↗
-              </a>
-            )}
-          </div>
-        </section>
-      )}
-    </MultilingualArticle>
+              {SUPPORT_LINKS.githubSponsors && (
+                <a
+                  href={SUPPORT_LINKS.githubSponsors}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={secondaryButtonClass}
+                >
+                  github sponsors ↗
+                </a>
+              )}
+            </div>
+          </section>
+        )}
+      </MultilingualArticle>
+    </>
   )
 }

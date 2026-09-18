@@ -11,7 +11,7 @@ import { Link } from '@/i18n/navigation'
 import { isLocale } from '@/lib/locales'
 import { fetchMoments, parseEditionYear, wallFilterFor, type EditionChip } from '@/lib/moments'
 import { getCachedCounters, getCachedEditions } from '@/lib/moments-cache'
-import { localeAlternates, siteJsonLd } from '@/lib/seo'
+import { localeAlternates, siteJsonLd, siteOpenGraph } from '@/lib/seo'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
 
 // Landing + wall in one page — the wall must feel alive on first paint
@@ -30,7 +30,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   if (!isLocale(locale)) return {}
-  return { alternates: localeAlternates('/', locale) }
+  const t = await getTranslations({ locale, namespace: 'hero' })
+  const alternates = localeAlternates('/', locale)
+  // og:url, because this is the one page whose address varies: a chip click
+  // leaves ?e=YYYY behind (docs/00 D13), and sharing that link without an
+  // og:url scrapes the filtered address as if it were its own page.
+  return { alternates, openGraph: siteOpenGraph(t('body'), alternates.canonical) }
 }
 
 /** Dynamic part — the filtered moments. Streams in behind <Suspense>. */

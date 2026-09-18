@@ -34,3 +34,31 @@ test('robots → sitemap index → every locale file answers, and unknown files 
 
   expect((await request.get('/sitemap/xx.xml')).status()).toBe(404)
 })
+
+/**
+ * /llms.txt moved out of public/ into a route so it can carry live figures
+ * (GEO). Only a real server shows whether the middleware lets it through:
+ * drop it from the matcher and the locale router swallows it, which unit
+ * tests cannot see — the same blind spot D60 found for the sitemap.
+ */
+test('llms.txt is served as plain text and names the project', async ({ request }) => {
+  const res = await request.get('/llms.txt')
+  expect(res.status()).toBe(200)
+  expect(res.headers()['content-type']).toMatch(/^text\/plain/)
+  const body = await res.text()
+  expect(body).toContain('# one tribe')
+  // the unaffiliated notice travels with the description, never optional
+  expect(body).toContain('Not affiliated')
+
+  // The live figures are the whole reason this stopped being a file in
+  // public/. Without these two assertions the route could answer with the
+  // figure-less fallback forever and this test would not notice.
+  expect(body, 'llms.txt carries no live figures').toMatch(/- Moments on the wall: \d+/)
+  const asOf = body.match(/- As of: (\S+)/)?.[1]
+  expect(asOf, 'figures with no as-of stamp are not quotable').toBeTruthy()
+  const stamped = new Date(asOf!)
+  expect(Number.isNaN(stamped.getTime()), `unparseable as-of: ${asOf}`).toBe(false)
+  // in the past, but no tighter: the route is revalidated hourly, so an hour
+  // of staleness is the designed behavior, not a failure
+  expect(stamped.getTime()).toBeLessThanOrEqual(Date.now())
+})

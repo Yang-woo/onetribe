@@ -50,6 +50,26 @@ test('the wall links a caption-less moment to a page that heads and describes it
       'content',
       `${line} · ${name} · Netherlands`,
     )
+
+    // lib/seo builds the structured data, but nothing read the page's own
+    // ld+json — so dropping the edition/city argument here, or the og:url,
+    // passed every test (test review, 2026-09-18). Read from the raw HTML:
+    // the claim is about what a crawler receives.
+    const raw = await (await request.get(`/en/m/${id}`)).text()
+    const block = raw.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)
+    expect(block, 'the moment page emitted no structured data').not.toBeNull()
+    const ld = JSON.parse(block![1])
+    expect(ld['@type']).toBe('ImageObject')
+    expect(ld.name, 'the edition line never reached the structured data').toBe(line)
+    expect(ld.contentLocation).toEqual({ '@type': 'Place', name: 'Biddinghuizen' })
+    // upload time, not capture time — an old photo must not be dated to today
+    expect(ld.uploadDate).toBeTruthy()
+    expect(ld.publisher['@id']).toMatch(/#organization$/)
+    expect(ld.isPartOf['@id']).toMatch(/#website$/)
+
+    expect(raw, 'the moment card names no address of its own').toMatch(
+      new RegExp(`<meta property="og:url" content="[^"]*/en/m/${id}"`),
+    )
   } finally {
     await service.from('memories').delete().eq('id', id)
   }

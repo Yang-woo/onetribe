@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { PolicyArticle } from './policy-article'
 import AboutPage from '@/app/[locale]/about/page'
 import { POLICIES } from '@/lib/policy-content'
@@ -34,8 +34,16 @@ describe('PolicyArticle — every language stacked', () => {
 })
 
 describe('About page — stacked story + single support CTA', () => {
-  test('renders the story in every language and one ko-fi link (D15/D18)', () => {
-    const { container } = render(<AboutPage />)
+  beforeEach(() => vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://onetribe.world'))
+  afterEach(() => vi.unstubAllEnvs())
+
+  // The page reads the URL locale now (for its structured data), so it awaits
+  // params like any other server component — call it, then render what it gave.
+  const about = async (locale: string) =>
+    render(await AboutPage({ params: Promise.resolve({ locale }) }))
+
+  test('renders the story in every language and one ko-fi link (D15/D18)', async () => {
+    const { container } = await about('en')
     expect(container.querySelector('#lang-ko')).not.toBeNull()
     expect(container.querySelector('#lang-de')).not.toBeNull()
 
@@ -45,5 +53,26 @@ describe('About page — stacked story + single support CTA', () => {
     expect(kofi).not.toBeNull()
     // one CTA, not one per language
     expect(container.querySelectorAll('a[href="https://ko-fi.com/onetribeworld"]').length).toBe(1)
+  })
+
+  // Wiring, not shape: lib/seo builds the node, but only this catches the page
+  // never rendering it — the gap D59's test review found the first time round.
+  test('emits its structured data, tied to the one declared organization', async () => {
+    const { container } = await about('ko')
+    const script = container.querySelector('script[type="application/ld+json"]')
+    expect(script, 'the about page rendered no structured data').not.toBeNull()
+    const data = JSON.parse(script!.textContent!.replace(/\\u003c/g, '<'))
+    expect(data['@type']).toBe('AboutPage')
+    expect(data.url).toBe('https://onetribe.world/ko/about')
+    expect(data.name).toBe('소개')
+    expect(data.mainEntity).toEqual({ '@id': 'https://onetribe.world/#organization' })
+  })
+
+  test('an unknown locale falls back to English rather than a broken node', async () => {
+    const { container } = await about('xx')
+    const script = container.querySelector('script[type="application/ld+json"]')
+    const data = JSON.parse(script!.textContent!.replace(/\\u003c/g, '<'))
+    expect(data.url).toBe('https://onetribe.world/en/about')
+    expect(data.inLanguage).toBe('en')
   })
 })

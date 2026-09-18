@@ -16,7 +16,10 @@ describe('middleware', () => {
   afterEach(() => vi.unstubAllEnvs())
 
   test('crawl files on the canonical host pass through — no redirect', () => {
-    for (const path of ['/sitemap/ko.xml', '/robots.txt']) {
+    // /llms.txt joined them when it moved out of public/ into a route: the
+    // matcher's dotted-path exclusion skips it, so it has to be named twice —
+    // once in the matcher, once here — or the locale router swallows it.
+    for (const path of ['/sitemap/ko.xml', '/robots.txt', '/llms.txt']) {
       const res = middleware(new NextRequest(`https://onetribe.world${path}`))
       // passed through — not redirected and not rewritten. A rewrite carries no
       // Location either, so that check alone can't tell the two apart (D60).
@@ -42,5 +45,9 @@ describe('middleware', () => {
     const locale = middleware(new NextRequest('https://www.onetribe.world/sitemap/ko.xml'))
     expect(locale.status).toBe(308)
     expect(locale.headers.get('location')).toBe('https://onetribe.world/sitemap/ko.xml')
+
+    const llms = middleware(new NextRequest('https://www.onetribe.world/llms.txt'))
+    expect(llms.status).toBe(308)
+    expect(llms.headers.get('location')).toBe('https://onetribe.world/llms.txt')
   })
 })

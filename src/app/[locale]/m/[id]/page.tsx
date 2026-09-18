@@ -56,15 +56,17 @@ export async function generateMetadata({
   if (!moment) return {}
   const base = siteUrl()
   const title = eventLine(moment.events) ?? 'a moment'
+  const alternates = localeAlternates(`/m/${id}`, isLocale(locale) ? locale : DEFAULT_LOCALE)
   return {
     // The layout template appends the brand — plain title here avoids
     // "… — one tribe — one tribe".
     title,
     description: momentDescription(moment, eventLine(moment.events), locale),
-    alternates: localeAlternates(`/m/${id}`, isLocale(locale) ? locale : DEFAULT_LOCALE),
+    alternates,
     openGraph: {
       siteName: 'one tribe',
       title: `${title} — one tribe`,
+      url: alternates.canonical,
       // Caption only, unlike the meta description: a share card already shows
       // the edition line as its title, so the facts would just repeat it.
       description: moment.caption ?? undefined,
@@ -122,7 +124,12 @@ export default async function MomentPage({
   const nextId = nextRows?.[0]?.id as string | undefined
 
   const src = momentImageSrc(moment) ?? undefined
-  const jsonLd = momentJsonLd(moment, isLocale(locale) ? locale : DEFAULT_LOCALE)
+  // The edition line and city travel as arguments: lib/seo is on the
+  // middleware's import path, so it must not reach for the moments module.
+  const jsonLd = momentJsonLd(moment, isLocale(locale) ? locale : DEFAULT_LOCALE, {
+    line: eventLine(moment.events),
+    city: moment.events?.city,
+  })
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-8">

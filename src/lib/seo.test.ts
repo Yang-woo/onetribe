@@ -4,12 +4,15 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import robots from '@/app/robots'
 import { LOCALES } from './locales'
 import {
+  aboutPageJsonLd,
   canonicalHostRedirect,
+  HOME_TITLE,
   localeAlternates,
   momentDescription,
   momentJsonLd,
   serializeJsonLd,
   siteJsonLd,
+  siteOpenGraph,
   sitemapEntries,
   sitemapIndexXml,
 } from './seo'
@@ -268,7 +271,10 @@ describe('momentJsonLd', () => {
     author_name: 'warrior',
     author_link: 'https://instagram.com/warrior',
     created_at: '2026-06-27T12:00:00Z',
+    thumb_url: 'https://media.example/m/2026/photo-thumb.webp',
   }
+
+  const line = 'Biddinghuizen · 2026 · Defqon.1 — Sacred Oath'
 
   test('a photo becomes an ImageObject with author and canonical page', () => {
     const data = momentJsonLd(base, 'ko') as Record<string, unknown>
@@ -294,5 +300,97 @@ describe('momentJsonLd', () => {
   test('clips and media-less rows yield nothing — no image claim we cannot back', () => {
     expect(momentJsonLd({ ...base, media_kind: 'clip' }, 'en')).toBeNull()
     expect(momentJsonLd({ ...base, media_url: null }, 'en')).toBeNull()
+  })
+
+  test('the edition line and city travel as the page prints them', () => {
+    const data = momentJsonLd(base, 'en', { line, city: 'Biddinghuizen' }) as Record<
+      string,
+      unknown
+    >
+    expect(data.name).toBe(line)
+    expect(data.contentLocation).toEqual({ '@type': 'Place', name: 'Biddinghuizen' })
+  })
+
+  test('a moment with no edition claims neither a name nor a place', () => {
+    const data = momentJsonLd(base, 'en') as Record<string, unknown>
+    expect(data).not.toHaveProperty('name')
+    expect(data).not.toHaveProperty('contentLocation')
+  })
+
+  test('created_at is when the wall received it, not when the photo was taken', () => {
+    const data = momentJsonLd(base, 'en') as Record<string, unknown>
+    expect(data.uploadDate).toBe(base.created_at)
+    // dateCreated would date a 2013 edition's photo to the day it was posted
+    expect(data).not.toHaveProperty('dateCreated')
+  })
+
+  test('the thumbnail is offered when one exists and never invented', () => {
+    expect((momentJsonLd(base, 'en') as Record<string, unknown>).thumbnailUrl).toBe(base.thumb_url)
+    expect(momentJsonLd({ ...base, thumb_url: null }, 'en')).not.toHaveProperty('thumbnailUrl')
+  })
+
+  test('it points at the same organization and website the home graph declares', () => {
+    const data = momentJsonLd(base, 'en') as Record<string, unknown>
+    const graph = (siteJsonLd('a memory wall') as { '@graph': Record<string, unknown>[] })['@graph']
+    const idOf = (type: string) => graph.find((n) => n['@type'] === type)!['@id']
+    expect(data.publisher).toEqual({ '@id': idOf('Organization') })
+    expect(data.isPartOf).toEqual({ '@id': idOf('WebSite') })
+  })
+})
+
+describe('siteOpenGraph', () => {
+  test('a page that needs its own og:url still gets the whole card', () => {
+    // Next replaces the layout's openGraph wholesale when a page declares one,
+    // so a card that lost its image is exactly the regression to catch here
+    const og = siteOpenGraph('a memory wall', 'https://onetribe.world/ko')
+    expect(og.siteName).toBe('one tribe')
+    expect(og.type).toBe('website')
+    expect(og.title).toBe('one tribe')
+    expect(og.description).toBe('a memory wall')
+    expect(og.images).toEqual([
+      { url: 'https://onetribe.world/api/og/site', width: 1200, height: 630 },
+    ])
+    expect(og.url).toBe('https://onetribe.world/ko')
+  })
+
+  test('with no url the key is absent rather than empty', () => {
+    expect(siteOpenGraph('a memory wall')).not.toHaveProperty('url')
+  })
+})
+
+describe('aboutPageJsonLd', () => {
+  const idOf = (type: string) =>
+    (siteJsonLd('a memory wall') as { '@graph': Record<string, unknown>[] })['@graph'].find(
+      (n) => n['@type'] === type,
+    )!['@id']
+
+  test('it joins the site graph by @id instead of declaring a second organization', () => {
+    const data = aboutPageJsonLd('en', 'about') as Record<string, unknown>
+    expect(data.mainEntity).toEqual({ '@id': idOf('Organization') })
+    expect(data.isPartOf).toEqual({ '@id': idOf('WebSite') })
+    expect(JSON.stringify(data)).not.toContain('"Organization"')
+  })
+
+  test('each locale’s about page is its own node, named as that page is headed', () => {
+    const ko = aboutPageJsonLd('ko', '소개') as Record<string, unknown>
+    expect(ko.url).toBe('https://onetribe.world/ko/about')
+    expect(ko['@id']).toBe('https://onetribe.world/ko/about#webpage')
+    expect(ko.name).toBe('소개')
+    expect(ko.inLanguage).toBe('ko')
+  })
+})
+
+describe('HOME_TITLE', () => {
+  test('it names both this project and the festival, inside the snippet limit', () => {
+    // GSC showed every query that reached the site was a name collision, and
+    // none of them contained "defqon" (docs/00 D60)
+    expect(HOME_TITLE).toContain('one tribe')
+    expect(HOME_TITLE).toContain('Defqon.1')
+    expect(HOME_TITLE.length).toBeLessThanOrEqual(60)
+  })
+
+  test('it frames the project as a fan project, never an official one', () => {
+    expect(HOME_TITLE).toMatch(/\bfan\b/)
+    expect(HOME_TITLE).not.toMatch(/official/i)
   })
 })
