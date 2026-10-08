@@ -68,9 +68,10 @@ export default async function LocaleLayout({
 }>) {
   const { locale } = await params
   if (!hasLocale(routing.locales, locale)) notFound()
-  // Without this next-intl reads the locale from a request header, and that
-  // read alone makes every page under this layout dynamic — the moment page's
-  // cache (docs/00 D62) would silently never fill.
+  // Otherwise next-intl reads the locale from a request header, which a cached
+  // page cannot do: with no call here or in the page, the cached moment page
+  // (docs/00 D62) fails to render at all. next-intl asks for it in every
+  // layout and page that renders statically, so the page calls it too.
   setRequestLocale(locale)
 
   return (

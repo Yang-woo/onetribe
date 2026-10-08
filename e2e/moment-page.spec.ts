@@ -99,8 +99,15 @@ test('a cached moment page still goes down with its takedown', async ({ page, re
   try {
     expect((await request.get(`/en/m/${id}`)).status()).toBe(200)
     if (process.env.CI) {
-      const again = await request.get(`/en/m/${id}`)
-      expect(again.headers()['x-nextjs-cache'], 'the moment page is not cached').toBe('HIT')
+      // Asked until it settles: a parallel takedown or upload drops the same
+      // tag and can empty the entry between two visits (seen as MISS when the
+      // mobile and desktop runs of this test overlapped). A page that never
+      // caches never answers HIT.
+      await expect
+        .poll(async () => (await request.get(`/en/m/${id}`)).headers()['x-nextjs-cache'], {
+          message: 'the moment page is not cached',
+        })
+        .toBe('HIT')
     }
 
     const { data, error } = await service
