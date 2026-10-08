@@ -5,10 +5,14 @@ import { siteUrl } from '@/lib/site-url'
 /**
  * Crawl hygiene (docs/00 D23): APIs and the admin console are not for
  * crawlers; everything else — AI crawlers included (GEO) — is welcome.
+ * One exception (docs/00 D62): Meta's training crawler led the bot traffic
+ * that took the Vercel Hobby quota over in 2026-10 and cites nothing back.
+ * A named group replaces `*` for that crawler, so it reads only this line.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
+      { userAgent: 'meta-externalagent', disallow: '/' },
       {
         userAgent: '*',
         // OG image endpoints must stay crawlable — they're the share-card

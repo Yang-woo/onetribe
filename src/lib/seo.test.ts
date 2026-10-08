@@ -155,15 +155,25 @@ describe('sitemapIndexXml', () => {
 })
 
 describe('robots', () => {
+  const ruleFor = (userAgent: string) => {
+    const { rules } = robots()
+    return (Array.isArray(rules) ? rules : [rules]).find((r) => r.userAgent === userAgent)
+  }
+
   test('blocks api and every locale admin, points at the sitemap', () => {
-    const result = robots()
-    const rule = Array.isArray(result.rules) ? result.rules[0] : result.rules
-    expect(rule?.userAgent).toBe('*')
+    const rule = ruleFor('*')
     expect(rule?.disallow).toContain('/api/')
     for (const locale of LOCALES) {
       expect(rule?.disallow).toContain(`/${locale}/admin`)
     }
-    expect(result.sitemap).toBe('https://onetribe.world/sitemap.xml')
+    expect(robots().sitemap).toBe('https://onetribe.world/sitemap.xml')
+  })
+
+  // docs/00 D62: the one crawler shut out entirely — and only that one. A
+  // `disallow: '/'` landing in the `*` group would drop the site from search.
+  test('shuts out meta-externalagent and nobody else', () => {
+    expect(ruleFor('meta-externalagent')?.disallow).toBe('/')
+    expect([ruleFor('*')?.disallow].flat()).not.toContain('/')
   })
 })
 
