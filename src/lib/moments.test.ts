@@ -1,6 +1,7 @@
+import { createClient } from '@supabase/supabase-js'
 import { describe, expect, test } from 'vitest'
 import type { EditionChip, Moment } from './moments'
-import { momentImageSrc, parseEditionYear, wallFilterFor } from './moments'
+import { fetchMomentRow, momentImageSrc, parseEditionYear, wallFilterFor } from './moments'
 
 // Spec: docs/15 §1 — the wall's filter state lives in the URL (?e=YYYY).
 // Both readers (the server page's searchParams and the client filter's
@@ -89,5 +90,27 @@ describe('momentImageSrc', () => {
       embed_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     }
     expect(momentImageSrc(clip)).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
+  })
+})
+
+// docs/00 D62: the moment page caches what it renders, 404s included. A read
+// that swallowed its error would answer null, render a 404, and cache it over
+// a live moment. A real client whose server answers with an error:
+// postgrest-js hands that back as `{ error }` rather than throwing, which is
+// the case to pin.
+describe('fetchMomentRow', () => {
+  test('a failed read throws instead of answering "no such moment"', async () => {
+    const db = createClient('http://db.test', 'anon-key', {
+      global: {
+        fetch: async () =>
+          new Response(JSON.stringify({ code: 'XX000', message: 'boom' }), {
+            status: 400,
+            headers: { 'content-type': 'application/json' },
+          }),
+      },
+    })
+    await expect(fetchMomentRow(db, '00000000-0000-4000-8000-000000000000')).rejects.toThrow(
+      /fetchMomentRow failed/,
+    )
   })
 })

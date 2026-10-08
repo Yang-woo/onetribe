@@ -172,8 +172,12 @@ describe('robots', () => {
   // docs/00 D62: the one crawler shut out entirely — and only that one. A
   // `disallow: '/'` landing in the `*` group would drop the site from search.
   test('shuts out meta-externalagent and nobody else', () => {
-    expect(ruleFor('meta-externalagent')?.disallow).toBe('/')
-    expect([ruleFor('*')?.disallow].flat()).not.toContain('/')
+    // every group that blocks the whole site, whatever shape it is written in
+    const shutOut = [robots().rules]
+      .flat()
+      .filter((r) => [r.disallow].flat().some((p) => p === '/' || p === '/*'))
+      .flatMap((r) => [r.userAgent].flat())
+    expect(shutOut).toEqual(['meta-externalagent'])
   })
 })
 

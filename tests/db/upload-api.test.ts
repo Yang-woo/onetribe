@@ -1055,6 +1055,38 @@ describe('POST /api/report — server-computed reporter_hint', () => {
     expect(revalidated).toContain('counters')
   })
 
+  // docs/00 D62: the tag also empties every cached moment page, so a report
+  // that takes nothing down must not drop it — or one IP filing reports keeps
+  // that cache cold. Neither must a report on a moment that is already down.
+  test('a report that hides nothing drops no cache', async () => {
+    const live = await fixtureMemory(`${MARKER}-report-nodrop`)
+    const hidden = await seedMemory(db, {
+      event_id: eventId,
+      caption: `${MARKER}-report-nodrop-hidden`,
+      status: 'hidden',
+      hidden_reason: 'operator',
+    })
+
+    for (const [memoryId, i] of [
+      [live, 5],
+      [hidden, 6],
+    ] as const) {
+      const res = await createReportHandler(reportDeps())(
+        new Request('http://localhost/api/report', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-forwarded-for': `${REPORT_IP_BASE}.${i}`,
+          },
+          body: JSON.stringify({ memoryId, reason: 'spam' }),
+        }),
+      )
+      expect(res.status).toBe(201)
+    }
+
+    expect(revalidated).toEqual([])
+  })
+
   test('a filed report fires a best-effort Discord alert linking the moment (D36)', async () => {
     const notify = vi.fn(async (_msg: unknown) => {})
     const memoryId = await fixtureMemory(`${MARKER}-report-discord`)

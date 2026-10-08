@@ -124,6 +124,15 @@ export function createAdminActionHandler(deps: ModerationDeps) {
     const parsed = actionSchema.safeParse(await parseBody(req))
     if (!parsed.success) return json(400, { error: 'invalid request' })
     const { memoryId, action, acknowledge } = parsed.data
+    // Best-effort: the action has already succeeded by the time this runs, and
+    // a stale count or page is not worth turning it into a 500.
+    const dropMomentCaches = () => {
+      try {
+        deps.revalidate(COUNTERS_TAG)
+      } catch {
+        // stale until the next drop or the moment page's ceiling (docs/00 D62)
+      }
+    }
 
     if (action === 'hide') {
       // Through the channel like every other path, so the operator's hand is
@@ -177,6 +186,10 @@ export function createAdminActionHandler(deps: ModerationDeps) {
         .maybeSingle()
       const { error } = await deps.db.from('memories').delete().eq('id', memoryId)
       if (error) return json(500, { error: error.message })
+      // Before the cleanup, not after: the object deletes below have no timeout,
+      // and a function killed mid-cleanup must not leave the deleted moment on
+      // its cached page (docs/00 D62).
+      dropMomentCaches()
       // Row first (taking content down must not depend on storage being up);
       // object delete is best-effort — a failure just leaves an orphan.
       for (const url of [memory?.media_url, memory?.thumb_url]) {
@@ -211,13 +224,10 @@ export function createAdminActionHandler(deps: ModerationDeps) {
       const failure = await clearReports(deps.db, memoryId)
       if (failure) return failure
     }
-    // hide/unhide/delete changed how many moments are live; dismiss didn't, but
-    // dropping a 60s cache entry costs one query — not worth branching on.
-    try {
-      deps.revalidate(COUNTERS_TAG)
-    } catch {
-      // the action already succeeded; a stale count is not worth a 500
-    }
+    // hide/unhide changed what is live; dismiss didn't, but it doubles as the
+    // operator's way to flush the moment pages after a change made in SQL
+    // (docs/00 D62). Delete dropped above, before its cleanup.
+    if (action !== 'delete') dropMomentCaches()
     return json(200, { ok: true })
   }
 }

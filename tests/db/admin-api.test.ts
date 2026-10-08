@@ -246,6 +246,21 @@ describe('actions', () => {
     expect(deletedKeys).toContain(`${caption}.jpg`)
   })
 
+  // docs/00 D62: the tag also empties the cached moment pages. The object
+  // deletes have no timeout, so a drop that waits for them can be cut off with
+  // the function — and the deleted moment keeps showing on its cached page.
+  test('delete drops the moment caches before a hung storage cleanup', async () => {
+    const id = await createMemory(`admin-delete-hang-${randomUUID().slice(0, 6)}`)
+    const before = revalidated.length
+
+    void createAdminActionHandler({
+      ...deps(),
+      storage: { ...fakeStorage, deleteObject: () => new Promise<void>(() => {}) },
+    })(withAuth(operatorToken, { memoryId: id, action: 'delete' }))
+
+    await expect.poll(() => revalidated.slice(before)).toContain('counters')
+  })
+
   test('delete erases the caption out of the translation cache too', async () => {
     // `translations` is keyed by a hash of the caption, not by memory id, and
     // anon can read it — so without this the translated caption keeps answering
