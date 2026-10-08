@@ -529,6 +529,22 @@ export function createReportHandler(deps: ReportDeps) {
       return json(429, { error: 'too many reports — try again later' })
     }
 
+    // This report may trip the auto-hide trigger, taking the moment off the
+    // wall (D12/D41) and off its cached page (docs/00 D62). The trigger's result
+    // isn't visible from here, so compare the status around the insert. The
+    // tag also empties every cached moment page, so dropping it on every report
+    // would let one IP keep that cache cold — drop only on live → hidden. A
+    // failed read counts as "changed": a missed drop leaves the moment up.
+    const statusOf = async () => {
+      const { data, error } = await deps.db
+        .from('memories')
+        .select('status')
+        .eq('id', parsed.data.memoryId)
+        .maybeSingle()
+      return error ? 'unknown' : (data?.status ?? 'unknown')
+    }
+    const before = await statusOf()
+
     const { error } = await deps.db.from('reports').insert({
       memory_id: parsed.data.memoryId,
       reason: parsed.data.reason,
@@ -536,15 +552,13 @@ export function createReportHandler(deps: ReportDeps) {
     })
     if (error) return json(400, { error: 'could not file report' })
 
-    // This report may have tripped the auto-hide trigger, taking the moment off
-    // the wall and lowering the cached live count (D12/D41). We can't see the
-    // trigger's result from here, so drop the counters unconditionally — a
-    // report that didn't trip it just costs one cache refill, like admin
-    // dismiss. Best-effort: a filed report must not 500 on a cache miss.
-    try {
-      deps.revalidate(COUNTERS_TAG)
-    } catch {
-      // an auto-hidden moment stays counted for up to the cache window at worst
+    // Best-effort: a filed report must not 500 on a cache miss.
+    if (before !== 'hidden' && (await statusOf()) !== 'live') {
+      try {
+        deps.revalidate(COUNTERS_TAG)
+      } catch {
+        // an auto-hidden moment stays counted, and on its page, until a later drop
+      }
     }
 
     await recordRateEvent(deps.db, reportScopedHash)

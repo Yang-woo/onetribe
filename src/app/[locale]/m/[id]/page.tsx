@@ -12,15 +12,7 @@ import { Link } from '@/i18n/navigation'
 import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { instagramHandle } from '@/lib/format'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/locales'
-import {
-  EVENT_LINE_COLUMNS,
-  eventLine,
-  isMomentId,
-  momentImageSrc,
-  PUBLIC_MEMORY_COLUMNS,
-  type Moment,
-  type MomentEvent,
-} from '@/lib/moments'
+import { eventLine, fetchMomentRow, isMomentId, momentImageSrc } from '@/lib/moments'
 import { localeAlternates, momentDescription, momentJsonLd } from '@/lib/seo'
 import { siteUrl } from '@/lib/site-url'
 import { createServiceRoleClient } from '@/lib/server/supabase'
@@ -36,31 +28,23 @@ import { createDefaultProvider, translateCaption } from '@/lib/translate'
  * Rendered once per locale and id, then served from the cache (docs/00 D62):
  * crawlers walk all 17 × N of these, and rendering each hit took the Vercel
  * Hobby quota over. The empty list builds nothing ahead — each page fills on
- * its first visit. The cache lives until COUNTERS_TAG drops: every write that
+ * its first visit. The cache lives until COUNTERS_TAG drops — every write that
  * changes what a moment page shows (publish, hide, restore, delete, account
  * anonymization) already drops it, and the moment read below carries the tag,
- * so the page entry goes with it.
+ * so the page entry goes with it — or until the read's one-week ceiling.
  */
 export function generateStaticParams() {
   return []
 }
 
-type MomentWithEvent = Moment & { events: MomentEvent | null }
-
-// Throws on a failed read rather than answering null: null renders a 404, and
-// a cached 404 would hide a live moment until the next tag drop.
 const readMoment = unstable_cache(
-  async (id: string): Promise<MomentWithEvent | null> => {
-    const { data, error } = await supabaseServerAnon()
-      .from('memories')
-      .select(`${PUBLIC_MEMORY_COLUMNS}, ${EVENT_LINE_COLUMNS}`)
-      .eq('id', id)
-      .maybeSingle()
-    if (error) throw error
-    return (data as unknown as MomentWithEvent) ?? null
-  },
+  (id: string) => fetchMomentRow(supabaseServerAnon(), id),
   ['moment-page'],
-  { tags: [COUNTERS_TAG] },
+  // The ceiling is for what no drop reaches: an edit made in SQL, a takedown
+  // called past the app, a DeepL or neighbor read that failed mid-render. It
+  // caps the page too. A week stays inside the 30-day erasure promise (docs/00
+  // D57) while costing one re-render per page per week.
+  { tags: [COUNTERS_TAG], revalidate: 7 * 24 * 60 * 60 },
 )
 
 // cache(): generateMetadata and the page body share one read per render.

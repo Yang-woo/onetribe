@@ -174,6 +174,24 @@ export async function fetchCounters(
   return data as { moments: number; countries: number }
 }
 
+/**
+ * One live moment with its event line, for the moment page. Throws on a failed
+ * read: null means "no such live moment" and renders a 404, which that page
+ * caches (docs/00 D62) — a transient error must not hide a live moment.
+ */
+export async function fetchMomentRow(
+  db: SupabaseClient,
+  id: string,
+): Promise<(Moment & { events: MomentEvent | null }) | null> {
+  const { data, error } = await db
+    .from('memories')
+    .select(`${PUBLIC_MEMORY_COLUMNS}, ${EVENT_LINE_COLUMNS}`)
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(`fetchMomentRow failed: ${error.message}`)
+  return (data as unknown as Moment & { events: MomentEvent | null }) ?? null
+}
+
 /** YouTube thumbnail for clip moments — id from the canonical watch URL. */
 export function youtubeThumbnail(embedUrl: string): string | null {
   try {
