@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Inter, Space_Grotesk, Space_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { CloudflareAnalytics } from '@/components/cloudflare-analytics'
@@ -68,6 +68,10 @@ export default async function LocaleLayout({
 }>) {
   const { locale } = await params
   if (!hasLocale(routing.locales, locale)) notFound()
+  // Without this next-intl reads the locale from a request header, and that
+  // read alone makes every page under this layout dynamic — the moment page's
+  // cache (docs/00 D62) would silently never fill.
+  setRequestLocale(locale)
 
   return (
     <html

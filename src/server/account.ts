@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { json, requireBearerUser } from '@/lib/server/http'
 
 /**
@@ -14,6 +15,7 @@ import { json, requireBearerUser } from '@/lib/server/http'
 export interface AccountDeps {
   db: SupabaseClient // service role
   adminEmails: string[] // lowercase — these accounts must outlive the button
+  revalidate: (tag: string) => void
 }
 
 export function createAccountDeleteHandler(deps: AccountDeps) {
@@ -34,6 +36,14 @@ export function createAccountDeleteHandler(deps: AccountDeps) {
       .update({ author_name: null, author_link: null })
       .eq('author_id', userId)
     if (anonymizeError) return json(500, { error: 'could not delete account' })
+    // Moment pages are cached (docs/00 D62) and print the name and handle just
+    // erased — drop them, or the erasure stays invisible until the next upload.
+    // Best-effort like the other drop sites: the rows are already anonymized.
+    try {
+      deps.revalidate(COUNTERS_TAG)
+    } catch {
+      // the cache refills from the anonymized rows on its next drop
+    }
 
     // profiles/attendance cascade away with the auth user.
     const { error: deleteError } = await deps.db.auth.admin.deleteUser(userId)

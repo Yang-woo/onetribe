@@ -1,6 +1,7 @@
 import { cache, type ReactNode } from 'react'
 import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { unstable_cache } from 'next/cache'
 import { notFound } from 'next/navigation'
 import { CaptionToggle } from '@/components/caption-toggle'
 import { JsonLd } from '@/components/json-ld'
@@ -8,6 +9,7 @@ import { CountryLabel, MetaSep } from '@/components/moment-meta'
 import { ReportButton } from '@/components/report-button'
 import { SkeletonImage } from '@/components/skeleton-image'
 import { Link } from '@/i18n/navigation'
+import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { instagramHandle } from '@/lib/format'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/locales'
 import {
@@ -30,21 +32,39 @@ import { createDefaultProvider, translateCaption } from '@/lib/translate'
  * project: fullbleed photo, translated caption with an original toggle,
  * OG image, prev/next, report + takedown entry points. Hidden or unknown
  * ids 404 via RLS (the anon read finds nothing).
+ *
+ * Rendered once per locale and id, then served from the cache (docs/00 D62):
+ * crawlers walk all 17 × N of these, and rendering each hit took the Vercel
+ * Hobby quota over. The empty list builds nothing ahead — each page fills on
+ * its first visit. The cache lives until COUNTERS_TAG drops: every write that
+ * changes what a moment page shows (publish, hide, restore, delete, account
+ * anonymization) already drops it, and the moment read below carries the tag,
+ * so the page entry goes with it.
  */
-export const dynamic = 'force-dynamic'
+export function generateStaticParams() {
+  return []
+}
 
 type MomentWithEvent = Moment & { events: MomentEvent | null }
 
-// cache(): generateMetadata and the page body share one fetch per request.
-const fetchMoment = cache(async (id: string): Promise<MomentWithEvent | null> => {
-  if (!isMomentId(id)) return null
-  const { data } = await supabaseServerAnon()
-    .from('memories')
-    .select(`${PUBLIC_MEMORY_COLUMNS}, ${EVENT_LINE_COLUMNS}`)
-    .eq('id', id)
-    .maybeSingle()
-  return (data as unknown as MomentWithEvent) ?? null
-})
+// Throws on a failed read rather than answering null: null renders a 404, and
+// a cached 404 would hide a live moment until the next tag drop.
+const readMoment = unstable_cache(
+  async (id: string): Promise<MomentWithEvent | null> => {
+    const { data, error } = await supabaseServerAnon()
+      .from('memories')
+      .select(`${PUBLIC_MEMORY_COLUMNS}, ${EVENT_LINE_COLUMNS}`)
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw error
+    return (data as unknown as MomentWithEvent) ?? null
+  },
+  ['moment-page'],
+  { tags: [COUNTERS_TAG] },
+)
+
+// cache(): generateMetadata and the page body share one read per render.
+const fetchMoment = cache(async (id: string) => (isMomentId(id) ? readMoment(id) : null))
 
 export async function generateMetadata({
   params,
@@ -81,6 +101,7 @@ export default async function MomentPage({
   params: Promise<{ locale: string; id: string }>
 }) {
   const { locale, id } = await params
+  setRequestLocale(locale)
   const moment = await fetchMoment(id)
   if (!moment) notFound()
   const t = await getTranslations('moment')
