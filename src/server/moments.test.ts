@@ -137,7 +137,7 @@ describe('moment self-removal', () => {
   test.each([
     ['already hidden', 'hidden', []],
     ['unreadable before', 'unreadable', [COUNTERS_TAG]],
-  ] as const)('a moment %s → drops %j', async (_label, before, dropped) => {
+  ] as const)('a moment %s (%s) → drops %j', async (_label, before, dropped) => {
     const { deps, calls } = stubDeps({ before })
     const res = await createMomentRemoveHandler(deps)(
       removeRequest({ memoryId: A_MOMENT }, 'valid'),

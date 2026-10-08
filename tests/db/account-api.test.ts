@@ -12,10 +12,12 @@ import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from
 
 const service = createServiceClient()
 const ADMIN_EMAIL = `operator-${randomUUID().slice(0, 8)}@onetribe.world`
+// docs/00 D62: what the real update…select('id') hands back decides the drop
+const dropped: string[] = []
 const handler = createAccountDeleteHandler({
   db: service,
   adminEmails: [ADMIN_EMAIL],
-  revalidate: () => {},
+  revalidate: (tag) => void dropped.push(tag),
 })
 
 let eventId: string
@@ -117,8 +119,11 @@ describe('account delete route', () => {
     })
     fixtureIds.push(bystanderId)
 
+    const before = dropped.length
     const res = await handler(deleteRequest(token))
     expect(res.status).toBe(200)
+    // the cached moment pages print the name just erased — they have to go
+    expect(dropped.slice(before)).toEqual(['counters'])
 
     // auth user + owned rows are gone
     const { data: ghost } = await service.auth.admin.getUserById(uid)
