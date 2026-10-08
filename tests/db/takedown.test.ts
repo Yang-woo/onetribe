@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, expect, test } from 'vitest'
+import { COUNTERS_TAG } from '@/lib/cache-tags'
+import { createTakedown } from '@/server/takedown'
 import { createAnonClient, createServiceClient, eventIdByYear, memoryStatus } from './helpers'
 
 /**
@@ -87,4 +89,42 @@ test('a valid token is idempotent — already hidden still reports success', asy
   })
   expect(data).toBe(true)
   expect(await statusOf(memoryId)).toBe('hidden')
+})
+
+// docs/00 D62: the link's form action on the real RPC and the real anon client.
+// The drop empties every cached moment page, and the RPC answers true for a
+// moment already down — so replaying one link must drop once, on the takedown
+// that took it down. The anon read is what tells them apart: RLS hides the row
+// once it is down.
+test('the link action drops the moment caches once, not on every replay', async () => {
+  const eventId = await eventIdByYear(service, 2019)
+  const { data, error } = await service
+    .from('memories')
+    .insert({
+      event_id: eventId,
+      media_kind: 'image',
+      media_url: `https://example.com/takedown-replay-${randomUUID()}.jpg`,
+      caption: 'takedown-replay-test',
+      rights_confirmed: true,
+      status: 'live',
+    })
+    .select('id, takedown_token')
+    .single()
+  if (error || !data) throw new Error(`fixture failed: ${error?.message}`)
+
+  try {
+    const dropped: string[] = []
+    const takedown = createTakedown({ db: anon, revalidate: (tag) => dropped.push(tag) })
+
+    expect(await takedown(data.id, randomUUID())).toBe('0')
+    expect(dropped).toEqual([])
+
+    expect(await takedown(data.id, data.takedown_token)).toBe('1')
+    expect(dropped).toEqual([COUNTERS_TAG])
+
+    expect(await takedown(data.id, data.takedown_token)).toBe('1')
+    expect(dropped).toEqual([COUNTERS_TAG])
+  } finally {
+    await service.from('memories').delete().eq('id', data.id)
+  }
 })

@@ -108,6 +108,11 @@ test('a cached moment page still goes down with its takedown', async ({ page, re
           message: 'the moment page is not cached',
         })
         .toBe('HIT')
+      // The ceiling (docs/00 D62: one week) is all that bounds a change no drop
+      // reaches — SQL in the dashboard, a takedown called past the app. Nothing
+      // else fails if it goes, or if it shrinks into a re-render per crawl.
+      const cc = (await request.get(`/en/m/${id}`)).headers()['cache-control'] ?? ''
+      expect(Number(/s-maxage=(\d+)/.exec(cc)?.[1]), `ceiling: ${cc}`).toBe(7 * 24 * 60 * 60)
     }
 
     const { data, error } = await service

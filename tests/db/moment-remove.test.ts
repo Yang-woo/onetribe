@@ -131,10 +131,18 @@ describe('passport self-removal', () => {
   test('removing twice is not an error (a double-tap is not a broken link)', async () => {
     const owner = await newPassport('double')
     const memoryId = await seedOwned(owner.userId, `twice-${randomUUID().slice(0, 8)}`)
+    // docs/00 D62: the drop empties every cached moment page, so only the
+    // removal that took the moment down may drop — not the replay
+    const dropped: string[] = []
+    const recording = createMomentRemoveHandler({
+      db: service,
+      revalidate: (tag) => dropped.push(tag),
+    })
 
-    expect((await handler(removeRequest(memoryId, owner.token))).status).toBe(200)
-    expect((await handler(removeRequest(memoryId, owner.token))).status).toBe(200)
+    expect((await recording(removeRequest(memoryId, owner.token))).status).toBe(200)
+    expect((await recording(removeRequest(memoryId, owner.token))).status).toBe(200)
     expect(await memoryStatus(service, memoryId)).toBe('hidden')
+    expect(dropped).toEqual(['counters'])
   })
 
   test('the browser backend posts a real session token and reports failure', async () => {

@@ -9,7 +9,7 @@ import { createAccountDeleteHandler } from './account'
 // is signed in, so an ADMIN_EMAILS account must bounce off with 403 before
 // anything destructive runs.
 
-function stubDeps({ email }: { email?: string }) {
+function stubDeps({ email, moments = 1 }: { email?: string; moments?: number }) {
   const calls = { anonymized: 0, deleted: 0 }
   const db = {
     auth: {
@@ -26,10 +26,15 @@ function stubDeps({ email }: { email?: string }) {
     },
     from: () => ({
       update: () => ({
-        eq: async () => {
-          calls.anonymized += 1
-          return { error: null }
-        },
+        eq: () => ({
+          select: async () => {
+            calls.anonymized += 1
+            return {
+              data: Array.from({ length: moments }, (_, i) => ({ id: `m-${i}` })),
+              error: null,
+            }
+          },
+        }),
       }),
     }),
   }
@@ -112,6 +117,19 @@ describe('account delete operator guard', () => {
       adminEmails: ['op@onetribe.world'],
     })(deleteRequest('valid'))
     expect(op.revalidated).toEqual([])
+  })
+
+  // Anonymous sign-up is open, so a drop per account deletion would be a
+  // signup-and-delete loop away from a cold cache. Only real erasures drop.
+  test('an account with no moments drops nothing', async () => {
+    const empty = stubDeps({ email: 'fan@example.com', moments: 0 })
+    const res = await createAccountDeleteHandler({
+      db: empty.db,
+      revalidate: empty.revalidate,
+      adminEmails: [],
+    })(deleteRequest('valid'))
+    expect(res.status).toBe(200)
+    expect(empty.revalidated).toEqual([])
   })
 
   test('a cache that throws does not undo a completed erasure', async () => {

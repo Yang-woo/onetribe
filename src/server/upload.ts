@@ -31,6 +31,7 @@ import {
   type AllowedMime,
 } from '@/lib/upload/constants'
 import { IG_HANDLE_RE } from '@/lib/upload/instagram-input'
+import { isLive } from './moment-cache'
 
 /**
  * Upload pipeline handlers — docs/17 T2.1, structure per docs/00 D9 P1.
@@ -531,19 +532,9 @@ export function createReportHandler(deps: ReportDeps) {
 
     // This report may trip the auto-hide trigger, taking the moment off the
     // wall (D12/D41) and off its cached page (docs/00 D62). The trigger's result
-    // isn't visible from here, so compare the status around the insert. The
-    // tag also empties every cached moment page, so dropping it on every report
-    // would let one IP keep that cache cold — drop only on live → hidden. A
-    // failed read counts as "changed": a missed drop leaves the moment up.
-    const statusOf = async () => {
-      const { data, error } = await deps.db
-        .from('memories')
-        .select('status')
-        .eq('id', parsed.data.memoryId)
-        .maybeSingle()
-      return error ? 'unknown' : (data?.status ?? 'unknown')
-    }
-    const before = await statusOf()
+    // isn't visible from here, so read whether it is live around the insert and
+    // drop only if this report took a live moment down (see isLive).
+    const wasLive = await isLive(deps.db, parsed.data.memoryId)
 
     const { error } = await deps.db.from('reports').insert({
       memory_id: parsed.data.memoryId,
@@ -553,7 +544,7 @@ export function createReportHandler(deps: ReportDeps) {
     if (error) return json(400, { error: 'could not file report' })
 
     // Best-effort: a filed report must not 500 on a cache miss.
-    if (before !== 'hidden' && (await statusOf()) !== 'live') {
+    if (wasLive !== false && (await isLive(deps.db, parsed.data.memoryId)) !== true) {
       try {
         deps.revalidate(COUNTERS_TAG)
       } catch {
