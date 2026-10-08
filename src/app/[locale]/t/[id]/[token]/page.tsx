@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { revalidateTag } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
-import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { supabaseServerAnon } from '@/lib/supabase/server-anon'
+import { createTakedown } from '@/server/takedown'
 
 // Secret-token URL — must never end up in an index if a link leaks
 // (docs/00 D23, same treatment as /admin).
@@ -34,26 +34,13 @@ export default async function TakedownPage({
 
   async function takedown() {
     'use server'
-    const db = supabaseServerAnon()
-    const { data, error } = await db.rpc('takedown_memory', { p_memory_id: id, p_token: token })
-    // A transient RPC failure is not an invalid link — route to a retry message,
-    // not "invalid" (which reads as "your link is broken, give up"). With the
-    // idempotent RPC (migration 20260725000300) a matching token yields true even
-    // if the moment was already hidden, so `false` means a genuinely bad token.
-    if (error) redirect(`/${locale}/t/${id}/${token}?done=error`)
-    // A successful hide lowers the live count the wall header serves from a 60s
-    // cache (docs/00 D12/D41) — drop it here like the publish and admin paths
-    // do, or the moment vanishes from the wall while the count still includes it.
-    // Best-effort like those sites: the hide already committed, so a cache
-    // failure must not turn a successful takedown into an error page.
-    if (data === true) {
-      try {
-        revalidateTag(COUNTERS_TAG, { expire: 0 })
-      } catch {
-        // the moment is already hidden; a stale count is not worth failing on
-      }
-    }
-    redirect(`/${locale}/t/${id}/${token}?done=${data === true ? '1' : '0'}`)
+    // `{ expire: 0 }`: the uploader's next look at the wall or the moment page
+    // must not get one more stale-while-revalidate copy of what they removed.
+    const done = await createTakedown({
+      db: supabaseServerAnon(),
+      revalidate: (tag) => revalidateTag(tag, { expire: 0 }),
+    })(id, token)
+    redirect(`/${locale}/t/${id}/${token}?done=${done}`)
   }
 
   return (

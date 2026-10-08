@@ -42,8 +42,10 @@ const readMoment = unstable_cache(
   ['moment-page'],
   // The ceiling is for what no drop reaches: an edit made in SQL, a takedown
   // called past the app, a DeepL or neighbor read that failed mid-render. It
-  // caps the page too. A week stays inside the 30-day erasure promise (docs/00
-  // D57) while costing one re-render per page per week.
+  // caps the page too — but this entry is shared by all 17 locales and a page
+  // restarts its week on render, so the worst case is about two weeks. That
+  // stays inside the 30-day erasure promise (docs/00 D57) at one re-render per
+  // page per week.
   { tags: [COUNTERS_TAG], revalidate: 7 * 24 * 60 * 60 },
 )
 

@@ -122,7 +122,7 @@ afterAll(async () => {
     .in('ip_hash', [
       hashIp(IP, 'upload'),
       hashIp(RATE_IP, 'upload'),
-      ...Array.from({ length: 5 }, (_, i) => hashIp(`${REPORT_IP_BASE}.${i}`, 'report')),
+      ...Array.from({ length: 8 }, (_, i) => hashIp(`${REPORT_IP_BASE}.${i}`, 'report')),
     ])
 })
 
@@ -1085,6 +1085,34 @@ describe('POST /api/report — server-computed reporter_hint', () => {
     }
 
     expect(revalidated).toEqual([])
+  })
+
+  // The natural tidy-up — "drop only on live → hidden" — would quietly lose
+  // this branch: a failed status read has to drop, or a moment the threshold
+  // just took down stays on its cached page (docs/00 D62).
+  test('a status read that fails still drops', async () => {
+    const memoryId = await fixtureMemory(`${MARKER}-report-readfail`)
+    const failingReads = {
+      from: (table: string) =>
+        table === 'memories'
+          ? {
+              select: () => ({
+                eq: () => ({
+                  maybeSingle: async () => ({ data: null, error: { message: 'boom' } }),
+                }),
+              }),
+            }
+          : db.from(table),
+    } as unknown as typeof db
+    const res = await createReportHandler(reportDeps({ db: failingReads }))(
+      new Request('http://localhost/api/report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': `${REPORT_IP_BASE}.7` },
+        body: JSON.stringify({ memoryId, reason: 'spam' }),
+      }),
+    )
+    expect(res.status).toBe(201)
+    expect(revalidated).toEqual(['counters'])
   })
 
   test('a filed report fires a best-effort Discord alert linking the moment (D36)', async () => {

@@ -11,10 +11,11 @@ import { createMomentRemoveHandler } from './moments'
  *
  * The stub records the RPC arguments, because the whole safety property here is
  * one of them: drop `p_author_id` and every happy path below still passes while
- * the route becomes a way to take down anyone's moment. It also refuses to hand
- * out a query builder at all — going back to a direct `update` would slip out of
- * the one channel that owns `hidden_reason` (docs/00 D55), and that is a change
- * no assertion about arguments would notice.
+ * the route becomes a way to take down anyone's moment. Its query builder can
+ * only read — going back to a direct `update` would slip out of the one channel
+ * that owns `hidden_reason` (docs/00 D55), and that is a change no assertion
+ * about arguments would notice. The one read is whether the moment was live,
+ * which decides the cache drop (docs/00 D62).
  */
 
 const CALLER = 'user-1'
@@ -23,6 +24,8 @@ function stubDeps({
   matched = true,
   reason = 'owner' as string | null,
   error = null as { message: string } | null,
+  // status before the write; 'unreadable' = the read errors
+  before = 'live' as 'live' | 'hidden' | 'unreadable',
 } = {}) {
   const calls = {
     rpc: [] as Array<{ fn: string; args: Record<string, unknown> }>,
@@ -39,9 +42,19 @@ function stubDeps({
       calls.rpc.push({ fn, args })
       return error ? { data: null, error } : { data: [{ matched, reason }], error: null }
     },
-    from: (table: string) => {
-      throw new Error(`removal must go through hide_memory, not a direct write to ${table}`)
-    },
+    from: (table: string) => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () =>
+            before === 'unreadable'
+              ? { data: null, error: { message: 'boom' } }
+              : { data: { status: before }, error: null },
+        }),
+      }),
+      update: () => {
+        throw new Error(`removal must go through hide_memory, not a direct write to ${table}`)
+      },
+    }),
   }
   return {
     deps: {
@@ -115,6 +128,22 @@ describe('moment self-removal', () => {
       removeRequest({ memoryId: A_MOMENT }, 'valid'),
     )
     expect(res.status).toBe(200)
+  })
+
+  // docs/00 D62: the drop empties every cached moment page, and removing an
+  // already-hidden moment still answers `matched` — so the drop has to hang on
+  // the moment having been live, or one passport repeating this keeps the
+  // cache cold. A failed read drops anyway: missing a real removal is worse.
+  test.each([
+    ['already hidden', 'hidden', []],
+    ['unreadable before', 'unreadable', [COUNTERS_TAG]],
+  ] as const)('a moment %s → drops %j', async (_label, before, dropped) => {
+    const { deps, calls } = stubDeps({ before })
+    const res = await createMomentRemoveHandler(deps)(
+      removeRequest({ memoryId: A_MOMENT }, 'valid'),
+    )
+    expect(res.status).toBe(200)
+    expect(calls.revalidated).toEqual(dropped)
   })
 
   test('no bearer token → 401 before anything is written', async () => {

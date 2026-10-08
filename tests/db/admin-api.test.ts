@@ -171,14 +171,25 @@ describe('actions', () => {
   // Hiding a moment lowers the live count the wall header shows from cache
   // (docs/00 D12), so moderation has to drop that cache like a publish does —
   // otherwise a moment taken down for a report is still counted for a minute.
-  test('a moderation action drops the cached counters', async () => {
-    const id = await createMemory(`admin-revalidate-${randomUUID().slice(0, 6)}`)
+  // Since docs/00 D62 the same drop also takes the cached moment pages down —
+  // and dismiss is the operator's way to flush them after an edit made in SQL.
+  test.each([
+    ['hide', 'live', null],
+    ['unhide', 'hidden', 'operator'],
+    ['dismiss', 'live', null],
+  ] as const)('%s drops the cached counters and moment pages', async (action, status, reason) => {
+    const id = await createMemory(
+      `admin-revalidate-${action}-${randomUUID().slice(0, 6)}`,
+      status,
+      reason,
+    )
     const before = revalidated.length
 
-    await createAdminActionHandler(deps())(
-      withAuth(operatorToken, { memoryId: id, action: 'hide' }),
+    const res = await createAdminActionHandler(deps())(
+      withAuth(operatorToken, { memoryId: id, action }),
     )
 
+    expect(res.status).toBe(200)
     expect(revalidated.slice(before)).toContain('counters')
   })
 
@@ -253,12 +264,21 @@ describe('actions', () => {
     const id = await createMemory(`admin-delete-hang-${randomUUID().slice(0, 6)}`)
     const before = revalidated.length
 
+    let hung = false
     void createAdminActionHandler({
       ...deps(),
-      storage: { ...fakeStorage, deleteObject: () => new Promise<void>(() => {}) },
+      storage: {
+        ...fakeStorage,
+        deleteObject: () => {
+          hung = true
+          return new Promise<void>(() => {})
+        },
+      },
     })(withAuth(operatorToken, { memoryId: id, action: 'delete' }))
 
     await expect.poll(() => revalidated.slice(before)).toContain('counters')
+    // the cleanup really was reached — without it this passes vacuously
+    await expect.poll(() => hung).toBe(true)
   })
 
   test('delete erases the caption out of the translation cache too', async () => {

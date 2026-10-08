@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { COUNTERS_TAG } from '@/lib/cache-tags'
 import { json, parseBody, requireBearerUser } from '@/lib/server/http'
+import { isLive } from './moment-cache'
 
 /**
  * Uploader self-removal from the passport (docs/00 D54).
@@ -49,6 +50,10 @@ export function createMomentRemoveHandler(deps: MomentRemoveDeps) {
     // set one, and a moment that is already down keeps the label it went down
     // with (docs/00 D55). Removing your own already-reported moment therefore
     // still succeeds — it just doesn't repaint why it is off the wall.
+    // Read before the write: hide_memory answers `matched` for a moment that is
+    // already down too, and a repeated removal must not empty the moment-page
+    // cache each time (docs/00 D62, see isLive).
+    const wasLive = await isLive(deps.db, parsed.data.memoryId)
     const { data, error } = await deps.db.rpc('hide_memory', {
       p_memory_id: parsed.data.memoryId,
       p_reason: 'owner',
@@ -62,10 +67,12 @@ export function createMomentRemoveHandler(deps: MomentRemoveDeps) {
 
     // Best-effort like the other takedown sites: the row is already hidden, so
     // a cache miss must not turn a completed removal into an error.
-    try {
-      deps.revalidate(COUNTERS_TAG)
-    } catch {
-      // a stale count for up to 60s is not worth failing a successful removal
+    if (wasLive !== false) {
+      try {
+        deps.revalidate(COUNTERS_TAG)
+      } catch {
+        // stale until a later drop or the moment page's ceiling
+      }
     }
     return json(200, { ok: true })
   }

@@ -31,18 +31,23 @@ export function createAccountDeleteHandler(deps: AccountDeps) {
 
     // Anonymize before deleteUser — after it, author_id is already null
     // (FK set null) and these rows can no longer be found.
-    const { error: anonymizeError } = await deps.db
+    const { data: anonymized, error: anonymizeError } = await deps.db
       .from('memories')
       .update({ author_name: null, author_link: null })
       .eq('author_id', userId)
+      .select('id')
     if (anonymizeError) return json(500, { error: 'could not delete account' })
     // Moment pages are cached (docs/00 D62) and print the name and handle just
-    // erased — drop them, or the erasure stays invisible until the next upload.
+    // erased — drop them, or the erasure stays invisible on those pages. Only
+    // when a row was touched: anonymous sign-up is open, and a drop per empty
+    // account would let a signup-and-delete loop keep the cache cold.
     // Best-effort like the other drop sites: the rows are already anonymized.
-    try {
-      deps.revalidate(COUNTERS_TAG)
-    } catch {
-      // the cache refills from the anonymized rows on its next drop
+    if (anonymized?.length) {
+      try {
+        deps.revalidate(COUNTERS_TAG)
+      } catch {
+        // stale until a later drop or the moment page's ceiling
+      }
     }
 
     // profiles/attendance cascade away with the auth user.
