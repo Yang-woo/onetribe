@@ -5,6 +5,8 @@
  * server-only deps.
  */
 
-/** Wall counters ("N moments · M countries"). Drop wherever the live moment
- *  count changes — publish, admin moderation, self-takedown, report auto-hide. */
+/** Wall counters ("N moments · M countries") and every cached moment page
+ *  (docs/00 D62). Drop wherever a moment's public face changes — publish,
+ *  admin moderation, self-takedown, report auto-hide, account anonymization.
+ *  A missed drop leaves a taken-down moment, or an erased name, on its page. */
 export const COUNTERS_TAG = 'counters'

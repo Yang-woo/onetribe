@@ -74,3 +74,49 @@ test('the wall links a caption-less moment to a page that heads and describes it
     await service.from('memories').delete().eq('id', id)
   }
 })
+
+/**
+ * Moment pages render once and are served from the cache after (docs/00 D62)
+ * — crawlers walking every locale × moment took the Vercel quota over when
+ * each hit rendered. Two claims only a production server can show:
+ *
+ * - the second visit really is a cache hit. A header read, a cookie, or
+ *   `force-dynamic` creeping back in turns the cache off and fails nothing
+ *   else. `next dev` never caches, so that half runs under CI's `next start`.
+ * - a takedown still takes the page down. The cached entry is dropped only
+ *   because the page's read carries the tag the takedown drops; lose that
+ *   link and the moment stays up on its own page.
+ */
+test('a cached moment page still goes down with its takedown', async ({ page, request }) => {
+  const service = serviceClient()
+  const run = randomUUID().slice(0, 8)
+  const id = await seedMemory(service, {
+    event_id: await eventIdByYear(service, 2015),
+    media_url: svgDataUri(`cache-${run}`),
+    caption: `cache-e2e-${run}`,
+  })
+
+  try {
+    expect((await request.get(`/en/m/${id}`)).status()).toBe(200)
+    if (process.env.CI) {
+      const again = await request.get(`/en/m/${id}`)
+      expect(again.headers()['x-nextjs-cache'], 'the moment page is not cached').toBe('HIT')
+    }
+
+    const { data, error } = await service
+      .from('memories')
+      .select('takedown_token')
+      .eq('id', id)
+      .single()
+    if (error) throw error
+    await page.goto(`/en/t/${id}/${data.takedown_token}`)
+    await page.getByRole('button', { name: 'yes, take it down' }).click()
+    await expect(page).toHaveURL(/done=1/)
+
+    expect((await request.get(`/en/m/${id}`)).status(), 'the taken-down moment is still up').toBe(
+      404,
+    )
+  } finally {
+    await service.from('memories').delete().eq('id', id)
+  }
+})

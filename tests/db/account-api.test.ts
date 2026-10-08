@@ -12,7 +12,11 @@ import { createAnonClient, createServiceClient, eventIdByYear, seedMemory } from
 
 const service = createServiceClient()
 const ADMIN_EMAIL = `operator-${randomUUID().slice(0, 8)}@onetribe.world`
-const handler = createAccountDeleteHandler({ db: service, adminEmails: [ADMIN_EMAIL] })
+const handler = createAccountDeleteHandler({
+  db: service,
+  adminEmails: [ADMIN_EMAIL],
+  revalidate: () => {},
+})
 
 let eventId: string
 const fixtureIds: string[] = []
